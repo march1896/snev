@@ -8,5 +8,7 @@ int in_func()
 		return 2;
 	printf("out put something\n" );
 
+	// hello, this is added in version 7
+
 	else return 1;
 }
