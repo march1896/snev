@@ -47,6 +47,13 @@ float tsin( float __degree )
 	return sinTable[ x >> 8 ][ 0 ] + x * sinTable[ x >> 8 ][ 1 ];
 }
 
+float tcos( float __degree )
+{
+	tangle x = degree2angle( __degree + 90.0 );
+
+	return sinTable[ x >> 8 ][ 0 ] + x * sinTable[ x >> 8 ][ 1 ];
+}
+
 // this is the method how vclibrary build the sincos table
 static void t_generateTable( void ) 
 {
@@ -67,7 +74,8 @@ static void t_generateTable( void )
 	return;
 }
 
-int main()
+// testing code
+/*int main()
 {
 	t_generateTable();
 	for ( int i = 0; i < 256; i++ )
@@ -75,13 +83,13 @@ int main()
 		printf( "%e\t%e\n", sinTable[ i ][ 0 ], sinTable[ i ][ 1 ] );
 	}
 
-	/*printf("test table\n" );
+	printf("test table\n" );
 	for ( int i = -360; i < 360; i++ )
 	{
-		printf( "%f\t%f\n", tsin( i ), sin( i * float_PI / 180.0 ) );
-	}*/
+		printf( "%f\t%f\n", tcos( i ), cos( i * float_PI / 180.0 ) );
+	}
 	printf("%f\n", tsin( 30.0 ) );
 	return 0;
-}
+}*/
 		
 
