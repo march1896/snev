@@ -35,17 +35,16 @@ static tangle radian2angle( float __angle )
 	return  tangle ( __angle * ( 1 << 15 ) / float_PI );
 }
 
-static float degree2angle( float __degree )
+static tangle degree2angle( float __degree )
 {
 	return tangle (__degree / 360.0 * ( 1 << 16 ) );
 }
 
 float tsin( float __degree )
 {
-	float a = degree2angle( __degree );
-	tangle x = (tangle) a;
+	tangle x = degree2angle( __degree );
 
-	return sinTable[ x >> 8 ][ 0 ] + a * sinTable[ x >> 8 ][ 1 ];
+	return sinTable[ x >> 8 ][ 0 ] + x * sinTable[ x >> 8 ][ 1 ];
 }
 
 // this is the method how vclibrary build the sincos table
