@@ -1,4 +1,12 @@
 #!/usr/local/bin/perl
+# The Windows directory structure is immitated with folders in the project so that you can find things easily.
+# Required: Windows VS .NET, Perl runtime (such as ActiveState).
+#   1. Copy / paste the perl source code below into a text file (like with Notepad) and save it as genvcproj.pl.
+#   2. open a command window and chdir to the top level directory of your project (the highest level directory that contains all the source code).
+#   3. run the tool with "perl genvcproj.pl myproject"
+#   4. the output file, myproject.vcproj, is XML so you can edit it if you want to.
+#   5. load the vcproj in MSVS .Net. 
+
 
 #-----------------------------------------------------------------------
 #   vcproj file generator, with recursion
