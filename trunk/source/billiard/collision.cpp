@@ -54,10 +54,10 @@ void CalculateNewState_twoBall( Ball* pBallA, Ball* pBallB )
 
 	vector3 deltaV;
 	deltaV.setXYZ( vA_ * cline.getX(), vA_ * cline.getY(), vA_ * cline.getZ() );
-	pBallA->pos += deltaV;
+	//pBallA->pos += deltaV;
 
 	deltaV.setXYZ( vB_ * cline.getX(), vB_ * cline.getY(), vB_ * cline.getZ() );
-	pBallB->pos += deltaV;
+	//pBallB->pos += deltaV;
 }
 
 void CalculateNewState_withTable( Ball* pBall, Table* pTable )
