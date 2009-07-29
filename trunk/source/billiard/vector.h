@@ -9,18 +9,20 @@ public:
 
 	vector2 operator+( const vector2 &rhs );
 	vector2 operator-( const vector2 &rhs );
+	vector2 operator-=( const vector2 &rhs );
+	vector2 operator+=( const vector2 &rhs );
 	vector2 operator=( const vector2 &rhs );
 	bool operator==( const vector2 &rhs );
 	float dot( const vector2 &rhs );
-	float cross( const vector2 & rhs );
+	float cross( const vector2 &rhs );
 	vector2 normalize();
 	float length();
 
-	void setXY( float _x, float _y );
-	float getX();
-	float getY();
+	float getX() const;
+	float getY() const;
 	void setX( float _x );
 	void setY( float _y );
+	void setXY( float _x, float _y );
 private:
 	float x, y;
 };
@@ -34,17 +36,19 @@ public:
 
 	vector3 operator+( const vector3 &rhs );
 	vector3 operator-( const vector3 &rhs );
+	vector3 operator+=( const vector3 &rhs );
+	vector3 operator-=( const vector3 &rhs );
 	vector3 operator=( const vector3 &rhs );
 	bool operator==( const vector3 &rhs );
 	float dot( const vector3 &rhs );
-	vector3 cross( const vector3 & rhs );
+	vector3 cross( const vector3  &rhs );
 	vector3 normalize();
 	float length();
 
 	void setXYZ( float _x, float _y, float _z );
-	float getX();
-	float getY();
-	float getZ();
+	float getX() const;
+	float getY() const;
+	float getZ() const;
 	void setX( float _x );
 	void setY( float _y );
 	void setZ( float _z );
@@ -62,10 +66,10 @@ public:
 	void setXYZ( float _x, float _y, float _z );
 	void setXYZW( float _x, float _y, float _z, float _w );
 	float length();
-	float getX();
-	float getY();
-	float getZ();
-	float getW();
+	float getX() const;
+	float getY() const;
+	float getZ() const;
+	float getW() const;
 	void setX( float _x );
 	void setY( float _y );
 	void setZ( float _z );
@@ -73,6 +77,8 @@ public:
 
 	vector4 operator+( const vector4 &rhs );
 	vector4 operator-( const vector4 &rhs );
+	vector4 operator+=( const vector4 &rhs );
+	vector4 operator-=( const vector4 &rhs );
 	vector4 operator=( const vector4 &rhs );
 	bool operator==( const vector4 &rhs );
 	float dot( const vector4 &rhs );
