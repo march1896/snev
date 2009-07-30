@@ -6,6 +6,6 @@ class Table;
 bool IsCollided_twoBall( Ball* pBallA, Ball* pBallB );
 bool IsCollided_withTable( Ball* pBall, Table* pTable );
 
-void CalculateNewState_twoBall( Ball* pBallA, Ball* pBallB );
-void CalculateNewState_withTable( Ball* pBall, Table* pTable );
+void Collision_twoBall( Ball* pBallA, Ball* pBallB );
+void Collision_withTable( Ball* pBall, Table* pTable );
 #endif
