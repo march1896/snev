@@ -1,5 +1,6 @@
 #ifndef _BILLIARD_BALL_
 #define _BILLIARD_BALL_
+#include "object.h"
 
 //class vector3;
 //we have to know the size of the vector.....
@@ -13,14 +14,13 @@ enum BALLCOLOR
 	RED,
 };
 
-
-class Ball
+class Ball : public VisibleObject
 {
 public:
 	Ball();
 	Ball( BALLCOLOR _color );
-	Ball( float _radius, float _weight, BALLCOLOR _color, vector3 pos );
-	~Ball();
+	Ball( float _radius, float _weight, BALLCOLOR _color, vector3 _pos );
+	virtual ~Ball();
 //private:
 	float radius;
 	float weight;
