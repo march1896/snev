@@ -1,10 +1,11 @@
 #ifndef _BALL_TABLE_
 #define _BALL_TABLE_
+#include "object.h"
 
 // TODO: add vector to pch files
 #include "vector.h"
 
-class Table
+class Table: public VisibleObject
 {
 public:
 	Table();

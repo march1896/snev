@@ -1,4 +1,5 @@
 #include "table.h"
+
 Table::Table():
 	Width( 10.0 ), Height( 6.0 ),
 	Left( -5.0 ), Right( 5.0 ), Top( 3.0 ), Bottom( -3.0 ),
