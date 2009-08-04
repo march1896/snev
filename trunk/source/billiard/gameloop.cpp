@@ -2,6 +2,7 @@
 #include "vector.h"
 #include "collision.h"
 #include "table.h"
+#include <cstdio>
 
 static Ball* pBalls;
 static Table* pTable;
@@ -32,10 +33,13 @@ int main()
 	bool Running;
 
 	GameInit();
+
+	printf("hello, world\n");
 	while ( true )
 	{
 		Running = MainLoop();
-		if ( !Running ) break;
+		//if ( !Running ) break;
+		if ( true ) break;
 	}
 	GameDeinit();
 
