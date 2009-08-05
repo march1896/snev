@@ -12,14 +12,9 @@ objects := $(source:.cpp=.o)
 billiard: $(objects)
 	@echo building projects...
 	g++ -o billiard $(objects)
-ball.o: ball.cpp
-collision.o: collision.cpp
-gameloop.o: gameloop.cpp
-gamestate.o: gamestate.cpp
-object.o: object.cpp
-render.o: render.cpp
-table.o: table.cpp
-vector.o: vector.cpp
+%.d:%.cpp
+	$(CXX) $(CPPFLAGS) -MM -MF $@ $<
+-include $(objects:.o=.d)
 .PHONY: clean
 clean:
 	rm *.o
