@@ -1,21 +1,19 @@
 # Makefile for this project, 
 # Maintained by Tangel
-#
-#
-# This is of cource not a good makefile, cause that the prerequisites are not include, for example, if vector.h is change, most of the files in these project should be 
-# recompiled, but not. if a *.cpp file include a *.h file, we should add the .h file into the prerequisites
-#
 
 source := $(wildcard *.cpp)
 objects := $(source:.cpp=.o)
+# I found it is hard to move *.o files to a specific folder, 
+# It's hard to generate *.d file, and when *.d file is included, *.o file is been fixed
 
 billiard: $(objects)
 	@echo building projects...
-	g++ -o billiard $(objects)
-	rm *.d
+	@g++ -o billiard $(objects)
+	@rm *.d
 %.d:%.cpp
-	$(CXX) $(CPPFLAGS) -MM -MF $@ $<
+	@$(CXX) $(CPPFLAGS) -MM -MF $@ $<
 -include $(objects:.o=.d)
 .PHONY: clean
 clean:
-	rm *.o
+	@echo removing .o files
+	@rm -f *.o
