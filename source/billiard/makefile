@@ -12,6 +12,7 @@ objects := $(source:.cpp=.o)
 billiard: $(objects)
 	@echo building projects...
 	g++ -o billiard $(objects)
+	rm *.d
 %.d:%.cpp
 	$(CXX) $(CPPFLAGS) -MM -MF $@ $<
 -include $(objects:.o=.d)
