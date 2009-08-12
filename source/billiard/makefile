@@ -6,9 +6,14 @@ objects := $(source:.cpp=.o)
 # I found it is hard to move *.o files to a specific folder, 
 # It's hard to generate *.d file, and when *.d file is included, *.o file is been fixed
 
+# CPPFLAGS += -D_MSC_VER
+# LDFLAGS := -L"C:\Program Files\Microsoft Visual Studio 8\VC\PlatformSDK\"
+LDFLAGS := -L"C:\\MinGW\\lib"
+LDFLAGS += -lwinmm -lgdi32 -lopengl32 -lglu32 -lglaux
+
 billiard: $(objects)
 	@echo building projects...
-	@g++ -o billiard $(objects)
+	$(CXX) -o billiard.exe $(objects) $(LDFLAGS)
 	@rm *.d
 %.d:%.cpp
 	@$(CXX) $(CPPFLAGS) -MM -MF $@ $<
