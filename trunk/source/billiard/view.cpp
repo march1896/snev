@@ -1,4 +1,6 @@
 #include "view.h"
+#include <gl\gl.h>
+#include <gl\glu.h>
 
 void View :: Reset()
 {
