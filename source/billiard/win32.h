@@ -2,7 +2,7 @@
 	Copyright 2002 Jeff Molofee, Gregory Austwick and Others
 
 	Title:
-		 Window Handling class	
+		 WindowsHandle Handling class	
 
 	Version History:
 		v1.00		Copied from my ill-fated tutorial series:)	(GA 29/10/02)
@@ -28,74 +28,85 @@
 
 #include <windows.h>
 
-class Window {
-	int			width,height;	// dimensions
-	int			mx,my;			// mouse position
+class WindowsHandle {
+	RECT		WindowRect;				// Grabs Rectangle Upper Left / Lower Right Values
+	
+	int		mx,my;			// mouse position
 	bool		lbut,rbut;		// buttons positions
 	bool		keys[256];		// key positions
-	bool		sized;			// whether window has been sized
+	bool		sized;			// whether WindowsHandle has been sized
 	HWND		hwnd;			// Windows handle
-	HINSTANCE	hins;			// instance
+	HINSTANCE	hInstance;			// instance
+
+	HDC		hDC;              // Private GDI Device Context
+	HGLRC		hRC;              // Permanent Rendering Context
+	
+	int 		bpp; 		// Bits per pixel
+	bool 		fullscreen;
 	// Helper functions
 	BOOL Register(char *name);
 	void DoMessaging();
 public:
-	Window();
-	~Window();
+	WindowsHandle();
+	~WindowsHandle();
 	// Setup function
 	//	Params:
-	//		(x,y):		position of window
-	//		(wid,hit):	dimensions of window
-	//		name:		name of window
+	//		(x,y):		position of WindowsHandle
+	//		(wid,hit):	dimensions of WindowsHandle
+	//		name:		name of WindowsHandle
 	bool Setup(int x,int y,int wid,int hit,char *name);
 	// Setup function with title
 	//	Params:
-	//		(x,y):		position of window
-	//		(wid,hit):	dimensions of window
-	//		name:		name of window
+	//		(x,y):		position of WindowsHandle
+	//		(wid,hit):	dimensions of WindowsHandle
+	//		name:		name of WindowsHandle
 	bool SetupTitle(int x,int y,int wid,int hit,char *name);
-	// Close window
+
+	bool InitWindow(char* name, int x, int y, int wid, int hit, bool fullscreenflag);
+	void KillWindow();
+	// Close WindowsHandle
 	void Close();
-	// Has the window been sized?
+	// Has the WindowsHandle been sized?
 	bool BeenSized() { bool temp=sized; sized=false; return temp; };
 	// Get Windows Handle
 	HWND GetHandle() const		{ return hwnd; };
 	// Get Windows Instance
-	HINSTANCE GetInstance() const { return hins; };
+	HINSTANCE GetInstance() const { return hInstance; };
 	// Get Dimensions
 	//	Params:
-	//		wid,hit:	dimensions of window
+	//		wid,hit:	dimensions of WindowsHandle
 	void GetDimensions(int &wid,int &hit) const	{
-					wid=width;	hit=height;			// return the dimensions
-				};
+		wid=WindowRect.right - WindowRect.left;	
+		hit=WindowRect.bottom - WindowRect.top;			// return the dimensions
+	};
 	// Get Mouse Position
 	//	Params:
-	//		(x,y): position of window
+	//		(x,y): position of WindowsHandle
 	void GetMousePosition(int &x,int &y) {
-					this->DoMessaging();			// get latest mouse position
-					x=mx;	y=my;					// and return it
-				};
+		this->DoMessaging();			// get latest mouse position
+		x=mx;	y=my;					// and return it
+	};
 	// Get Mouse Buttons
 	//	Params:
 	//		(left,right): state of mouse buttons
 	void GetMouseButton(bool &left,bool &right) {
-					this->DoMessaging();			// get latest mouse button status
-					left=lbut; right=rbut;		// and return it
-				};
+		this->DoMessaging();			// get latest mouse button status
+		left=lbut; right=rbut;		// and return it
+	};
 	// Get Key Value
 	//	Params:
 	//		the key to test
 	bool GetKey(int val) { 
-					this->DoMessaging();	// get latest keys
-					if(val<0 || val>255)	// is it a sensible value
-						return false; 
-					return keys[val];		// return the status
-				};
+		this->DoMessaging();	// get latest keys
+		if(val<0 || val>255)	// is it a sensible value
+			return false; 
+		return keys[val];		// return the status
+	};
 	// Get the values of all the keys
 	bool *GetKeys()	{ 
-					this->DoMessaging();	// get latest keys
-					return (bool *)keys;	// return the key array
-					};
+		this->DoMessaging();	// get latest keys
+		return (bool *)keys;	// return the key array
+	};
 
 	//
 	//	Data access procedure

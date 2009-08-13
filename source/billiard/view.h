@@ -26,8 +26,6 @@
 #define VIEW_H
 
 #include "vector.h"
-#include <gl\gl.h>
-#include <gl\glu.h>
 
 /* the 'include' files in opengl.h, which is defined in nehe sdk
 #include <windows.h>    // Header File For Windows
