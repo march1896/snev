@@ -44,7 +44,7 @@ private:
 	}data;
 public:
 	matrix44();
-	matrix44( float *mp );
+	matrix44( const float *mp );
 	matrix44( const matrix44 &rhs );
 	~matrix44();
 
@@ -69,6 +69,6 @@ public:
 	friend matrix44 operator*( const matrix44 &lhs, const matrix44 &rhs );
 };
 
-matrix44 operator*(  matrix44 &lhs,  matrix44 &rhs );
+matrix44 operator*( const matrix44 &lhs, const matrix44 &rhs );
 
 #endif

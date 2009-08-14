@@ -7,7 +7,7 @@ matrix44::matrix44() {
 	this->identity();
 }
 
-matrix44::matrix44( float *mp ) {
+matrix44::matrix44( const float *mp ) {
 	assert( mp );
 	for (int i = 0; i < 16; i++ )
 		this->data.m[ i ] = mp[ i ];
@@ -38,10 +38,10 @@ const float* matrix44::getdata() const
 	return this->data.m;
 }
 
-void matrix44::setdata( const float* data )
+void matrix44::setdata( const float* _data )
 {
 	for ( int i = 0; i < 16; i++ )
-		this->data.m[i] = data[i];
+		data.m[i] = _data[i];
 }
 
 void matrix44::set( int x, int y, float value )
