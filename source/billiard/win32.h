@@ -61,6 +61,7 @@ public:
 	//		(wid,hit):	dimensions of WindowsHandle
 	//		name:		name of WindowsHandle
 	bool SetupTitle(int x,int y,int wid,int hit,char *name);
+	void SwapBuffer() { SwapBuffers( hDC ); }
 
 	bool InitWindow(char* name, int x, int y, int wid, int hit, bool fullscreenflag);
 	void KillWindow();
