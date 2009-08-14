@@ -27,22 +27,6 @@
 
 #include "vector.h"
 
-/* the 'include' files in opengl.h, which is defined in nehe sdk
-#include <windows.h>    // Header File For Windows
-#include <gl\gl.h>		// Header File For The OpenGL32 Library
-#include <gl\glu.h>		// Header File For The GLu32 Library
-#include "win32.h"		// the windows class
-#include "state.h"		// the state manager	
-#include "timer.h"		// Timing functions
-
-#ifdef _MSC_VER
-#pragma comment(lib,"opengl32.lib")
-#pragma comment(lib,"glu32.lib")
-*/
-
-//#pragma comment(lib,"opengl32")
-//#pragma comment(lib,"glu32")
-
 class View {
 public:
 	//

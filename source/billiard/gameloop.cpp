@@ -4,6 +4,7 @@
 #include "table.h"
 #include "win32.h"
 #include "opengl.h"
+#include "log.h"
 #include <cstdio>
 
 static Ball* pBalls;
@@ -30,11 +31,9 @@ bool MainLoop()
 	return true;
 }
 
-int DrawGLScene(GLvoid)									// Here's Where We Do All The Drawing
+int DrawGLScene(unsigned int x, unsigned int y, unsigned int width, unsigned int height) 	// Here's Where We Do All The Drawing
 {
-	unsigned int width = 640;
-	unsigned int height = 480;
-	glViewport(0,0,width,height);						// Reset The Current Viewport
+	glViewport(x,y,width,height);						// Reset The Current Viewport
 
 	glMatrixMode(GL_PROJECTION);						// Select The Projection Matrix
 	glLoadIdentity();									// Reset The Projection Matrix
@@ -53,7 +52,7 @@ int DrawGLScene(GLvoid)									// Here's Where We Do All The Drawing
 	glDepthFunc(GL_LEQUAL);								// The Type Of Depth Testing To Do
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);	// Really Nice Perspective Calculations
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	// Clear Screen And Depth Buffer
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	// Clear Screen And Depth Buffer
 	glLoadIdentity();									// Reset The Current Modelview Matrix
 	glTranslatef(-1.5f,0.0f,-6.0f);						// Move Left 1.5 Units And Into The Screen 6.0
 	glRotatef(0.0f,0.0f,1.0f,0.0f);						// Rotate The Triangle On The Y axis ( NEW )
@@ -96,6 +95,9 @@ int main()
 		printf( "create successful\n" );
 	}
 
+	Log::print( "hello, world" );
+	Log::print( "fuck you, Tangel" );
+
 	while ( Running )
 	{
 		if (PeekMessage(&msg,NULL,0,0,PM_REMOVE))	// Is There A Message Waiting?
@@ -110,7 +112,11 @@ int main()
 				DispatchMessage(&msg);				// Dispatch The Message
 			}
 		}
-		DrawGLScene();
+		DrawGLScene(0, 0, 100, 100);
+		DrawGLScene(100, 100, 100, 100);
+		DrawGLScene(200, 200, 100, 100);
+		DrawGLScene(300, 300, 100, 100);
+
 		winHandle.SwapBuffer();
 		
 		//Running = MainLoop();
