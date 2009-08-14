@@ -75,13 +75,15 @@ int DrawGLScene(GLvoid)									// Here's Where We Do All The Drawing
 		glVertex3f( 1.0f,-1.0f, 0.0f);					// Bottom Right
 		glVertex3f(-1.0f,-1.0f, 0.0f);					// Bottom Left
 	glEnd();											// Done Drawing The Quad
+	glFlush();
 	return TRUE;										// Keep Going
 }
 
 
 int main()
 {
-	bool Running;
+	bool Running = true;
+	MSG 	msg;
 
 	GameInit();
 
@@ -94,16 +96,30 @@ int main()
 		printf( "create successful\n" );
 	}
 
-	//DrawGLScene();
-	int i;
-	scanf("%d", &i );
-	while ( true )
+	while ( Running )
 	{
-		Running = MainLoop();
+		if (PeekMessage(&msg,NULL,0,0,PM_REMOVE))	// Is There A Message Waiting?
+		{
+			if (msg.message==WM_QUIT)				// Have We Received A Quit Message?
+			{
+				Running = false;							// If So done=TRUE
+			}
+			else									// If Not, Deal With Window Messages
+			{
+				TranslateMessage(&msg);				// Translate The Message
+				DispatchMessage(&msg);				// Dispatch The Message
+			}
+		}
+		DrawGLScene();
+		winHandle.SwapBuffer();
+		
+		//Running = MainLoop();
 		//if ( !Running ) break;
 
 		//if ( true ) break;
 	}
+
+	winHandle.KillWindow();
 	GameDeinit();
 	printf( "end\n" );
 
