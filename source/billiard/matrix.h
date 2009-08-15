@@ -53,7 +53,11 @@ public:
 	void set( int x, int y, float data );
 	float get( int x, int y );
 
-	matrix44 operator=( const matrix44 &rhs );
+	/*
+	 * In operator=, if we return "matrix44" instead of "matrix44 &", the program will crash silently in this func without any compile error.
+	 * It is dangerous and ridiculous, TODO: find where the problem is.
+	 */
+	matrix44& operator=( const matrix44 &rhs );
 	bool operator==( const matrix44 &rhs );
 	matrix44 left_mult( const matrix44 &rhs );
 	matrix44 right_mult( const matrix44 &rhs );
