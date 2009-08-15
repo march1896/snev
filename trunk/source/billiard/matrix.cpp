@@ -33,6 +33,11 @@ void matrix44::identity()
 		this->data.m[ IDX( i, i ) ] = 1.0f;
 }
 
+matrix44& matrix44::operator=( const matrix44 &rhs ) {
+	this->setdata( rhs.getdata() );
+	return *this;
+}
+
 const float* matrix44::getdata() const 
 {
 	return this->data.m;
@@ -41,7 +46,7 @@ const float* matrix44::getdata() const
 void matrix44::setdata( const float* _data )
 {
 	for ( int i = 0; i < 16; i++ )
-		data.m[i] = _data[i];
+		this->data.m[i] = _data[i];
 }
 
 void matrix44::set( int x, int y, float value )
@@ -71,11 +76,6 @@ matrix44 operator*( const matrix44 &lhs, const matrix44 &rhs ) {
 			ret.data.m[ IDX( i, j ) ] = temp;
 		}
 	return ret;
-}
-
-matrix44 matrix44::operator=( const matrix44 &rhs ) {
-	this->setdata( rhs.getdata() );
-	return *this;
 }
 
 bool matrix44::operator==( const matrix44 &rhs ) {
