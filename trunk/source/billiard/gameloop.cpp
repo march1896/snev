@@ -53,6 +53,7 @@ int DrawGLScene(unsigned int x, unsigned int y, unsigned int width, unsigned int
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);	// Really Nice Perspective Calculations
 
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	// Clear Screen And Depth Buffer
+	glClear( GL_DEPTH_BUFFER_BIT);	// Clear Screen And Depth Buffer
 	glLoadIdentity();									// Reset The Current Modelview Matrix
 	glTranslatef(-1.5f,0.0f,-6.0f);						// Move Left 1.5 Units And Into The Screen 6.0
 	glRotatef(0.0f,0.0f,1.0f,0.0f);						// Rotate The Triangle On The Y axis ( NEW )
@@ -112,6 +113,8 @@ int main()
 				DispatchMessage(&msg);				// Dispatch The Message
 			}
 		}
+		//DrawGLScene(0, 0, 640, 480);
+		//Log::print( "the pic has been drawed" );
 		DrawGLScene(0, 0, 100, 100);
 		DrawGLScene(100, 100, 100, 100);
 		DrawGLScene(200, 200, 100, 100);
