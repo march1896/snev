@@ -128,6 +128,7 @@ void matrix44::rotate_y( float angle )
 	temp.identity();
 
 	temp.set( 0, 0, cx );
+	temp.set( 2, 2, cx );
 	temp.set( 0, 2, -sx );
 	temp.set( 2, 0, sx );
 
