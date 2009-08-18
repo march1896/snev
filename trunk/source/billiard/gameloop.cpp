@@ -5,6 +5,7 @@
 #include "win32.h"
 #include "opengl.h"
 #include "log.h"
+#include "color.h"
 #include <cstdio>
 
 static Ball* pBalls;
@@ -98,6 +99,7 @@ int main()
 
 	Log::print( "hello, world" );
 	Log::print( "fuck you, Tangel" );
+	//color red( 1.0, 0.0, 0.0, 1.0 );
 
 	while ( Running )
 	{
