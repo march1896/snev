@@ -26,6 +26,7 @@
 #define VIEW_H
 
 #include "vector.h"
+#include "matrix.h"
 
 class View {
 public:
