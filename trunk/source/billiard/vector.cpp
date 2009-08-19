@@ -1,6 +1,8 @@
 #include "vector.h"
 #include <cmath>
 
+static float dummy[ 4 ];
+
 vector2::vector2(): x( 0.0 ), y( 0.0 ) {}
 vector2::vector2( float _x, float _y ): x( _x ), y( _y )  {}
 vector2::vector2( const vector2 &rhs ): x( rhs.getX() ), y( rhs.getY() ) {}
@@ -11,6 +13,12 @@ void vector2::setX( float _x ) { x = _x;	}
 void vector2::setY( float _y ) { y = _y;	}
 float vector2::getX()const {		return x; 	}
 float vector2::getY()const {		return y; 	}
+
+float* vector2::getdata() const {
+	dummy[0] = x;
+	dummy[1] = y;
+	return dummy;
+}
 
 vector2 vector2::operator=( const vector2 &rhs ) {
 	this->x = rhs.getX();
@@ -77,6 +85,13 @@ float vector4::getX()const {		return x; 	}
 float vector4::getY()const {		return y; 	}
 float vector4::getZ()const {		return z; 	}
 float vector4::getW()const {		return w; 	}
+float* vector4::getdata() const {
+	dummy[0] = x;
+	dummy[1] = y;
+	dummy[2] = z;
+	dummy[3] = w;
+	return dummy;
+}
 
 vector4 vector4::operator=( const vector4 &rhs ) {
 	this->x = rhs.getX();
@@ -146,6 +161,12 @@ void vector3::setZ( float _z ) { z = _z;	}
 float vector3::getX()const {		return x; 	}
 float vector3::getY()const {		return y; 	}
 float vector3::getZ()const {		return z; 	}
+float* vector3::getdata() const {
+	dummy[0] = x;
+	dummy[1] = y;
+	dummy[2] = z;
+	return dummy;
+}
 
 vector3 vector3::operator=( const vector3 &rhs ) {
 	this->x = rhs.getX();

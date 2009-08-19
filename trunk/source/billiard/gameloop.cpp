@@ -6,6 +6,8 @@
 #include "opengl.h"
 #include "log.h"
 #include "color.h"
+#include "render.h"
+#include "view.h"
 #include <cstdio>
 
 static Ball* pBalls;
@@ -34,7 +36,7 @@ bool MainLoop()
 
 int DrawGLScene(unsigned int x, unsigned int y, unsigned int width, unsigned int height) 	// Here's Where We Do All The Drawing
 {
-	glViewport(x,y,width,height);						// Reset The Current Viewport
+	/*glViewport(x,y,width,height);						// Reset The Current Viewport
 
 	glMatrixMode(GL_PROJECTION);						// Select The Projection Matrix
 	glLoadIdentity();									// Reset The Projection Matrix
@@ -55,6 +57,7 @@ int DrawGLScene(unsigned int x, unsigned int y, unsigned int width, unsigned int
 
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	// Clear Screen And Depth Buffer
 	glClear( GL_DEPTH_BUFFER_BIT);	// Clear Screen And Depth Buffer
+	*/
 	glLoadIdentity();									// Reset The Current Modelview Matrix
 	glTranslatef(-1.5f,0.0f,-6.0f);						// Move Left 1.5 Units And Into The Screen 6.0
 	glRotatef(0.0f,0.0f,1.0f,0.0f);						// Rotate The Triangle On The Y axis ( NEW )
@@ -97,8 +100,9 @@ int main()
 		printf( "create successful\n" );
 	}
 
-	Log::print( "hello, world" );
 	Log::print( "fuck you, Tangel" );
+	Renderer render( &winHandle );
+	View* DefaultView = render.GetDefaultView();
 	//color red( 1.0, 0.0, 0.0, 1.0 );
 
 	while ( Running )
@@ -117,10 +121,11 @@ int main()
 		}
 		//DrawGLScene(0, 0, 640, 480);
 		//Log::print( "the pic has been drawed" );
-		DrawGLScene(0, 0, 100, 100);
-		DrawGLScene(100, 100, 100, 100);
-		DrawGLScene(200, 200, 100, 100);
-		DrawGLScene(300, 300, 100, 100);
+		DefaultView->Rotate( 1.0, 1.0, 1.0, 0.0 );
+		DrawGLScene(0, 0, 500, 300);
+		//DrawGLScene(100, 100, 100, 200);
+		//DrawGLScene(200, 200, 100, 200);
+		//DrawGLScene(300, 300, 100, 200);
 
 		winHandle.SwapBuffer();
 		
