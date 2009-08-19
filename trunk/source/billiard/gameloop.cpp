@@ -8,6 +8,7 @@
 #include "color.h"
 #include "render.h"
 #include "view.h"
+#include "timer.h"
 #include <cstdio>
 
 static Ball* pBalls;
@@ -58,9 +59,9 @@ int DrawGLScene(unsigned int x, unsigned int y, unsigned int width, unsigned int
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	// Clear Screen And Depth Buffer
 	glClear( GL_DEPTH_BUFFER_BIT);	// Clear Screen And Depth Buffer
 	*/
-	glLoadIdentity();									// Reset The Current Modelview Matrix
-	glTranslatef(-1.5f,0.0f,-6.0f);						// Move Left 1.5 Units And Into The Screen 6.0
-	glRotatef(0.0f,0.0f,1.0f,0.0f);						// Rotate The Triangle On The Y axis ( NEW )
+	//glLoadIdentity();									// Reset The Current Modelview Matrix
+	glTranslatef(-1.5f,0.0f,0.0f);						// Move Left 1.5 Units And Into The Screen 6.0
+	//glRotatef(0.0f,0.0f,1.0f,0.0f);						// Rotate The Triangle On The Y axis ( NEW )
 	glBegin(GL_TRIANGLES);								// Start Drawing A Triangle
 		glColor3f(1.0f,0.0f,0.0f);						// Set Top Point Of Triangle To Red
 		glVertex3f( 0.0f, 1.0f, 0.0f);					// First Point Of The Triangle
@@ -69,9 +70,9 @@ int DrawGLScene(unsigned int x, unsigned int y, unsigned int width, unsigned int
 		glColor3f(0.0f,0.0f,1.0f);						// Set Right Point Of Triangle To Blue
 		glVertex3f( 1.0f,-1.0f, 0.0f);					// Third Point Of The Triangle
 	glEnd();											// Done Drawing The Triangle
-	glLoadIdentity();									// Reset The Current Modelview Matrix
-	glTranslatef(1.5f,0.0f,-6.0f);						// Move Right 1.5 Units And Into The Screen 6.0
-	glRotatef(0.0f,1.0f,0.0f,0.0f);					// Rotate The Quad On The X axis ( NEW )
+	//glLoadIdentity();									// Reset The Current Modelview Matrix
+	//glRotatef(0.0f,1.0f,0.0f,0.0f);					// Rotate The Quad On The X axis ( NEW )
+	glTranslatef(3.0f,0.0f,0.0f);						// Move Right 1.5 Units And Into The Screen 6.0
 	glColor3f(0.5f,0.5f,1.0f);							// Set The Color To Blue One Time Only
 	glBegin(GL_QUADS);									// Draw A Quad
 		glVertex3f(-1.0f, 1.0f, 0.0f);					// Top Left
@@ -79,6 +80,7 @@ int DrawGLScene(unsigned int x, unsigned int y, unsigned int width, unsigned int
 		glVertex3f( 1.0f,-1.0f, 0.0f);					// Bottom Right
 		glVertex3f(-1.0f,-1.0f, 0.0f);					// Bottom Left
 	glEnd();											// Done Drawing The Quad
+	glTranslatef(-1.5f,0.0f,0.0f);						// Move Right 1.5 Units And Into The Screen 6.0
 	glFlush();
 	return TRUE;										// Keep Going
 }
@@ -103,7 +105,11 @@ int main()
 	Log::print( "fuck you, Tangel" );
 	Renderer render( &winHandle );
 	View* DefaultView = render.GetDefaultView();
+	DefaultView->Translate( 0.0, 0.0, 6.0 );
+	//glTranslatef(-1.5f,0.0f,-6.0f);						// Move Left 1.5 Units And Into The Screen 6.0
 	//color red( 1.0, 0.0, 0.0, 1.0 );
+	Frame GameFrame;
+	float deltatime;
 
 	while ( Running )
 	{
@@ -119,15 +125,29 @@ int main()
 				DispatchMessage(&msg);				// Dispatch The Message
 			}
 		}
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	// Clear The Screen And The Depth Buffer
 		//DrawGLScene(0, 0, 640, 480);
 		//Log::print( "the pic has been drawed" );
-		DefaultView->Rotate( 1.0, 1.0, 1.0, 0.0 );
+		DefaultView->Rotate( 1.0, 0.0, 1.0, 0.0 );
+		//DefaultView->Translate( 0.01, 0.0, 0.0 );
 		DrawGLScene(0, 0, 500, 300);
 		//DrawGLScene(100, 100, 100, 200);
 		//DrawGLScene(200, 200, 100, 200);
 		//DrawGLScene(300, 300, 100, 200);
 
+		//glClearColor( 0.0, 0.0, 0.0, 0.0 );
+		
 		winHandle.SwapBuffer();
+		
+		GameFrame.Update();
+		deltatime = GameFrame.GetLength();
+
+		if ( deltatime < 33.0 )
+			Sleep( 33.0 - deltatime );
+		/*while ( deltatime < 1000.0f ) {  // 1 second
+			GameFrame.Update();
+			deltatime += GameFrame.GetLength(); 
+		}*/
 		
 		//Running = MainLoop();
 		//if ( !Running ) break;
