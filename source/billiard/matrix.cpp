@@ -1,7 +1,10 @@
 #include "matrix.h"
-#include "math.h"
 #include <cassert>
+#include <cmath>
 #define IDX(x,y) (4*(x)+(y))
+#define PI M_PI
+
+// the rotate angle is present as 0 ~ 360
 
 matrix44::matrix44() {
 	this->identity();
@@ -109,6 +112,9 @@ void matrix44::scale( float x, float y, float z )
  */
 void matrix44::rotate_x( float angle )
 {
+	// conver radian to angle
+	// from PI to 360
+	angle = angle / 180.0f * PI;
 	float sx = sin( angle ), cx = cos( angle );
 	matrix44 temp;
 	temp.identity();
@@ -123,6 +129,7 @@ void matrix44::rotate_x( float angle )
 
 void matrix44::rotate_y( float angle )
 {
+	angle = angle / 180.0f * PI;
 	float sx = sin( angle ), cx = cos( angle );
 	matrix44 temp;
 	temp.identity();
@@ -137,6 +144,7 @@ void matrix44::rotate_y( float angle )
 
 void matrix44::rotate_z( float angle )
 {
+	angle = angle / 180.0f * PI;
 	float sx = sin( angle ), cx = cos( angle );
 	matrix44 temp;
 	temp.identity();
@@ -151,6 +159,7 @@ void matrix44::rotate_z( float angle )
 
 void matrix44::rotate_xyz(  float x,  float y,  float z,  float angle )
 {
+	angle = angle / 180.0f * PI;
 	float alpha, beta, xz, xyz, s_alpha, c_alpha, s_beta, c_beta;
 	xz = sqrt( x*x + z*z );
 	if ( xz < 10e-10 ) {

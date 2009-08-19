@@ -9,6 +9,7 @@
 #include "render.h"
 #include "view.h"
 #include "timer.h"
+#include <cmath>
 #include <cstdio>
 
 static Ball* pBalls;
@@ -103,14 +104,25 @@ int main()
 	}
 
 	Log::print( "fuck you, Tangel" );
+	printf("%f\n", M_PI );
 	Renderer render( &winHandle );
-	View* DefaultView = render.GetDefaultView();
-	DefaultView->Translate( 0.0, 0.0, 6.0 );
+
+	Renderer render2( 0, 0, 300, 200 );
+	View* render2view = render2.GetCurrentView();
+	render2view->Translate( 0.0, 0.0, 6.0 );
+
+
+	View* view1 = render.GetCurrentView();
+	View view2( 900, 200 );
+	view1->Translate( 0.0, 0.0, 6.0 );
+	view2.Translate( 0.0, 0.0, 6.0 );
+	Log::print( "work to here" );
 	//glTranslatef(-1.5f,0.0f,-6.0f);						// Move Left 1.5 Units And Into The Screen 6.0
 	//color red( 1.0, 0.0, 0.0, 1.0 );
 	Frame GameFrame;
 	float deltatime;
 
+	int SwapCount = 0;
 	while ( Running )
 	{
 		if (PeekMessage(&msg,NULL,0,0,PM_REMOVE))	// Is There A Message Waiting?
@@ -125,25 +137,47 @@ int main()
 				DispatchMessage(&msg);				// Dispatch The Message
 			}
 		}
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	// Clear The Screen And The Depth Buffer
+
+		render.ClearScreen();
+		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	// Clear The Screen And The Depth Buffer
 		//DrawGLScene(0, 0, 640, 480);
-		//Log::print( "the pic has been drawed" );
-		DefaultView->Rotate( 1.0, 0.0, 1.0, 0.0 );
-		//DefaultView->Translate( 0.01, 0.0, 0.0 );
+		view1->Rotate( 1.0, 1.0, 1.0, 1.0 );
+		//view1->Translate( 0.01, 0.0, 0.0 );
 		DrawGLScene(0, 0, 500, 300);
 		//DrawGLScene(100, 100, 100, 200);
 		//DrawGLScene(200, 200, 100, 200);
 		//DrawGLScene(300, 300, 100, 200);
 
 		//glClearColor( 0.0, 0.0, 0.0, 0.0 );
+
+		render2.SetAsWorking();
+		render2view->Rotate( -1.0, 0.0, 1.0, 0.0 );
+		//render2.ClearScreen();
+		DrawGLScene(0, 0, 500, 500 );
 		
 		winHandle.SwapBuffer();
 		
 		GameFrame.Update();
 		deltatime = GameFrame.GetLength();
 
-		if ( deltatime < 33.0 )
+		render.SetAsWorking();
+		if ( deltatime < 33.0 ) {
 			Sleep( 33.0 - deltatime );
+			SwapCount ++;
+
+			if ( SwapCount > 30 ) {
+				SwapCount = 0;
+				if ( view1->IsCurrentView() ) {
+					Log::print( "view changed, now is view2" );
+					view2.PrepareRendering();
+				} else {
+					Log::print( "view changed, now is view1" );
+					view1->PrepareRendering();
+				}
+			}
+		}
+
+
 		/*while ( deltatime < 1000.0f ) {  // 1 second
 			GameFrame.Update();
 			deltatime += GameFrame.GetLength(); 
