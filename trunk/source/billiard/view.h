@@ -8,7 +8,9 @@ class View {
 public:
 	View( int width, int height );
 	~View();
-	void SetAsCurrent();
+	void PrepareRendering();
+	void StopRendering();
+	bool IsCurrentView();
 	void Reset();
 	void Translate(float x,float y,float z);
 	void Translate(vector3 vec)			{ this->Translate(vec.getX(),vec.getY(),vec.getZ()); };
@@ -24,6 +26,7 @@ private:
 	float AspectRatio;
 	bool isCurr;
 
-	static View *Curr;
+	// this variable is use to keep only one current view;
+	static View* Curr;
 };
 #endif

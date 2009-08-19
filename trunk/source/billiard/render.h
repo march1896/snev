@@ -22,7 +22,11 @@ public:
 	bool AddLight( Light *lit );
 	bool RemoveLight( Light *lit );
 	int GetNumLights();
-	View* GetDefaultView();
+	View* GetCurrentView();
+	void SetAsWorking();
+	void DisableAllLights();
+	void EnableAllLights();
+	void ClearScreen();
 private:
 	Renderer();
 
@@ -32,9 +36,11 @@ private:
 		int posx, posy, width, height;
 	} Viewport;
 
-	View *defaultview;
+	View *CurrentView;
 	Light* Lights[ MAX_LIGHTS ];
 	int LightIdx;
+
+	static Renderer* Curr;
 };
 
 #endif
