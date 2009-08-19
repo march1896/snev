@@ -151,8 +151,59 @@ void matrix44::rotate_z( float angle )
 
 void matrix44::rotate_xyz(  float x,  float y,  float z,  float angle )
 {
-	// TODO: have not implemented
-	// method is written below
+	float alpha, beta, xz, xyz, s_alpha, c_alpha, s_beta, c_beta;
+	xz = sqrt( x*x + z*z );
+	if ( xz < 10e-10 ) {
+		s_alpha = 0.0f;
+		c_alpha = 1.0f;
+	}else {
+		s_alpha = z / xz;
+		c_alpha = x / xz;
+	}
+	xyz = sqrt( x*x + y*y + z*z );
+	s_beta = y / xyz;
+	c_beta = xz / xyz;
+	if ( x < 0.0f ) c_beta = -c_beta;
+
+	matrix44 temp;
+
+	float sx, cx;
+	sx = sin( angle ), cx = cos( angle );
+	temp.identity();
+
+	temp.set( 0, 0, c_alpha );
+	temp.set( 2, 2, c_alpha );
+	temp.set( 0, 2, s_alpha );
+	temp.set( 2, 0, -s_alpha );
+	this->left_mult( temp );
+
+	temp.identity();
+	temp.set( 0, 0, c_beta );
+	temp.set( 1, 1, c_beta );
+	temp.set( 0, 1, s_beta );
+	temp.set( 1, 0, -s_beta );
+	this->left_mult( temp );
+
+	temp.identity();
+	temp.set( 1, 1, cx );
+	temp.set( 2, 2, cx );
+	temp.set( 1, 2, sx );
+	temp.set( 2, 1, -sx );
+	this->left_mult( temp );
+
+	temp.identity();
+	temp.set( 0, 0, c_beta );
+	temp.set( 1, 1, c_beta );
+	temp.set( 0, 1, -s_beta );
+	temp.set( 1, 0, s_beta );
+	this->left_mult( temp );
+
+	temp.identity();
+	temp.set( 0, 0, c_alpha );
+	temp.set( 2, 2, c_alpha );
+	temp.set( 0, 2, -s_alpha );
+	temp.set( 2, 0, s_alpha );
+	this->left_mult( temp );
 }
 
 /*static matrix * matrix_rotate_xyz( matrix *a, float x, float y, float z, float angle )  

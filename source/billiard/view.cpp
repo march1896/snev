@@ -1,5 +1,6 @@
 #include "view.h"
 #include "opengl.h"
+#include "log.h"
 #include <cstdlib>
 
 // it's not a good idea to use the default width and height, how could it be better
@@ -76,6 +77,7 @@ void View::Translate( float x, float y, float z ) {
 	if ( isCurr ) {
 		glMatrixMode( GL_MODELVIEW );
 		glTranslatef( -x, -y, -z );
+		Log::print( "I am the current view" );
 	} else {
 		this->Modelview.translate( -x, -y, -z );
 	}
