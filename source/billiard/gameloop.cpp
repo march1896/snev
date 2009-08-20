@@ -41,32 +41,48 @@ int DrawGLScene(unsigned int x, unsigned int y, unsigned int width, unsigned int
 	return TRUE;										// Keep Going
 }
 
-static Ball *redball, *blueball, *greenball;
+static const int N_BALLS = 20;
+static Ball *redball, *blueball, *greenball, *ballArray[N_BALLS];
 static Table *table;
 
 void GameDataInit() {
-	redball = new Ball( color( 1.0, 0.0, 0.0, 1.0 ) );
-	greenball = new Ball( color( 0.0, 1.0, 0.0, 1.0 ) );
-	blueball = new Ball( color( 0.0, 0.0, 1.0, 1.0 ) );
+	for ( int i = 0; i < N_BALLS; i ++ ) {
+		ballArray[ i ] = new Ball();
+		ballArray[ i ]->AssignRandomSpeed();
+		ballArray[ i ]->AssignRandomColor();
+		ballArray[ i ]->pos += vector3( -40.0 + i * 4, 0.0, 0.0 );
+	}
 	table = new Table();
 
-	redball->pos += vector3( 10.0, 0.0, 0.0 );
+	/*redball = new Ball( color( 1.0, 0.0, 0.0, 1.0 ) );
+	greenball = new Ball( color( 0.0, 1.0, 0.0, 1.0 ) );
+	blueball = new Ball( color( 0.0, 0.0, 1.0, 1.0 ) );
+
+	redball->pos += vector3( 10.0, 10.0, 0.0 );
 	greenball->pos += vector3( 0.0, 10.0, 0.0 );
-	blueball->pos += vector3( -10.0, 0.0, 0.0 );
+	blueball->pos += vector3( -10.0, 10.0, 0.0 );
 
 	redball->AssignRandomSpeed();
 	greenball->AssignRandomSpeed();
-	blueball->AssignRandomSpeed();
+	blueball->AssignRandomSpeed();*/
 }
 
 void GameDataDeinit() {
-	delete redball;
+	/*delete redball;
 	delete greenball;
-	delete blueball;
+	delete blueball;*/
+
+	for ( int i = 0; i < N_BALLS; i ++ ) { 
+		delete ballArray[i];
+	}
 	delete table;
 }
 
 void GameUpdate( float deltaTime ) {
+	/*redball->Update( deltaTime );
+	greenball->Update( deltaTime );
+	blueball->Update( deltaTime );
+
 	Collision_twoBall( redball, greenball );
 	Collision_twoBall( greenball, blueball );
 	Collision_twoBall( redball, blueball );
@@ -74,16 +90,25 @@ void GameUpdate( float deltaTime ) {
 	Collision_withTable( redball, table );
 	Collision_withTable( greenball, table );
 	Collision_withTable( blueball, table );
+	*/
 
-	redball->Update( deltaTime );
-	greenball->Update( deltaTime );
-	blueball->Update( deltaTime );
+	for ( int i = 0; i < N_BALLS; i ++ ) {
+		ballArray[ i ]->Update( deltaTime );
+	}
+
+	for ( int i = 0; i < N_BALLS; i ++ ) {
+		for ( int j = i + 1; j < N_BALLS; j ++ ) {
+			Collision_twoBall( ballArray[ i ], ballArray[ j ] );
+		}
+	}
+
+	for ( int i = 0; i < N_BALLS; i ++ ) {
+		Collision_withTable( ballArray[ i ], table );
+	}
 }
 
 void GameDraw( Renderer* rd ) {
-	rd->ResetView(); // we must reset the view, or opengl will use the current modelview matrix, how could make it be better look
-	table->Draw();
-
+	/*
 	rd->ResetView();
 	redball->Draw();
 
@@ -92,6 +117,15 @@ void GameDraw( Renderer* rd ) {
 
 	rd->ResetView();
 	blueball->Draw();
+	*/
+
+	rd->ResetView(); // we must reset the view, or opengl will use the current modelview matrix, how could make it be better look
+	table->Draw();
+
+	for ( int i = 0; i < N_BALLS; i ++ ) {
+		rd->ResetView();
+		ballArray[ i ]->Draw(); 
+	}		
 }
 
 
@@ -121,8 +155,8 @@ int main()
 
 	Renderer* render2 = new Renderer( 0, 0, 300, 200 );
 	render2->GetView()->Translate( 0.0, 0.0, 60.0 );
-	render2->GetView()->Rotate( 90.0, 1.0, 0.0, 0.0 );
-	render2->GetView()->Translate( 0.0, 0.0, 10.0 );
+	render2->GetView()->Rotate( 70.0, 1.0, 0.0, 0.0 );
+	//render2->GetView()->Translate( 0.0, 0.0, 30.0 );
 
 	//glTranslatef(-1.5f,0.0f,-6.0f);						// Move Left 1.5 Units And Into The Screen 6.0
 	//color red( 1.0, 0.0, 0.0, 1.0 );
@@ -161,7 +195,7 @@ int main()
 		GameDraw( render1 );
 
 		render2->Activate();
-		render2->GetView()->Rotate( -1.0, 0.0, 0.0, 1.0 );
+		//render2->GetView()->Rotate( -1.0, 0.0, 0.0, 1.0 );
 		glClear( GL_DEPTH_BUFFER_BIT);	// Clear The Depth Buffer, so render2 could cover render1
 		table->colour.setRGB( 0.8, 0.8, 0.2 );
 		

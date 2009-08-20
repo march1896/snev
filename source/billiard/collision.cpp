@@ -18,10 +18,10 @@ bool IsCollided_twoBall( Ball* pBallA, Ball* pBallB )
 
 bool IsCollided_withTable( Ball* pBall, Table* pTable )
 {
-	if ( pBall->pos.getX() - pBall->radius < pTable->Left ) return true;
-	if ( pBall->pos.getX() + pBall->radius > pTable->Right ) return true;
-	if ( pBall->pos.getY() - pBall->radius < pTable->Bottom ) return true;
-	if ( pBall->pos.getY() + pBall->radius > pTable->Top ) return true;
+	if ( pBall->pos.getX() - pBall->radius <= pTable->Left ) return true;
+	if ( pBall->pos.getX() + pBall->radius >= pTable->Right ) return true;
+	if ( pBall->pos.getY() - pBall->radius <= pTable->Bottom ) return true;
+	if ( pBall->pos.getY() + pBall->radius >= pTable->Top ) return true;
 	return false;
 }
 
@@ -33,7 +33,8 @@ void Collision_twoBall( Ball* pBallA, Ball* pBallB )
 
 	vector3 cline; // collision line
 
-	cline = pBallA->speed - pBallB->speed;
+	//cline = pBallA->speed - pBallB->speed;
+	cline = pBallA->pos - pBallB->pos;
 	cline.normalize();
 	float vA, vB; 		// before collision
 	float vA_, vB_; 	// after collision
@@ -44,6 +45,8 @@ void Collision_twoBall( Ball* pBallA, Ball* pBallB )
 	vB = pBallB->speed.dot( cline );
 	mA = pBallA->weight;
 	mB = pBallB->weight;
+
+	if ( vB < 0.0 && vA > 0.0 ) return;
 
 	if ( true ) // TODO: we assume elastic collsion, please add inelastic collision
 	{
@@ -72,22 +75,22 @@ void Collision_withTable( Ball* pBall, Table* pTable )
 		// TODO: I don't know how deal with friction of rolling
 		// the same situation occurs below
 		// TODO: I assume all collisions are elastic collision
-		assert( pBall->speed.getX() < 0.0 );
+		//assert( pBall->speed.getX() <= 0.0 );
 		pBall->speed.setX( - pBall->speed.getX() );
 	}
 
 	if ( pBall->pos.getX() + pBall->radius > pTable->Right ) {
-		assert( pBall->speed.getX() > 0.0 );
+		//assert( pBall->speed.getX() >= 0.0 );
 		pBall->speed.setX( - pBall->speed.getX() );
 	}
 
 	if ( pBall->pos.getY() - pBall->radius < pTable->Bottom ) {
-		assert( pBall->speed.getY() < 0 );
+		//assert( pBall->speed.getY() <= 0.0 );
 		pBall->speed.setY( - pBall->speed.getY() );
 	}
 
 	if ( pBall->pos.getY() + pBall->radius > pTable->Top ) {
-		assert( pBall->speed.getY() > 0 );
+		//assert( pBall->speed.getY() >= 0.0 );
 		pBall->speed.setY( - pBall->speed.getY() );
 	}
 
