@@ -8,6 +8,7 @@ public:
 	~vector2();
 
 	float *getdata() const;
+	vector2 scale( float para );
 	vector2 operator+( const vector2 &rhs );
 	vector2 operator-( const vector2 &rhs );
 	vector2 operator-=( const vector2 &rhs );
@@ -36,6 +37,7 @@ public:
 	~vector3();
 
 	float *getdata() const;
+	vector3 scale( float para );
 	vector3 operator+( const vector3 &rhs );
 	vector3 operator-( const vector3 &rhs );
 	vector3 operator+=( const vector3 &rhs );
@@ -66,6 +68,7 @@ public:
 	~vector4();
 
 	float *getdata() const;
+	vector4 scale( float para );
 	void setXYZ( float _x, float _y, float _z );
 	void setXYZW( float _x, float _y, float _z, float _w );
 	float length();

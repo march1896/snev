@@ -38,7 +38,7 @@ View::View( int width, int height ) {
 	glMatrixMode( GL_PROJECTION );
 	glPushMatrix();
 	glLoadIdentity();
-	gluPerspective( 45.0f, (GLfloat) width / (GLfloat) height, 0.1f, 100.0f );
+	gluPerspective( 45.0f, (GLfloat) width / (GLfloat) height, 0.1f, 1000.0f );
 	glGetFloatv( GL_PROJECTION_MATRIX, matrixdata );
 	this->Projection.setdata( matrixdata );
 	glPopMatrix();
@@ -49,17 +49,37 @@ View::View( int width, int height ) {
 View::~View() {
 }
 
+void View::Perspective( float fovy, float aspect, float near, float far ) {
+	glMatrixMode( GL_PROJECTION );
+	glPushMatrix();
+	glLoadIdentity();
+	gluPerspective( fovy, aspect, near, far );
+	glGetFloatv( GL_PROJECTION_MATRIX, matrixdata );
+	this->Projection.setdata( matrixdata );
+	glPopMatrix();
+}
+
+void View::Ortho2D( float left, float right, float bottom, float top ) {
+	glMatrixMode( GL_PROJECTION );
+	glPushMatrix();
+	glLoadIdentity();
+	gluOrtho2D( left, right, bottom, top );
+	glGetFloatv( GL_PROJECTION_MATRIX, matrixdata );
+	this->Projection.setdata( matrixdata );
+	glPopMatrix();
+}
+
 void View::Reset() {
 	if ( isActive ) {
 		glMatrixMode( GL_PROJECTION );
-		gluPerspective(45.0f,AspectRatio,0.1f,100.0f);
+		gluPerspective(45.0f,AspectRatio,0.1f,1000.0f);
 		glMatrixMode( GL_MODELVIEW );
 		glLoadIdentity();
 	} 
 	glMatrixMode( GL_PROJECTION );
 	glPushMatrix();
 	glLoadIdentity();
-	gluPerspective( 45.0f, AspectRatio, 0.1f, 100.0f );
+	gluPerspective( 45.0f, AspectRatio, 0.1f, 1000.0f );
 	glGetFloatv( GL_PROJECTION_MATRIX, matrixdata );
 	this->Projection.setdata( matrixdata );
 	glPopMatrix();
