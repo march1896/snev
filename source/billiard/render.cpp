@@ -28,37 +28,39 @@ void Renderer::ClearScreen() {
 	
 
 Renderer::Renderer( WindowsHandle* winhandle ) {
+	LightIdx = -1;
 
 	Viewport.posx = 0, Viewport.posy = 0;
 	winhandle->GetDimensions( Viewport.width, Viewport.height );
 
-	CurrentView = new View( Viewport.width, Viewport.height );
+	DefaultView = new View( Viewport.width, Viewport.height );
+	DefaultView->Translate( 0.0f, 0.0f, 10.0f );
+	CurrentView = DefaultView;
+
+	// if this is the first renderer, we will set it active
 	if ( Renderer::Curr == NULL ) {
-		Renderer::Curr = this;
 		InitGL();
-		ClearScreen();
-		CurrentView->PrepareRendering();
-		glViewport( Viewport.posx, Viewport.posy, Viewport.width, Viewport.height );
+		Activate();
 	}
-	LightIdx = -1;
 }
 
 Renderer::Renderer( int x, int y, int width, int height )
 {
-	CurrentView = new View( width, height );
+	LightIdx = -1;
+	// create a default veiw
+	DefaultView = new View( width, height );
+	DefaultView->Translate( 0.0f, 0.0f, 10.0f );
+	CurrentView = DefaultView;
+
+	// if this is the first renderer, activate this renderer
 	if ( Renderer::Curr == NULL ) {
-		Renderer::Curr = this;
 		InitGL();
-		ClearScreen();
-		CurrentView->PrepareRendering();
-		glViewport( Viewport.posx, Viewport.posy, Viewport.width, Viewport.height );
+		Activate();
 	}
 
 	Viewport.posx = x, Viewport.posy = y;
 	Viewport.width = width;
 	Viewport.height = height;
-
-	LightIdx = -1;
 }
 
 Renderer::~Renderer()
@@ -66,19 +68,32 @@ Renderer::~Renderer()
 	if ( Renderer::Curr == this ) {
 		Renderer::Curr = NULL; 
 	}
-	delete CurrentView;
+	if ( DefaultView != NULL )
+		delete DefaultView;
 }
 
-void Renderer::SetAsWorking() {
+void Renderer::Activate() {
 	if ( Renderer::Curr == this ) return;
 
 	// Remove the state of last renderer
-	Renderer::Curr->DisableAllLights();
+	if ( Renderer::Curr != NULL ) {
+		Renderer::Curr->DisableAllLights();
+		Renderer::Curr->GetView()->Deactivate();
+	}
 
 	glViewport( Viewport.posx, Viewport.posy, Viewport.width, Viewport.height );
-	CurrentView->PrepareRendering();
+	CurrentView->Activate();
 	Renderer::Curr = this;
 	this->EnableAllLights();
+}
+
+void Renderer::Deactivate() {
+	if ( Renderer::Curr != this ) return;
+
+	this->DisableAllLights();
+	this->GetView()->Deactivate();
+	
+	Renderer::Curr = NULL;
 }
 
 void Renderer::DisableAllLights() {
@@ -126,8 +141,16 @@ bool Renderer::RemoveLight( Light *lit ) {
 	return false;
 }
 
-View* Renderer::GetCurrentView() {
+View* Renderer::GetView() {
 	return CurrentView;
+}
+
+bool Renderer::SetView( View* v ) {
+	if ( v == NULL ) return false;
+
+	CurrentView->Deactivate();
+	CurrentView = v;
+	return true;
 }
 
 int Renderer::GetNumLights() {

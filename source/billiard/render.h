@@ -22,8 +22,10 @@ public:
 	bool AddLight( Light *lit );
 	bool RemoveLight( Light *lit );
 	int GetNumLights();
-	View* GetCurrentView();
-	void SetAsWorking();
+	View* GetView();
+	bool SetView( View *v );
+	void Activate();
+	void Deactivate();
 	void DisableAllLights();
 	void EnableAllLights();
 	void ClearScreen();
@@ -37,7 +39,8 @@ private:
 	} Viewport;
 
 	View *CurrentView;
-	Light* Lights[ MAX_LIGHTS ];
+	View* DefaultView;   // this view is created and maintained by the renderer
+	Light* Lights[ MAX_LIGHTS ]; // renderer will not manage the memory of lights, so if you created a light, you must delete it yourself
 	int LightIdx;
 
 	static Renderer* Curr;

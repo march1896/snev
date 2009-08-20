@@ -9,36 +9,27 @@
 //the default constructor is declared private
 
 static float matrixdata[16];
-View* View::Curr = NULL;
 
-void View::PrepareRendering() {
+void View::Activate() {
 	// Set this matrix as working matrix
 	glMatrixMode( GL_PROJECTION );
 	glLoadMatrixf( this->Projection.getdata() );
 	glMatrixMode( GL_MODELVIEW );
 	glLoadMatrixf( this->Modelview.getdata() );
 
-	this->isCurr = true;
-	if ( View::Curr == NULL ) {
-		View::Curr = this;
-		return;
-	} else if ( View::Curr != this ) {
-		View::Curr->isCurr = false;
-		View::Curr = this;
-	}
+	this->isActive = true;
 }
 
-void View::StopRendering() {
-	this->isCurr = false;
-	View::Curr = NULL;
+void View::Deactivate() {
+	this->isActive = false;
 }
 
-bool View::IsCurrentView() {
-	return this->isCurr;
+bool View::IsActive() {
+	return this->isActive;
 }
 
 View::View( int width, int height ) {
-	isCurr = false;
+	isActive = false;
 	AspectRatio = (float)width / (float)height;
 
 	// The process of generating projection matrix is not implemented yet, 
@@ -56,13 +47,10 @@ View::View( int width, int height ) {
 }
 
 View::~View() {
-	if ( View::Curr == this ) {
-		View::Curr = NULL;
-	}
 }
 
 void View::Reset() {
-	if ( isCurr ) {
+	if ( isActive ) {
 		glMatrixMode( GL_PROJECTION );
 		gluPerspective(45.0f,AspectRatio,0.1f,100.0f);
 		glMatrixMode( GL_MODELVIEW );
@@ -80,7 +68,7 @@ void View::Reset() {
 }
 
 void View::Translate( float x, float y, float z ) {
-	if ( isCurr ) {
+	if ( isActive ) {
 		glMatrixMode( GL_MODELVIEW );
 		glTranslatef( -x, -y, -z );
 	} 
@@ -88,7 +76,7 @@ void View::Translate( float x, float y, float z ) {
 }
 
 void View::Rotate( float angle, float x, float y, float z ) {
-	if ( isCurr ) {
+	if ( isActive ) {
 		glMatrixMode( GL_MODELVIEW );
 		glRotatef( -angle, x, y, z );
 	}
@@ -96,7 +84,7 @@ void View::Rotate( float angle, float x, float y, float z ) {
 }
 
 void View::Scale( float x, float y, float z ) {
-	if ( isCurr ) {
+	if ( isActive ) {
 		glMatrixMode( GL_MODELVIEW );
 		glScalef( x, y, z );
 	}
@@ -112,7 +100,7 @@ void View::LookAt( vector3 pos, vector3 at, vector3 up ) {
 	this->Projection.setdata( matrixdata );
 	glPopMatrix(); 
 	
-	if ( isCurr ) {
+	if ( isActive ) {
 		glLoadIdentity();
 		gluLookAt(pos.getX(),pos.getY(),pos.getZ(),at.getX(),at.getY(),at.getZ(),up.getX(),up.getY(),up.getZ());
 	} 

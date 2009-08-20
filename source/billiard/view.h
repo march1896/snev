@@ -8,9 +8,9 @@ class View {
 public:
 	View( int width, int height );
 	~View();
-	void PrepareRendering();
-	void StopRendering();
-	bool IsCurrentView();
+	void Activate();
+	void Deactivate();
+	bool IsActive();
 	void Reset();
 	void Translate(float x,float y,float z);
 	void Translate(vector3 vec)			{ this->Translate(vec.getX(),vec.getY(),vec.getZ()); };
@@ -24,9 +24,6 @@ private:
 	matrix44 Projection;
 	matrix44 Modelview;
 	float AspectRatio;
-	bool isCurr;
-
-	// this variable is use to keep only one current view;
-	static View* Curr;
+	bool isActive;
 };
 #endif

@@ -102,20 +102,18 @@ int main()
 	} else {
 		printf( "create successful\n" );
 	}
-
 	Log::print( "fuck you, Tangel" );
-	printf("%f\n", M_PI );
-	Renderer render( &winHandle );
 
-	Renderer render2( 0, 0, 300, 200 );
-	View* render2view = render2.GetCurrentView();
-	render2view->Translate( 0.0, 0.0, 6.0 );
+	Renderer* render1 = new Renderer( &winHandle );
+	Log::print( "work to here" );
+	View* view1 = render1->GetView();   // this is the default view created by render1
 
 
-	View* view1 = render.GetCurrentView();
-	View view2( 900, 200 );
-	view1->Translate( 0.0, 0.0, 6.0 );
-	view2.Translate( 0.0, 0.0, 6.0 );
+	View* view2 = new View( 640, 480 );
+	view2->Translate( 0.0, 0.0, 10.0 );
+
+	Renderer* render2 = new Renderer( 0, 0, 300, 200 );
+
 	Log::print( "work to here" );
 	//glTranslatef(-1.5f,0.0f,-6.0f);						// Move Left 1.5 Units And Into The Screen 6.0
 	//color red( 1.0, 0.0, 0.0, 1.0 );
@@ -138,10 +136,13 @@ int main()
 			}
 		}
 
-		render.ClearScreen();
+		render1->ClearScreen();
 		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	// Clear The Screen And The Depth Buffer
 		//DrawGLScene(0, 0, 640, 480);
-		view1->Rotate( 1.0, 1.0, 1.0, 1.0 );
+		if ( view1->IsActive() )
+			view1->Rotate( 1.0, 1.0, 0.0, 0.0 );
+		else if ( view2->IsActive() ) 
+			view2->Rotate( 1.0, 0.0, 0.0, 1.0 );
 		//view1->Translate( 0.01, 0.0, 0.0 );
 		DrawGLScene(0, 0, 500, 300);
 		//DrawGLScene(100, 100, 100, 200);
@@ -150,8 +151,8 @@ int main()
 
 		//glClearColor( 0.0, 0.0, 0.0, 0.0 );
 
-		render2.SetAsWorking();
-		render2view->Rotate( -1.0, 0.0, 1.0, 0.0 );
+		render2->Activate();
+		render2->GetView()->Rotate( -1.0, 0.0, 1.0, 0.0 );
 		//render2.ClearScreen();
 		DrawGLScene(0, 0, 500, 500 );
 		
@@ -160,19 +161,19 @@ int main()
 		GameFrame.Update();
 		deltatime = GameFrame.GetLength();
 
-		render.SetAsWorking();
+		render1->Activate();
 		if ( deltatime < 33.0 ) {
 			Sleep( 33.0 - deltatime );
 			SwapCount ++;
 
 			if ( SwapCount > 30 ) {
 				SwapCount = 0;
-				if ( view1->IsCurrentView() ) {
+				if ( view1->IsActive() ) {
 					Log::print( "view changed, now is view2" );
-					view2.PrepareRendering();
+					render1->SetView( view2 );
 				} else {
 					Log::print( "view changed, now is view1" );
-					view1->PrepareRendering();
+					render1->SetView( view1 );
 				}
 			}
 		}
