@@ -75,6 +75,15 @@ void Ball::AssignRandomSpeed() {
 	speed.setXYZ( _x , _y, 0.0 );
 }
 
+void Ball::AssignRandomColor() {
+	float r, g, b;
+	r = GenerateRandomNumber() / 100.0;
+	g = GenerateRandomNumber() / 100.0;
+	b = GenerateRandomNumber() / 100.0;
+
+	colour.setRGB( r, g, b );
+}
+
 Ball::~Ball()
 {
 }

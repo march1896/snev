@@ -20,6 +20,7 @@ public:
 	void Update( float deltaTime );
 	void Draw();
 	void AssignRandomSpeed();
+	void AssignRandomColor();
 //private:
 	float radius;
 	float weight;
