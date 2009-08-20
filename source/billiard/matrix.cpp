@@ -215,63 +215,6 @@ void matrix44::rotate_xyz(  float x,  float y,  float z,  float angle )
 	this->left_mult( temp );
 }
 
-/*static matrix * matrix_rotate_xyz( matrix *a, float x, float y, float z, float angle )  
-{
-	// first rotate (x, y, z ) to ( 1, 0, 0 ), then rotate_x angle
-	// use this method will cause five matrix operations
-	float alpha, beta, xz, xyz, s_alpha, c_alpha, s_beta, c_beta;
-	xz = sqrt( x*x + z*z );
-	if ( xz < 10e-10 ) {
-		s_alpha = 0.0f;
-		c_alpha = 1.0f;
-	}else {
-		s_alpha = z / xz;
-		c_alpha = x / xz;
-	}
-	xyz = sqrt( x*x + y*y + z*z );
-	s_beta = y / xyz;
-	c_beta = xz / xyz;
-	if ( x < 0.0f ) c_beta = -c_beta;
-
-	matrix temp;
-
-	float sx, cx;
-	sx = sin( angle ), cx = cos( angle );
-
-	matrix_identity( &temp );
-	temp.r00 = temp.r22 = c_alpha;
-	temp.r02 = s_alpha;
-	temp.r20 = -s_alpha;
-	matrix_left_mult( a, &temp );
-
-	matrix_identity( &temp );
-	temp.r00 = temp.r11 = c_beta;
-	temp.r01 = s_beta;
-	temp.r10 = -s_beta;
-	matrix_left_mult( a, &temp );
-
-	matrix_identity( &temp );
-	temp.r11 = temp.r22 = cx;
-	temp.r12 = sx;
-	temp.r21 = -sx;
-	matrix_left_mult( a, &temp );
-
-	matrix_identity( &temp );
-	temp.r00 = temp.r11 = c_beta;
-	temp.r01 = -s_beta;
-	temp.r10 = s_beta;
-	matrix_left_mult( a, &temp );
-
-	matrix_identity( &temp );
-	temp.r00 = temp.r22 = c_alpha;
-	temp.r02 = -s_alpha;
-	temp.r20 = s_alpha;
-	matrix_left_mult( a, &temp );
-
-	return a;
-}
-*/
-
 
 // this = rhs * this;
 matrix44 matrix44::left_mult( const matrix44 &rhs ) 

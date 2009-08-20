@@ -21,13 +21,16 @@ public:
 
 	bool AddLight( Light *lit );
 	bool RemoveLight( Light *lit );
-	int GetNumLights();
-	View* GetView();
-	bool SetView( View *v );
-	void Activate();
-	void Deactivate();
 	void DisableAllLights();
 	void EnableAllLights();
+	int GetNumLights();
+
+	View* GetView();
+	bool SetView( View *v );
+	void ResetView();
+
+	void Activate();
+	void Deactivate();
 	void ClearScreen();
 private:
 	Renderer();

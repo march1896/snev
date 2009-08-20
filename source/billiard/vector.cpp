@@ -20,6 +20,11 @@ float* vector2::getdata() const {
 	return dummy;
 }
 
+vector2 vector2::scale( float para ) {
+	this->x *= para;
+	this->y *= para;
+	return *this;
+}
 vector2 vector2::operator=( const vector2 &rhs ) {
 	this->x = rhs.getX();
 	this->y = rhs.getY();
@@ -91,6 +96,14 @@ float* vector4::getdata() const {
 	dummy[2] = z;
 	dummy[3] = w;
 	return dummy;
+}
+
+vector4 vector4::scale( float para ) {
+	this->x *= para;
+	this->y *= para;
+	this->z *= para;
+	// this->w *= para;
+	return *this;
 }
 
 vector4 vector4::operator=( const vector4 &rhs ) {
@@ -168,6 +181,12 @@ float* vector3::getdata() const {
 	return dummy;
 }
 
+vector3 vector3::scale( float para ) {
+	this->x *= para;
+	this->y *= para;
+	this->z *= para;
+	return *this;
+}
 vector3 vector3::operator=( const vector3 &rhs ) {
 	this->x = rhs.getX();
 	this->y = rhs.getY();

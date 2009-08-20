@@ -153,6 +153,10 @@ bool Renderer::SetView( View* v ) {
 	return true;
 }
 
+void Renderer::ResetView() {
+	CurrentView->Activate();
+}
+
 int Renderer::GetNumLights() {
 	return LightIdx + 1;
 }
