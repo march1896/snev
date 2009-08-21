@@ -21,10 +21,10 @@ public:
 
 	bool AddLight( Light *lit );
 	bool RemoveLight( Light *lit );
-	void DisableAllLights();
-	void EnableAllLights();
-	int GetNumLights();
-	bool IsLightEnabled();
+	void DisableAllLights() const;
+	void EnableAllLights() const;
+	int GetNumLights() const;
+	bool IsLightEnabled() const;
 
 	View* GetView();
 	bool SetView( View *v );

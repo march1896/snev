@@ -8,7 +8,7 @@ public:
 	Material();
 	Material( const color &colour );
 	Material( const color &Amb, const color &Diff, const color &Spec, const float &Shin );
-	void SetAmbiet( const color &para );
+	void SetAmbient( const color &para );
 	void SetDiffuse( const color &para );
 	void SetSpecular( const color &para );
 	void SetShininess( const float &para );

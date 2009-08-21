@@ -99,14 +99,14 @@ void Renderer::Deactivate() {
 	Renderer::Curr = NULL;
 }
 
-void Renderer::DisableAllLights() {
+void Renderer::DisableAllLights() const {
 	glDisable( GL_LIGHTING );
 	for ( int i = 0; i <= LightIdx; i ++ ) {
 		glDisable( LightType[ i ] );
 	}
 }
 
-void Renderer::EnableAllLights() {
+void Renderer::EnableAllLights() const {
 	if ( LightIdx == -1 ) {
 		glDisable( GL_LIGHTING );
 		return;
@@ -179,10 +179,10 @@ void Renderer::ResetView() {
 		DefaultView->Activate();
 }
 
-int Renderer::GetNumLights() {
+int Renderer::GetNumLights() const {
 	return LightIdx + 1;
 }
 
-bool Renderer::IsLightEnabled() {
-	return GetNumLights() != -1;
+bool Renderer::IsLightEnabled() const {
+	return GetNumLights() != 0;
 }
