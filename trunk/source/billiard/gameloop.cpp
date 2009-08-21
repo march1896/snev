@@ -9,6 +9,7 @@
 #include "render.h"
 #include "view.h"
 #include "timer.h"
+#include "light.h"
 #include <cmath>
 #include <cstdio>
 
@@ -44,6 +45,7 @@ int DrawGLScene(unsigned int x, unsigned int y, unsigned int width, unsigned int
 static const int N_BALLS = 20;
 static Ball *redball, *blueball, *greenball, *ballArray[N_BALLS];
 static Table *table;
+static Light* lit;
 
 void GameDataInit() {
 	for ( int i = 0; i < N_BALLS; i ++ ) {
@@ -53,6 +55,12 @@ void GameDataInit() {
 		ballArray[ i ]->pos += vector3( -40.0 + i * 4, 0.0, 0.0 );
 	}
 	table = new Table();
+
+	lit = new Light( vector4( 0.0, 0.0, 50.0, 1.0 ), 
+			color( 1.0, 1.0, 1.0, 1.0 ),
+			color( 1.0, 1.0, 1.0, 1.0 ),
+			color( 1.0, 1.0, 1.0, 1.0 )
+		       );
 
 	/*redball = new Ball( color( 1.0, 0.0, 0.0, 1.0 ) );
 	greenball = new Ball( color( 0.0, 1.0, 0.0, 1.0 ) );
@@ -76,6 +84,7 @@ void GameDataDeinit() {
 		delete ballArray[i];
 	}
 	delete table;
+	delete lit;
 }
 
 void GameUpdate( float deltaTime ) {
@@ -143,6 +152,8 @@ int main()
 		Log::print( "create window successful" );
 	}
 
+	GameDataInit();
+
 	Renderer* render1 = new Renderer( &winHandle );
 	View* view1 = render1->GetView();   // this is the default view created by render1
 	view1->Translate( 0.0, 0.0, 100.0 );
@@ -154,6 +165,8 @@ int main()
 	view2->Translate( 0.0, 0.0, 10.0 );
 
 	Renderer* render2 = new Renderer( 0, 0, 300, 200 );
+	render2->AddLight( lit );
+	
 	render2->GetView()->Translate( 0.0, 0.0, 60.0 );
 	render2->GetView()->Rotate( 70.0, 1.0, 0.0, 0.0 );
 	//render2->GetView()->Translate( 0.0, 0.0, 30.0 );
@@ -162,8 +175,6 @@ int main()
 	//color red( 1.0, 0.0, 0.0, 1.0 );
 	Frame GameFrame;
 	float deltatime;
-
-	GameDataInit();
 
 	int SwapCount = 0;
 	while ( Running )
@@ -195,9 +206,9 @@ int main()
 		GameDraw( render1 );
 
 		render2->Activate();
-		//render2->GetView()->Rotate( -1.0, 0.0, 0.0, 1.0 );
+		render2->GetView()->Rotate( -0.1, 0.0, 0.0, 1.0 );
 		glClear( GL_DEPTH_BUFFER_BIT);	// Clear The Depth Buffer, so render2 could cover render1
-		table->colour.setRGB( 0.8, 0.8, 0.2 );
+		table->colour.setRGB( 0.2, 0.6, 0.6 );
 		
 		GameDraw( render2 );
 		//DrawGLScene(0, 0, 500, 500 );

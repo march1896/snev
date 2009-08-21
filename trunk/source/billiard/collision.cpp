@@ -80,6 +80,8 @@ void Collision_withTable( Ball* pBall, Table* pTable )
 	}
 
 	if ( pBall->pos.getX() + pBall->radius > pTable->Right ) {
+		//this assert is not right because, when the ball hit the table border, it may also hit other balls
+		//in this condition, the ball's speed may rapidly change and recollide with table border.
 		//assert( pBall->speed.getX() >= 0.0 );
 		pBall->speed.setX( - pBall->speed.getX() );
 	}

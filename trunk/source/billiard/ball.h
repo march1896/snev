@@ -7,6 +7,9 @@
 //how to deal with these things
 #include "vector.h"
 #include "color.h"
+#include "material.h"
+
+class Renderer;
 
 class Ball : public VisibleObject
 {
@@ -19,12 +22,15 @@ public:
 
 	void Update( float deltaTime );
 	void Draw();
+	void Draw( const Renderer* render );
 	void AssignRandomSpeed();
 	void AssignRandomColor();
 //private:
 	float radius;
 	float weight;
 	color colour;
+	Material mat;
+
 	vector3 pos;
 	vector3 rotate, speed;
 };
