@@ -7,6 +7,8 @@
 #include <cassert>
 #include <cstdlib>
 
+#include "log.h"
+
 GLenum LightType[ MAX_LIGHTS ] = { GL_LIGHT0, GL_LIGHT1, GL_LIGHT2, GL_LIGHT3 };
 Renderer* Renderer::Curr = NULL;
 
@@ -84,6 +86,7 @@ void Renderer::Activate() {
 	glViewport( Viewport.posx, Viewport.posy, Viewport.width, Viewport.height );
 	CurrentView->Activate();
 	Renderer::Curr = this;
+
 	this->EnableAllLights();
 }
 
@@ -97,17 +100,24 @@ void Renderer::Deactivate() {
 }
 
 void Renderer::DisableAllLights() {
+	glDisable( GL_LIGHTING );
 	for ( int i = 0; i <= LightIdx; i ++ ) {
 		glDisable( LightType[ i ] );
 	}
 }
 
 void Renderer::EnableAllLights() {
+	if ( LightIdx == -1 ) {
+		glDisable( GL_LIGHTING );
+		return;
+	}
+
+	glEnable( GL_LIGHTING );
 	for ( int i = 0; i <= LightIdx; i++ ) {
-		glEnable( LightType[ ++ LightIdx ] );
-		glLightfv( LightType[ LightIdx ], GL_AMBIENT, Lights[i]->getAmbient().getdata() );		// Setup The Ambient Light
-		glLightfv( LightType[ LightIdx ], GL_DIFFUSE, Lights[i]->getDiffuse().getdata() );		// Setup The Diffuse Light
-		glLightfv( LightType[ LightIdx ], GL_POSITION,Lights[i]->getPos().getdata() );	// Position The Light
+		glEnable( LightType[ i ] );
+		glLightfv( LightType[ i ], GL_AMBIENT, Lights[i]->getAmbient().getdata() );		// Setup The Ambient Light
+		glLightfv( LightType[ i ], GL_DIFFUSE, Lights[i]->getDiffuse().getdata() );		// Setup The Diffuse Light
+		glLightfv( LightType[ i ], GL_POSITION,Lights[i]->getPos().getdata() );	// Position The Light
 	}
 }
 
@@ -115,13 +125,15 @@ bool Renderer::AddLight( Light *lit ) {
 	assert( lit );
 	if ( lit == NULL ) return false;
 	if ( LightIdx >= MAX_LIGHTS - 1 ) return false;
+	Lights[ ++LightIdx ] = lit;
 
-	glEnable( LightType[ ++ LightIdx ] );
-	glLightfv( LightType[ LightIdx ], GL_AMBIENT, lit->getAmbient().getdata() );		// Setup The Ambient Light
-	glLightfv( LightType[ LightIdx ], GL_DIFFUSE, lit->getDiffuse().getdata() );		// Setup The Diffuse Light
-	glLightfv( LightType[ LightIdx ], GL_POSITION,lit->getPos().getdata() );	// Position The Light
-
-	Lights[ LightIdx ] = lit;
+	if ( Renderer::Curr == this ) {
+		glEnable( GL_LIGHTING );
+		glEnable( LightType[ LightIdx ] );
+		glLightfv( LightType[ LightIdx ], GL_AMBIENT, lit->getAmbient().getdata() );		// Setup The Ambient Light
+		glLightfv( LightType[ LightIdx ], GL_DIFFUSE, lit->getDiffuse().getdata() );		// Setup The Diffuse Light
+		glLightfv( LightType[ LightIdx ], GL_POSITION,lit->getPos().getdata() );	// Position The Light
+	}
 }
 
 bool Renderer::RemoveLight( Light *lit ) {
@@ -135,6 +147,13 @@ bool Renderer::RemoveLight( Light *lit ) {
 			for ( int j = i; j < LightIdx; j ++ )
 				Lights[ j ] = Lights[ j+1 ];
 			LightIdx --;
+			if ( Renderer::Curr == this ) {
+				this->DisableAllLights();
+				this->EnableAllLights();
+			}
+			if ( LightIdx == -1 ) {
+				glDisable( GL_LIGHTING );
+			}
 			return true;
 		}
 	}
@@ -150,13 +169,20 @@ bool Renderer::SetView( View* v ) {
 
 	CurrentView->Deactivate();
 	CurrentView = v;
+	if ( Renderer::Curr == this ) 
+		CurrentView->Activate();
 	return true;
 }
 
 void Renderer::ResetView() {
-	CurrentView->Activate();
+	if ( Renderer::Curr == this )
+		DefaultView->Activate();
 }
 
 int Renderer::GetNumLights() {
 	return LightIdx + 1;
+}
+
+bool Renderer::IsLightEnabled() {
+	return GetNumLights() != -1;
 }

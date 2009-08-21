@@ -24,6 +24,7 @@ public:
 	void DisableAllLights();
 	void EnableAllLights();
 	int GetNumLights();
+	bool IsLightEnabled();
 
 	View* GetView();
 	bool SetView( View *v );
