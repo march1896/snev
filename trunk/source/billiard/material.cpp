@@ -9,7 +9,7 @@ Material::Material():
 }
 
 Material::Material( const color &colour ):
-	Ambient( 0.2, 0.2, 0.2, 1.0 ),
+	Ambient( colour ),
 	Diffuse( colour ),
 	Specular( 0.0, 0.0, 0.0, 1.0 ),
 	Shininess( 0.0 )
@@ -24,7 +24,7 @@ Material::Material( const color &Amb, const color &Diff, const color &Spec, cons
 {
 }
 
-void Material::SetAmbiet( const color &para ) { 	Ambient = para; 	}
+void Material::SetAmbient( const color &para ) { 	Ambient = para; 	}
 void Material::SetDiffuse( const color &para ) { 	Diffuse = para; 	}
 void Material::SetSpecular( const color &para ) { 	Specular = para; 	}
 void Material::SetShininess( const float &para ) { 	Shininess = para; 	}

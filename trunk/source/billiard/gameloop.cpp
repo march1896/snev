@@ -57,9 +57,9 @@ void GameDataInit() {
 	table = new Table();
 
 	lit = new Light( vector4( 0.0, 0.0, 50.0, 1.0 ), 
-			color( 1.0, 1.0, 1.0, 1.0 ),
-			color( 1.0, 1.0, 1.0, 1.0 ),
-			color( 1.0, 1.0, 1.0, 1.0 )
+			color( 0.1, 0.1, 0.1, 1.0 ),
+			color( 0.8, 0.8, 0.8, 1.0 ),
+			color( 0.0, 0.0, 0.0, 1.0 )
 		       );
 
 	/*redball = new Ball( color( 1.0, 0.0, 0.0, 1.0 ) );
@@ -129,11 +129,11 @@ void GameDraw( Renderer* rd ) {
 	*/
 
 	rd->ResetView(); // we must reset the view, or opengl will use the current modelview matrix, how could make it be better look
-	table->Draw();
+	table->Draw( rd );
 
 	for ( int i = 0; i < N_BALLS; i ++ ) {
 		rd->ResetView();
-		ballArray[ i ]->Draw(); 
+		ballArray[ i ]->Draw( rd ); 
 	}		
 }
 
@@ -156,19 +156,21 @@ int main()
 
 	Renderer* render1 = new Renderer( &winHandle );
 	View* view1 = render1->GetView();   // this is the default view created by render1
+	render1->AddLight( lit );
 	view1->Translate( 0.0, 0.0, 100.0 );
+	view1->Rotate( 70.0, 1.0, 0.0, 0.0 );
+	//render2->GetView()->Rotate( 70.0, 1.0, 0.0, 0.0 );
 	int winWidth, winHeight;
 	winHandle.GetDimensions( winWidth, winHeight );
-	view1->Perspective( 45.0, (float)winWidth / winHeight, 0.1, 500.0 );
+	//view1->Perspective( 45.0, (float)winWidth / winHeight, 0.1, 500.0 );
 
 	View* view2 = new View( 640, 480 );
 	view2->Translate( 0.0, 0.0, 10.0 );
 
-	Renderer* render2 = new Renderer( 0, 0, 300, 200 );
-	render2->AddLight( lit );
+	Renderer* render2 = new Renderer( 0, 0, 200, 150 );
 	
-	render2->GetView()->Translate( 0.0, 0.0, 60.0 );
-	render2->GetView()->Rotate( 70.0, 1.0, 0.0, 0.0 );
+	render2->GetView()->Translate( 0.0, 0.0, 100.0 );
+	//render2->GetView()->Rotate( 70.0, 1.0, 0.0, 0.0 );
 	//render2->GetView()->Translate( 0.0, 0.0, 30.0 );
 
 	//glTranslatef(-1.5f,0.0f,-6.0f);						// Move Left 1.5 Units And Into The Screen 6.0
@@ -201,15 +203,16 @@ int main()
 			view2->Rotate( 1.0, 0.0, 0.0, 1.0 );
 			*/
 		//view1->Rotate( 1.0, 0.0, 0.0, 1.0 );
-		table->colour.setRGB( 0.5, 0.5, 0.5 );
+		render1->GetView()->Rotate( -0.1, 0.0, 0.0, 1.0 );
+		//table->colour.setRGB( 0.5, 0.5, 0.5 );
 		//DrawGLScene(0, 0, 500, 300);
 		GameDraw( render1 );
 
 		render2->Activate();
-		render2->GetView()->Rotate( -0.1, 0.0, 0.0, 1.0 );
 		glClear( GL_DEPTH_BUFFER_BIT);	// Clear The Depth Buffer, so render2 could cover render1
-		table->colour.setRGB( 0.2, 0.6, 0.6 );
+		//table->colour.setRGB( 0.2, 0.6, 0.6 );
 		
+		glDisable( GL_LIGHTING );
 		GameDraw( render2 );
 		//DrawGLScene(0, 0, 500, 500 );
 		

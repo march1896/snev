@@ -5,6 +5,8 @@
 #include <cstdlib>
 #include <ctime>
 
+#include "log.h"
+
 GLUquadricObj * quadratic=gluNewQuadric();	// Create A Pointer To The Quadric Object (Return 0 If No Memory) (NEW)
 
 
@@ -59,11 +61,15 @@ void Ball::Draw( const Renderer* render ) {
 	gluQuadricNormals(quadratic, GLU_SMOOTH);			// Create Smooth Normals (NEW)
 	gluQuadricTexture(quadratic, GL_TRUE);				// Create Texture Coords (NEW)
 
-	float shininess[] = { mat.GetShininess() };
-	glMaterialfv(GL_FRONT, GL_AMBIENT, mat.GetAmbient().getdata() );			// Set Material Ambience
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, mat.GetDiffuse().getdata() );			// Set Material Diffuse
-	glMaterialfv(GL_FRONT, GL_SPECULAR, mat.GetSpecular().getdata() );		// Set Material Specular
-	glMaterialfv(GL_FRONT, GL_SHININESS, shininess );		// Set Material Shininess
+	if ( render->IsLightEnabled() ) {
+		float shininess[] = { mat.GetShininess() };
+		glMaterialfv(GL_FRONT, GL_AMBIENT, mat.GetAmbient().getdata() );			// Set Material Ambience
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, mat.GetDiffuse().getdata() );			// Set Material Diffuse
+		glMaterialfv(GL_FRONT, GL_SPECULAR, mat.GetSpecular().getdata() );		// Set Material Specular
+		glMaterialfv(GL_FRONT, GL_SHININESS, shininess );		// Set Material Shininess
+	} else {
+		glColor4fv( colour.getdata() );
+	}
 
 	gluSphere(quadratic,1.3f,32,32);				// Draw A Sphere With A Radius Of 1 And 16 Longitude And 16 Latitude Segments
 }
@@ -103,7 +109,10 @@ void Ball::AssignRandomColor() {
 
 	colour.setRGB( r, g, b );
 
+	mat.SetAmbient( color( r, g, b, 1.0 ) );
 	mat.SetDiffuse( color( r, g, b, 1.0 ) );
+	//mat.SetSpecular( color( r, g, b, 1.0 ) );
+
 }
 
 Ball::~Ball()
