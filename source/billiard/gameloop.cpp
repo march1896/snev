@@ -117,6 +117,27 @@ void GameUpdate( float deltaTime ) {
 	}
 }
 
+void MoveCamera( View* view, Control *control ) {
+	if ( control->IsPressed( 'W' ) || control->IsPressed( 'w' ) ) {
+		view->Rotate( -1.0, 1.0, 0.0, 0.0 );
+	}
+	if ( control->IsPressed( 'S' ) || control->IsPressed( 's' ) ) {
+		view->Rotate( 1.0, 1.0, 0.0, 0.0 );
+	}
+	if ( control->IsPressed( 'A' ) || control->IsPressed( 'a' ) ) {
+		view->Rotate( -1.0, 0.0, 1.0, 0.0 );
+	}
+	if ( control->IsPressed( 'D' ) || control->IsPressed( 'd' ) ) {
+		view->Rotate( 1.0, 0.0, 1.0, 0.0 );
+	}
+	if ( control->IsPressed( 'Q' ) || control->IsPressed( 'q' ) ) {
+		view->Translate( 0.0, 0.0, 1.0 );
+	}
+	if ( control->IsPressed( 'E' ) || control->IsPressed( 'e' ) ) {
+		view->Translate( 0.0, 0.0, -1.0 );
+	}
+}
+
 void GameDraw( Renderer* rd ) {
 	/*
 	rd->ResetView();
@@ -220,7 +241,6 @@ int main()
 		glClear( GL_DEPTH_BUFFER_BIT);	// Clear The Depth Buffer, so render2 could cover render1
 		//table->colour.setRGB( 0.2, 0.6, 0.6 );
 		
-		glDisable( GL_LIGHTING );
 		GameDraw( render2 );
 		//DrawGLScene(0, 0, 500, 500 );
 		
@@ -232,16 +252,17 @@ int main()
 
 		render1->Activate();
 
+		MoveCamera( render1->GetView(), control );
+
 		// prite the input message
 		{
 			int x, y;
-			winHandle.GetMousePosition( x, y );
-			//printf( "Mouse Position:\t%d\t%d\n", x, y );
 			bool left, right;
-			/*winHandle.GetMouseButton( left, right );
-			//control->GetMousePosition( x, y );
+			control->GetMousePosition( x, y );
+			control->GetMousePressed( left, right );
+			printf( "Mouse Position: %d\t%d\n", x, y );
 			printf( "Mouse Pressed: %s   %s\n", left ? "true" : "false", right ? "true" : "false" );
-			*/
+			
 		}
 
 		const float DELTATIME = 33.0;

@@ -51,7 +51,7 @@ void Ball::Draw() {
 	gluQuadricTexture(quadratic, GL_TRUE);				// Create Texture Coords (NEW)
 	glColor4fv( colour.getdata() );
 
-	gluSphere(quadratic,1.3f,32,32);				// Draw A Sphere With A Radius Of 1 And 16 Longitude And 16 Latitude Segments
+	gluSphere(quadratic,radius,32,32);				// Draw A Sphere With A Radius Of 1 And 16 Longitude And 16 Latitude Segments
 }
 
 void Ball::Draw( const Renderer* render ) {
@@ -71,7 +71,7 @@ void Ball::Draw( const Renderer* render ) {
 		glColor4fv( colour.getdata() );
 	}
 
-	gluSphere(quadratic,1.3f,32,32);				// Draw A Sphere With A Radius Of 1 And 16 Longitude And 16 Latitude Segments
+	gluSphere(quadratic,radius,32,32);				// Draw A Sphere With A Radius Of 1 And 16 Longitude And 16 Latitude Segments
 }
 
 // calculate the position next second
