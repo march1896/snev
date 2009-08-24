@@ -10,6 +10,7 @@
 #include "view.h"
 #include "timer.h"
 #include "light.h"
+#include "control.h"
 #include <cmath>
 #include <cstdio>
 
@@ -154,6 +155,8 @@ int main()
 
 	GameDataInit();
 
+	Control* control = new Control( &winHandle );
+
 	Renderer* render1 = new Renderer( &winHandle );
 	View* view1 = render1->GetView();   // this is the default view created by render1
 	render1->AddLight( lit );
@@ -194,6 +197,11 @@ int main()
 			}
 		}
 
+		int width, height;
+		//printf("%d\t%d\n", width, height );
+		winHandle.GetDimensions( width, height );
+		render1->Resize( 0, 0, width, height );
+
 		// no matter which render calls clearscreen(), the whole screen will be cleared
 		render1->ClearScreen();
 
@@ -221,11 +229,26 @@ int main()
 		GameFrame.Update();
 		deltatime = GameFrame.GetLength();
 
-		GameUpdate( 33.0 / 1000.0 );
 
 		render1->Activate();
-		if ( deltatime < 33.0 ) {
-			Sleep( static_cast<DWORD> (33.0 - deltatime) );
+
+		// prite the input message
+		{
+			int x, y;
+			winHandle.GetMousePosition( x, y );
+			//printf( "Mouse Position:\t%d\t%d\n", x, y );
+			bool left, right;
+			/*winHandle.GetMouseButton( left, right );
+			//control->GetMousePosition( x, y );
+			printf( "Mouse Pressed: %s   %s\n", left ? "true" : "false", right ? "true" : "false" );
+			*/
+		}
+
+		const float DELTATIME = 33.0;
+
+		GameUpdate( DELTATIME / 1000.0 );
+		if ( deltatime < DELTATIME ) {
+			Sleep( static_cast<DWORD> ( DELTATIME - deltatime) );
 			/*SwapCount ++;
 
 			if ( SwapCount > 30 ) {
@@ -243,6 +266,7 @@ int main()
 
 	GameDataDeinit();
 
+	delete control;
 	delete view1;
 	delete view2;
 	delete render1;

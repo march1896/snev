@@ -26,6 +26,8 @@ public:
 	int GetNumLights() const;
 	bool IsLightEnabled() const;
 
+	void Resize( int x, int y, int width, int height );
+
 	View* GetView();
 	bool SetView( View *v );
 	void ResetView();
@@ -37,7 +39,6 @@ private:
 	Renderer();
 
 	void InitGL();
-	// if a renderer is constructed, the position and the dimension could not be changed
 	struct {
 		int posx, posy, width, height;
 	} Viewport;
