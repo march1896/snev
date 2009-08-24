@@ -26,6 +26,8 @@
 #include "win32.h"
 #include "opengl.h"
 
+#include "log.h"
+
 WindowsHandle :: WindowsHandle()
 {
 	// clear everything
@@ -65,7 +67,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	WindowsHandle *win;	// our WindowsHandle class
 
 	// get the right class
-	win=(WindowsHandle *)GetWindowLong(hwnd,GWL_USERDATA);
+	win=(WindowsHandle *)GetWindowLongPtr(hwnd,GWL_USERDATA);
 
 	// which message
 	switch(msg)
@@ -121,8 +123,9 @@ LRESULT CALLBACK WndProc(HWND hwnd,UINT msg,WPARAM wParam,LPARAM lParam)
 void WindowsHandle :: DataAccess(int key,int value)
 {
 	// if called before anything else
-	if(!this)
+	if(!this) {
 		return;
+	}
 
 	// Convert messages to variables
 	switch(key)
@@ -275,6 +278,7 @@ bool WindowsHandle::InitWindow( char* name, int x, int y, int wid, int hit, bool
 	wc.hInstance		= hInstance;							// Set The Instance
 	wc.hIcon	 	= LoadIcon(NULL, IDI_WINLOGO);			// Load The Default Icon
 	wc.hCursor		= LoadCursor(NULL, IDC_ARROW);			// Load The Arrow Pointer
+	wc.hbrBackground=(HBRUSH)GetStockObject(BLACK_BRUSH);
 	wc.hbrBackground	= NULL;									// No Background Required For GL
 	wc.lpszMenuName		= NULL;									// We Don't Want A Menu
 	wc.lpszClassName	= "OpenGL";								// Set The Class Name
@@ -344,6 +348,8 @@ bool WindowsHandle::InitWindow( char* name, int x, int y, int wid, int hit, bool
 		MessageBox(NULL,"Can't Create hWnd Context.","ERROR",MB_OK|MB_ICONEXCLAMATION);
 		return false;								// Return FALSE
 	}
+
+	SetWindowLongPtr( hwnd, GWL_USERDATA, (LONG_PTR)this);
 
 	static	PIXELFORMATDESCRIPTOR pfd=				// pfd Tells Windows How We Want Things To Be
 	{

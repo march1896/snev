@@ -94,8 +94,8 @@ static int GenerateRandomNumber() {
 
 void Ball::AssignRandomSpeed() {
 	float _x, _y, _z;
-	_x = GenerateRandomNumber() / 3;
-	_y = GenerateRandomNumber() / 3;
+	_x = GenerateRandomNumber() / 5;
+	_y = GenerateRandomNumber() / 5;
 	_z = GenerateRandomNumber();
 
 	speed.setXYZ( _x , _y, 0.0 );

@@ -74,6 +74,17 @@ Renderer::~Renderer()
 		delete DefaultView;
 }
 
+void Renderer::Resize( int x, int y, int wid, int hit ) {
+	Viewport.posx = x;
+	Viewport.posy = y;
+	Viewport.width = wid;
+	Viewport.height = hit;
+
+	if ( Renderer::Curr == this ) {
+		glViewport( Viewport.posx, Viewport.posy, Viewport.width, Viewport.height );
+	}
+}
+
 void Renderer::Activate() {
 	if ( Renderer::Curr == this ) return;
 
