@@ -22,7 +22,14 @@ bool MainLoop()
 int DrawGLScene(unsigned int x, unsigned int y, unsigned int width, unsigned int height) 	// Here's Where We Do All The Drawing
 {
 	glTranslatef(-1.5f,0.0f,0.0f);						// Move Left 1.5 Units And Into The Screen 6.0
-	glBegin(GL_TRIANGLES);								// Start Drawing A Triangle
+	glBegin( GL_TRIANGLE_FAN );
+		glVertex3f(-1.0f, 1.0f, 0.0f);					// Top Left
+		glVertex3f( 1.0f, 1.0f, 0.0f);					// Top Right
+		glVertex3f( 1.0f,-1.0f, 0.0f);					// Bottom Right
+		glVertex3f(-1.0f,-1.0f, 0.0f);					// Bottom Left
+	glEnd();
+	
+	/*glBegin(GL_TRIANGLES);								// Start Drawing A Triangle
 		glColor3f(1.0f,0.0f,0.0f);						// Set Top Point Of Triangle To Red
 		glVertex3f( 0.0f, 1.0f, 0.0f);					// First Point Of The Triangle
 		glColor3f(0.0f,1.0f,0.0f);						// Set Left Point Of Triangle To Green
@@ -30,6 +37,7 @@ int DrawGLScene(unsigned int x, unsigned int y, unsigned int width, unsigned int
 		glColor3f(0.0f,0.0f,1.0f);						// Set Right Point Of Triangle To Blue
 		glVertex3f( 1.0f,-1.0f, 0.0f);					// Third Point Of The Triangle
 	glEnd();											// Done Drawing The Triangle
+	*/
 	glTranslatef(3.0f,0.0f,0.0f);						// Move Right 1.5 Units And Into The Screen 6.0
 	glColor3f(0.5f,0.5f,1.0f);							// Set The Color To Blue One Time Only
 	glBegin(GL_QUADS);									// Draw A Quad
@@ -42,6 +50,7 @@ int DrawGLScene(unsigned int x, unsigned int y, unsigned int width, unsigned int
 	glFlush();
 	return TRUE;										// Keep Going
 }
+
 
 static const int N_BALLS = 20;
 static Ball *redball, *blueball, *greenball, *ballArray[N_BALLS];
@@ -232,9 +241,16 @@ int main()
 			view2->Rotate( 1.0, 0.0, 0.0, 1.0 );
 			*/
 		//view1->Rotate( 1.0, 0.0, 0.0, 1.0 );
-		render1->GetView()->Rotate( -0.1, 0.0, 0.0, 1.0 );
 		//table->colour.setRGB( 0.5, 0.5, 0.5 );
-		//DrawGLScene(0, 0, 500, 300);
+
+		/*
+		render1->SetView( view2 );
+		glDisable( GL_LIGHTING );
+		DrawGLScene(0, 0, 500, 300);
+		*/
+
+
+		render1->GetView()->Rotate( -0.1, 0.0, 0.0, 1.0 );
 		GameDraw( render1 );
 
 		render2->Activate();

@@ -4,6 +4,7 @@
 #include "render.h"
 #include <cstdlib>
 #include <ctime>
+#include <cmath>
 
 #include "log.h"
 
@@ -43,6 +44,75 @@ Ball::Ball( float _radius, float _weight, color _color, vector3 _pos ):
 {
 }
 
+static float r2a( float radian ) // radian to angle 
+{
+	return radian / M_PI * 180.0f;
+}
+
+static float a2r( float angle ) // angle to radian
+{ 
+	return angle / 180.f * M_PI;
+}
+
+static float angle_sin( float angle ) {
+	return sin( a2r( angle ) );
+}
+
+static float angle_cos( float angle ) {
+	return cos( a2r( angle ) );
+}
+
+static void DrawSphere( float radius, float longitude, float latitude ) {
+	float alpha, theta;
+	
+	glBegin( GL_TRIANGLE_FAN );
+	{
+		glNormal3f( 0.0f, 0.0, 1.0f );
+		glVertex3f( 0.0f, 0.0f, radius );
+		theta = 10.0f;
+		for ( int i = 0; i <= longitude; i ++ ) {
+			alpha = 360.0 / longitude * i;
+			glNormal3f( radius * angle_sin( theta ) * angle_cos( alpha ), radius * angle_sin( theta ) * angle_sin( alpha ), radius * angle_cos( theta ) );
+			glVertex3f( radius * angle_sin( theta ) * angle_cos( alpha ), radius * angle_sin( theta ) * angle_sin( alpha ), radius * angle_cos( theta ) );
+		}
+	}
+	glEnd();
+
+	glBegin( GL_TRIANGLE_FAN );
+	{
+		glNormal3f( 0.0f, 0.0, -1.0f );
+		glVertex3f( 0.0f, 0.0f, -radius );
+		theta = 170.0f;
+		for ( int i = 0; i <= longitude; i ++ ) {
+			alpha = 360.0 / longitude * i;
+			glNormal3f( radius * angle_sin( theta ) * angle_cos( alpha ), radius * angle_sin( theta ) * angle_sin( alpha ), radius * angle_cos( theta ) );
+			glVertex3f( radius * angle_sin( theta ) * angle_cos( alpha ), radius * angle_sin( theta ) * angle_sin( alpha ), radius * angle_cos( theta ) );
+		}
+	}
+	glEnd();
+
+	float theta2;
+	for ( int i = 0; i < latitude; i ++ ) {
+		theta = 10.0f + 160.0f / latitude * i ;
+		theta2 = 10.0f + 160.0f / latitude * ( i + 1 ) ;
+		glBegin( GL_TRIANGLE_STRIP );
+		{
+			glNormal3f( radius * angle_sin( theta ) , 0.0f, radius * angle_cos( theta ) );
+			glVertex3f( radius * angle_sin( theta ) , 0.0f, radius * angle_cos( theta ) );
+			glNormal3f( radius * angle_sin( theta2 ), 0.0f, radius * angle_cos( theta2 ) );
+			glVertex3f( radius * angle_sin( theta2 ), 0.0f, radius * angle_cos( theta2 ) );
+			for ( int j = 1; j <= longitude; j ++ ) {
+				alpha = 360.0 / longitude * j;
+				glNormal3f( radius * angle_sin( theta ) * angle_cos( alpha ), radius * angle_sin( theta ) * angle_sin( alpha ), radius * angle_cos( theta ) );
+				glVertex3f( radius * angle_sin( theta ) * angle_cos( alpha ), radius * angle_sin( theta ) * angle_sin( alpha ), radius * angle_cos( theta ) );
+				glNormal3f( radius * angle_sin( theta2 ) * angle_cos( alpha ), radius * angle_sin( theta2 ) * angle_sin( alpha ), radius * angle_cos( theta2 ) );
+				glVertex3f( radius * angle_sin( theta2 ) * angle_cos( alpha ), radius * angle_sin( theta2 ) * angle_sin( alpha ), radius * angle_cos( theta2 ) );
+			}
+		}
+		glEnd();
+	}
+}
+
 void Ball::Draw() {
 	glMatrixMode( GL_MODELVIEW );
 	glTranslatef( pos.getX(), pos.getY(), pos.getZ() );
@@ -51,7 +121,11 @@ void Ball::Draw() {
 	gluQuadricTexture(quadratic, GL_TRUE);				// Create Texture Coords (NEW)
 	glColor4fv( colour.getdata() );
 
+#if 1
 	gluSphere(quadratic,radius,32,32);				// Draw A Sphere With A Radius Of 1 And 16 Longitude And 16 Latitude Segments
+#else 
+	DrawSphere( radius, 16, 16 );
+#endif
 }
 
 void Ball::Draw( const Renderer* render ) {
@@ -71,7 +145,11 @@ void Ball::Draw( const Renderer* render ) {
 		glColor4fv( colour.getdata() );
 	}
 
+#if 0
 	gluSphere(quadratic,radius,32,32);				// Draw A Sphere With A Radius Of 1 And 16 Longitude And 16 Latitude Segments
+#else 
+	DrawSphere( radius, 16, 16 );
+#endif
 }
 
 // calculate the position next second
