@@ -21,6 +21,11 @@ bool MainLoop()
 
 int DrawGLScene(unsigned int x, unsigned int y, unsigned int width, unsigned int height) 	// Here's Where We Do All The Drawing
 {
+	glEnable( GL_CULL_FACE );
+	glCullFace( GL_BACK );
+	glFrontFace( GL_CCW );
+
+	/*
 	glTranslatef(-1.5f,0.0f,0.0f);						// Move Left 1.5 Units And Into The Screen 6.0
 	glBegin( GL_TRIANGLE_FAN );
 		glVertex3f(-1.0f, 1.0f, 0.0f);					// Top Left
@@ -28,16 +33,19 @@ int DrawGLScene(unsigned int x, unsigned int y, unsigned int width, unsigned int
 		glVertex3f( 1.0f,-1.0f, 0.0f);					// Bottom Right
 		glVertex3f(-1.0f,-1.0f, 0.0f);					// Bottom Left
 	glEnd();
+	*/
 	
-	/*glBegin(GL_TRIANGLES);								// Start Drawing A Triangle
+	glBegin(GL_TRIANGLES);								// Start Drawing A Triangle
 		glColor3f(1.0f,0.0f,0.0f);						// Set Top Point Of Triangle To Red
+		glNormal3f( 0.0, 0.0, 1.0f );
 		glVertex3f( 0.0f, 1.0f, 0.0f);					// First Point Of The Triangle
 		glColor3f(0.0f,1.0f,0.0f);						// Set Left Point Of Triangle To Green
+		glNormal3f( 0.0, 0.0, 1.0f );
 		glVertex3f(-1.0f,-1.0f, 0.0f);					// Second Point Of The Triangle
 		glColor3f(0.0f,0.0f,1.0f);						// Set Right Point Of Triangle To Blue
+		glNormal3f( 0.0, 0.0, 1.0f );
 		glVertex3f( 1.0f,-1.0f, 0.0f);					// Third Point Of The Triangle
 	glEnd();											// Done Drawing The Triangle
-	*/
 	glTranslatef(3.0f,0.0f,0.0f);						// Move Right 1.5 Units And Into The Screen 6.0
 	glColor3f(0.5f,0.5f,1.0f);							// Set The Color To Blue One Time Only
 	glBegin(GL_QUADS);									// Draw A Quad
@@ -240,15 +248,17 @@ int main()
 		else if ( view2->IsActive() ) 
 			view2->Rotate( 1.0, 0.0, 0.0, 1.0 );
 			*/
-		//view1->Rotate( 1.0, 0.0, 0.0, 1.0 );
-		//table->colour.setRGB( 0.5, 0.5, 0.5 );
+		/*
+		glEnable( GL_CULL_FACE );
+		glFrontFace( GL_CWW );
+		glCullFace( GL_BACK );
+		*/
 
 		/*
 		render1->SetView( view2 );
 		glDisable( GL_LIGHTING );
 		DrawGLScene(0, 0, 500, 300);
 		*/
-
 
 		render1->GetView()->Rotate( -0.1, 0.0, 0.0, 1.0 );
 		GameDraw( render1 );
