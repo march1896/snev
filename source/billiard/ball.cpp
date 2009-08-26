@@ -85,7 +85,7 @@ static void DrawSphere( float radius, float longitude, float latitude ) {
 		glVertex3f( 0.0f, 0.0f, -radius );
 		//theta = 170.0f;
 		theta = 180.0f - 180.0f / ( longitude + 1 ) / 2;
-		for ( int i = 0; i <= longitude; i ++ ) {
+		for ( int i = longitude; i >= 0 ; i -- ) {
 			alpha = 360.0 / longitude * i;
 			glNormal3f( radius * angle_sin( theta ) * angle_cos( alpha ), radius * angle_sin( theta ) * angle_sin( alpha ), radius * angle_cos( theta ) );
 			glVertex3f( radius * angle_sin( theta ) * angle_cos( alpha ), radius * angle_sin( theta ) * angle_sin( alpha ), radius * angle_cos( theta ) );
