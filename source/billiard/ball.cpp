@@ -69,7 +69,8 @@ static void DrawSphere( float radius, float longitude, float latitude ) {
 	{
 		glNormal3f( 0.0f, 0.0, 1.0f );
 		glVertex3f( 0.0f, 0.0f, radius );
-		theta = 10.0f;
+		//theta = 10.0f;
+		theta = 180.0f / ( longitude + 1 ) / 2;
 		for ( int i = 0; i <= longitude; i ++ ) {
 			alpha = 360.0 / longitude * i;
 			glNormal3f( radius * angle_sin( theta ) * angle_cos( alpha ), radius * angle_sin( theta ) * angle_sin( alpha ), radius * angle_cos( theta ) );
@@ -82,7 +83,8 @@ static void DrawSphere( float radius, float longitude, float latitude ) {
 	{
 		glNormal3f( 0.0f, 0.0, -1.0f );
 		glVertex3f( 0.0f, 0.0f, -radius );
-		theta = 170.0f;
+		//theta = 170.0f;
+		theta = 180.0f - 180.0f / ( longitude + 1 ) / 2;
 		for ( int i = 0; i <= longitude; i ++ ) {
 			alpha = 360.0 / longitude * i;
 			glNormal3f( radius * angle_sin( theta ) * angle_cos( alpha ), radius * angle_sin( theta ) * angle_sin( alpha ), radius * angle_cos( theta ) );
@@ -93,8 +95,10 @@ static void DrawSphere( float radius, float longitude, float latitude ) {
 
 	float theta2;
 	for ( int i = 0; i < latitude; i ++ ) {
-		theta = 10.0f + 160.0f / latitude * i ;
-		theta2 = 10.0f + 160.0f / latitude * ( i + 1 ) ;
+		float tempx = 180.0f / ( longitude + 1 ) / 2;
+		float tempy = 180.0f - 180.0f / ( longitude + 1 ) / 2;
+		theta = tempx + tempy / latitude * i ;
+		theta2 = tempx + tempy / latitude * ( i + 1 ) ;
 		glBegin( GL_TRIANGLE_STRIP );
 		{
 			glNormal3f( radius * angle_sin( theta ) , 0.0f, radius * angle_cos( theta ) );
