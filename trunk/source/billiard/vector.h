@@ -14,7 +14,7 @@ public:
 	vector2 operator-=( const vector2 &rhs );
 	vector2 operator+=( const vector2 &rhs );
 	vector2 operator=( const vector2 &rhs );
-	bool operator==( const vector2 &rhs );
+	bool operator==( const vector2 &rhs ) const;
 	float dot( const vector2 &rhs );
 	float cross( const vector2 &rhs );
 	vector2 normalize();
@@ -43,7 +43,7 @@ public:
 	vector3 operator+=( const vector3 &rhs );
 	vector3 operator-=( const vector3 &rhs );
 	vector3 operator=( const vector3 &rhs );
-	bool operator==( const vector3 &rhs );
+	bool operator==( const vector3 &rhs ) const;
 	float dot( const vector3 &rhs );
 	vector3 cross( const vector3  &rhs );
 	vector3 normalize();
@@ -86,7 +86,7 @@ public:
 	vector4 operator+=( const vector4 &rhs );
 	vector4 operator-=( const vector4 &rhs );
 	vector4 operator=( const vector4 &rhs );
-	bool operator==( const vector4 &rhs );
+	bool operator==( const vector4 &rhs ) const;
 	float dot( const vector4 &rhs );
 	vector4 cross( const vector4 &rhs );
 	vector4 normalize();

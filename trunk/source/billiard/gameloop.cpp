@@ -11,6 +11,7 @@
 #include "timer.h"
 #include "light.h"
 #include "control.h"
+#include "shadow.h"
 #include <cmath>
 #include <cstdio>
 
@@ -74,7 +75,7 @@ void GameDataInit() {
 	}
 	table = new Table();
 
-	lit = new Light( vector4( 0.0, 0.0, 50.0, 1.0 ), 
+	lit = new Light( vector4( 0.0, 0.0, 100.0, 1.0 ), 
 			color( 0.1, 0.1, 0.1, 1.0 ),
 			color( 0.8, 0.8, 0.8, 1.0 ),
 			color( 0.0, 0.0, 0.0, 1.0 )
@@ -155,7 +156,7 @@ void MoveCamera( View* view, Control *control ) {
 	}
 }
 
-void GameDraw( Renderer* rd ) {
+void GameDraw( Renderer* rd, Light *lit = NULL ) {
 	/*
 	rd->ResetView();
 	redball->Draw();
@@ -170,10 +171,54 @@ void GameDraw( Renderer* rd ) {
 	rd->ResetView(); // we must reset the view, or opengl will use the current modelview matrix, how could make it be better look
 	table->Draw( rd );
 
+	if ( lit != NULL ) 
+		ConstructShadowModel( ballArray[0] );
+
 	for ( int i = 0; i < N_BALLS; i ++ ) {
 		rd->ResetView();
 		ballArray[ i ]->Draw( rd ); 
+
+		// the model is constructed succeed
+		//DrawShadowModle( ballArray[i] );
+		// has been tested
 	}		
+
+	glClear( GL_COLOR_BUFFER_BIT );
+	PreDrawShadow();
+	for ( int i = 0; i < N_BALLS; i ++ ) {
+		if ( lit != NULL ) {
+			rd->ResetView();
+			DrawShadowVolume( ballArray[i], lit );
+		}
+	}
+	EndDrawShadow();
+	//DrawShadow();
+
+	/*
+	glDisable( GL_LIGHTING );
+	glEnable( GL_STENCIL_TEST );
+	glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
+	glColor4f( 0.0f, 0.0f, 1.0f, 0.4f );
+	glEnable( GL_BLEND );
+	glStencilFunc( GL_NEVER, 0, 0xffffffff );
+	glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+	glStencilOp( GL_KEEP, GL_KEEP, GL_KEEP );
+	glPushMatrix();
+	glLoadIdentity();
+	printf( "stencil buffer is enabled: %s\n", glIsEnabled( GL_STENCIL_TEST ) ? "true" : "false" );
+	glBegin( GL_TRIANGLE_STRIP );
+		glVertex3f(-1.1f, 1.1f,-1.0f);
+		glVertex3f(-1.1f,-1.1f,-1.0f);
+		glVertex3f( 1.1f, 1.1f,-1.0f);
+		glVertex3f( 1.1f,-1.1f,-1.0f);
+	glEnd();
+	glPopMatrix();
+	glDisable( GL_BLEND );
+
+	glDepthMask( GL_TRUE );
+	glDisable( GL_STENCIL_TEST );
+	glEnable( GL_LIGHTING );
+	*/
 }
 
 
@@ -261,13 +306,13 @@ int main()
 		*/
 
 		render1->GetView()->Rotate( -0.1, 0.0, 0.0, 1.0 );
-		GameDraw( render1 );
+		GameDraw( render1, lit );
 
 		render2->Activate();
 		glClear( GL_DEPTH_BUFFER_BIT);	// Clear The Depth Buffer, so render2 could cover render1
 		//table->colour.setRGB( 0.2, 0.6, 0.6 );
 		
-		GameDraw( render2 );
+		//GameDraw( render2 );
 		//DrawGLScene(0, 0, 500, 500 );
 		
 		winHandle.SwapBuffer();
@@ -286,8 +331,8 @@ int main()
 			bool left, right;
 			control->GetMousePosition( x, y );
 			control->GetMousePressed( left, right );
-			printf( "Mouse Position: %d\t%d\n", x, y );
-			printf( "Mouse Pressed: %s   %s\n", left ? "true" : "false", right ? "true" : "false" );
+			//printf( "Mouse Position: %d\t%d\n", x, y );
+			//printf( "Mouse Pressed: %s   %s\n", left ? "true" : "false", right ? "true" : "false" );
 			
 		}
 
