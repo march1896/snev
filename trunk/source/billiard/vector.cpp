@@ -1,5 +1,5 @@
 #include "vector.h"
-#include <cmath>
+#include "zmath.h"
 
 static float dummy[ 4 ];
 
@@ -52,7 +52,8 @@ vector2 vector2::operator-( const vector2 &rhs ) {
 }
 
 bool vector2::operator==( const vector2 &rhs ) const {
-	return ( this->x == rhs.getX() && this->y == rhs.getY() );
+	//return ( this->x == rhs.getX() && this->y == rhs.getY() );
+	return ( float_equal( this->x, rhs.getX() ) && float_equal( this->y, rhs.getY() ) );
 }
 
 float vector2::dot( const vector2 &rhs ) {
@@ -137,7 +138,8 @@ vector4 vector4::operator-( const vector4 &rhs ) {
 }
 
 bool vector4::operator==( const vector4 &rhs ) const {
-	return ( this->x == rhs.getX() && this->y == rhs.getY() && this->z == rhs.getZ() && this->w == rhs.getW() );
+	//return ( this->x == rhs.getX() && this->y == rhs.getY() && this->z == rhs.getZ() && this->w == rhs.getW() );
+	return ( float_equal( this->x, rhs.getX() ) && float_equal( this->y, rhs.getY() ) && float_equal( this->z, rhs.getZ() ) && float_equal( this->w, rhs.getW() ) );
 }
 
 float vector4::dot( const vector4 &rhs ) {
@@ -217,7 +219,8 @@ vector3 vector3::operator-( const vector3 &rhs ) {
 }
 
 bool vector3::operator==( const vector3 &rhs ) const {
-	return ( this->x == rhs.getX() && this->y == rhs.getY() && this->z == rhs.getZ() );
+	//return ( this->x == rhs.getX() && this->y == rhs.getY() && this->z == rhs.getZ() );
+	return ( float_equal( this->x, rhs.getX() ) && float_equal( this->y, rhs.getY() ) && float_equal( this->z, rhs.getZ() ) );
 }
 
 float vector3::dot( const vector3 &rhs ) {
