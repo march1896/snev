@@ -366,7 +366,7 @@ bool WindowsHandle::InitWindow( char* name, int x, int y, int wid, int hit, bool
 		0,											// No Accumulation Buffer
 		0, 0, 0, 0,									// Accumulation Bits Ignored
 		16,											// 16Bit Z-Buffer (Depth Buffer)  
-		0,											// No Stencil Buffer
+		1,											// No Stencil Buffer
 		0,											// No Auxiliary Buffer
 		PFD_MAIN_PLANE,								// Main Drawing Layer
 		0,											// Reserved

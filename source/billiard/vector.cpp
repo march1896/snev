@@ -51,7 +51,7 @@ vector2 vector2::operator-( const vector2 &rhs ) {
 	return vector2( this->x - rhs.getX(), this->y - rhs.getY() );
 }
 
-bool vector2::operator==( const vector2 &rhs ) {
+bool vector2::operator==( const vector2 &rhs ) const {
 	return ( this->x == rhs.getX() && this->y == rhs.getY() );
 }
 
@@ -136,7 +136,7 @@ vector4 vector4::operator-( const vector4 &rhs ) {
 	return vector4( this->x - rhs.getX(), this->y - rhs.getY(), this->z - rhs.getZ(), this->w );
 }
 
-bool vector4::operator==( const vector4 &rhs ) {
+bool vector4::operator==( const vector4 &rhs ) const {
 	return ( this->x == rhs.getX() && this->y == rhs.getY() && this->z == rhs.getZ() && this->w == rhs.getW() );
 }
 
@@ -216,7 +216,7 @@ vector3 vector3::operator-( const vector3 &rhs ) {
 	return vector3( this->x - rhs.getX(), this->y - rhs.getY(), this->z - rhs.getZ() );
 }
 
-bool vector3::operator==( const vector3 &rhs ) {
+bool vector3::operator==( const vector3 &rhs ) const {
 	return ( this->x == rhs.getX() && this->y == rhs.getY() && this->z == rhs.getZ() );
 }
 
