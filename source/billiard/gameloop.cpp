@@ -12,6 +12,7 @@
 #include "light.h"
 #include "control.h"
 #include "shadow.h"
+#include "zmath.h"
 #include <cmath>
 #include <cstdio>
 
@@ -75,7 +76,7 @@ void GameDataInit() {
 	}
 	table = new Table();
 
-	lit = new Light( vector4( 0.0, 0.0, 100.0, 1.0 ), 
+	lit = new Light( vector4( 0.0, 0.0, 10.0, 1.0 ), 
 			color( 0.1, 0.1, 0.1, 1.0 ),
 			color( 0.8, 0.8, 0.8, 1.0 ),
 			color( 0.0, 0.0, 0.0, 1.0 )
@@ -183,7 +184,7 @@ void GameDraw( Renderer* rd, Light *lit = NULL ) {
 		// has been tested
 	}		
 
-	glClear( GL_COLOR_BUFFER_BIT );
+	//glClear( GL_COLOR_BUFFER_BIT );
 	PreDrawShadow();
 	for ( int i = 0; i < N_BALLS; i ++ ) {
 		if ( lit != NULL ) {
@@ -191,8 +192,8 @@ void GameDraw( Renderer* rd, Light *lit = NULL ) {
 			DrawShadowVolume( ballArray[i], lit );
 		}
 	}
-	EndDrawShadow();
-	//DrawShadow();
+	DrawShadow();
+	//EndDrawShadow();
 
 	/*
 	glDisable( GL_LIGHTING );

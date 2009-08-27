@@ -30,7 +30,7 @@ struct Plane {
 static Plane pl[1024];
 static int PN = 0;
 
-bool operator<( const vector3& lhs, const vector3& rhs ) {
+static bool operator<( const vector3& lhs, const vector3& rhs ) {
 	if ( lhs.getX() < rhs.getX() ) return true;
 	else if ( lhs.getX() > rhs.getX() ) return false;
 
@@ -41,7 +41,7 @@ bool operator<( const vector3& lhs, const vector3& rhs ) {
 	else if ( lhs.getZ() > rhs.getZ() ) return false;
 }
 
-bool operator>( const vector3& lhs, const vector3& rhs ) {
+static bool operator>( const vector3& lhs, const vector3& rhs ) {
 	if ( lhs < rhs ) return false;
 	else if ( lhs == rhs ) return false;
 	return true;
@@ -63,6 +63,8 @@ bool line::operator<( const line& para ) const {
 	*/
 }
 
+
+
 bool line::operator==( const line& para ) const {
 	/*if ( p[0] == para.p[0] && normal[0] == para.normal[0] && p[1] == para.p[1] && normal[1] == para.normal[1] ||
 			( p[1] == para.p[0] && normal[1] == para.normal[0] && normal[0] == para.normal[1] && p[0] == para.p[1] ) ) return true;*/
@@ -72,7 +74,7 @@ bool line::operator==( const line& para ) const {
 }
 
 static void sortline( line& para ) {
-	if ( para.p[0] > para.p[1] ) {
+	if ( para.p[1] < para.p[0] ) {
 		vector3 temp = para.p[0];
 		para.p[0] = para.p[1];
 		para.p[1] = temp;
@@ -91,7 +93,7 @@ void ConstructSilhouette( set< line >& lineset, set< line >::iterator& itr, cons
 			pl[ i ].pe.b * lp.getY() +
 			pl[ i ].pe.c * lp.getZ() +
 			pl[ i ].pe.d;
-		if ( side <= 0 ) break;
+		if ( side <= 0 ) continue;
 		for ( int j = 0; j < 3; j ++ ) {
 			ln.p[0] = pl[i].p[j];
 			ln.p[1] = pl[i].p[(j+1)%3];
@@ -190,7 +192,7 @@ void DrawShadowVolume( Ball* ball, Light* light ) {
 	printf( "%d\n", number );
 
 	// Draw the silhouette
-
+	/*
 	glDisable( GL_LIGHTING );
 	glMatrixMode( GL_MODELVIEW );
 	glTranslatef( ball->pos.getX(), ball->pos.getY(), ball->pos.getZ() );
@@ -206,6 +208,7 @@ void DrawShadowVolume( Ball* ball, Light* light ) {
 		glEnd();
 	}
 	return;
+	*/
 	// End
 
 
@@ -227,13 +230,13 @@ void DrawShadowVolume( Ball* ball, Light* light ) {
 	glFrontFace( GL_CCW );
 	for ( itr = lnset.begin(); itr != lnset.end(); itr ++ ) {
 		vector3 v[2];
-		v[0].setX( itr->p[0].getX() - light->getPos().getX() );
-		v[0].setY( itr->p[0].getY() - light->getPos().getY() );
-		v[0].setZ( itr->p[0].getZ() - light->getPos().getZ() );
+		v[0].setX( ( itr->p[0].getX() - lp.getX() ) * 100.0f );
+		v[0].setY( ( itr->p[0].getY() - lp.getY() ) * 100.0f );
+		v[0].setZ( ( itr->p[0].getZ() - lp.getZ() ) * 100.0f );
 
-		v[1].setX( itr->p[1].getX() - light->getPos().getX() );
-		v[1].setY( itr->p[1].getY() - light->getPos().getY() );
-		v[1].setZ( itr->p[1].getZ() - light->getPos().getZ() );
+		v[1].setX( ( itr->p[1].getX() - lp.getX() ) * 100.0f );
+		v[1].setY( ( itr->p[1].getY() - lp.getY() ) * 100.0f );
+		v[1].setZ( ( itr->p[1].getZ() - lp.getZ() ) * 100.0f );
 
 		glBegin( GL_TRIANGLE_STRIP );
 			glVertex3f( itr->p[0].getX(), itr->p[0].getY(), itr->p[0].getZ() );
@@ -242,17 +245,17 @@ void DrawShadowVolume( Ball* ball, Light* light ) {
 			glVertex3f( itr->p[1].getX() + v[1].getX() , itr->p[1].getY() + v[1].getY() , itr->p[1].getZ() + v[1].getZ() );
 		glEnd();
 	}
-	glFrontFace( GL_CW );
 	glStencilOp( GL_KEEP, GL_KEEP, GL_DECR );
+	glFrontFace( GL_CW );
 	for ( itr = lnset.begin(); itr != lnset.end(); itr ++ ) {
 		vector3 v[2];
-		v[0].setX( itr->p[0].getX() - light->getPos().getX() );
-		v[0].setY( itr->p[0].getY() - light->getPos().getY() );
-		v[0].setZ( itr->p[0].getZ() - light->getPos().getZ() );
+		v[0].setX( ( itr->p[0].getX() - lp.getX() ) * 100.0f );
+		v[0].setY( ( itr->p[0].getY() - lp.getY() ) * 100.0f );
+		v[0].setZ( ( itr->p[0].getZ() - lp.getZ() ) * 100.0f );
 
-		v[1].setX( itr->p[1].getX() - light->getPos().getX() );
-		v[1].setY( itr->p[1].getY() - light->getPos().getY() );
-		v[1].setZ( itr->p[1].getZ() - light->getPos().getZ() );
+		v[1].setX( ( itr->p[1].getX() - lp.getX() ) * 100.0f );
+		v[1].setY( ( itr->p[1].getY() - lp.getY() ) * 100.0f );
+		v[1].setZ( ( itr->p[1].getZ() - lp.getZ() ) * 100.0f );
 
 		glBegin( GL_TRIANGLE_STRIP );
 			glVertex3f( itr->p[0].getX(), itr->p[0].getY(), itr->p[0].getZ() );
