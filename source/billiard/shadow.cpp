@@ -135,7 +135,7 @@ void ConstructSilhouette( set< line >& lineset, set< line >::iterator& itr, cons
 			ln.p[0] = pl[i].p[j];
 			ln.p[1] = pl[i].p[(j+1)%3];
 
-			sortline( ln );
+			//sortline( ln );
 			//itr = lineset.find( ln );
 			for ( itr = lineset.begin(); itr != lineset.end(); itr ++ )
 			{
@@ -156,7 +156,7 @@ void ConstructSilhouette( set< line >& lineset, set< line >::iterator& itr, cons
 				lineset.insert( ln );
 			} else {
 				// if we find the line, this line appears twice, remove it;
-				//lineset.erase( itr );
+				lineset.erase( itr );
 			}
 		}
 	}
@@ -201,7 +201,7 @@ void DrawShadow() {
 	glEnable( GL_STENCIL_TEST );
 	glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
 	glDepthMask( GL_FALSE );
-	glColor4f( 0.0f, 0.0f, 0.0f, 0.4f );
+	glColor4f( 0.0f, 0.0f, 0.0f, 1.0f );
 	glEnable( GL_BLEND );
 	glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 	glStencilFunc( GL_NOTEQUAL, 5, 0xffffffff );
