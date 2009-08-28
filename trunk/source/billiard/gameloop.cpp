@@ -96,9 +96,11 @@ void GameDataInit() {
 }
 
 void GameDataDeinit() {
-	/*delete redball;
+	/*
+	delete redball;
 	delete greenball;
-	delete blueball;*/
+	delete blueball;
+	*/
 
 	for ( int i = 0; i < N_BALLS; i ++ ) { 
 		delete ballArray[i];
@@ -108,7 +110,8 @@ void GameDataDeinit() {
 }
 
 void GameUpdate( float deltaTime ) {
-	/*redball->Update( deltaTime );
+	/*
+	redball->Update( deltaTime );
 	greenball->Update( deltaTime );
 	blueball->Update( deltaTime );
 

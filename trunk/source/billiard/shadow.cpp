@@ -13,6 +13,7 @@ class line {
 public:
 	bool operator==( const line& para ) const;
 	bool operator<( const line& para ) const;
+	bool operator>( const line& para ) const;
 	vector3 p[2];
 	//vector3 normal[2]
 };
@@ -24,6 +25,7 @@ struct PlaneEq {
 
 struct Plane {
 	vector3 p[3];
+	vector3 normal;
 	PlaneEq pe;
 };
 
@@ -39,6 +41,19 @@ static bool operator<( const vector3& lhs, const vector3& rhs ) {
 	
 	if ( lhs.getZ() < rhs.getZ() ) return true;
 	else if ( lhs.getZ() > rhs.getZ() ) return false;
+
+	return true;
+}
+
+static bool vector_lessthen( const vector3& lhs, const vector3& rhs ) {
+	if ( lhs.getX() < rhs.getX() ) return true;
+	else if ( lhs.getX() > rhs.getX() ) return false;
+	else if ( lhs.getY() < rhs.getY() ) return true;
+	else if ( lhs.getY() > rhs.getY() ) return false;
+	else if ( lhs.getZ() < rhs.getZ() ) return true;
+	else if ( lhs.getZ() > rhs.getZ() ) return false;
+
+	return true;
 }
 
 static bool operator>( const vector3& lhs, const vector3& rhs ) {
@@ -47,13 +62,25 @@ static bool operator>( const vector3& lhs, const vector3& rhs ) {
 	return true;
 }
 
+static bool vector_greaterthen( const vector3& lhs, const vector3& rhs ) {
+	if ( vector_lessthen( lhs, rhs ) ) return false;
+	else if ( lhs == rhs ) return false;
+	return true;
+}
+
 bool line::operator<( const line& para ) const {
+	/*
 	if ( p[0] < para.p[0] ) return true;
 	else if ( p[0] > para.p[0] ) return false;
-
-	if ( p[1] < para.p[1] ) return true;
+	else if ( p[1] < para.p[1] ) return true;
 	else if ( p[1] > para.p[1] ) return false;
+	*/
+	if ( vector_lessthen( p[0] , para.p[0] ) ) return true;
+	else if ( vector_greaterthen( p[0] , para.p[0] ) ) return false;
+	else if ( vector_lessthen( p[1] , para.p[1] ) ) return true;
+	else if ( vector_greaterthen( p[1] , para.p[1] ) ) return false;
 
+	return true;
 	/*
 	if ( normal[0] < para.normal[0] ) return true;
 	else if ( normal[0] > para.normal[0] ) return false;
@@ -63,13 +90,25 @@ bool line::operator<( const line& para ) const {
 	*/
 }
 
+bool line::operator>( const line& para ) const {
+	/*
+	if ( p[0] < para.p[0] ) return false;
+	else if ( p[0] > para.p[0] ) return true;
+	else if ( p[1] < para.p[1] ) return false;
+	else if ( p[1] > para.p[1] ) return true;
+	*/
+	if ( vector_lessthen( p[0] , para.p[0] ) ) return false;
+	else if ( vector_greaterthen( p[0] , para.p[0] ) ) return true;
+	else if ( vector_lessthen( p[1] , para.p[1] ) ) return false;
+	else if ( vector_greaterthen( p[1] , para.p[1] ) ) return true;
 
+	return true;
+}
 
 bool line::operator==( const line& para ) const {
-	/*if ( p[0] == para.p[0] && normal[0] == para.normal[0] && p[1] == para.p[1] && normal[1] == para.normal[1] ||
-			( p[1] == para.p[0] && normal[1] == para.normal[0] && normal[0] == para.normal[1] && p[0] == para.p[1] ) ) return true;*/
-	if ( p[0] == para.p[0] && p[1] == para.p[1] ||
-			( p[1] == para.p[0] && p[0] == para.p[1] ) ) return true;
+	//if ( p[0] == para.p[0] && normal[0] == para.normal[0] && p[1] == para.p[1] && normal[1] == para.normal[1] ||
+	//		( p[1] == para.p[0] && normal[1] == para.normal[0] && normal[0] == para.normal[1] && p[0] == para.p[1] ) ) return true;
+	if ( p[0] == para.p[0] && p[1] == para.p[1] || ( p[1] == para.p[0] && p[0] == para.p[1] ) ) return true;
 	else return false;
 }
 
@@ -89,23 +128,35 @@ void ConstructSilhouette( set< line >& lineset, set< line >::iterator& itr, cons
 	//std::set< line >::iterator itr;
 	line ln;
 	for ( int i = 0; i < PN; i ++ ) {
-		side = pl[ i ].pe.a * lp.getX() + 
-			pl[ i ].pe.b * lp.getY() +
-			pl[ i ].pe.c * lp.getZ() +
-			pl[ i ].pe.d;
+		//side = pl[ i ].pe.a * lp.getX() + pl[ i ].pe.b * lp.getY() + pl[ i ].pe.c * lp.getZ() + pl[ i ].pe.d;
+		side = pl[i].normal.getX() * lp.getX() + pl[i].normal.getY() * lp.getY() + pl[i].normal.getZ() * lp.getZ();
 		if ( side <= 0 ) continue;
 		for ( int j = 0; j < 3; j ++ ) {
 			ln.p[0] = pl[i].p[j];
 			ln.p[1] = pl[i].p[(j+1)%3];
 
 			sortline( ln );
-			itr = lineset.find( ln );
-			if ( itr != lineset.end() ) {
-				// if we find the line, this line appears twice, remove it;
-				lineset.erase( itr );
-			} else {
+			//itr = lineset.find( ln );
+			for ( itr = lineset.begin(); itr != lineset.end(); itr ++ )
+			{
+				/*
+				if ( *itr == ln ) {
+					printf( "point a %f %f %f\t\t%f %f %f\n", itr->p[0].getX(), itr->p[0].getY(), itr->p[0].getZ(),
+							itr->p[1].getX(), itr->p[1].getY(), itr->p[1].getZ() );
+
+					printf( "point b %f %f %f\t\t%f %f %f\n", ln.p[0].getX(), ln.p[0].getY(), ln.p[0].getZ(),
+							ln.p[1].getX(), ln.p[1].getY(), ln.p[1].getZ() );
+				}
+				*/
+				if ( *itr == ln ) break;
+			}
+
+			if ( itr == lineset.end() ) {
 				// if this line appears the first time, add it into the set
 				lineset.insert( ln );
+			} else {
+				// if we find the line, this line appears twice, remove it;
+				//lineset.erase( itr );
 			}
 		}
 	}
@@ -198,17 +249,22 @@ void DrawShadowVolume( Ball* ball, Light* light ) {
 	glTranslatef( ball->pos.getX(), ball->pos.getY(), ball->pos.getZ() );
 	glTranslatef( 0.0, 0.0, ball->radius );
 	glColor3f( 1.0, 0.0, 0.0 );
+	*/
 
-	for ( itr = lnset.begin(); itr != lnset.end(); itr ++ ) {
-		printf( "%f %f %f\t\t%f %f %f\n", itr->p[0].getX(), itr->p[0].getY(), itr->p[0].getZ(), itr->p[1].getX(), itr->p[1].getY(), itr->p[1].getZ() );
+	static int count = 0;
+	if ( count == 0 ) {
+		for ( itr = lnset.begin(); itr != lnset.end(); itr ++ ) {
+			printf( "%f %f %f\t\t%f %f %f\n", itr->p[0].getX(), itr->p[0].getY(), itr->p[0].getZ(), itr->p[1].getX(), itr->p[1].getY(), itr->p[1].getZ() );
+		}
+		count ++; 
+	}
+		/*
 		glLineWidth( 10.0f );
 		glBegin( GL_LINES );
 			glVertex3f( itr->p[0].getX(), itr->p[0].getY(), itr->p[0].getZ() );
 			glVertex3f( itr->p[1].getX(), itr->p[1].getY(), itr->p[1].getZ() );
 		glEnd();
-	}
-	return;
-	*/
+		*/
 	// End
 
 
@@ -289,10 +345,11 @@ static void CalcPlane( Plane *plane) {
 					  v[3].getX()*(v[1].getY()*v[2].getZ() - v[2].getY()*v[1].getZ()) );
 }
 
-static void AssignPlane( Plane* pl, vector3 pt1, vector3 pt2, vector3 pt3 ) {
+static void AssignPlane( Plane* pl, vector3 pt1, vector3 pt2, vector3 pt3, vector3 normal ) {
 	pl->p[ 0 ] = pt1;
 	pl->p[ 1 ] = pt2;
 	pl->p[ 2 ] = pt3;
+	pl->normal = normal;
 	CalcPlane( pl );
 }
 
@@ -331,7 +388,7 @@ void DrawShadowModle( Ball* ball ) {
 void ConstructShadowModel( Ball* ball ) {
 	int longitude = 10;
 	int latitude = 10;
-	vector3 pt[3];
+	vector3 pt[3], normal;
 	float alpha, theta, theta2;
 	float radius = ball->radius;
 
@@ -349,7 +406,7 @@ void ConstructShadowModel( Ball* ball ) {
 		pt[ 2 ].setX( radius * angle_sin( theta ) * angle_cos( alpha ) );
 		pt[ 2 ].setY( radius * angle_sin( theta ) * angle_sin( alpha ) );
 		pt[ 2 ].setZ( radius * angle_cos( theta ) );
-		AssignPlane( &pl[ PN++ ], pt[0], pt[1], pt[2] );
+		AssignPlane( &pl[ PN++ ], pt[0], pt[1], pt[2], pt[0] );
 	}
 
 	pt[ 0 ].setX( 0.0f );
@@ -365,7 +422,7 @@ void ConstructShadowModel( Ball* ball ) {
 		pt[ 2 ].setX( radius * angle_sin( theta ) * angle_cos( alpha ) );
 		pt[ 2 ].setY( radius * angle_sin( theta ) * angle_sin( alpha ) );
 		pt[ 2 ].setZ( radius * angle_cos( theta ) );
-		AssignPlane( &pl[ PN++ ], pt[0], pt[1], pt[2] );
+		AssignPlane( &pl[ PN++ ], pt[0], pt[1], pt[2], pt[0] );
 	}
 
 	for ( int i = 0; i < latitude; i ++ ) {
@@ -386,7 +443,7 @@ void ConstructShadowModel( Ball* ball ) {
 			pt[ 2 ].setX( radius * angle_sin( theta ) * angle_cos( alpha ) );
 			pt[ 2 ].setY( radius * angle_sin( theta ) * angle_sin( alpha ) );
 			pt[ 2 ].setZ( radius * angle_cos( theta ) );
-			AssignPlane( &pl[ PN++ ], pt[0], pt[1], pt[2] );
+			AssignPlane( &pl[ PN++ ], pt[0], pt[1], pt[2], pt[0] );
 			
 			alpha = 360.0 / longitude * ( j + 1 );
 			pt[ 0 ].setX( radius * angle_sin( theta ) * angle_cos( alpha ) );
@@ -400,7 +457,7 @@ void ConstructShadowModel( Ball* ball ) {
 			pt[ 2 ].setX( radius * angle_sin( theta2 ) * angle_cos( alpha ) );
 			pt[ 2 ].setY( radius * angle_sin( theta2 ) * angle_sin( alpha ) );
 			pt[ 2 ].setZ( radius * angle_cos( theta2 ) );
-			AssignPlane( &pl[ PN++ ], pt[0], pt[1], pt[2] );
+			AssignPlane( &pl[ PN++ ], pt[0], pt[1], pt[2], pt[0] );
 		}
 	}
 }

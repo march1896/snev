@@ -193,7 +193,7 @@ void Ball::AssignRandomColor() {
 
 	mat.SetAmbient( color( r, g, b, 1.0 ) );
 	mat.SetDiffuse( color( r, g, b, 1.0 ) );
-	//mat.SetSpecular( color( r, g, b, 1.0 ) );
+	//mat.SetSpecular( color( r, g, b, 0.1 ) );
 
 }
 
