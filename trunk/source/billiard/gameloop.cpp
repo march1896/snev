@@ -316,7 +316,7 @@ int main()
 		glClear( GL_DEPTH_BUFFER_BIT);	// Clear The Depth Buffer, so render2 could cover render1
 		//table->colour.setRGB( 0.2, 0.6, 0.6 );
 		
-		//GameDraw( render2 );
+		GameDraw( render2 );
 		//DrawGLScene(0, 0, 500, 500 );
 		
 		winHandle.SwapBuffer();
