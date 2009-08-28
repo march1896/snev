@@ -45,42 +45,19 @@ static bool operator<( const vector3& lhs, const vector3& rhs ) {
 	return true;
 }
 
-static bool vector_lessthen( const vector3& lhs, const vector3& rhs ) {
-	if ( lhs.getX() < rhs.getX() ) return true;
-	else if ( lhs.getX() > rhs.getX() ) return false;
-	else if ( lhs.getY() < rhs.getY() ) return true;
-	else if ( lhs.getY() > rhs.getY() ) return false;
-	else if ( lhs.getZ() < rhs.getZ() ) return true;
-	else if ( lhs.getZ() > rhs.getZ() ) return false;
-
-	return true;
-}
-
 static bool operator>( const vector3& lhs, const vector3& rhs ) {
 	if ( lhs < rhs ) return false;
 	else if ( lhs == rhs ) return false;
 	return true;
 }
 
-static bool vector_greaterthen( const vector3& lhs, const vector3& rhs ) {
-	if ( vector_lessthen( lhs, rhs ) ) return false;
-	else if ( lhs == rhs ) return false;
-	return true;
-}
-
 bool line::operator<( const line& para ) const {
-	/*
 	if ( p[0] < para.p[0] ) return true;
 	else if ( p[0] > para.p[0] ) return false;
 	else if ( p[1] < para.p[1] ) return true;
 	else if ( p[1] > para.p[1] ) return false;
-	*/
-	if ( vector_lessthen( p[0] , para.p[0] ) ) return true;
-	else if ( vector_greaterthen( p[0] , para.p[0] ) ) return false;
-	else if ( vector_lessthen( p[1] , para.p[1] ) ) return true;
-	else if ( vector_greaterthen( p[1] , para.p[1] ) ) return false;
 
-	return true;
+	return false;
 	/*
 	if ( normal[0] < para.normal[0] ) return true;
 	else if ( normal[0] > para.normal[0] ) return false;
@@ -91,16 +68,10 @@ bool line::operator<( const line& para ) const {
 }
 
 bool line::operator>( const line& para ) const {
-	/*
 	if ( p[0] < para.p[0] ) return false;
 	else if ( p[0] > para.p[0] ) return true;
 	else if ( p[1] < para.p[1] ) return false;
 	else if ( p[1] > para.p[1] ) return true;
-	*/
-	if ( vector_lessthen( p[0] , para.p[0] ) ) return false;
-	else if ( vector_greaterthen( p[0] , para.p[0] ) ) return true;
-	else if ( vector_lessthen( p[1] , para.p[1] ) ) return false;
-	else if ( vector_greaterthen( p[1] , para.p[1] ) ) return true;
 
 	return true;
 }
@@ -120,13 +91,13 @@ static void sortline( line& para ) {
 	}
 }
 
-void ConstructSilhouette( set< line >& lineset, set< line >::iterator& itr, const vector3& lp ) {
+void ConstructSilhouette( set< line >& lineset, const vector3& lp ) {
 	if ( PN <= 0 ) return; // this module is not initialized yet
 
 	float side;
-	//std::set< line >lineset;
-	//std::set< line >::iterator itr;
 	line ln;
+	set< line >::iterator itr;
+
 	for ( int i = 0; i < PN; i ++ ) {
 		//side = pl[ i ].pe.a * lp.getX() + pl[ i ].pe.b * lp.getY() + pl[ i ].pe.c * lp.getZ() + pl[ i ].pe.d;
 		side = pl[i].normal.getX() * lp.getX() + pl[i].normal.getY() * lp.getY() + pl[i].normal.getZ() * lp.getZ();
@@ -137,6 +108,13 @@ void ConstructSilhouette( set< line >& lineset, set< line >::iterator& itr, cons
 
 			//sortline( ln );
 			//itr = lineset.find( ln );
+			// it fails to find a certain line use above method, 
+			// TODO: have a review of the STL containers
+			// Here I find the reason.
+			// The main reason is that two lines can not be compared
+			// if I use the compare function above, if the first node of line A less than the first node of line B, 
+			// then A < B, that is, there is nothing about the second node. So, if the first node of two lines are equal, we judge the line equal.
+
 			for ( itr = lineset.begin(); itr != lineset.end(); itr ++ )
 			{
 				/*
@@ -198,10 +176,11 @@ void PreDrawShadow() {
 	glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
 }
 void DrawShadow() {
+	glDisable( GL_LIGHTING );
 	glEnable( GL_STENCIL_TEST );
 	glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
 	glDepthMask( GL_FALSE );
-	glColor4f( 0.0f, 0.0f, 0.0f, 1.0f );
+	glColor4f( 0.0f, 0.0f, 0.0f, 0.4f );
 	glEnable( GL_BLEND );
 	glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 	glStencilFunc( GL_NOTEQUAL, 5, 0xffffffff );
@@ -233,8 +212,8 @@ void DrawShadowVolume( Ball* ball, Light* light ) {
 	lp.setY( light->getPos().getY() - ball->pos.getY() );
 	lp.setZ( light->getPos().getZ() - ball->pos.getZ() );
 	set< line > lnset;
-	set< line >::iterator itr;
-	ConstructSilhouette( lnset, itr, lp );
+	set<line>::iterator itr;
+	ConstructSilhouette( lnset, lp );
 
 	int number = 0;
 	for ( itr = lnset.begin(); itr != lnset.end(); itr ++ ) {
@@ -386,8 +365,8 @@ void DrawShadowModle( Ball* ball ) {
 }
 
 void ConstructShadowModel( Ball* ball ) {
-	int longitude = 10;
-	int latitude = 10;
+	int longitude = 12;
+	int latitude = 12;
 	vector3 pt[3], normal;
 	float alpha, theta, theta2;
 	float radius = ball->radius;
