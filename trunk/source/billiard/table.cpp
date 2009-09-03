@@ -47,6 +47,7 @@ Table::Table( float _weight, float _height, const color& _col, const vector3 &_p
 void Table::Draw() {
 	glColor4fv( colour.getdata() );							// Set The Color To Blue One Time Only
 	glBegin(GL_QUADS);									// Draw A Quad
+		glNormal3f( 0.0, 0.0, 1.0 );
 		glVertex3f( Left, Bottom, 0.0f);					// Top Left
 		glVertex3f( Right, Bottom, 0.0f);					// Top Right
 		glVertex3f( Right, Top, 0.0f);					// Bottom Right

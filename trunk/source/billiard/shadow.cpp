@@ -219,7 +219,7 @@ void DrawShadowVolume( Ball* ball, Light* light ) {
 	for ( itr = lnset.begin(); itr != lnset.end(); itr ++ ) {
 		number++;
 	}
-	printf( "%d\n", number );
+	//printf( "%d\n", number );
 
 	// Draw the silhouette
 	/*
@@ -328,7 +328,8 @@ static void AssignPlane( Plane* pl, vector3 pt1, vector3 pt2, vector3 pt3, vecto
 	pl->p[ 0 ] = pt1;
 	pl->p[ 1 ] = pt2;
 	pl->p[ 2 ] = pt3;
-	pl->normal = normal;
+	//pl->normal = normal;
+	pl->normal = pt1 + pt2 + pt3;
 	CalcPlane( pl );
 }
 
@@ -350,7 +351,7 @@ static float angle_cos( float angle ) {
 	return cos( a2r( angle ) );
 }
 
-void DrawShadowModle( Ball* ball ) {
+void DrawShadowModel( Ball* ball ) {
 	glMatrixMode( GL_MODELVIEW );
 	glTranslatef( ball->pos.getX(), ball->pos.getY(), ball->pos.getZ() );
 	glTranslatef( 0.0, 0.0, ball->radius );
