@@ -3,6 +3,7 @@
 #include "collision.h"
 #include "table.h"
 #include "win32.h"
+#include "gl\glew.h"
 #include "opengl.h"
 #include "log.h"
 #include "color.h"
@@ -13,6 +14,7 @@
 #include "control.h"
 #include "shadow.h"
 #include "zmath.h"
+#include "shader.h"
 #include <cmath>
 #include <cstdio>
 
@@ -239,6 +241,10 @@ int main()
 	} else {
 		Log::print( "create window successful" );
 	}
+	
+	// init glew extension before use shader
+	glewInit();
+	// 
 
 	GameDataInit();
 
@@ -265,6 +271,11 @@ int main()
 
 	//glTranslatef(-1.5f,0.0f,-6.0f);						// Move Left 1.5 Units And Into The Screen 6.0
 	//color red( 1.0, 0.0, 0.0, 1.0 );
+	//
+	//Shader shader( "Shader\\light.vert", "Shader\\light.frag" );
+	Shader shader( "Shader\\test.vert", "Shader\\test.frag" );
+	shader.Activate();
+	//shader.Deactivate();
 	Frame GameFrame;
 	float deltatime;
 

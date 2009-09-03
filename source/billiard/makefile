@@ -9,7 +9,7 @@ objects := $(source:.cpp=.o)
 # CPPFLAGS += -D_MSC_VER
 # LDFLAGS := -L"C:\Program Files\Microsoft Visual Studio 8\VC\PlatformSDK\"
 LDFLAGS := -L"C:\\MinGW\\lib"
-LDFLAGS += -lwinmm -lgdi32 -lopengl32 -lglu32 -lglaux
+LDFLAGS += -lwinmm -lgdi32 -lopengl32 -lglu32 -lglaux -lglew32
 
 billiard: $(objects)
 	@echo building projects...

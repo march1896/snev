@@ -12,6 +12,6 @@ void PreDrawShadow();
 void EndDrawShadow();
 void DrawShadowVolume( Ball* ball, Light* light );
 
-void DrawShadowModle( Ball* ball );
+void DrawShadowModel( Ball* ball );
 
 #endif 
