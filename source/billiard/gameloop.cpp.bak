@@ -273,8 +273,8 @@ int main()
 	//color red( 1.0, 0.0, 0.0, 1.0 );
 	//
 	//Shader shader( "Shader\\light.vert", "Shader\\light.frag" );
-	Shader shader( "Shader\\test.vert", "Shader\\test.frag" );
-	shader.Activate();
+	Shader* shader = new Shader( "Shader\\test.vert", "Shader\\test.frag" );
+	shader->Activate();
 	//shader.Deactivate();
 	Frame GameFrame;
 	float deltatime;
@@ -378,6 +378,7 @@ int main()
 	delete view2;
 	delete render1;
 	delete render2;
+	delete shader;
 
 	winHandle.KillWindow();
 	printf( "end\n" );

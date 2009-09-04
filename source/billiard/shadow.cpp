@@ -230,13 +230,6 @@ void DrawShadowVolume( Ball* ball, Light* light ) {
 	glColor3f( 1.0, 0.0, 0.0 );
 	*/
 
-	static int count = 0;
-	if ( count == 0 ) {
-		for ( itr = lnset.begin(); itr != lnset.end(); itr ++ ) {
-			printf( "%f %f %f\t\t%f %f %f\n", itr->p[0].getX(), itr->p[0].getY(), itr->p[0].getZ(), itr->p[1].getX(), itr->p[1].getY(), itr->p[1].getZ() );
-		}
-		count ++; 
-	}
 		/*
 		glLineWidth( 10.0f );
 		glBegin( GL_LINES );
@@ -461,4 +454,19 @@ static void CalcPlane(glObject o, sPlane *plane){
 					  v[3].x*(v[1].y*v[2].z - v[2].y*v[1].z) );
 }
 */
+
+/***********************************************************************************
+ *
+ *
+ *
+ *
+ *
+ * ABOVE IS SHADOW VOLUME IMPLEMENTATION, AND RIGHT NOW IT IS NOT LOOKED WELL
+ * BELOW IS SHADOW MAPPING, USE GLSL
+ *
+ *
+ *
+ *
+ ***********************************************************************************/
+
 
