@@ -1,0 +1,183 @@
+#include "ball.h"
+#include "vector.h"
+#include "collision.h"
+#include "table.h"
+#include "win32.h"
+#include "gl\glew.h"
+#include "opengl.h"
+#include "log.h"
+#include "color.h"
+#include "render.h"
+#include "view.h"
+#include "timer.h"
+#include "light.h"
+#include "control.h"
+#include "shadow.h"
+#include "zmath.h"
+#include "shader.h"
+#include <cmath>
+#include <cstdio>
+
+int DrawGLScene(unsigned int x, unsigned int y, unsigned int width, unsigned int height) 	// Here's Where We Do All The Drawing
+{
+	glEnable( GL_CULL_FACE );
+	glCullFace( GL_BACK );
+	glFrontFace( GL_CCW );
+
+	glBegin(GL_TRIANGLES);								// Start Drawing A Triangle
+		glColor3f(1.0f,0.0f,0.0f);						// Set Top Point Of Triangle To Red
+		glNormal3f( 0.0, 0.0, 1.0f );
+		glVertex3f( 0.0f, 1.0f, 0.0f);					// First Point Of The Triangle
+		glColor3f(0.0f,1.0f,0.0f);						// Set Left Point Of Triangle To Green
+		glNormal3f( 0.0, 0.0, 1.0f );
+		glVertex3f(-1.0f,-1.0f, 0.0f);					// Second Point Of The Triangle
+		glColor3f(0.0f,0.0f,1.0f);						// Set Right Point Of Triangle To Blue
+		glNormal3f( 0.0, 0.0, 1.0f );
+		glVertex3f( 1.0f,-1.0f, 0.0f);					// Third Point Of The Triangle
+	glEnd();											// Done Drawing The Triangle
+	glTranslatef(3.0f,0.0f,0.0f);						// Move Right 1.5 Units And Into The Screen 6.0
+	glColor3f(0.5f,0.5f,1.0f);							// Set The Color To Blue One Time Only
+	glBegin(GL_QUADS);									// Draw A Quad
+		glVertex3f(-1.0f, 1.0f, 0.0f);					// Top Left
+		glVertex3f( 1.0f, 1.0f, 0.0f);					// Top Right
+		glVertex3f( 1.0f,-1.0f, 0.0f);					// Bottom Right
+		glVertex3f(-1.0f,-1.0f, 0.0f);					// Bottom Left
+	glEnd();											// Done Drawing The Quad
+	glTranslatef(-1.5f,0.0f,0.0f);						// Move Right 1.5 Units And Into The Screen 6.0
+	glFlush();
+	return TRUE;										// Keep Going
+}
+
+
+static const int N_BALLS = 20;
+static Ball *ball;
+static Table *table;
+static Light* lit;
+
+void GameDataInit() {
+	ball = new Ball();
+	//ball->AssignRandomColor();
+
+	table = new Table();
+
+	lit = new Light( vector4( 10.0, 0.0, 10.0, 1.0 ), 
+			color( 0.1, 0.1, 0.1, 1.0 ),
+			color( 0.8, 0.8, 0.8, 1.0 ),
+			color( 0.0, 0.0, 0.0, 1.0 )
+		       );
+}
+
+void GameDataDeinit() {
+	delete ball;
+	delete table;
+	delete lit;
+}
+
+void GameUpdate( float deltaTime ) {
+	return;
+}
+
+void GameDraw( Renderer* rd, Light *lit = NULL ) {
+	rd->ResetView(); // we must reset the view, or opengl will use the current modelview matrix, how could make it be better look
+	table->Draw( rd );
+
+	/*
+	if ( lit != NULL ) 
+		ConstructShadowModel( ballArray[0] );
+
+	for ( int i = 0; i < N_BALLS; i ++ ) {
+		rd->ResetView();
+		ballArray[ i ]->Draw( rd ); 
+
+		// the model is constructed succeed
+		//DrawShadowModle( ballArray[i] );
+		// has been tested
+	}		
+	*/
+
+	if ( lit != NULL ) 
+		ConstructShadowModel( ball );
+
+	rd->ResetView();
+	ball->Draw( rd );
+
+	/*
+	PreDrawShadow();
+	rd->ResetView();
+	DrawShadowVolume( ball, lit );
+	DrawShadow();
+	*/
+
+	//glClear( GL_COLOR_BUFFER_BIT );
+	/*
+	PreDrawShadow();
+	for ( int i = 0; i < N_BALLS; i ++ ) {
+		if ( lit != NULL ) {
+			rd->ResetView();
+			DrawShadowVolume( ballArray[i], lit );
+		}
+	}
+	DrawShadow();
+	*/
+}
+
+WindowsHandle winHandle;
+Renderer* render;
+View* view;
+int winWidth, winHeight;
+Shader * shader;
+void gameinit() {
+
+	if ( !winHandle.InitWindow( "BILLIARD", 100, 100, 640, 480, false ) ) {
+		Log::print( "create window failed" );
+	} else {
+		Log::print( "create window successful" );
+	}
+	
+
+	GameDataInit();
+
+	render = new Renderer( &winHandle );
+	view = render->GetView();   // this is the default view created by render
+	render->AddLight( lit );
+	view->Translate( 0.0, 0.0, 10.0 );
+	view->Rotate( 70.0, 1.0, 0.0, 0.0 );
+	winHandle.GetDimensions( winWidth, winHeight );
+
+	// if shader is used
+	glewInit();
+	// we must init glew first
+	
+	shader = new Shader( "Shader\\light.vert", "Shader\\light.frag" );
+	shader->Activate();
+}
+
+void gamedeinit() {
+	GameDataDeinit();
+
+	delete view;
+	delete render;
+	delete shader;
+
+	winHandle.KillWindow();
+	printf( "end\n" );
+}
+
+bool gameloop( float deltatime ) {
+	int width, height;
+	winHandle.GetDimensions( width, height );
+	render->Resize( 0, 0, width, height );
+
+	// no matter which render calls clearscreen(), the whole screen will be cleared
+	render->ClearScreen();
+	render->GetView()->Rotate( -0.1, 0.0, 0.0, 1.0 );
+
+	GameDraw( render, lit );
+
+	winHandle.SwapBuffer();
+
+	//MoveCamera( render->GetView(), control );
+
+	GameUpdate( deltatime );
+}
+

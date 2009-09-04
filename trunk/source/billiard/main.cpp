@@ -25,13 +25,13 @@ INITFUNC _GameInit_, _GameDeinit_;
 
 const float DELTATIME = 33.0 / 1000.0;
 
-#include "gameloop1.game"
+#include "game2.game"
 
 void Init() {
 	// we must init _GameMainLoop_(), _GameInit_(), _GameDeinit_() here;
-	_GameMainLoop_ = gameloop1;
-	_GameInit_ = gameinit1;
-	_GameDeinit_ = gamedeinit1;
+	_GameMainLoop_ = gameloop;
+	_GameInit_ = gameinit;
+	_GameDeinit_ = gamedeinit;
 }
 
 
@@ -40,8 +40,8 @@ int main() {
 	float deltatime = DELTATIME;
 	MSG 	msg;
 
-	glewInit();
 	Frame GameFrame;
+	// glewinit() must be called after the window is initialized, so it should be called in gameinit
 	Init();
 	
 	_GameInit_();

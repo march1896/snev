@@ -208,7 +208,7 @@ Renderer* render1, *render2;
 View* view1, *view2;
 int winWidth, winHeight;
 Shader * shader;
-void gameinit1() {
+void gameinit() {
 
 	Log::print( "fuck you, Tangel" );
 	if ( !winHandle.InitWindow( "BILLIARD", 100, 100, 640, 480, false ) ) {
@@ -244,11 +244,13 @@ void gameinit1() {
 	//color red( 1.0, 0.0, 0.0, 1.0 );
 	//
 	//Shader shader( "Shader\\light.vert", "Shader\\light.frag" );
+	glewInit();
+
 	shader = new Shader( "Shader\\test.vert", "Shader\\test.frag" );
 	shader->Activate();
 }
 
-void gamedeinit1() {
+void gamedeinit() {
 	GameDataDeinit();
 
 	delete control;
@@ -262,7 +264,7 @@ void gamedeinit1() {
 	printf( "end\n" );
 }
 
-bool gameloop1( float deltatime ) {
+bool gameloop( float deltatime ) {
 	int width, height;
 	//printf("%d\t%d\n", width, height );
 	winHandle.GetDimensions( width, height );
@@ -315,7 +317,7 @@ bool gameloop1( float deltatime ) {
 
 	}
 
-	printf( "delta time = %f\n", deltatime );
+	//printf( "delta time = %f\n", deltatime );
 	GameUpdate( deltatime );
 }
 
