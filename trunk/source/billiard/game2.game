@@ -56,11 +56,11 @@ static Light* lit;
 
 void GameDataInit() {
 	ball = new Ball();
-	//ball->AssignRandomColor();
+	ball->AssignRandomColor();
 
 	table = new Table();
 
-	lit = new Light( vector4( 10.0, 0.0, 10.0, 1.0 ), 
+	lit = new Light( vector4( 10.0, 10.0, 20.0, 1.0 ), 
 			color( 0.1, 0.1, 0.1, 1.0 ),
 			color( 0.8, 0.8, 0.8, 1.0 ),
 			color( 0.0, 0.0, 0.0, 1.0 )
@@ -170,7 +170,7 @@ bool gameloop( float deltatime ) {
 
 	// no matter which render calls clearscreen(), the whole screen will be cleared
 	render->ClearScreen();
-	render->GetView()->Rotate( -0.1, 0.0, 0.0, 1.0 );
+	//render->GetView()->Rotate( -0.1, 0.0, 0.0, 1.0 );
 
 	GameDraw( render, lit );
 

@@ -11,7 +11,8 @@ void main()
 	according to the OpenGL specification, the light 
 	is stored in eye space. Also since we're talking about 
 	a directional light, the position field is actually direction */
-	lightDir = normalize(vec3(gl_LightSource[0].position));
+	//lightDir = normalize(vec3(gl_LightSource[0].position));
+	lightDir = normalize(vec3(gl_LightSource[0].position) - vec3(gl_Vertex));
 
 	/* Normalize the halfVector to pass it to the fragment shader */
 	halfVector = normalize(gl_LightSource[0].halfVector.xyz);

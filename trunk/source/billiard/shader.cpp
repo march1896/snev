@@ -75,12 +75,21 @@ Shader::Shader( const char * vf, const char * ff ):
 	program( -1 ),
 	inited( false )
 {
-	int length = strlen( vf );
-	vsFile = (char*)malloc( ( length + 1 ) * sizeof( char ) );
-	strcpy( vsFile, vf );
-	length = strlen( ff );
-	fsFile = ( char * ) malloc( ( length + 1 ) * sizeof( char ) );
-	strcpy( fsFile, ff );
+	if ( vf != NULL ) {
+		int length = strlen( vf );
+		vsFile = (char*)malloc( ( length + 1 ) * sizeof( char ) );
+		strcpy( vsFile, vf );
+	} else {
+		vsFile = NULL;
+	}
+
+	if ( ff != NULL ) {
+		int length = strlen( ff );
+		fsFile = ( char * ) malloc( ( length + 1 ) * sizeof( char ) );
+		strcpy( fsFile, ff );
+	} else {
+		fsFile = NULL;
+	}
 }
 
 Shader::~Shader() {
@@ -122,6 +131,43 @@ void Shader::Activate() {
 	}
 
 	if ( !inited ) {
+		/* in fact, this is a longing that, only one shader is rewrite by the author, and the other shader is remain the same functionality
+		 * if one of the shaders( vert & frag ) is rewrite, the other must be rewrite, so you can not just change the position of vertex and 
+		 * expect that lighting system remains work, so the implementation commented below may be a better idea here
+		 */
+		if ( vsFile == NULL ) {
+			Log::print( "vertex shader not exit" );
+		} else {
+			vs = glCreateShader( GL_VERTEX_SHADER );
+			vsSource = textFileRead( vsFile );
+			const char *vv = vsSource;
+			glShaderSource( vs, 1, &vv, NULL );
+			glCompileShader( vs );
+		}
+
+		if ( fsFile == NULL ) {
+			Log::print( "fragment shader not exit" );
+		} else {
+			fs = glCreateShader( GL_FRAGMENT_SHADER );
+			fsSource = textFileRead( fsFile );
+			const char *ff = fsSource;
+			glShaderSource( fs, 1, &ff, NULL );
+			glCompileShader( fs );
+		}
+
+		PrintShaderInfo();
+		if ( vsFile != NULL || fsFile != NULL ) {
+			program = glCreateProgram();
+
+			if ( vsFile != NULL ) glAttachShader( program, vs );
+			if ( fsFile != NULL ) glAttachShader( program, fs );
+
+			glLinkProgram( program );
+			PrintProgramInfo();
+			inited = true;
+		}
+
+		/*
 		vs = glCreateShader(GL_VERTEX_SHADER);
 		fs = glCreateShader(GL_FRAGMENT_SHADER);
 
@@ -150,6 +196,7 @@ void Shader::Activate() {
 		glLinkProgram(program);
 		PrintProgramInfo();
 		inited = true;
+		*/
 	}
 
 	glUseProgram(program);
