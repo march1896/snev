@@ -14,12 +14,12 @@ LDFLAGS += -lwinmm -lgdi32 -lopengl32 -lglu32 -lglaux -lglew32
 billiard: $(objects)
 	@echo building projects...
 	$(CXX) -o billiard.exe $(objects) $(LDFLAGS)
-	@rm -f *.d
+	@del -f *.d
 %.d:%.cpp
 	@$(CXX) $(CPPFLAGS) -MM -MF $@ $<
 -include $(objects:.o=.d)
 .PHONY: clean
 clean:
 	@echo removing *.o and *.d files
-	@rm -f *.d
-	@rm -f *.o
+	@del -f *.d
+	@del -f *.o
