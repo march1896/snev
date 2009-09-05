@@ -186,8 +186,10 @@ bool Renderer::SetView( View* v ) {
 }
 
 void Renderer::ResetView() {
-	if ( Renderer::Curr == this )
+	if ( Renderer::Curr == this ) {
 		DefaultView->Activate();
+		glViewport( Viewport.posx, Viewport.posy, Viewport.width, Viewport.height );
+	}
 }
 
 int Renderer::GetNumLights() const {
