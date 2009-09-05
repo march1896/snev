@@ -16,6 +16,32 @@ matrix44::matrix44( const float *mp ) {
 		this->data.m[ i ] = mp[ i ];
 }
 
+matrix44::matrix44( float f0, float f1, float f2, float f3, float f4, float f5, float f6, float f7, float f8, float f9, float f10, float f11, float f12, float f13, float f14, float f15 ) {
+/* any method to use the following #define
+#define Assign( X ) \
+	data.m[X] = f##X
+	for ( int i = 0; i < 16; i ++ )
+		Assign( i );
+#undef Assign( X )
+*/
+	data.m[0] = f0;
+	data.m[1] = f1;
+	data.m[2] = f2;
+	data.m[3] = f3;
+	data.m[4] = f4;
+	data.m[5] = f5;
+	data.m[6] = f6;
+	data.m[7] = f7;
+	data.m[8] = f8;
+	data.m[9] = f9;
+	data.m[10] = f10;
+	data.m[11] = f11;
+	data.m[12] = f12;
+	data.m[13] = f13;
+	data.m[14] = f14;
+	data.m[15] = f15;
+}
+
 matrix44::matrix44( const matrix44 &rhs ) {
 	*this = rhs;
 }

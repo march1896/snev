@@ -45,6 +45,7 @@ private:
 public:
 	matrix44();
 	matrix44( const float *mp );
+	matrix44( float f0, float f1, float f2, float f3, float f4, float f5, float f6, float f7, float f8, float f9, float f10, float f11, float f12, float f13, float f14, float f15 );
 	matrix44( const matrix44 &rhs );
 	~matrix44();
 

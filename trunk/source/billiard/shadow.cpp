@@ -3,7 +3,9 @@
 #include "opengl.h"
 #include "vector.h"
 #include "light.h"
+#include "matrix.h"
 #include "log.h"
+#include "shader.h"
 #include <cmath>
 #include <set>
 
@@ -469,4 +471,92 @@ static void CalcPlane(glObject o, sPlane *plane){
  *
  ***********************************************************************************/
 
+const int shadowMapSize = 512;
+static matrix44 lightProjectionMatrix, lightViewMatrix, textureMatrix;
+static float tmp[16];
+static GLuint shadowMapTexture;
+static Shader* shader;
 
+// pre draw the scene from light's pos
+void PreShadowMap( Light * light ) {
+	// generate a texture to save the shadow map
+	glGenTextures(1, &shadowMapTexture);
+	glBindTexture(GL_TEXTURE_2D, shadowMapTexture);
+	glTexImage2D(	GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadowMapSize, shadowMapSize, 0,
+					GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	// generate end
+
+	// set the camera pos to light
+	glDisable( GL_LIGHTING );
+	glMatrixMode( GL_PROJECTION );
+	glPushMatrix();
+	glLoadIdentity();
+	gluPerspective(45.0f, 1.0f, 2.0f, 8.0f);
+	// save the matrix look from light's pos 
+	glGetFloatv(GL_PROJECTION_MATRIX, tmp);
+	lightProjectionMatrix.setdata( tmp );
+
+	glMatrixMode( GL_MODELVIEW );
+	glPushMatrix();
+	glLoadIdentity();
+	gluLookAt( light->getPos().getX(), light->getPos().getY(), light->getPos().getZ() ,
+				0.0f, 0.0f, 0.0f,
+				0.0f, 1.0f, 0.0f);
+
+	glGetFloatv(GL_MODELVIEW_MATRIX, tmp);
+	lightViewMatrix.setdata( tmp );
+	// save end
+	//
+	matrix44 biasMatrix( 	0.5f, 0.0f, 0.0f, 0.0f,
+				0.0f, 0.5f, 0.0f, 0.0f,
+				0.0f, 0.0f, 0.5f, 0.0f,
+				0.5f, 0.5f, 0.5f, 1.0f 	);	//bias from [-1, 1] to [0, 1]
+	matrix44 textureMatrix=biasMatrix*lightProjectionMatrix*lightViewMatrix;
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	
+	//Use viewport the same size as the shadow map
+	glViewport(0, 0, shadowMapSize, shadowMapSize);
+
+	//Draw back faces into the shadow map
+	glCullFace(GL_FRONT);
+
+	//Disable color writes, and use flat shading for speed
+	glShadeModel(GL_FLAT);
+	glColorMask(0, 0, 0, 0);
+}
+	
+//Draw the scene, first pass
+//DrawScene();
+
+void DuringShadowMap()
+{
+	//Read the depth buffer into the shadow map texture
+	glBindTexture(GL_TEXTURE_2D, shadowMapTexture);
+	glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, shadowMapSize, shadowMapSize);
+
+	//restore states
+	glCullFace(GL_BACK);
+	glShadeModel(GL_SMOOTH);
+	glColorMask(1, 1, 1, 1);
+
+	glMatrixMode( GL_MODELVIEW );
+	glPopMatrix();
+	glMatrixMode( GL_PROJECTION );
+	glPopMatrix();
+	glEnable( GL_LIGHTING );
+
+	shader = new Shader( "Shader\\shadowmap.vert", "Shader\\shadowmap.frag" );
+	//shader->Activate();
+}
+
+// Draw the scene, second pass
+// DrasScene();
+
+void PostShadowMap() {
+	//shader->Deactivate();
+}

@@ -8,8 +8,9 @@ objects := $(source:.cpp=.o)
 
 # CPPFLAGS += -D_MSC_VER
 # LDFLAGS := -L"C:\Program Files\Microsoft Visual Studio 8\VC\PlatformSDK\"
-# LDFLAGS := -L"c:\cygwin\lib\w32api"
-LDFLAGS += -lwinmm -lgdi32 -lglu32 -lglaux -lopengl32 
+# LDFLAGS := -L"c:/cygwin/lib/w32api"
+LDFLAGS := -L"/lib/w32api"
+LDFLAGS += -lwinmm -lgdi32 -lopengl32 -lglu32 -lglaux 
 
 billiard: $(objects)
 	@echo building projects...

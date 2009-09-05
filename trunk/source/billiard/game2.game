@@ -172,6 +172,16 @@ bool gameloop( float deltatime ) {
 	render->ClearScreen();
 	//render->GetView()->Rotate( -0.1, 0.0, 0.0, 1.0 );
 
+	/*
+	PreShadowMap( lit );
+	GameDraw( render, lit );
+
+	DuringShadowMap();
+	GameDraw( render, lit );
+
+	PostShadowMap();
+	*/
+
 	GameDraw( render, lit );
 
 	winHandle.SwapBuffer();
