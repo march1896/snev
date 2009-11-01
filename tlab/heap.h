@@ -2,22 +2,23 @@
 #define _TJ_HEAP_
 
 // TODO: remove this
-#define uint unsigned int
+// #define uint unsigned int
+typedef unsigned int uint;
 
 class IHeap {
 public:
-	virtual ~IHeap();
+	virtual ~IHeap(){} ;
 	virtual bool CreateFromBuffer( void* buffer, uint size ) = 0;
 	virtual void Destroy() = 0;
 	virtual void* Alloc( uint size ) = 0;
 	virtual void Free( void *mem ) = 0;
-	virtual uint GetLargestFree() = 0;
-	virtual uint GetTotalFree() = 0;
+	virtual uint GetLargestFree() const = 0;
+	virtual uint GetTotalFree() const = 0;
 };
 
 class CHeap1: public IHeap {
 public:
-	CHeap1( const uint AlignMent = 32 );
+	CHeap1( uint AlignMent = 32 );
 	~CHeap1();
 
 	bool CreateFromBuffer( void* buffer, uint size );
@@ -26,7 +27,7 @@ public:
 	void Free( void* mem );
 	uint GetLargestFree() const;
 	uint GetTotalFree() const;
-	uint GetHeapSize() const { return (uint)( (char*)pHeapEnd - (char*)pSentinel ) };
+	uint GetHeapSize() const { return (uint)( (char*)pHeapEnd - (char*)pSentinel ); };
 protected:
 	class Node {
 	public:
@@ -46,10 +47,12 @@ protected:
 		const char* CallerFile;
 	#endif
 	};
+	Node* Merge( Node* Prev, Node* Next );
+	bool CheckNode( Node* Tocheck );
 
 	const uint AlignMent;
 	bool Initialized;
-	Node* pSentinnel; // void* pHeapStart; // start and end memory after alignment
+	Node* pSentinel; // void* pHeapStart; // start and end memory after alignment
 	void* pHeapEnd;  // uint HeapSize; 
 
 	void* pHeapMemoryStart;// because the start node is aligned, if we want to remove this heap, we need to remember this;
