@@ -100,6 +100,7 @@ void* CHeap1::Alloc( uint size ) {
 
 void CHeap1::Free( void* mem ) {
 	Node* Tofree = (Node*)( (char*)mem - sizeof(Node) );
+	mem = NULL;
 
 	if ( !CheckNode( Tofree ) ) {
 		// This is not a vilide node, something wrong
@@ -129,6 +130,7 @@ void CHeap1::Free( void* mem ) {
 			if ( pSentinel->pNextFree ) pSentinel->pNextFree->pPrevFree = Tofree;
 			pSentinel->pNextFree = Tofree;
 		}
+		return;
 	}
 
 	if ( ISFREE( Prev ) && ISFREE( Next ) ) {

@@ -40,17 +40,16 @@ protected:
 		Node* pNextMem;
 		Node* pPrevFree;
 		Node* pNextFree;
-
+#ifdef MEM_DEBUG
+		uint CallerLine;
+		const char* CallerFile;
+#endif
 		uint GetSize() const {
 			return (uint)pNextMem - (uint)this;
 		}
 		uint GetDataSize() const {
 			return GetSize() - sizeof( Node );
 		}
-	#ifdef MEM_DEBUG
-		uint CallerLine;
-		const char* CallerFile;
-	#endif
 	};
 	bool CheckNode( Node* Tocheck );
 
