@@ -34,6 +34,10 @@ int main() {
 	printf( "mchar4 addr: 0x%08x\n", (unsigned)mchar4 );
 	printf( "mshort addr: 0x%08x\n", (unsigned)mshort );
 	*/
+
+	heap->OutputFreeList();
+	printf( "\n" );
+
 	char* pointer[ 100 ];
 	int allocated[ 100 ];
 	memset( allocated, 0, sizeof( int )*100 );
@@ -51,6 +55,7 @@ int main() {
 		}
 		else {
 			heap->Free( pointer[num] );
+			allocated[ num ] = 0;
 			printf( "Pointer %d \tfree %d, \taddr 0x%08x\n", num, heap->GetBlockSize( pointer[ num] ), (unsigned)pointer[ num ] - 24 );
 		}
 		heap->OutputFreeList();
@@ -58,6 +63,16 @@ int main() {
 	}
 
 	printf( "End\n\n\n" );
+	//heap->OutputFreeList();
+
+	for ( int i = 0; i < 100; i ++ ) {
+		if ( allocated[ i ] ) {
+			heap->Free( pointer[ i ] );
+			printf( "Pointer %d \tfree %d, \taddr 0x%08x\n", i, heap->GetBlockSize( pointer[ i ] ), (unsigned)pointer[ i ] - 24 );
+			heap->OutputFreeList();
+			printf( "\n" );
+		}
+	}
 	heap->OutputFreeList();
 	
 	delete heap;
