@@ -111,10 +111,30 @@ void CHeap1::Free( void* mem ) {
 	Node* Prev = Tofree->pPrevMem;
 	Node* Next = Tofree->pNextMem;
 	Node* node = Tofree;
+
+	if ( Prev == pSentinel ) {
+		if ( ISFREE( Next ) ) {
+			node->pPrevFree = Next->pPrevFree;
+			node->pNextFree = Next->pNextFree;
+
+			Next->pPrevFree->pNextFree = node;
+			if ( Next->pNextFree ) Next->pNextFree->pPrevFree = node;
+
+			node->pNextMem = Next->pNextMem;
+			if ( Next->pNextMem <= pHeapEnd ) node->pNextMem->pPrevMem = node;
+		}
+		else {
+			Tofree->pNextFree = pSentinel->pNextFree;
+			Tofree->pPrevFree = pSentinel;
+			if ( pSentinel->pNextFree ) pSentinel->pNextFree->pPrevFree = Tofree;
+			pSentinel->pNextFree = Tofree;
+		}
+	}
+
 	if ( ISFREE( Prev ) && ISFREE( Next ) ) {
 		// Prev and Next both in FreeList
 		Next->pPrevFree->pNextFree = Next->pNextFree;
-		if ( Next->pNextFree ) Next->pNextFree->pPrevFree = Prev;
+		if ( Next->pNextFree ) Next->pNextFree->pPrevFree = Next->pPrevFree;
 
 		Prev->pNextMem = Next->pNextMem;
 		if ( Next->pNextMem <= pHeapEnd ) Next->pNextMem->pPrevMem = Prev;
@@ -130,39 +150,24 @@ void CHeap1::Free( void* mem ) {
 		Next->pPrevFree->pNextFree = node;
 		if ( Next->pNextFree ) Next->pNextFree->pPrevFree = node;
 
-		Prev->pNextMem = node->pNextMem;
-		if ( node->pNextMem <= pHeapEnd ) node->pNextMem->pPrevMem = Prev;
+		node->pNextMem = Next->pNextMem;
+		if ( Next->pNextMem <= pHeapEnd ) node->pNextMem->pPrevMem = node;
 	}
 	else {
 		// merge failed
 		Tofree->pNextFree = pSentinel->pNextFree;
 		Tofree->pPrevFree = pSentinel;
+		if ( pSentinel->pNextFree ) pSentinel->pNextFree->pPrevFree = Tofree;
 		pSentinel->pNextFree = Tofree;
 	}
 	return;
 #undef ISFREE
 }
 
-CHeap1::Node* CHeap1::Merge( Node* Prev, Node* Next ) {
-	Prev->pNextMem = Next->pNextMem;
-	if ( CheckNode( Next->pNextMem ) ) Next->pNextMem->pPrevMem = Prev;
-
-	Prev->pNextFree = Next->pNextFree;
-
-	if ( Next->pNextFree ) Next->pNextFree->pPrevFree = Prev;
-
-	if ( Prev->pPrevFree == NULL ) {
-		Prev->pPrevFree = Next->pPrevFree;
-		if ( Prev->pPrevFree != NULL ) {
-			Prev->pPrevFree->pNextFree = Prev;
-		}
-	}
-}
-
 bool CHeap1::CheckNode( Node* tocheck ) {
 	if ( tocheck == NULL ) return false;
-	if ( tocheck < ( Node*)pSentinel + 1 || tocheck > (Node*)pHeapEnd ) return false;
-#define CHECKPOINTER( pointer ) pointer == NULL || ( pointer >= ( (Node*)pSentinel + 1 ) && pointer <= (Node*)pHeapEnd )
+	if ( tocheck < ( Node*)pSentinel || tocheck >= (Node*)pHeapEnd ) return false;
+#define CHECKPOINTER( pointer ) pointer == NULL || ( pointer >= (Node*)pSentinel && pointer <= (Node*)pHeapEnd )
 	bool ret = true;
 	ret &= CHECKPOINTER( tocheck->pPrevMem );
 	ret &= CHECKPOINTER( tocheck->pNextMem );
@@ -195,7 +200,7 @@ uint CHeap1::GetBlockSize( void* Mem ) const {
 void CHeap1::OutputFreeList() const {
 	Node* node = pSentinel->pNextFree;
 	while ( node ) {
-		printf( "ADDR 0x%08x, SIZE %d\n", (uint)node, node->GetSize() );
+		printf( "ADDR 0x%08x, SIZE 0x%08x\n", (uint)node, node->GetSize() );
 		node = node->pNextFree;
 	}
 	return;

@@ -52,7 +52,6 @@ protected:
 		const char* CallerFile;
 	#endif
 	};
-	Node* Merge( Node* Prev, Node* Next );
 	bool CheckNode( Node* Tocheck );
 
 	const uint AlignMent;
