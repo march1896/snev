@@ -1,13 +1,15 @@
 #include "heap.h"
+#include <cstring>
 #include <cstdio>
 #include <cstdlib>
 
 int main() {
 	int stopflag;
 	CHeap1* heap = new CHeap1();
-	void *memory = (void*)malloc( 2 << 16 );
-	heap->CreateFromBuffer( memory, 2 << 16 );
+	void *memory = (void*)malloc( 2 << 20 );
+	heap->CreateFromBuffer( memory, 2 << 20 );
 
+	/*
 	int *mint = (int*)heap->Alloc( sizeof( int ) * 10 );
 	if ( mint == NULL ) printf( "mint alloc failed\n" );
 	float *mfloat = (float*)heap->Alloc( sizeof( float ) * 40 );
@@ -31,8 +33,34 @@ int main() {
 	printf( "mchar3 addr: 0x%08x\n", (unsigned)mchar3 );
 	printf( "mchar4 addr: 0x%08x\n", (unsigned)mchar4 );
 	printf( "mshort addr: 0x%08x\n", (unsigned)mshort );
+	*/
+	char* pointer[ 100 ];
+	int allocated[ 100 ];
+	memset( allocated, 0, sizeof( int )*100 );
+
+	for ( int i = 0; i < 100; i ++ ) {
+		int num = rand() % 100;
+		if ( allocated[ num ] == 0 ) {
+			int size = rand() % 200;
+			
+			pointer[ num ] = (char*)heap->Alloc( size * sizeof( char ) );
+			if ( pointer[ num ] != NULL ) {
+				printf( "Pointer %d \tallocate %d, \taddr 0x%08x\n", num, size, (unsigned)pointer[ num ] );
+				allocated[ num ] = 1;
+			}
+		}
+		else {
+			heap->Free( pointer[num] );
+			printf( "Pointer %d \tfree %d, \taddr 0x%08x\n", num, heap->GetBlockSize( pointer[ num] ), (unsigned)pointer[ num ] - 24 );
+		}
+		heap->OutputFreeList();
+		printf( "\n" );
+	}
+
+	printf( "End\n\n\n" );
+	heap->OutputFreeList();
 	
 	delete heap;
-	scanf("%d", &stopflag );
+	//scanf("%d", &stopflag );
 	return 0;
 }

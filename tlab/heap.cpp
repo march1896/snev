@@ -5,7 +5,7 @@
 #define ALIGNUP( x, ALIGN_T ) ( ( (x) + ALIGN_T - 1 ) & ~( ALIGN_T - 1 ) )
 
 #define NODESIZE sizeof( CHeap1::Node )
-#define SPLIT_THRESHOLD 64
+#define SPLIT_THRESHOLD 32
 
 CHeap1::CHeap1( const uint alignment ):
 	AlignMent( alignment ),
@@ -50,48 +50,52 @@ void CHeap1::Destroy() {
 }
 
 void* CHeap1::Alloc( uint size ) {
-	Node *Next = pSentinel->pNextFree;
-	Node *Prev = pSentinel;
+	Node *node = pSentinel->pNextFree;
 
-	while ( Next != NULL ) {
-		if ( Next->GetDataSize() > size ) {
+	while ( node != NULL ) {
+		if ( node->GetDataSize() > size ) {
 			// found a suitable node
 			break;
 		}
-		Prev = Next;
-		Next = Next->pNextFree;
+		node = node->pNextFree;
 	}
 
-	if ( Next == NULL ) {
+	if ( node == NULL ) {
 		return NULL;
 	}
 
-	if ( Next->GetDataSize() - size < SPLIT_THRESHOLD ) {
-		// will not divide
-		Prev->pNextFree = Next->pNextFree;
-		if ( Next->pNextFree ) Next->pNextFree->pPrevFree = Prev;	
+	Node *NextFree = node->pNextFree;
+	Node *PrevFree = node->pPrevFree;
+	Node *NextMem = node->pNextMem;
+	Node *PrevMem = node->pPrevMem;
 
-		Next->pPrevFree = Next->pNextFree = NULL;
+	if ( node->GetDataSize() - size < SPLIT_THRESHOLD ) {
+		// will not divide
+		PrevFree->pNextFree = NextFree;
+		if ( NextFree ) NextFree->pPrevFree = PrevFree;	
+
+		node->pPrevFree = node->pNextFree = NULL;
 	}
 	else {
-		void* addr = (void*)( (char*) Next + size + sizeof( Node ) );
+		void* addr = (void*)( (char*) node + size + sizeof( Node ) );
 		addr = (void*)ALIGNUP( (uint)addr, AlignMent );
+
 		Node* new_node = (Node*)( addr );
-		new_node->pPrevMem = Next;
-		new_node->pNextMem = Next->pNextMem;
-		new_node->pPrevFree = Next->pPrevFree;
-		new_node->pNextFree = Next->pNextFree;
+		new_node->pPrevMem = node;
+		new_node->pNextMem = NextMem;
+		new_node->pPrevFree = PrevFree;
+		new_node->pNextFree = NextFree;
 
-		Next->pNextMem = new_node;
+		if ( PrevFree ) PrevFree->pNextFree = new_node;
+		if ( NextFree ) NextFree->pPrevFree = new_node;
 
-		Prev->pNextFree = new_node;
-		if ( Next->pNextFree ) Next->pNextFree->pPrevFree = new_node;
-		if ( Next->pNextMem ) Next->pNextMem->pPrevMem = new_node;
+		if ( NextMem && NextMem != pHeapEnd ) NextMem->pPrevMem = new_node;
+		node->pNextMem = new_node;
 
-		Next->pPrevFree = Next->pNextFree = NULL;
+		node->pPrevFree = node->pNextFree = NULL;
 	}
 	
-	return (void*)( (char*)Next + sizeof( Node ) );
+	return (void*)( (char*)node + sizeof( Node ) );
 }
 
 void CHeap1::Free( void* mem ) {
@@ -103,35 +107,62 @@ void CHeap1::Free( void* mem ) {
 	}
 
 	// because sentinel is always exsit as a free node, so any node in freelist will at least has one p*Free != NULL
-#define ISFREE( node ) node != NULL && node->pPrevFree != NULL || node->pNextFree != NULL
+#define ISFREE( node ) ( CheckNode( node ) && node->pPrevFree != NULL || node->pNextFree != NULL )
+	Node* Prev = Tofree->pPrevMem;
 	Node* Next = Tofree->pNextMem;
-	if ( ISFREE( Tofree->pPrevMem ) ) {
-		Tofree = Merge( Tofree->pPrevMem, Tofree );
+	Node* node = Tofree;
+	if ( ISFREE( Prev ) && ISFREE( Next ) ) {
+		// Prev and Next both in FreeList
+		Next->pPrevFree->pNextFree = Next->pNextFree;
+		if ( Next->pNextFree ) Next->pNextFree->pPrevFree = Prev;
+
+		Prev->pNextMem = Next->pNextMem;
+		if ( Next->pNextMem <= pHeapEnd ) Next->pNextMem->pPrevMem = Prev;
 	}
-	if ( ISFREE( Next ) ) {
-		Tofree = Merge( Tofree, Next );
+	else if ( ISFREE( Prev ) ) {
+		Prev->pNextMem = node->pNextMem;
+		if ( node->pNextMem <= pHeapEnd ) node->pNextMem->pPrevMem = Prev;
 	}
-#undef ISFREE
-	if ( Tofree->pPrevFree == NULL && Tofree->pNextFree == NULL ) {
+	else if ( ISFREE( Next ) ) {
+		node->pPrevFree = Next->pPrevFree;
+		node->pNextFree = Next->pNextFree;
+
+		Next->pPrevFree->pNextFree = node;
+		if ( Next->pNextFree ) Next->pNextFree->pPrevFree = node;
+
+		Prev->pNextMem = node->pNextMem;
+		if ( node->pNextMem <= pHeapEnd ) node->pNextMem->pPrevMem = Prev;
+	}
+	else {
 		// merge failed
 		Tofree->pNextFree = pSentinel->pNextFree;
 		Tofree->pPrevFree = pSentinel;
 		pSentinel->pNextFree = Tofree;
 	}
 	return;
+#undef ISFREE
 }
 
 CHeap1::Node* CHeap1::Merge( Node* Prev, Node* Next ) {
-	Prev->pNextFree = Next->pNextFree;
 	Prev->pNextMem = Next->pNextMem;
+	if ( CheckNode( Next->pNextMem ) ) Next->pNextMem->pPrevMem = Prev;
+
+	Prev->pNextFree = Next->pNextFree;
 
 	if ( Next->pNextFree ) Next->pNextFree->pPrevFree = Prev;
-	if ( Next->pNextMem ) Next->pNextMem->pPrevMem = Prev;
+
+	if ( Prev->pPrevFree == NULL ) {
+		Prev->pPrevFree = Next->pPrevFree;
+		if ( Prev->pPrevFree != NULL ) {
+			Prev->pPrevFree->pNextFree = Prev;
+		}
+	}
 }
 
 bool CHeap1::CheckNode( Node* tocheck ) {
 	if ( tocheck == NULL ) return false;
-#define CHECKPOINTER( pointer ) pointer == NULL || ( pointer >= pSentinel && pointer <= (Node*)pHeapEnd )
+	if ( tocheck < ( Node*)pSentinel + 1 || tocheck > (Node*)pHeapEnd ) return false;
+#define CHECKPOINTER( pointer ) pointer == NULL || ( pointer >= ( (Node*)pSentinel + 1 ) && pointer <= (Node*)pHeapEnd )
 	bool ret = true;
 	ret &= CHECKPOINTER( tocheck->pPrevMem );
 	ret &= CHECKPOINTER( tocheck->pNextMem );
@@ -153,4 +184,21 @@ uint CHeap1::GetLargestFree() const  {
 uint CHeap1::GetTotalFree() const {
 	return TotalFree;
 }
+
+uint CHeap1::GetBlockSize( void* Mem ) const { 
+	Node* node = (Node*)( (char*) Mem - sizeof( Node ) );
+	return node->GetDataSize();
+}
+
+#ifdef MEM_DEBUG
+#include <cstdio>
+void CHeap1::OutputFreeList() const {
+	Node* node = pSentinel->pNextFree;
+	while ( node ) {
+		printf( "ADDR 0x%08x, SIZE %d\n", (uint)node, node->GetSize() );
+		node = node->pNextFree;
+	}
+	return;
+}
+#endif //MEM_DEBUG
 

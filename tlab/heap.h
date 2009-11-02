@@ -3,6 +3,7 @@
 
 // TODO: remove this
 // #define uint unsigned int
+#define MEM_DEBUG
 typedef unsigned int uint;
 
 class IHeap {
@@ -25,9 +26,13 @@ public:
 	void Destroy();
 	void* Alloc( uint size );
 	void Free( void* mem );
+	uint GetBlockSize( void* mem ) const;
 	uint GetLargestFree() const;
 	uint GetTotalFree() const;
 	uint GetHeapSize() const { return (uint)( (char*)pHeapEnd - (char*)pSentinel ); };
+#ifdef MEM_DEBUG
+	void OutputFreeList() const;
+#endif
 protected:
 	class Node {
 	public:
