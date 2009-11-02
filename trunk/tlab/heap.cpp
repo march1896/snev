@@ -51,7 +51,7 @@ void CHeap1::Destroy() {
 
 void* CHeap1::Alloc( uint size ) {
 	Node *Next = pSentinel->pNextFree;
-	Node *Prev = NULL;
+	Node *Prev = pSentinel;
 
 	while ( Next != NULL ) {
 		if ( Next->GetDataSize() > size ) {
@@ -79,13 +79,16 @@ void* CHeap1::Alloc( uint size ) {
 		Node* new_node = (Node*)( addr );
 		new_node->pPrevMem = Next;
 		new_node->pNextMem = Next->pNextMem;
-		new_node->pPrevFree = Prev;
+		new_node->pPrevFree = Next->pPrevFree;
 		new_node->pNextFree = Next->pNextFree;
 
 		Next->pNextMem = new_node;
 
 		Prev->pNextFree = new_node;
 		if ( Next->pNextFree ) Next->pNextFree->pPrevFree = new_node;
+		if ( Next->pNextMem ) Next->pNextMem->pPrevMem = new_node;
+
+		Next->pPrevFree = Next->pNextFree = NULL;
 	}
 	
 	return (void*)( (char*)Next + sizeof( Node ) );
@@ -100,7 +103,7 @@ void CHeap1::Free( void* mem ) {
 	}
 
 	// because sentinel is always exsit as a free node, so any node in freelist will at least has one p*Free != NULL
-#define ISFREE( node ) node->pPrevFree != NULL || node->pNextFree != NULL
+#define ISFREE( node ) node != NULL && node->pPrevFree != NULL || node->pNextFree != NULL
 	Node* Next = Tofree->pNextMem;
 	if ( ISFREE( Tofree->pPrevMem ) ) {
 		Tofree = Merge( Tofree->pPrevMem, Tofree );
@@ -109,22 +112,33 @@ void CHeap1::Free( void* mem ) {
 		Tofree = Merge( Tofree, Next );
 	}
 #undef ISFREE
+	if ( Tofree->pPrevFree == NULL && Tofree->pNextFree == NULL ) {
+		// merge failed
+		Tofree->pNextFree = pSentinel->pNextFree;
+		Tofree->pPrevFree = pSentinel;
+		pSentinel->pNextFree = Tofree;
+	}
 	return;
 }
 
 CHeap1::Node* CHeap1::Merge( Node* Prev, Node* Next ) {
 	Prev->pNextFree = Next->pNextFree;
-	Next->pNextFree->pPrevFree = Prev;
 	Prev->pNextMem = Next->pNextMem;
+
+	if ( Next->pNextFree ) Next->pNextFree->pPrevFree = Prev;
+	if ( Next->pNextMem ) Next->pNextMem->pPrevMem = Prev;
 }
 
 bool CHeap1::CheckNode( Node* tocheck ) {
+	if ( tocheck == NULL ) return false;
 #define CHECKPOINTER( pointer ) pointer == NULL || ( pointer >= pSentinel && pointer <= (Node*)pHeapEnd )
-	CHECKPOINTER( tocheck->pPrevMem );
-	CHECKPOINTER( tocheck->pNextMem );
-	CHECKPOINTER( tocheck->pPrevFree );
-	CHECKPOINTER( tocheck->pNextFree );
+	bool ret = true;
+	ret &= CHECKPOINTER( tocheck->pPrevMem );
+	ret &= CHECKPOINTER( tocheck->pNextMem );
+	ret &= CHECKPOINTER( tocheck->pPrevFree );
+	ret &= CHECKPOINTER( tocheck->pNextFree );
 #undef CHECKPOINTER
+	return ret;
 }
 
 uint CHeap1::GetLargestFree() const  {
