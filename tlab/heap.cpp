@@ -193,6 +193,7 @@ uint CHeap1::GetTotalFree() const {
 }
 
 uint CHeap1::GetBlockSize( void* Mem ) const { 
+	if ( Mem == NULL ) return 0;
 	Node* node = (Node*)( (char*) Mem - sizeof( Node ) );
 	return node->GetDataSize();
 }
