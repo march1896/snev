@@ -38,25 +38,24 @@ int main() {
 	heap->OutputFreeList();
 	printf( "\n" );
 
-	char* pointer[ 100 ];
-	int allocated[ 100 ];
-	memset( allocated, 0, sizeof( int )*100 );
+	const int SIZE = 1000;
+	char* pointer[ SIZE ];
+	memset( pointer, 0, sizeof( char* )*SIZE );
 
-	for ( int i = 0; i < 100; i ++ ) {
-		int num = rand() % 100;
-		if ( allocated[ num ] == 0 ) {
-			int size = rand() % 200;
+	for ( int i = 0; i < 10000; i ++ ) {
+		int num = rand() % SIZE;
+		if ( pointer[ num ] == 0 ) {
+			int size = rand() % 500;
 			
 			pointer[ num ] = (char*)heap->Alloc( size * sizeof( char ) );
 			if ( pointer[ num ] != NULL ) {
 				printf( "Pointer %d \tallocate %d, \taddr 0x%08x\n", num, size, (unsigned)pointer[ num ] );
-				allocated[ num ] = 1;
 			}
 		}
 		else {
 			heap->Free( pointer[num] );
-			allocated[ num ] = 0;
-			printf( "Pointer %d \tfree %d, \taddr 0x%08x\n", num, heap->GetBlockSize( pointer[ num] ), (unsigned)pointer[ num ] - 24 );
+			pointer[ num ] = 0;
+			//printf( "Pointer %d \tfree %d, \taddr 0x%08x\n", num, heap->GetBlockSize( pointer[ num] ), (unsigned)pointer[ num ] - 24 );
 		}
 		heap->OutputFreeList();
 		printf( "\n" );
@@ -65,8 +64,8 @@ int main() {
 	printf( "End\n\n\n" );
 	//heap->OutputFreeList();
 
-	for ( int i = 0; i < 100; i ++ ) {
-		if ( allocated[ i ] ) {
+	for ( int i = 0; i < SIZE; i ++ ) {
+		if ( pointer[ i ] ) {
 			heap->Free( pointer[ i ] );
 			printf( "Pointer %d \tfree %d, \taddr 0x%08x\n", i, heap->GetBlockSize( pointer[ i ] ), (unsigned)pointer[ i ] - 24 );
 			heap->OutputFreeList();
