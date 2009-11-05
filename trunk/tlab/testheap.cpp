@@ -36,13 +36,16 @@ int main() {
 	int stopflag;
 	double t0;
 
-	void* memory = (void*)malloc( 2 << 20 );
-	InitHeap( memory, 2<<20 );
+	const int INIT_MEMORY_SIZE = 1 << 29;
+	void* memory = (void*)malloc( INIT_MEMORY_SIZE );
+	if ( memory == NULL ) printf( "!!!!!FATAL ERROR!!!!!\n" );
+	InitHeap( memory, INIT_MEMORY_SIZE );
 
 	//DumpFreeList();
 
-	const int SIZE = 10000;
-	const int NUM = 1000000;
+	const int SIZE 	= 100000;
+	const int NUM 	= 1000000; // test num
+	const int RANDOM_ALLOC_MAX_SIZE = 10000;
 	char* pointer[ SIZE ];
 	memset( pointer, 0, sizeof( char* )*SIZE );
 
@@ -51,11 +54,12 @@ int main() {
 	for ( int i = 0; i < NUM; i ++ ) {
 		int num = rand() % SIZE;
 		if ( pointer[ num ] == 0 ) {
-			int size = rand() % 300 + 1;
+			int size = rand() % RANDOM_ALLOC_MAX_SIZE + 1;
 			//printf( "Allocate: %d\t\t", size );
 			
 			pointer[ num ] = (char*)Allocate( size * sizeof( char ) );
-			if ( pointer[ num ] != NULL ) {
+			if ( pointer[ num ] == NULL ) {
+				printf( "Allocate failed\n" );
 				//printf( "Pointer %d \tallocate %d, \taddr 0x%08x\n", num, size, (unsigned)pointer[ num ] );
 			}
 		}
@@ -86,10 +90,11 @@ int main() {
 	free( memory );
 
 	CHeap1* heap = new CHeap1();
-	memory = (void*)malloc( 2 << 20 );
-	heap->CreateFromBuffer( memory, 2 << 20 );
+	memory = (void*)malloc( INIT_MEMORY_SIZE );
+	if ( memory == NULL ) printf( "!!!!!FATAL ERROR!!!!!\n" );
+	heap->CreateFromBuffer( memory, INIT_MEMORY_SIZE );
 
-	heap->OutputFreeList();
+	//heap->OutputFreeList();
 	printf( "\n" );
 
 	memset( pointer, 0, sizeof( char* )*SIZE );
@@ -97,10 +102,11 @@ int main() {
 	for ( int i = 0; i < NUM; i ++ ) {
 		int num = rand() % SIZE;
 		if ( pointer[ num ] == 0 ) {
-			int size = rand() % 300 + 1;
+			int size = rand() % RANDOM_ALLOC_MAX_SIZE + 1;
 			
 			pointer[ num ] = (char*)heap->Alloc( size * sizeof( char ) );
-			if ( pointer[ num ] != NULL ) {
+			if ( pointer[ num ] == NULL ) {
+				printf( "Allocate failed\n" );
 				//printf( "Pointer %d \tallocate %d, \taddr 0x%08x\n", num, size, (unsigned)pointer[ num ] );
 			}
 		}
@@ -113,7 +119,7 @@ int main() {
 		//printf( "\n" );
 	}
 
-	printf( "End\n\n\n" );
+	//printf( "End\n\n\n" );
 	//heap->OutputFreeList();
 
 	for ( int i = 0; i < SIZE; i ++ ) {
@@ -124,7 +130,7 @@ int main() {
 			//printf( "\n" );
 		}
 	}
-	heap->OutputFreeList();
+	//heap->OutputFreeList();
 
 	delete heap;
 
@@ -136,10 +142,11 @@ int main() {
 	for ( int i = 0; i < NUM; i ++ ) {
 		int num = rand() % SIZE;
 		if ( pointer[ num ] == 0 ) {
-			int size = rand() % 300 + 1;
+			int size = rand() % RANDOM_ALLOC_MAX_SIZE + 1;
 			
 			pointer[ num ] = (char*)malloc( size * sizeof( char ) );
-			if ( pointer[ num ] != NULL ) {
+			if ( pointer[ num ] == NULL ) {
+				printf( "Allocate failed\n" );
 			}
 		}
 		else {
