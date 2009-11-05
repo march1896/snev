@@ -39,10 +39,10 @@ int main() {
 	void* memory = (void*)malloc( 2 << 20 );
 	InitHeap( memory, 2<<20 );
 
-	DumpFreeList();
+	//DumpFreeList();
 
-	const int SIZE = 100;
-	const int NUM = 1000;
+	const int SIZE = 10000;
+	const int NUM = 1000000;
 	char* pointer[ SIZE ];
 	memset( pointer, 0, sizeof( char* )*SIZE );
 
@@ -125,9 +125,37 @@ int main() {
 		}
 	}
 	heap->OutputFreeList();
-	printf( "heap use %lf\n", getTime2() - t0 );
-	
+
 	delete heap;
+
+	printf( "heap use %lf\n", getTime2() - t0 );
+	t0 = getTime2();
+
+	memset( pointer, 0, sizeof( char* )*SIZE );
+
+	for ( int i = 0; i < NUM; i ++ ) {
+		int num = rand() % SIZE;
+		if ( pointer[ num ] == 0 ) {
+			int size = rand() % 300 + 1;
+			
+			pointer[ num ] = (char*)malloc( size * sizeof( char ) );
+			if ( pointer[ num ] != NULL ) {
+			}
+		}
+		else {
+			free( pointer[num] );
+			pointer[ num ] = NULL;
+		}
+	}
+
+
+	for ( int i = 0; i < SIZE; i ++ ) {
+		if ( pointer[ i ] ) {
+			free( pointer[ i ] );
+		}
+	}
+	printf( "system heap use %lf\n", getTime2() - t0 );
+	
 	//scanf("%d", &stopflag );
 	return 0;
 }
