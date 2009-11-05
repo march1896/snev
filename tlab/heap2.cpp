@@ -4,7 +4,7 @@
 #define ALIGNDOWN( x, ALIGN_T ) ( (x) & ~( ALIGN_T - 1 ))
 #define ALIGNUP( x, ALIGN_T ) ( ( (x) + ALIGN_T - 1 ) & ~( ALIGN_T - 1 ) )
 
-#define SPLIT_THRESHOLD 32
+#define SPLIT_THRESHOLD 64
 
 typedef struct _Block {
 	_Block* pPrevMem;
@@ -104,10 +104,10 @@ void* AllocateLow( size_t Size ) {
 				b = b->pNextFree;
 			}
 
-			if ( b != NULL ) {
-				// find
-				break;
-			}
+		}
+		if ( b != NULL ) {
+			// find
+			break;
 		}
 
 		bit ++;
@@ -137,7 +137,6 @@ void* AllocateLow( size_t Size ) {
 
 		PushIntoFreeList( new_b );
 	}
-	b->pPrevFree = b->pNextFree = NULL;
 
 	return (void*) ( (char*) b + sizeof( Block ) );
 }
@@ -241,7 +240,6 @@ void PushIntoFreeList( Block* b ) {
 	}
 }
 
-#include <cstdio>
 void PopFromFreeList( Block* b ) {
 	if ( !CheckBlock( b ) ) return;
 
@@ -256,17 +254,19 @@ void PopFromFreeList( Block* b ) {
 		// assert( b == pFreeList[ bit ] );
 		if ( pFreeList[ bit ] != b ) {
 			// TODO: report error
-			printf( "fatal error!" );
 		}
 
 		pFreeList[ bit] = next;
-		if ( next ) next->pPrevFree = NULL;
+		if ( next ) next->pPrevFree = pStartSentinel;
 	}
 	else {
 		// b is in the end of the list
 		prev->pNextFree = next;
 		if ( next ) next->pPrevFree = prev;
 	}
+	
+	b->pPrevFree = b->pNextFree = NULL;
+	return;
 }
 
 bool CheckPointer( Block*b, bool ForFree ) {
