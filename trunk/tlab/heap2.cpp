@@ -6,6 +6,7 @@
 
 #define SPLIT_THRESHOLD 64
 
+
 typedef struct _Block {
 	_Block* pPrevMem;
 	_Block* pNextMem;
@@ -17,14 +18,56 @@ typedef struct _Block {
 	char* 	FileName;
 #endif
 }Block;
+const size_t BLOCKSIZE = sizeof( Block );
 
 size_t GetBlockSize( Block* b ) {
 	return (char*)b->pNextMem - (char*)b;
 }
 
 size_t GetBlockDataSize( Block* b ) {
-	return GetBlockSize( b ) - sizeof( Block );
+	return GetBlockSize( b ) - BLOCKSIZE;
 }
+
+inline uint uint_log2( uint Value ) {
+uint bit;
+
+	//@todo optimize with assembly instructions such as LZC ("lead zero count" on PS/PS2)
+	//or BSR ("Bit scan reverse" on x86)
+
+	//Ensure Value is non-zero
+	if( Value == 0 ) return 0;
+
+	//Use a binary chop algorithm to find bit
+	bit = 0;
+
+	if( ((uint)Value & 0xffff0000) != 0 ) {
+		Value >>= 16;
+		bit = 16;
+	}
+
+	if( (Value & 0xff00) != 0 ) {
+		Value >>= 8;
+		bit +=8;
+	}
+
+	if( (Value & 0x00f0) != 0 ) {
+		Value >>= 4;
+		bit +=4;
+	}
+
+	if( (Value & 0x000c) != 0 ) {
+		Value >>= 2;
+		bit +=2;
+	}
+
+	if( (Value & 0x0002) != 0 ) {
+		bit++;
+	}
+
+	//Return bit number found
+	return bit;
+}
+
 
 uint Mylog2( uint x ) {
 	// assert( x > 0 );
@@ -35,15 +78,8 @@ uint Mylog2( uint x ) {
 	return ret;
 }
 
-#define log2( x ) Mylog2( x )
-
-#define ASSIGNBLOCK( b, prev, next, prevfree, nextfree ) 	\
-	{ 														\
-		b->pPrevMem = prev; 								\
-		b->pNextMem = next; 								\
-		b->pPrevFree = prevfree; 							\
-		b->pNextFree = nextfree; 							\
-	}
+// #define log2( x ) Mylog2( x )
+#define log2( x ) uint_log2( x )
 
 Block* 	pEndSentinel;
 Block* 	pStartSentinel;
@@ -51,14 +87,14 @@ void* 	pHeapStart;
 Block*  pFreeList[32];
 size_t 	AlignMent;
 
-static void PushIntoFreeList( Block* b );
-static void PopFromFreeList( Block* b );
-static bool CheckPointer( Block*b, bool ForFree );
-static bool CheckBlock( Block* b );
-static bool IsBlockFree( Block* b );
+static inline void PushIntoFreeList( Block* b );
+static inline void PopFromFreeList( Block* b );
+static inline bool CheckPointer( Block*b, bool ForFree );
+static inline bool CheckBlock( Block* b );
+static inline bool IsBlockFree( Block* b );
 
 size_t GetMemoryBlockSize( void* Mem ) {
-	Block* b = (Block*)( (char*)Mem - sizeof( Block ) );
+	Block* b = (Block*)( (char*)Mem - BLOCKSIZE );
 	if ( CheckBlock( b ) ) {
 		return GetBlockSize( b );
 	}
@@ -125,7 +161,7 @@ void* AllocateLow( size_t Size ) {
 	}
 	else {
 		PopFromFreeList( b );
-		void* addr = (char*)b + sizeof( Block ) + Size;
+		void* addr = (char*)b + BLOCKSIZE + Size;
 		addr = (void*)ALIGNUP( (uint)addr, AlignMent );
 
 		Block* new_b = (Block*)addr;
@@ -138,7 +174,7 @@ void* AllocateLow( size_t Size ) {
 		PushIntoFreeList( new_b );
 	}
 
-	return (void*) ( (char*) b + sizeof( Block ) );
+	return (void*) ( (char*) b + BLOCKSIZE );
 }
 
 void* AllocateHigh( size_t Size ) {
@@ -148,7 +184,7 @@ void* ReAllocate( void* Mem, size_t Size ) {
 }
 
 void Free( void* ToFree ) {
-	Block* b = (Block*)( (char*)ToFree - sizeof( Block ) );
+	Block* b = (Block*)( (char*)ToFree - BLOCKSIZE );
 
 	if ( !CheckBlock( b ) ) {
 		// SomeThing wrong!!
@@ -323,7 +359,7 @@ void DumpFreeList() {
 		}
 
 		while ( b != NULL ) {
-			printf( "\t\tBlock Addr 0x%08x\tSize %d\n", (uint)( (char*)b + sizeof( Block ) ), GetBlockSize( b ) );
+			printf( "\t\tBlock Addr 0x%08x\tSize %d\n", (uint)( (char*)b + BLOCKSIZE ), GetBlockSize( b ) );
 			b = b->pNextFree;
 		}
 	}
