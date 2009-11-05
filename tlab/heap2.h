@@ -31,6 +31,8 @@ void 	DumpFreeList();
 #define ReAllocate( Mem, size ) ReAllocateDebug( Mem, size, __LINE__, __FILE__ )
 #define Free( ToFree ) FreeDebug( ToFree )
 #else // Final
+#define AllocateHigh( size ) AllocateHigh( size )
+#define AllocateLow( size ) AllocateLow( size )
 #define Allocate( size ) AllocateLow( size )
 #endif // _MEM_DEBUG_
 

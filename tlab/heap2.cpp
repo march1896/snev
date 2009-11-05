@@ -1,5 +1,6 @@
 #include "heap2.h"
 #include <cstdlib>
+#include <cstring>
 
 #define ALIGNDOWN( x, ALIGN_T ) ( (x) & ~( ALIGN_T - 1 ))
 #define ALIGNUP( x, ALIGN_T ) ( ( (x) + ALIGN_T - 1 ) & ~( ALIGN_T - 1 ) )
@@ -20,19 +21,17 @@ typedef struct _Block {
 }Block;
 const size_t BLOCKSIZE = sizeof( Block );
 
-size_t GetBlockSize( Block* b ) {
+inline size_t GetBlockSize( Block* b ) {
 	return (char*)b->pNextMem - (char*)b;
 }
 
-size_t GetBlockDataSize( Block* b ) {
+inline size_t GetBlockDataSize( Block* b ) {
 	return GetBlockSize( b ) - BLOCKSIZE;
 }
 
+// VC's log2 function
 inline uint uint_log2( uint Value ) {
 uint bit;
-
-	//@todo optimize with assembly instructions such as LZC ("lead zero count" on PS/PS2)
-	//or BSR ("Bit scan reverse" on x86)
 
 	//Ensure Value is non-zero
 	if( Value == 0 ) return 0;
@@ -69,7 +68,7 @@ uint bit;
 }
 
 
-uint Mylog2( uint x ) {
+inline uint Mylog2( uint x ) {
 	// assert( x > 0 );
 	int ret = 31;
 	while ( ( x & ( 0x00000001 << ret ) ) == 0 ) {
@@ -80,6 +79,7 @@ uint Mylog2( uint x ) {
 
 // #define log2( x ) Mylog2( x )
 #define log2( x ) uint_log2( x )
+#define MemCopy( dest, source, size ) memcpy( dest, source, size )
 
 Block* 	pEndSentinel;
 Block* 	pStartSentinel;
@@ -178,9 +178,73 @@ void* AllocateLow( size_t Size ) {
 }
 
 void* AllocateHigh( size_t Size ) {
+	if ( Size <= 0 ) return NULL;
+	uint bit = 31;
+	Block* b = NULL;
+
+	// find a large enough block
+	while ( bit > 0 ) {
+		if ( pFreeList[ bit ] != NULL ) 
+			break;
+		bit --;
+	}
+	b = pFreeList[ bit ];
+
+	if ( b == NULL ) return NULL;
+
+	while ( b != NULL ) {
+		if ( Size < GetBlockDataSize( b ) ) {
+			break;
+		}
+		b = b->pNextFree;
+	}
+	if ( b == NULL ) return NULL;
+
+	// split this block into two small blocks
+	if ( GetBlockDataSize( b ) - Size < SPLIT_THRESHOLD ) {
+		// don't split, just give this whole block to user
+		PopFromFreeList( b );
+	}
+	else {
+		PopFromFreeList( b );
+		void* addr = (char*)b + BLOCKSIZE + Size;
+		addr = (void*)ALIGNUP( (uint)addr, AlignMent );
+
+		Block* new_b = (Block*)addr;
+
+		new_b->pPrevMem = b;
+		new_b->pNextMem = b->pNextMem;
+		if ( b->pNextMem != pEndSentinel ) b->pNextMem->pPrevMem = new_b;
+		b->pNextMem = new_b;
+
+		PushIntoFreeList( new_b );
+	}
+
+	return (void*) ( (char*) b + BLOCKSIZE );
 }
 
 void* ReAllocate( void* Mem, size_t Size ) {
+	Block* b = (Block*)( (char*)Mem - BLOCKSIZE );
+
+	// if the block's remained space is enough for the desired size, just return
+	if ( GetBlockDataSize( b ) > Size ) return Mem;
+
+	Block* next = b->pNextMem;
+	// the next block is free, and the space is enough, so lucky
+	if ( IsBlockFree( next ) && GetBlockSize( next ) + GetBlockDataSize( b ) > Size ) {
+		PopFromFreeList( next );
+		if ( next->pNextMem != pEndSentinel ) next->pNextMem->pPrevMem = b;
+		b->pNextMem = next->pNextMem;
+
+		return Mem;
+	}
+
+	// the worst condition, allocate a new mem and move data to that area
+	void* new_m = (void*)AllocateLow( Size );
+	MemCopy( new_m, Mem, GetBlockDataSize( b ) );
+	Free( Mem );
+
+	return new_m;
 }
 
 void Free( void* ToFree ) {
@@ -288,9 +352,9 @@ void PopFromFreeList( Block* b ) {
 	if ( prev == pStartSentinel ) {
 		// b is in the front of this list
 		// assert( b == pFreeList[ bit ] );
-		if ( pFreeList[ bit ] != b ) {
+		//if ( pFreeList[ bit ] != b ) {
 			// TODO: report error
-		}
+		//}
 
 		pFreeList[ bit] = next;
 		if ( next ) next->pPrevFree = pStartSentinel;
@@ -337,12 +401,32 @@ bool IsBlockFree( Block* b ) {
 
 #ifdef _MEM_DEBUG_
 void* AllocateLowDebug( size_t Size, uint line, const char* filename ) {
+	void* mem = AllocateLow( Size );
+	Block* b = (Block*)( (char*)mem - BLOCKSIZE );
+	b->Line = line;
+	b->FileName = filename;
+	return mem;
 }
 void* AllocateHighDebug( size_t Size, uint line, const char* filename ) {
+	void* mem = AllocateHigh( Size );
+	Block* b = (Block*)( (char*)mem - BLOCKSIZE );
+	b->Line = line;
+	b->FileName = filename;
+	return mem;
 }
 void* ReAllocateDebug( void* Mem, size_t Size, uint line, const char* filename ) {
+	void* mem = ReAllocate( Mem, Size );
+	Block* b = (Block*)( (char*)mem - BLOCKSIZE );
+	b->Line = line;
+	b->FileName = filename;
+	return mem;
 }
 void FreeDebug( void* Mem, uint line, const char* filename ) {
+	Block* b = (Block*)( (char*)Mem - BLOCKSIZE );
+	b->Line = line;
+	b->FileName = filename;
+	Free( Mem );
+	return;
 }
 #endif
 
