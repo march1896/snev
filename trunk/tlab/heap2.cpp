@@ -32,7 +32,7 @@ typedef struct _Block {
 
 #ifdef _MEM_DEBUG_
 	uint 	Line;
-	char* 	FileName;
+	const char* 	FileName;
 #endif
 }Block;
 const size_t BLOCKSIZE = sizeof( Block );
@@ -139,7 +139,7 @@ void DeinitHeap() {
 	// give the memory back to system.
 }
 
-void* AllocateLow( size_t Size ) {
+void* AllocateLowClean( size_t Size ) {
 	if ( Size <= 0 ) return NULL;
 	uint bit = log2( Size );
 	Block* b = NULL;
@@ -193,7 +193,7 @@ void* AllocateLow( size_t Size ) {
 	return (void*) ( (char*) b + BLOCKSIZE );
 }
 
-void* AllocateHigh( size_t Size ) {
+void* AllocateHighClean( size_t Size ) {
 	if ( Size <= 0 ) return NULL;
 	uint bit = 31;
 	Block* b = NULL;
@@ -239,7 +239,7 @@ void* AllocateHigh( size_t Size ) {
 	return (void*) ( (char*) b + BLOCKSIZE );
 }
 
-void* ReAllocate( void* Mem, size_t Size ) {
+void* ReAllocateClean( void* Mem, size_t Size ) {
 	Block* b = (Block*)( (char*)Mem - BLOCKSIZE );
 
 	// if the block's remained space is enough for the desired size, just return
@@ -256,14 +256,14 @@ void* ReAllocate( void* Mem, size_t Size ) {
 	}
 
 	// the worst condition, allocate a new mem and move data to that area
-	void* new_m = (void*)AllocateLow( Size );
+	void* new_m = (void*)AllocateLowClean( Size );
 	MemCopy( new_m, Mem, GetBlockDataSize( b ) );
-	Free( Mem );
+	FreeClean( Mem );
 
 	return new_m;
 }
 
-void Free( void* ToFree ) {
+void FreeClean( void* ToFree ) {
 	Block* b = (Block*)( (char*)ToFree - BLOCKSIZE );
 
 	if ( !CheckBlock( b ) ) {
@@ -417,31 +417,32 @@ bool IsBlockFree( Block* b ) {
 
 #ifdef _MEM_DEBUG_
 void* AllocateLowDebug( size_t Size, uint line, const char* filename ) {
-	void* mem = AllocateLow( Size );
+	void* mem = AllocateLowClean( Size );
 	Block* b = (Block*)( (char*)mem - BLOCKSIZE );
 	b->Line = line;
 	b->FileName = filename;
 	return mem;
 }
 void* AllocateHighDebug( size_t Size, uint line, const char* filename ) {
-	void* mem = AllocateHigh( Size );
+	void* mem = AllocateHighClean( Size );
 	Block* b = (Block*)( (char*)mem - BLOCKSIZE );
 	b->Line = line;
 	b->FileName = filename;
 	return mem;
 }
 void* ReAllocateDebug( void* Mem, size_t Size, uint line, const char* filename ) {
-	void* mem = ReAllocate( Mem, Size );
+	void* mem = ReAllocateClean( Mem, Size );
 	Block* b = (Block*)( (char*)mem - BLOCKSIZE );
 	b->Line = line;
 	b->FileName = filename;
 	return mem;
 }
+
 void FreeDebug( void* Mem, uint line, const char* filename ) {
 	Block* b = (Block*)( (char*)Mem - BLOCKSIZE );
 	b->Line = line;
 	b->FileName = filename;
-	Free( Mem );
+	FreeClean( Mem );
 	return;
 }
 #endif
@@ -463,4 +464,21 @@ void DumpFreeList() {
 			b = b->pNextFree;
 		}
 	}
+}
+
+void CheckLeakPoint() {
+	Block* b = (Block*)pStartSentinel + 1;
+	printf( "block size: %d\n", BLOCKSIZE );
+
+	while ( b < pEndSentinel ) {
+		if ( CheckBlock( b ) && !IsBlockFree( b ) ) {
+#ifdef _MEM_DEBUG_
+			printf( "Leak point, addr: 0x%08x\tline: %d\tfile %s\n", (uint)(b + BLOCKSIZE), b->Line, b->FileName );
+#else 
+			printf( "Leak point, addr: 0x%08x\tline: %d\tfile %s\n",(uint)(b + BLOCKSIZE), -1, "" );
+#endif
+		}
+		b = b->pNextMem;
+	}
+	return;
 }

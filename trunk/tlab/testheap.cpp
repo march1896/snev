@@ -1,9 +1,11 @@
-#include "heap.h"
+#include <windows.h>
+//#define _MEM_DEBUG_
+//#define _REDIRECT_NEW_
+//#include "heap.h"
 #include "heap2.h"
 #include <cstring>
 #include <cstdio>
 #include <cstdlib>
-#include <windows.h>
 
 double getTime2() //使用高精度计时器
 {      
@@ -21,19 +23,8 @@ double getTime2() //使用高精度计时器
 	return t;
 }
 
-
-static uint Mylog2( uint x ) {
-	// assert( x > 0 );
-	int ret = 31;
-	while ( ( x & ( 0x00000001 << ret ) ) == 0 ) {
-		printf ("ret %d\n", ret );
-		ret --;
-	}
-	return ret;
-}
-
-int main() {
-	int stopflag;
+/*
+void testTime() {
 	double t0;
 
 	const int INIT_MEMORY_SIZE = 1 << 29;
@@ -162,7 +153,59 @@ int main() {
 		}
 	}
 	printf( "system heap use %lf\n", getTime2() - t0 );
-	
+}
+*/
+
+class A {
+public:
+	A() {
+		printf( "A constructed\n" );
+	}
+	~A() {
+		printf( "A deconstructed\n" );
+	}
+	int data[10];
+};
+
+class B {
+public: 
+	B() {
+		printf( "B constructed\n" );
+	}
+	~B() {
+		printf( "B deconstructed\n" );
+	}
+	A a[3];
+	char c[10];
+};
+
+void testHeapAdapter() {
+	//printf( "%d\t%s\n", __LINE__, __FILE__ );
+	const int INIT_MEMORY_SIZE = 1 << 20;
+	void* memory = (void*)malloc( INIT_MEMORY_SIZE );
+	if ( memory == NULL ) printf( "!!!!!FATAL ERROR!!!!!\n" );
+	InitHeap( memory, INIT_MEMORY_SIZE );
+	//DumpFreeList();
+
+	printf( "hello, world\n" );
+
+	A* a = new A();
+	B* b = new B();
+	printf( "\nA & B are constructed\n" );
+
+	//delete a;
+	delete b;
+
+	CheckLeakPoint();
+	//DumpFreeList();
+
+	free( memory );
+}
+
+int main() {
+	int stopflag;
+
+	testHeapAdapter();
 	//scanf("%d", &stopflag );
 	return 0;
 }
