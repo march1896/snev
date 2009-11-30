@@ -176,7 +176,7 @@ bool gameloop( float deltatime ) {
 	GameDraw( render, lit );
 
 	DuringShadowMap();
-	GameDraw( render, lit );
+	//GameDraw( render, lit );
 
 	PostShadowMap();
 

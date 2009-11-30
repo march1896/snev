@@ -17,6 +17,9 @@
 #include "shader.h"
 #include <cmath>
 #include <cstdio>
+#ifdef _USE_HEAP2_
+#include "heap2.h"
+#endif
 
 int DrawGLScene(unsigned int x, unsigned int y, unsigned int width, unsigned int height) 	// Here's Where We Do All The Drawing
 {
@@ -155,6 +158,7 @@ void GameDraw( Renderer* rd, Light *lit = NULL ) {
 	if ( lit != NULL ) 
 		ConstructShadowModel( ballArray[0] );
 
+
 	for ( int i = 0; i < N_BALLS; i ++ ) {
 		rd->ResetView();
 		ballArray[ i ]->Draw( rd ); 
@@ -247,7 +251,7 @@ void gameinit() {
 	glewInit();
 
 	shader = new Shader( "Shader\\test.vert", "Shader\\test.frag" );
-	shader->Activate();
+	//shader->Activate();
 }
 
 void gamedeinit() {
@@ -317,8 +321,14 @@ bool gameloop( float deltatime ) {
 
 	}
 
+	if ( control->IsPressed( 'Q' ) || control->IsPressed( 'q' ) ) {
+		printf( "fuck\n" );
+	   	return false;
+	}
+
 	//printf( "delta time = %f\n", deltatime );
 	GameUpdate( deltatime );
+	return true;
 }
 
 /*

@@ -213,7 +213,7 @@ void DrawShadowVolume( Ball* ball, Light* light ) {
 	lp.setX( light->getPos().getX() - ball->pos.getX() );
 	lp.setY( light->getPos().getY() - ball->pos.getY() );
 	lp.setZ( light->getPos().getZ() - ball->pos.getZ() );
-	set< line > lnset;
+	set<line> lnset;
 	set<line>::iterator itr;
 	ConstructSilhouette( lnset, lp );
 
@@ -471,15 +471,41 @@ static void CalcPlane(glObject o, sPlane *plane){
  *
  ***********************************************************************************/
 
+/*
 const int shadowMapSize = 512;
 static matrix44 lightProjectionMatrix, lightViewMatrix, textureMatrix;
 static float tmp[16];
 static GLuint shadowMapTexture;
+static GLuint depth_fb;  // depth frambuffer
+static GLuint depth_tex; // depth texture
 static Shader* shader;
+static bool Initialized = false;
 
 // pre draw the scene from light's pos
 void PreShadowMap( Light * light ) {
+
+	if ( !Initialized ) {
+		// init
+		glGenFramebuffersEXT(1, &depth_fb);
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, depth_fb);
+		glDrawBuffer(GL_NONE);
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+
+		glGenTextures(1, &depth_tex);
+
+		glBindTexture(GL_TEXTURE_2D, depth_tex);
+		//glTexImage3D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, depth_size, depth_size, MAX_SPLITS, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+
+		Initialized = true;
+	}
+
 	// generate a texture to save the shadow map
+	glEnable( GL_TEXTURE_2D );
 	glGenTextures(1, &shadowMapTexture);
 	glBindTexture(GL_TEXTURE_2D, shadowMapTexture);
 	glTexImage2D(	GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadowMapSize, shadowMapSize, 0,
@@ -489,8 +515,8 @@ void PreShadowMap( Light * light ) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 	// generate end
-
-	// set the camera pos to light
+	
+	// Get matrix from light pos
 	glDisable( GL_LIGHTING );
 	glMatrixMode( GL_PROJECTION );
 	glPushMatrix();
@@ -509,8 +535,8 @@ void PreShadowMap( Light * light ) {
 
 	glGetFloatv(GL_MODELVIEW_MATRIX, tmp);
 	lightViewMatrix.setdata( tmp );
-	// save end
-	//
+	// Get matrix from light pos, end
+
 	matrix44 biasMatrix( 	0.5f, 0.0f, 0.0f, 0.0f,
 				0.0f, 0.5f, 0.0f, 0.0f,
 				0.0f, 0.0f, 0.5f, 0.0f,
@@ -519,6 +545,12 @@ void PreShadowMap( Light * light ) {
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
+	// redirect rendering to the depth texture
+	glDisable( GL_TEXTURE_2D );
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, depth_fb);
+	// store the screen viewport
+	glPushAttrib(GL_VIEWPORT_BIT);
+
 	//Use viewport the same size as the shadow map
 	glViewport(0, 0, shadowMapSize, shadowMapSize);
 
@@ -527,7 +559,12 @@ void PreShadowMap( Light * light ) {
 
 	//Disable color writes, and use flat shading for speed
 	glShadeModel(GL_FLAT);
-	glColorMask(0, 0, 0, 0);
+	//glColorMask(0, 0, 0, 0);
+	//glColorMask(1, 1, 1, 1);
+	
+	// make the current depth map a rendering target
+	glFramebufferTextureEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, depth_tex, 0);
+
 }
 	
 //Draw the scene, first pass
@@ -536,10 +573,14 @@ void PreShadowMap( Light * light ) {
 void DuringShadowMap()
 {
 	//Read the depth buffer into the shadow map texture
-	glBindTexture(GL_TEXTURE_2D, shadowMapTexture);
-	glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, shadowMapSize, shadowMapSize);
+	//glBindTexture(GL_TEXTURE_2D, shadowMapTexture);
+	//glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, shadowMapSize, shadowMapSize);
 
+	// clear the depth texture from last time
+	glClear(GL_DEPTH_BUFFER_BIT);
+	
 	//restore states
+	glClear(GL_DEPTH_BUFFER_BIT);
 	glCullFace(GL_BACK);
 	glShadeModel(GL_SMOOTH);
 	glColorMask(1, 1, 1, 1);
@@ -548,6 +589,19 @@ void DuringShadowMap()
 	glPopMatrix();
 	glMatrixMode( GL_PROJECTION );
 	glPopMatrix();
+
+	// test code
+	glMatrixMode( GL_MODELVIEW );
+	glLoadIdentity();
+	glTranslatef( 0.0, 0.0, -3.0 );
+	glBegin( GL_QUADS );
+		glTexCoord2f( 0.0, 0.0 ); glVertex3f( -1.0, -1.0, 0.0 );
+		glTexCoord2f( 1.0, 0.0 ); glVertex3f( 1.0, -1.0, 0.0 );
+		glTexCoord2f( 1.0, 1.0 ); glVertex3f( 1.0, 1.0, 0.0 );
+		glTexCoord2f( 0.0, 1.0 ); glVertex3f( -1.0, 1.0, 0.0 );
+	glEnd();
+	// end
+
 	glEnable( GL_LIGHTING );
 
 	shader = new Shader( "Shader\\shadowmap.vert", "Shader\\shadowmap.frag" );
@@ -560,3 +614,4 @@ void DuringShadowMap()
 void PostShadowMap() {
 	//shader->Deactivate();
 }
+*/
