@@ -99,5 +99,3 @@ void Collision_withTable( Ball* pBall, Table* pTable )
 	return;
 }
 
-
-
