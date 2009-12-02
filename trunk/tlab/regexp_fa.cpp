@@ -1,73 +1,90 @@
-#include "heap2.h"
-#include "regexp.h"
+#include "regexp_fa.h"
+
 namespace regexp {
-#define EPSILON '\0'
-
-typedef char Weight;
-struct State {
-	int 	dummy;
-	State*  next;
-};
-struct Node;
-struct Edge {
-	Edge* 	next;
-	Node* 	dest;
-	Weight 	weight;
-};
-struct Node {
-	Node* 	next;
-	State*  statelist;
-	Edge* 	edgelist;
-};
-
-// a dummy graph is always maintained
-struct Context {
-	int 	state_count;
-	Node* 	nodelist;
-};
 
 Context* MakeContext() {
 	Context* ret = new Context();
 	ret->state_count = 0;
 	ret->nodelist = NULL;
+	ret->nfalist = NULL;
+	ret->stateliat = NULL;
 }
 
 void DestoryContext( Context* con ) {
+	// remove all nodes and edges
 	Node *node = con->nodelist;
 	Node *temp;
-	Edge *prev, *next;
-
 	while ( node != NULL ) {
-		prev = next = node->edgelist;
-		while ( next != NULL ) {
-			prev = next;
-			next = next->next;
-			delete prev;
-		}
 		temp = node;
 		node = node->next;
-		delete node;
+		RemoveNode( con, temp );
 	}
+
+	// remove all state
+	State *prev_s, *next_s;
+	prev_s = next_s = con->statelist;
+	while ( next_s != NULL ) {
+		prev_s = next_s;
+		next_s = next_s->next;
+		
+		RemoveState( con, prev_s );
+	}
+
+	// remove all nfas
+	Nfa *prev_n, *next_n;
+	prev_n = next_n = con->nfalist;
+	while ( next_n != NULL ) {
+		prev_n = next_n;
+		next_n = next_n->next;
+
+		RemoveNfa( con, prev_n );
+	}
+
 	delete con;
 }
 
-// dfa or nfa is just pick out some nodes as start node and accept node, but not 
-// maintain node infomation, the data is stored in the context
-struct Dfa {
-	Node* 	starts;
-	Node* 	accepts;
-	Context* 	context;
-};
-//#define Nfa Dfa
-typedef Dfa Nfa;
-
-State* MakeState( Context *con ) {
+State* AddState( Context *con ) {
 	State* s = new State();
 	s->dummy = con->state_count ++;
+	s->next = NULL;
+	
+	if ( con->statelist == NULL ) {
+		con->statelist = s;
+	}
+	else {
+		State* temp = con->statelist;
+		while ( temp->next != NULL ) {
+			temp = temp->next;
+		}
+		temp->next = s;
+	}
 	return s;
 }
 
-Node* AddNode( State* sl, Context* con ) {
+void RemoveState( Context* con, State* s ) {
+	State *prev, *next;
+
+	prev = next = con->statelist;
+
+	while ( next != NULL ) {
+		 if ( s == next ) {
+			 if ( prev == s->statelist ) {
+				 s->statelist = next->next;
+			 }
+			 else {
+				 prev->next = next->next;
+			 }
+			 delete next;
+			 return;
+		 }
+		 prev = next;
+		 next = next->next;
+	}
+	
+	//assert( false );
+}
+
+Node* AddNode( Context* con, State* sl ) {
 	Node* new_node = new Node();
 	new_node->next = NULL;
 	new_node->statelist = sl;
@@ -86,12 +103,11 @@ Node* AddNode( State* sl, Context* con ) {
 	}
 }
 
-void RemoveNode( Node* n, Context* con ) {
+void RemoveNode( Context* con, Node* n ) {
 	Edge 	*prev_edge, *next_edge;
 	Node 	*prev_node, *next_node;
 	prev_node = next_node = con->nodelist;
 
-	bool found = false;
 	while ( next_node != NULL ) {
 		if ( next_node == n ) {
 			// remove all edges out
@@ -101,7 +117,17 @@ void RemoveNode( Node* n, Context* con ) {
 				next_edge = next_edge->next;
 				delete prev_edge;
 			}
-			found = true;
+			if ( prev_node == con->nodelist ) {
+				prev_node = con->nodelist = next->next;
+			}
+			else {
+				prev_node->next = next_node->next;
+			}
+			Node* temp = next_node;
+			next_node = next_node->next;
+			delete temp;
+
+			continue;
 		}
 		else {
 			// remove all edges in
@@ -110,14 +136,12 @@ void RemoveNode( Node* n, Context* con ) {
 			while ( next_edge != NULL ) {
 				if ( next_edge->dest == n ) {
 					Edge* temp = next_edge;
-
 					if ( prev_edge == next_node->edgelist ) {
-						next_node->edgelist = next_edge->next;
+						prev_edge = next_node->edgelist = next_edge->next;
 					}
 					else {
 						prev_edge->next = next_edge->next;
 					}
-					prev_edge = next_edge;
 					next_edge = next_edge->next;
 					delete temp;
 				}
@@ -132,10 +156,6 @@ void RemoveNode( Node* n, Context* con ) {
 		next_node = next_node->next;
 	}
 	
-	// delete the node self
-	if ( found ) {
-		delete n;
-	}
 }
 
 void AddEdge( Node* from, Node* to, Weight w ) {
@@ -159,6 +179,12 @@ void RemoveEdge( Edge* e ) {
 	delete e;
 }
 
+Nfa* AddNfa( Context* con ) {
+	
+}
+
+void RemoveNfa( Context* con, Nfa* nfa ) {
+}
 
 // atomic operations
 Nfa* AtomicMakeNfaBySingleC( const char c, Context* con ) {
@@ -220,82 +246,5 @@ Nfa* AtomicClosureNfa( Nfa* in, Context* con ) {
 	in->accepts = n2;
 	return in;
 }
-
-Dfa* GenerateDFAfromNFA( Nfa* nfa ) {
-
-}
-
-enum SYMBOL {
-	NONE,
-	LBRACE,
-	RBRACE,
-	STAR,
-	AND,
-};
-#define STACK_SIZE 1000
-static Nfa* StackNfa[ STACK_SIZE ];
-static int SNCount = 0;
-static SYMBOL StackSym[ STACK_SIZE ];
-static int SSCount = 0;
-void PushNfa( Nfa* nfa ) {
-	if ( SNCount + 1 >= STACK_SIZE ) {
-		//
-		return;
-	}
-	StackNfa[ SNCount ++ ] = nfa;
-}
-Nfa* PopNfa() {
-	if ( SNCount - 1 < 0 ) { 
-		return NULL;
-	}
-	return StackNfa[ SNCount -- ];
-}
-void PushSymbol( SYMBOL s ) {
-	if ( SSCount + 1 >= STACK_SIZE ) {
-		return;
-	}
-	StackSym[ SSCount ++ ] = s;
-}
-SYMBOL PopSymbol( SYMBOL s ) {
-	if ( SSCount - 1 < 0 ) {
-		return NONE;
-	}
-	return StackSym[ SSCount -- ];
-}
-
-bool isletter( const char c ) {
-	return c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z';
-}
-Nfa* BuildNfa( const char* start, const char *end, Context* con ) {
-	if ( isletter( *start ) ) {
-
-	}
-	else if ( *start == '|' ) {
-	}
-	else if ( *start == '*' ) {
-	}
-	else if ( *start == '(' ) {
-	}
-	else if ( *start == ')' ) {
-	}
-}
-
-Nfa* BuildNfa( const char* Pattern ) {
-	if ( Pattern == NULL ) return NULL;
-
-	int len = strlen( Pattern );
-	Context con = new Context();
-	return BuildNfa( Pattern, Pattern + len - 1, con );
-}
-
-Dfa* BuildDFA( const char* Pattern ) {
-}
-} // namespace regexp
-
-#define _REGEXP_TEST_
-#ifdef _REGEXP_TEST_
-int main() {
-	using namespace regexp;
-	return 0;
-}
-#endif
+	
+}; // namespace
