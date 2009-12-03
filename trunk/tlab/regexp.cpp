@@ -1,301 +1,189 @@
 #include "heap2.h"
 #include "regexp.h"
+#include "regexp_fa.h"
+#include "stdio.h"
 namespace regexp {
-#define EPSILON '\0'
+enum SYMBOL {
+	STAR = 0,
+	CONCAT = 1,
+	OR,
+	LBRACE,
+	RBRACE,
+	NONE,
+};
+int SymbolWeight[ NONE + 1 ] = { 1, 2, 2, 3, 3, 4 };
 
-typedef char Weight;
-struct State {
-	int 	dummy;
-	State*  next;
+struct SymbolStackElement {
+	SYMBOL symbol;
+	SymbolStackElement* next;
 };
-struct Node;
-struct Edge {
-	Edge* 	next;
-	Node* 	dest;
-	Weight 	weight;
-};
-struct Node {
-	Node* 	next;
-	State*  statelist;
-	Edge* 	edgelist;
-};
+static SymbolStackElement* symbolstacktop = NULL;
 
-// a dummy graph is always maintained
-struct Context {
-	int 	state_count;
-	Node* 	nodelist;
-};
-
-Context* MakeContext() {
-	Context* ret = new Context();
-	ret->state_count = 0;
-	ret->nodelist = NULL;
+static void PushSymbol( SYMBOL s ) {
+	SymbolStackElement* sse = new SymbolStackElement();
+	sse->symbol = s;
+	sse->next = symbolstacktop;
+	symbolstacktop = sse;
 }
 
-void DestoryContext( Context* con ) {
-	Node *node = con->nodelist;
-	Node *temp;
-	Edge *prev, *next;
-
-	while ( node != NULL ) {
-		prev = next = node->edgelist;
-		while ( next != NULL ) {
-			prev = next;
-			next = next->next;
-			delete prev;
-		}
-		temp = node;
-		node = node->next;
-		delete node;
-	}
-	delete con;
-}
-
-// dfa or nfa is just pick out some nodes as start node and accept node, but not 
-// maintain node infomation, the data is stored in the context
-struct Dfa {
-	Node* 	starts;
-	Node* 	accepts;
-	Context* 	context;
-};
-//#define Nfa Dfa
-typedef Dfa Nfa;
-
-State* MakeState( Context *con ) {
-	State* s = new State();
-	s->dummy = con->state_count ++;
-	return s;
-}
-
-Node* AddNode( State* sl, Context* con ) {
-	Node* new_node = new Node();
-	new_node->next = NULL;
-	new_node->statelist = sl;
-	new_node->edgelist = NULL;
-
-	// add this node into the context
-	if ( con->nodelist == NULL ) {
-		con->nodelist = new_node;
+static SYMBOL PopSymbol() {
+	if ( symbolstacktop == NULL ) {
+		return NONE;
 	}
 	else {
-		Node* l = con->nodelist;
-		while ( l->next != NULL ) {
-			l = l->next;
-		}
-		l->next = new_node;
+		SYMBOL ret = symbolstacktop->symbol;
+		SymbolStackElement* sse = symbolstacktop;
+		symbolstacktop = symbolstacktop->next;
+		delete sse;
+		return ret;
 	}
 }
 
-void RemoveNode( Node* n, Context* con ) {
-	Edge 	*prev_edge, *next_edge;
-	Node 	*prev_node, *next_node;
-	prev_node = next_node = con->nodelist;
-
-	bool found = false;
-	while ( next_node != NULL ) {
-		if ( next_node == n ) {
-			// remove all edges out
-			next_edge = n->edgelist;
-			while ( next_edge != NULL ) {
-				prev_edge = next_edge;
-				next_edge = next_edge->next;
-				delete prev_edge;
-			}
-			found = true;
-		}
-		else {
-			// remove all edges in
-			prev_edge = next_edge = next_node->edgelist;
-
-			while ( next_edge != NULL ) {
-				if ( next_edge->dest == n ) {
-					Edge* temp = next_edge;
-
-					if ( prev_edge == next_node->edgelist ) {
-						next_node->edgelist = next_edge->next;
-					}
-					else {
-						prev_edge->next = next_edge->next;
-					}
-					prev_edge = next_edge;
-					next_edge = next_edge->next;
-					delete temp;
-				}
-				else {
-					prev_edge = next_edge;
-					next_edge = next_edge->next;
-				}
-			}
-		}
-
-		prev_node = next_node;
-		next_node = next_node->next;
-	}
-	
-	// delete the node self
-	if ( found ) {
-		delete n;
-	}
-}
-
-void AddEdge( Node* from, Node* to, Weight w ) {
-	Edge* 	new_edge = new Edge();
-	new_edge->dest = to;
-	new_edge->weight = w;
-
-	Edge* 	ep = from->edgelist;
-	if ( ep == NULL ) {
-		from->edgelist = new_edge;
+static SYMBOL TopSymbol() {
+	if ( symbolstacktop == NULL ) {
+		return NONE;
 	}
 	else {
-		while ( ep->next != NULL ) {
-			ep = ep->next;
-		}
-		ep->next = new_edge;
+		return symbolstacktop->symbol;
 	}
 }
 
-void RemoveEdge( Edge* e ) {
-	delete e;
-}
-
-
-// atomic operations
-Nfa* AtomicMakeNfaBySingleC( const char c, Context* con ) {
-	Nfa* ret = new Nfa();
-	State* ss = MakeState( con );
-	Node* start = AddNode( ss, con );
-	ss = MakeState( con );
-	Node* end = AddNode( ss, con );
-	AddEdge( start, end, c );
-	ret->starts = start;
-	ret->accepts = end;
-	ret->context = con;
+static int SymbolStackSize() {
+	SymbolStackElement* sse = symbolstacktop;
+	int ret = 0;
+	while ( sse != NULL ) {
+		sse = sse->next;
+		ret ++;
+	}
 	return ret;
 }
 
-Nfa* AtomicConcatenateNfa( Nfa* first, Nfa* second, Context* con ) {
-	Node* 	fa = first->accepts;
-	Node* 	ss = second->starts;
-	Edge* 	edge = ss->edgelist;
-
-	while ( edge != NULL ) {
-		AddEdge( fa, edge->dest, edge->weight );
-		edge = edge->next;
-	}
-	RemoveNode( second->starts, con );
-	first->accepts = second->accepts;
-	delete second;
-	return first;
+static bool SymbolGE( SYMBOL lhs, SYMBOL rhs ) {
+	return SymbolWeight[ lhs ] >= SymbolWeight[ rhs ];
 }
 
-Nfa* AtomicAndNfa( Nfa* first, Nfa* second, Context* con ) {
-	Node* 	n1 = AddNode( MakeState( con ), con );
-	AddEdge( n1, first->starts, EPSILON );
-	AddEdge( n1, second->starts, EPSILON );
-
-	Node* 	n2 = AddNode( MakeState( con ), con );
-	AddEdge( first->accepts, n2, EPSILON );
-	AddEdge( second->accepts, n2, EPSILON );
-
-	Nfa* 	nfa = new Nfa();
-	nfa->starts = n1;
-	nfa->accepts = n2;
-	nfa->context = con;
-
-	delete first;
-	delete second;
-	return nfa;
-}
-
-Nfa* AtomicClosureNfa( Nfa* in, Context* con ) {
-	Node* 	n1 = AddNode( MakeState( con ), con );
-	AddEdge( n1, in->starts, EPSILON );
-	Node* 	n2 = AddNode( MakeState( con ), con );
-	AddEdge( in->accepts, n2, EPSILON );
-
-	AddEdge( in->accepts, in->starts, EPSILON );
-
-	in->starts = n1;
-	in->accepts = n2;
-	return in;
-}
-
-Dfa* GenerateDFAfromNFA( Nfa* nfa ) {
-
-}
-
-enum SYMBOL {
-	NONE,
-	LBRACE,
-	RBRACE,
-	STAR,
-	AND,
-};
-#define STACK_SIZE 1000
-static Nfa* StackNfa[ STACK_SIZE ];
-static int SNCount = 0;
-static SYMBOL StackSym[ STACK_SIZE ];
-static int SSCount = 0;
-void PushNfa( Nfa* nfa ) {
-	if ( SNCount + 1 >= STACK_SIZE ) {
-		//
-		return;
+static void ChangeStack( Context* con ) {
+	printf( "Change Stack\n" );
+	SYMBOL s = PopSymbol();
+	Nfa* n1, *n2, *nt;
+	
+	if ( s == CONCAT ) {
+		n2 = PopNfa( con );
+		n1 = PopNfa( con );
+		nt = AtomicConcatenateNfa( con, n1, n2 );
+		PushNfa( con, nt );
 	}
-	StackNfa[ SNCount ++ ] = nfa;
-}
-Nfa* PopNfa() {
-	if ( SNCount - 1 < 0 ) { 
-		return NULL;
+	else if ( s == OR ) {
+		n2 = PopNfa( con );
+		n1 = PopNfa( con );
+		nt = AtomicOrNfa( con, n1, n2 );
+		PushNfa( con, nt );
 	}
-	return StackNfa[ SNCount -- ];
-}
-void PushSymbol( SYMBOL s ) {
-	if ( SSCount + 1 >= STACK_SIZE ) {
-		return;
-	}
-	StackSym[ SSCount ++ ] = s;
-}
-SYMBOL PopSymbol( SYMBOL s ) {
-	if ( SSCount - 1 < 0 ) {
-		return NONE;
-	}
-	return StackSym[ SSCount -- ];
-}
-
-bool isletter( const char c ) {
-	return c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z';
-}
-Nfa* BuildNfa( const char* start, const char *end, Context* con ) {
-	if ( isletter( *start ) ) {
-
-	}
-	else if ( *start == '|' ) {
-	}
-	else if ( *start == '*' ) {
-	}
-	else if ( *start == '(' ) {
-	}
-	else if ( *start == ')' ) {
+	else if ( s == STAR ) {
+		// impossible
 	}
 }
 
-Nfa* BuildNfa( const char* Pattern ) {
-	if ( Pattern == NULL ) return NULL;
-
-	int len = strlen( Pattern );
-	Context con = new Context();
-	return BuildNfa( Pattern, Pattern + len - 1, con );
+static bool isletter( const char c ) {
+	return c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z';
 }
 
-Dfa* BuildDFA( const char* Pattern ) {
-}
-} // namespace regexp
+void OutputContext( Context* con ) {
+	State* s;
+	Edge* e;
+	Node* n;
+	n = con->nodelist;
+	while ( n != NULL ) {
+		printf( "Node\n" );
+		s = n->statelist;
+		while ( s != NULL ) {
+			printf( "\tstate: %d\n", s->dummy );
+			s = s->next;
+		}
 
-#define _REGEXP_TEST_
-#ifdef _REGEXP_TEST_
-int main() {
-	using namespace regexp;
-	return 0;
+		e = n->edgelist;
+		while ( e != NULL ) {
+			printf ("\tedge: %d %c\n", e->dest->statelist->dummy, e->weight );
+			e = e->next;
+		}
+
+		printf( "\n" );
+		n = n->next;
+	}
+	printf( "Start: %d\n", con->stacktop->nfa->starts->statelist->dummy );
+	printf( "Accepts: %d\n", con->stacktop->nfa->accepts->statelist->dummy );
+	return;
 }
-#endif
+
+Context* RegexpCompile( const char* Pattern ) {
+	Context* con = MakeContext();
+	const char *p = Pattern;
+	
+	while ( *p != '\0' ) {
+		printf( "deal with %c\n", *p );
+		printf( "nfa size: %d\t%d\n", NumNfaList( con ), NumNfaStack( con ) );
+		printf( "symbol stack size: %d\n", SymbolStackSize() );
+		if ( isletter( *p ) ) {
+			Nfa* nfa = AtomicMakeNfaBySingleC( con, *p );
+			PushNfa( con, nfa );
+
+			while ( SymbolGE( CONCAT, TopSymbol() )  ) {
+				ChangeStack( con );
+			}
+			PushSymbol( CONCAT );
+		}
+		else if ( *p == '|' ) {
+			if ( TopSymbol() == CONCAT ) {
+				PopSymbol();
+			}
+			else {
+				printf("error\n");
+			}
+
+			while ( SymbolGE( OR, TopSymbol() ) ) {
+				ChangeStack( con );
+			}
+
+			PushSymbol( OR );
+		}
+		else if ( *p == '*' ) {
+			if ( TopSymbol() == CONCAT ) {
+				PopSymbol();
+			}
+			else {
+				printf("error\n");
+			}
+
+			Nfa* nfa = PopNfa( con );
+			nfa = AtomicClosureNfa( con, nfa );
+			PushNfa( con, nfa );
+
+			PushSymbol( CONCAT );
+		}
+		else if ( *p == '(' ) {
+			PushSymbol( LBRACE );
+		}
+		else if ( *p == ')' ) {
+			if ( TopSymbol() == CONCAT ) {
+				PopSymbol();
+			}
+			else {
+				printf("error\n");
+			}
+
+			while ( SymbolGE( RBRACE, TopSymbol() ) ) {
+				if ( TopSymbol() == LBRACE ) {
+					PopSymbol();
+					break;
+				}
+				ChangeStack( con );
+			}
+
+			PushSymbol( CONCAT );
+		}
+		p ++;
+	}
+	return con;
+}
+
+}

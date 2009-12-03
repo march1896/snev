@@ -12,9 +12,14 @@ typedef Dfa Nfa;
 
 Context* MakeContext();
 void DestoryContext( Context* con );
+Nfa* 	PopNfa( Context* con );
+void  	PushNfa( Context* con, Nfa* nfa );
+int 	NumNfaList( Context* con );
+int 	NumNfaStack( Context* con );
 
-State* AddState( Context* con );
-void RemoveState( Context* con );
+State* MakeState( Context* con );
+void AddState( Node* n, State* s );
+void RemoveState( Context* con, State* s );
 
 Node* AddNode( Context* con, State* statelist );
 void RemoveNode( Context* con, Node* node );
@@ -26,12 +31,23 @@ void RemoveEdge( Edge* e );
 Nfa* AddNfa( Context* con, Node* starts, Node* accepts );
 void RemoveNfa( Context* con, Nfa* nfa );
 
+Nfa* AtomicMakeNfaBySingleC( Context* con, const char c );
+Nfa* AtomicConcatenateNfa( Context* con, Nfa* first, Nfa* second );
+Nfa* AtomicOrNfa( Context* con, Nfa* first, Nfa* second );
+Nfa* AtomicClosureNfa( Context* con, Nfa* in );
+
+Dfa* CompileNfaToDfa( Context* con );
 // a dummy graph is always maintained
+struct NfaStackElement {
+	Nfa* 	nfa;
+	NfaStackElement* 	next;
+};
+
 struct Context {
 	int 	state_count;
 	Node* 	nodelist;
 	Nfa* 	nfalist;
-	State* 	statelist;
+	NfaStackElement* 	stacktop;
 };
 
 struct State {
@@ -58,5 +74,5 @@ struct Dfa {
 	Node* 	starts;
 	Node* 	accepts;
 };
-}; // namespace
+} // namespace
 #endif
