@@ -183,6 +183,10 @@ Context* RegexpCompile( const char* Pattern ) {
 		}
 		p ++;
 	}
+
+	while ( TopSymbol() != NONE ) {
+		PopSymbol();
+	}
 	return con;
 }
 

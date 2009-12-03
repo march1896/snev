@@ -7,8 +7,7 @@ struct State;
 struct Edge;
 struct Node;
 struct Context;
-struct Dfa;
-typedef Dfa Nfa;
+struct Nfa;
 
 Context* MakeContext();
 void DestoryContext( Context* con );
@@ -69,8 +68,8 @@ struct Node {
 
 // dfa or nfa is just pick out some nodes as start node and accept node, but not 
 // maintain node infomation, the data is stored in the context
-struct Dfa {
-	Dfa* 	next;
+struct Nfa {
+	Nfa* 	next;
 	Node* 	starts;
 	Node* 	accepts;
 };
