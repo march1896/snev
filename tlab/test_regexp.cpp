@@ -11,7 +11,7 @@ int main() {
 	if ( memory == NULL ) printf( "!!!!!FATAL ERROR!!!!!\n" );
 	InitHeap( memory, INIT_MEMORY_SIZE );
 	
-	char buff[] = "((ac))*|b";
+	char buff[] = "((ac)|a)|b";
 	Context* con;
 	con = RegexpCompile( buff );
 	OutputContext( con );

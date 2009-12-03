@@ -317,6 +317,10 @@ Nfa* AtomicClosureNfa( Context* con, Nfa* in ) {
 }
 
 Context* CompileNfaToDfa( Context* con ) {
+	Context* dfa_c = MakeContext();
+	Node* n_n = con->starts;
+	Node* d_n = AddNode( dfa_c );
+
 	DestoryContext( con );
 }
 
