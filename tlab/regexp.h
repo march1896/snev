@@ -1,9 +1,9 @@
 #ifndef _TJ_REGEXP_
 #define _TJ_REGEXP_
 namespace regexp {
-struct Dfa;
-Dfa* 	BuildDFA( const char* Pattern );
-bool 	Acceptable( const char* Text, const Dfa& dfa );
-bool 	FirstMatch( const char* Text, const Dfa& dfa, char* start, char* end );
+struct Context;
+Context* RegexpCompile( const char* Pattern );
+bool 	RegexpAcceptable( const char* Text, const Context* dfa );
+void 	OutputContext( Context* con );
 };
 #endif
