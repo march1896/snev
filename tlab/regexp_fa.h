@@ -8,6 +8,7 @@ struct Edge;
 struct Node;
 struct Context;
 struct Nfa;
+typedef Nfa Dfa;
 
 Context* MakeContext();
 void DestoryContext( Context* con );
@@ -35,18 +36,42 @@ Nfa* AtomicConcatenateNfa( Context* con, Nfa* first, Nfa* second );
 Nfa* AtomicOrNfa( Context* con, Nfa* first, Nfa* second );
 Nfa* AtomicClosureNfa( Context* con, Nfa* in );
 
-Dfa* CompileNfaToDfa( Context* con );
+struct DfaNodeElement;
+Node* 	PopDfaNode( Context* con );
+void 	PushDfaNode( Context* con, Node* noe );
+DfaNodeElement* 	FirstUncoloredNode( Context* con );
+void CompileNfaToDfa( Context* con );
+
+struct Symbol;
+void 	AddSymbol( Context* con, Weight w );
 // a dummy graph is always maintained
 struct NfaStackElement {
 	Nfa* 	nfa;
 	NfaStackElement* 	next;
 };
 
+struct DfaNodeElement {
+	Node* 	node;
+	bool 	colored;
+	DfaNodeElement* 	next;
+};
+
+struct Symbol {
+	Weight symbol;
+	Symbol* next;
+};
+
 struct Context {
 	int 	state_count;
-	Node* 	nodelist;
+	Node* 	nfanodelist;
 	Nfa* 	nfalist;
-	NfaStackElement* 	stacktop;
+	NfaStackElement* 	nfa_stacktop;
+
+	DfaNodeElement* 	dne_queue;
+	Node* 	dfanodelist;
+	Dfa* 	dfa;
+
+	Symbol* symbollist;
 };
 
 struct State {
