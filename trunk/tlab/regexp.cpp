@@ -1,6 +1,6 @@
-#include "heap2.h"
 #include "regexp.h"
 #include "regexp_fa.h"
+#include "heap2.h"
 #include "stdio.h"
 namespace regexp {
 enum SYMBOL {
@@ -92,7 +92,7 @@ void OutputContext( Context* con ) {
 	State* s;
 	Edge* e;
 	Node* n;
-	n = con->nodelist;
+	n = con->nfanodelist;
 	while ( n != NULL ) {
 		printf( "Node\n" );
 		s = n->statelist;
@@ -110,9 +110,44 @@ void OutputContext( Context* con ) {
 		printf( "\n" );
 		n = n->next;
 	}
-	printf( "Start: %d\n", con->stacktop->nfa->starts->statelist->dummy );
-	printf( "Accepts: %d\n", con->stacktop->nfa->accepts->statelist->dummy );
+	printf( "Start: %d\n", con->nfa_stacktop->nfa->starts->statelist->dummy );
+	printf( "Accepts: %d\n", con->nfa_stacktop->nfa->accepts->statelist->dummy );
 	return;
+}
+
+int ComputR( Node* n ) {
+	State* s = n->statelist;
+	int ret = 0;
+	
+	while ( s != NULL ) {
+		//printf( "%d\t", s->dummy );
+		ret += s->dummy;
+		s = s->next;
+	}
+	return ( (ret*17337) % 100 );
+}
+void OutputDfa( Context* con ) {
+	DfaNodeElement* dne = con->dne_queue;
+	while ( dne != NULL ) {
+		Node* node = dne->node;
+		printf( "Node %d\n", ComputR( dne->node ) );
+		Edge* e = node->edgelist;
+		printf( "Edges\n" );
+		while ( e != NULL ) {
+			printf( "\t%c\t%d\n", e->weight, ComputR( e->dest ) );
+			e = e->next;
+		}
+		dne = dne->next;
+	}
+
+	printf( "Starts: %d\n", ComputR( con->dfa->starts ) );
+	Node* n = con->dfa->accepts;
+	printf( "Accepts: " );
+	while ( n != NULL ) {
+		printf( "%d\t", ComputR( n ) );
+		n = n->next;
+	}
+	printf( "\n" );
 }
 
 Context* RegexpCompile( const char* Pattern ) {
@@ -190,4 +225,34 @@ Context* RegexpCompile( const char* Pattern ) {
 	return con;
 }
 
+bool 	RegexpAcceptable( const char* Text, const Context* con ) {
+	const char *p = Text;
+	Node* n = con->dfa->starts;
+	bool found;
+	while ( *p != '\0' ) {
+		Edge* e = n->edgelist;
+		
+		found = false;
+		while ( e != NULL ) {
+			if ( e->weight == *p ) {
+				found = true;
+				break;
+			}
+			e = e->next;
+		}
+		if ( found ) {
+			n = e->dest;
+			p ++;
+		}
+		else {
+			return false;
+		}
+	}
+	Node* nt = con->dfa->accepts;
+	while ( nt != NULL ) {
+		if ( nt == n ) return true;
+		nt = nt->next;
+	}
+	return false;
+}
 }

@@ -44,9 +44,12 @@ void testTime() {
 
 	for ( int i = 0; i < NUM; i ++ ) {
 		int num = rand() % SIZE;
-		if ( pointer[ num ] == 0 ) {
+		//printf( "Start num = %d\n", num );
+		//printf( "pointer addr: 0x%08x\n", (uint)pointer[num] );
+		if ( pointer[ num ] == NULL ) {
 			int size = rand() % RANDOM_ALLOC_MAX_SIZE + 1;
 			//printf( "Allocate: %d\t\t", size );
+			//printf( "here, fuck\n" );
 			
 			pointer[ num ] = (char*)Allocate( size * sizeof( char ) );
 			if ( pointer[ num ] == NULL ) {
@@ -58,7 +61,7 @@ void testTime() {
 			//printf( "Free:\t\t" );
 			Free( pointer[num] );
 			//printf( "Pointer %d \tfree %d, \taddr 0x%08x\n", num, GetMemoryBlockSize( pointer[ num] ), (unsigned)pointer[ num ] - 16 );
-			pointer[ num ] = 0;
+			pointer[ num ] = NULL;
 		}
 		//DumpFreeList();
 		//heap->OutputFreeList();

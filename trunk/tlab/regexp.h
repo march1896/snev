@@ -3,7 +3,8 @@
 namespace regexp {
 struct Context;
 Context* RegexpCompile( const char* Pattern );
-bool 	RegexpAcceptable( const char* Text, const Context* dfa );
+bool 	RegexpAcceptable( const char* Text, const Context* con );
 void 	OutputContext( Context* con );
+void 	OutputDfa( Context* con );
 };
 #endif
