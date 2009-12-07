@@ -1,6 +1,8 @@
 #include "regexp_fa.h"
 #include "heap2.h"
 #include "stdio.h"
+/* this version is far from graduated, so many mistakes
+   */
 
 namespace regexp {
 
