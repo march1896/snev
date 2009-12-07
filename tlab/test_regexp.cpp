@@ -15,7 +15,7 @@ int main() {
 	if ( memory == NULL ) printf( "!!!!!FATAL ERROR!!!!!\n" );
 	InitHeap( memory, INIT_MEMORY_SIZE );
 	
-	char buff[] = "(ab)*acb";
+	char buff[] = "(ab|a)*";
 	Context* con;
 	con = RegexpCompile( buff );
 	OutputContext( con );
@@ -26,14 +26,14 @@ int main() {
 	OutputDfa( con );
 	printf( "hello, world\n" );
 
-	teststring( "abababababababababababacb", con );
-	teststring( "abacb", con );
-	teststring( "abaabb", con );
+	teststring( "ababababababababababab", con );
+	teststring( "abaabaaabaab", con );
+	teststring( "abbaab", con );
 
 	DestoryContext( con );
 	CheckLeakPoint();
 
-	printf( "%d %d\n", NumNfaList( con ), NumNfaStack( con ) );
+	//printf( "%d %d\n", NumNfaList( con ), NumNfaStack( con ) );
 
 	free( memory );
 
