@@ -1,0 +1,35 @@
+#ifndef _CONTAINER_ALLOC_
+#define _CONTAINER_ALLOC_
+#include "../heap/heap2.h"
+namespace TgLib {
+	namespace Container {
+		template< typename T, typename Pointer=T*, typename Reference=T& >
+		//template< typename T >
+		class Alloc {
+			public:
+				typedef T 			value_type;
+				typedef Pointer 	pointer;
+				typedef Reference 	reference;
+
+				pointer  	allocate();
+				void 		deallocate( pointer p );
+			protected:
+		};
+
+		template< typename T, typename Pointer = T*, typename Reference = T& >
+		//template< typename T >
+		T* Alloc<T,T&,T*>::allocate() {
+			T* p;
+			return p;
+		}
+		/*
+
+		//template< typename T, typename Pointer = T*, typename Reference = T& >
+		template< typename T >
+		void Alloc<T>::deallocate( T* p ) {
+			return; 
+		}
+		*/
+	};
+};
+#endif //_CONTAINER_ALLOC_
