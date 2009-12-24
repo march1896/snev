@@ -1,0 +1,35 @@
+class Print : public Function {
+	void Compute() {
+		std::vector< Variable >::iterator itr = m_vParamlist.begin();
+
+		for ( ; itr != m_vParamlist.end(); itr ++ ) {
+			switch ( itr->GetType() ) {
+				case Variable::E_NULL:
+					printf( "NULL\t" );
+					break;
+				case Variable::E_INT:
+					printf( "%d\t", itr->GetIntValue() );
+					break;
+				case Variable::E_FLOAT:
+					printf( "%f\t", itr->GetFloatValue() );
+					break;
+				case Variable::E_STRING:
+					printf( "%s\t", itr->GetStringValue().c_str() );
+					break;
+			}
+		}
+		printf( "\n" );
+	}
+};
+
+class Add : public Function {
+	void Compute() {
+		std::vector< Variable >::iterator itr = m_vParamlist.begin();
+
+		Variable var( 0 );
+		for ( ; itr != m_vParamlist.end(); itr ++ ) {
+			var += (*itr);
+		}
+		m_ReturnValue = var;
+	}
+};
