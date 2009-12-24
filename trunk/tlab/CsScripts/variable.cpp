@@ -21,14 +21,28 @@ Variable::Variable( float value ): m_eType( E_FLOAT ) {
 }
 
 Variable::Variable( const std::string& value ): m_eType( E_STRING ) {
-	m_pData = new std::string( value );
+	m_pData = new std::string( value.substr( 1, value.length() - 2 ) );
 }
 
 Variable::Variable(): m_eType( E_NULL ), m_pData( NULL ) {
 }
 
 Variable::Variable( const Variable& var ) {
-	*this = var;
+	E_VTYPE type = var.GetType();
+	SetType( type );
+
+	if ( type == E_NULL ) {
+		m_pData = NULL;
+	}
+	else if ( type == E_FLOAT ) {
+		m_pData = new float( var.GetFloatValue() );
+	}
+	else if ( type == E_INT ) {
+		m_pData = new int( var.GetIntValue() );
+	}
+	else if ( type == E_STRING ) {
+		m_pData = new std::string( var.GetStringValue() );
+	}
 }
 
 Variable::~Variable() {
@@ -49,10 +63,8 @@ Variable::~Variable() {
 	}
 }
 
+#include <cstdio>
 const Variable& Variable::operator=( const Variable& var ) {
-	E_VTYPE type = var.GetType();
-	SetType( type );
-
 	if ( m_pData ) {
 		if ( m_eType == E_INT ) {
 			int* p = static_cast< int* >( m_pData );
@@ -69,6 +81,8 @@ const Variable& Variable::operator=( const Variable& var ) {
 		m_pData = NULL;
 	}
 	
+	E_VTYPE type = var.GetType();
+	SetType( type );
 	if ( type == E_NULL ) {
 		m_pData = NULL;
 	}

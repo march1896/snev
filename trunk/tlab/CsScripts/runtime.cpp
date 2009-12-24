@@ -3,6 +3,7 @@
 #include "function.h"
 #include <map>
 #include <vector>
+#include "function.items"
 
 /******************************************************************************
   implementation for functiontable class 
@@ -11,19 +12,24 @@ FunctionTable::FunctionTable() {
 }
 
 FunctionTable::~FunctionTable() {
+	std::map< std::string, Function* >::iterator itr = m_mTable.begin();
+	for (; itr != m_mTable.end(); itr ++ ) {
+		delete itr->second;
+	}
 	m_mTable.clear();
 }
 
-void FunctionTable::RegisterFunction( const std::string& funcName, Function func ) {
+void FunctionTable::RegisterFunction( const std::string& funcName, Function *func ) {
 	m_mTable.insert( make_pair( funcName, func ) );
 }
 
 void FunctionTable::UnregisterFunction( const std::string& funcName ) {
-	std::map< std::string, Function >::iterator itr;
+	std::map< std::string, Function* >::iterator itr;
 
 	itr = m_mTable.find( funcName );
 	if ( itr != m_mTable.end() ) {
 		// find the function
+		delete itr->second;
 		m_mTable.erase( itr );
 	}
 
@@ -31,11 +37,11 @@ void FunctionTable::UnregisterFunction( const std::string& funcName ) {
 }
 
 Function* FunctionTable::GetFunction( const std::string& funcName ) {
-	std::map< std::string, Function >::iterator itr;
+	std::map< std::string, Function* >::iterator itr;
 
 	itr = m_mTable.find( funcName );
 	if ( itr != m_mTable.end() ) {
-		return &itr->second;
+		return itr->second;
 	}
 
 	return NULL;
@@ -46,21 +52,30 @@ Function* FunctionTable::GetFunction( const std::string& funcName ) {
   ****************************************************************************/
 
 VariableTable::VariableTable() {
+	m_mTable.clear();
 }
 
 VariableTable::~VariableTable() {
+	std::map< std::string, Variable* >::iterator itr;
+	for ( itr = m_mTable.begin(); itr != m_mTable.end(); itr ++ ) {
+		if ( itr->second ) {
+			delete itr->second;
+			itr->second = NULL;
+		}
+	}
 	m_mTable.clear();
 }
 
 void VariableTable::RegisterVariable( const std::string& variableName, const Variable& var ) {
-	m_mTable.insert( make_pair( variableName, var ) );
+	m_mTable.insert( std::make_pair( variableName, new Variable( var ) ) );
 }
 
 void VariableTable::UnregisterVariable( const std::string& variableName ) {
-	std::map< std::string, Variable >::iterator itr;
+	std::map< std::string, Variable* >::iterator itr;
 	itr = m_mTable.find( variableName );
 
 	if ( itr != m_mTable.end() ) {
+		delete itr->second;
 		m_mTable.erase( itr );
 	}
 
@@ -68,11 +83,12 @@ void VariableTable::UnregisterVariable( const std::string& variableName ) {
 }
 
 Variable* VariableTable::GetVariable( const std::string& variableName ) {
-	std::map< std::string, Variable >::iterator itr;
+	std::map< std::string, Variable* >::iterator itr;
+
 	itr = m_mTable.find( variableName );
 
 	if ( itr != m_mTable.end() ) {
-		return &itr->second;
+		return itr->second;
 	}
 
 	return NULL;
@@ -122,7 +138,7 @@ void Runtime::PopVarTable() {
 Variable* Runtime::GetVariable( const std::string& varName ) {
 	std::vector< VariableTable* >::iterator vt_itr = m_vVtList.end();
 
-	for ( ; vt_itr != m_vVtList.begin(); vt_itr -- ) {
+	for ( vt_itr-- ; vt_itr != m_vVtList.begin(); vt_itr -- ) {
 		// check for toppest variabletable first, then go down 
 		Variable* pv = (*vt_itr)->GetVariable( varName );
 		if ( pv != NULL ) {
@@ -141,5 +157,8 @@ Variable* Runtime::AddVariable( const std::string& varName, Variable var ) {
 
 void Runtime::InitFunctionTable() {
 	// TODO:
+	m_pFuncTable = new FunctionTable();
+	m_pFuncTable->RegisterFunction( "print", new Print() );
+	m_pFuncTable->RegisterFunction( "add", new Add() );
 	return;
 }
