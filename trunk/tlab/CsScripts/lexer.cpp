@@ -120,11 +120,18 @@ void Token::Flush() {
 		m_dummy[0] = '\0';
 		return;
 	}
-
-	for ( const char *p = m_start; p < m_end; p ++ ) {
-		m_dummy[p - m_start] = *p;
+	int quate;
+	if ( m_type == E_TOKEN_STRING || m_type == E_TOKEN_STRING_SINGLEQUOTE ) {
+		quate = 1;
 	}
-	m_dummy[ m_end - m_start ] = '\0';
+	else {
+		quate = 0;
+	}
+
+	for ( const char *p = m_start + quate; p < m_end - quate; p ++ ) {
+		m_dummy[p - m_start - quate ] = *p;
+	}
+	m_dummy[ m_end - m_start - 2*quate ] = '\0';
 
 	return;
 }
@@ -461,7 +468,7 @@ void Lexer::MoveNext() {
 				q ++;
 			}
 
-			m_next->Assign( p, q+1, E_TOKEN_STRING );
+			m_next->Assign( p, q+1, E_TOKEN_STRING_SINGLEQUOTE );
 			return;
 		}
 

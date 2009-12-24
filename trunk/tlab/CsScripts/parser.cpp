@@ -536,8 +536,8 @@ Variable Expression::Calculate( const Variable &var1, const Variable &var2, E_TO
 		return Variable();
 	}
 
-	if ( var1.GetType() != var2.GetType() ) {
-		printf ("types %d %d\n", var1.GetType(), var2.GetType() );
+	if ( var1.GetType() - var2.GetType() > 1 || var1.GetType() - var2.GetType() < -1 ) {
+		// printf ("types %d %d\n", var1.GetType(), var2.GetType() );
 		GetParser()->SetError( Parser::E_PAERR_EXP_OPTYPEDIFF );
 		return Variable();
 	}
