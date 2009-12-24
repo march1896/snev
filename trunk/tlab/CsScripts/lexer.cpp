@@ -232,7 +232,7 @@ const Token& Token::operator=( const Token& tok ) {
   ***************************************************/
 const int Lexer::N_FILE_NAME = 100;
 
-char* Lexer::ErrorInfo[ E_ERROR_END ] = {
+const char* Lexer::ErrorInfo[ E_ERROR_END ] = {
 	"OK",
 	"Initialize lexer failed, no file binded",
 	"Not enough memory",
@@ -315,7 +315,8 @@ bool IsDigit( const char* p ) {
 }
 
 static inline bool IsBlack( const char* p ) {
-	if ( *p == ' ' || *p == '\t' || *p == 10 || *p == '\n' ) return true;
+	// 13 is for linux
+	if ( *p == ' ' || *p == '\t' || *p == 10 || *p == '\n' || *p == 13 ) return true;
 	else return false;
 }
 
@@ -546,6 +547,7 @@ void Lexer::MoveNext() {
   below is the test code for lexer
   *******************************************************************/
 
+//#define _CS_LEXER_TEST_
 #ifdef _CS_LEXER_TEST_
 int main( int argc, char* argv[] ) {
 	if ( argc <= 1 ) return 0;

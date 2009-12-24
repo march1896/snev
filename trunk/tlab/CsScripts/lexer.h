@@ -98,7 +98,7 @@ public:
 	};
 
 private:
-	static char *ErrorInfo[ E_ERROR_END ];
+	static const char *ErrorInfo[ E_ERROR_END ];
 public:
 					Lexer();
 					Lexer( const char* filename );
@@ -119,7 +119,7 @@ public:
 	void 			Initialize();
 
 	E_ERROR_TYPE 	GetErrorType() const { return m_errtype; } 			
-	char* 			GetErrorInfo() const { return ErrorInfo[ m_errtype ]; }
+	const char* 		GetErrorInfo() const { return ErrorInfo[ m_errtype ]; }
 	int 			GetErrorLine() const { return m_linenumber; }
 private:
 	

@@ -2,13 +2,14 @@
 #include "variable.h"
 #include "function.h"
 #include <cstdio>
+#include <cstring>
 
-#undef _DEBUG
+//#define _DEBUG
 
 /****************************************************************************
  Parser implementation
 ****************************************************************************/
-char* Parser::ErrorInfo[] = {
+const char* Parser::ErrorInfo[] = {
 	"OK",
 	"Undefined Keyword",
 	"Strange variable format",
@@ -348,6 +349,7 @@ void Expression::Parse() {
 	}
 	else if ( fac->GetType() == E_FACTOR_FUNCTION ) {
 		PushVar( *(fac->GetValue() ) );
+		m_bIsLastVariable = true;
 	}
 	else {
 		// error, expression can only start with variable or '('
@@ -375,6 +377,7 @@ void Expression::Parse() {
 	while ( true ) {
 		// pre judge if the expression is end
 		const Token* ptok = lex->GetNextTokenPointer();
+		//printf( "%s\n", lex->GetNextTokenPointer()->GetTokenTypeString() );
 		if ( m_bIsLastVariable ) {
 			if ( ptok->GetType() == E_TOKEN_DOLLAR || ptok->GetType() == E_TOKEN_AMPER || ptok->GetType() == E_TOKEN_IDENTITY ) {
 				while ( true ) {
@@ -1022,9 +1025,10 @@ void StatementList::GoThrough() {
 #define _CS_PARSER_TEST_
 #ifdef _CS_PARSER_TEST_
 int main( int argc, char* argv[] ) {
-	//if ( argc <= 1 ) return 0;
+	if ( argc <= 1 ) return 0;
 
-	const char* filename = "c:\\Projects\\Topspin4\\TOPSPIN4SVN\\Wii\\WiiProjects\\GameTopSpin4\\Code\\Common\\Cutscene\\CsScripts\\a.txt";
+	//const char* filename = "c:\\Projects\\Topspin4\\TOPSPIN4SVN\\Wii\\WiiProjects\\GameTopSpin4\\Code\\Common\\Cutscene\\CsScripts\\a.txt";
+	const char* filename = argv[1];
 	Parser* par = new Parser();
 	par->Initialize( filename );
 

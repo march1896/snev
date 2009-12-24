@@ -1,6 +1,6 @@
 #ifndef _CS_PARSER_
 #define _CS_PARSER_
-#include "Variable.h"
+#include "variable.h"
 #include "lexer.h"
 #include "runtime.h"
 
@@ -30,7 +30,7 @@ public:
 	};
 
 private:
-	static char* 				ErrorInfo[ E_PAERR_END ];
+	static const char* 				ErrorInfo[ E_PAERR_END ];
 
 public:
 								Parser();

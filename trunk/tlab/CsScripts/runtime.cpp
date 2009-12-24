@@ -3,6 +3,7 @@
 #include "function.h"
 #include <map>
 #include <vector>
+#include <cstdio>
 #include "function.items"
 
 /******************************************************************************
