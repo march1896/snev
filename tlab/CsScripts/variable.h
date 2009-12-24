@@ -7,10 +7,10 @@
 class Variable: public Interactive {
 public:
 	enum E_VTYPE {
-		E_NULL,
-		E_INT,
-		E_FLOAT,
-		E_STRING,
+		E_NULL=0,
+		E_INT=5,
+		E_FLOAT=6,
+		E_STRING=10,
 	};
 
 	Variable();
@@ -25,6 +25,9 @@ public:
 	virtual float 		GetFloatValue() const;
 	virtual int 		GetIntValue() const;
 	virtual std::string GetStringValue() const;
+
+	bool				Castable( E_VTYPE e ) const;
+	bool				Castto( E_VTYPE e );
 
 	const Variable& 	operator=( const Variable& var );
 	bool 				operator==( const Variable& var ) const;
@@ -47,6 +50,7 @@ protected:
 	E_VTYPE 			m_eType;
 	void* 				m_pData;
 };
+
 
 //Variable operator+( const Variable& lhs, const Variable& rhs );
 //Variable operator-( const Variable& lhs, const Variable& rhs );

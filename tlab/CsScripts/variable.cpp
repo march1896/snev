@@ -21,7 +21,7 @@ Variable::Variable( float value ): m_eType( E_FLOAT ) {
 }
 
 Variable::Variable( const std::string& value ): m_eType( E_STRING ) {
-	m_pData = new std::string( value.substr( 1, value.length() - 2 ) );
+	m_pData = new std::string( value );
 }
 
 Variable::Variable(): m_eType( E_NULL ), m_pData( NULL ) {
@@ -63,7 +63,39 @@ Variable::~Variable() {
 	}
 }
 
-#include <cstdio>
+
+bool Variable::Castable( E_VTYPE t ) const {
+	if ( m_eType == t ) {
+		// need no cast
+		return true;
+	}
+
+	if ( m_eType == E_INT && t == E_FLOAT ) {
+		return true;
+	}
+
+	return false;
+}
+
+bool Variable::Castto( E_VTYPE t ) {
+	if ( !Castable( t ) ) {
+		return false;
+	}
+
+	if ( t == m_eType ) {
+		return true;
+	}
+
+	if ( m_eType == E_INT && t == E_FLOAT ) {
+		int *p = static_cast< int* >( m_pData );
+		float f = *p;
+		delete p;
+		m_pData = new float( f );
+	}
+
+	return false;
+}
+
 const Variable& Variable::operator=( const Variable& var ) {
 	if ( m_pData ) {
 		if ( m_eType == E_INT ) {
@@ -151,6 +183,13 @@ void Variable::operator-=( const Variable& var ) {
 }
 
 bool Variable::operator==( const Variable& var ) const {
+	if ( m_eType - var.GetType() == 1 ) {
+		return GetFloatValue() == var.GetFloatValue();
+	}
+	else if ( m_eType - var.GetType() == -1 ) {
+		return GetFloatValue() == var.GetFloatValue();
+	}
+
 	if ( m_eType != var.GetType() ) {
 		return false;
 	}
@@ -177,6 +216,10 @@ bool Variable::operator!=( const Variable& var ) const {
 }
 
 bool Variable::operator<( const Variable& var ) const {
+	if ( ( m_eType - var.GetType() == 1 ) &&  ( m_eType - var.GetType() == -1 ) ) {
+		return GetFloatValue() < var.GetFloatValue();
+	}
+
 	if ( m_eType != var.GetType() ) {
 		// Error
 		return false;
@@ -200,6 +243,10 @@ bool Variable::operator<( const Variable& var ) const {
 }
 
 bool Variable::operator>( const Variable& var ) const {
+	if ( ( m_eType - var.GetType() == 1 ) &&  ( m_eType - var.GetType() == -1 ) ) {
+		return GetFloatValue() > var.GetFloatValue();
+	}
+
 	if ( m_eType != var.GetType() ) {
 		// Error
 		return false;
@@ -238,6 +285,9 @@ float Variable::GetFloatValue() const {
 	if ( m_eType == E_FLOAT ) {
 		return getFloat( m_pData );
 	}
+	else if ( m_eType == E_INT ) {
+		return (float)( getInt( m_pData ) );
+	}
 	else {
 		return 0.0;
 	}
@@ -246,6 +296,9 @@ float Variable::GetFloatValue() const {
 int Variable::GetIntValue() const {
 	if ( m_eType == E_INT ) {
 		return getInt( m_pData );
+	}
+	else if ( m_eType == E_FLOAT ) {
+		return (int)( getInt( m_pData ) );
 	}
 	else {
 		return 0;
@@ -263,7 +316,12 @@ std::string Variable::GetStringValue() const {
 
 Variable operator+( const Variable& lhs, const Variable& rhs ) {
 	Variable ret;
-	if ( lhs.GetType() == rhs.GetType() ) {
+
+	if ( lhs.GetType() - rhs.GetType() == 1 || lhs.GetType() - rhs.GetType() == -1 ) {
+		ret.SetType( Variable::E_FLOAT );
+		ret.m_pData = new float( lhs.GetFloatValue() + rhs.GetFloatValue() );
+	}
+	else if ( lhs.GetType() == rhs.GetType() ) {
 		ret.SetType( lhs.GetType() );
 		switch ( lhs.GetType() ) {
 			case Variable::E_NULL:
@@ -282,12 +340,17 @@ Variable operator+( const Variable& lhs, const Variable& rhs ) {
 		return ret;
 	}
 
+	return ret;
 	// Error Here;
 }
 
 Variable operator-( const Variable& lhs, const Variable& rhs ) {
 	Variable ret;
-	if ( lhs.GetType() == rhs.GetType() ) {
+	if ( lhs.GetType() - rhs.GetType() == 1 || lhs.GetType() - rhs.GetType() == -1 ) {
+		ret.SetType( Variable::E_FLOAT );
+		ret.m_pData = new float( lhs.GetFloatValue() - rhs.GetFloatValue() );
+	}
+	else if ( lhs.GetType() == rhs.GetType() ) {
 		ret.SetType( lhs.GetType() );
 		switch ( lhs.GetType() ) {
 			case Variable::E_NULL:
@@ -307,12 +370,18 @@ Variable operator-( const Variable& lhs, const Variable& rhs ) {
 		return ret;
 	}
 
+	return ret;
 	// Error
 }
 
 Variable operator*( const Variable& lhs, const Variable& rhs ) {
 	Variable ret;
-	if ( lhs.GetType() == rhs.GetType() ) {
+
+	if ( lhs.GetType() - rhs.GetType() == 1 || lhs.GetType() - rhs.GetType() == -1 ) {
+		ret.SetType( Variable::E_FLOAT );
+		ret.m_pData = new float( lhs.GetFloatValue() * rhs.GetFloatValue() );
+	}
+	else if ( lhs.GetType() == rhs.GetType() ) {
 		ret.SetType( lhs.GetType() );
 		switch ( lhs.GetType() ) {
 			case Variable::E_NULL:
@@ -331,11 +400,17 @@ Variable operator*( const Variable& lhs, const Variable& rhs ) {
 	}
 
 	// Error Here;
+	return ret;
 }
 
 Variable operator/( const Variable& lhs, const Variable& rhs ) {
 	Variable ret;
-	if ( lhs.GetType() == rhs.GetType() ) {
+
+	if ( lhs.GetType() - rhs.GetType() == 1 || lhs.GetType() - rhs.GetType() == -1 ) {
+		ret.SetType( Variable::E_FLOAT );
+		ret.m_pData = new float( lhs.GetFloatValue() / rhs.GetFloatValue() );
+	}
+	else if ( lhs.GetType() == rhs.GetType() ) {
 		ret.SetType( lhs.GetType() );
 		switch ( lhs.GetType() ) {
 			case Variable::E_NULL:
@@ -356,6 +431,7 @@ Variable operator/( const Variable& lhs, const Variable& rhs ) {
 	}
 
 	// Error
+	return ret;
 }
 
 //***********************************************************************************************
