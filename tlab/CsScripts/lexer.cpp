@@ -539,6 +539,7 @@ void Lexer::MoveNext() {
   below is the test code for lexer
   *******************************************************************/
 
+#ifdef _CS_LEXER_TEST_
 int main( int argc, char* argv[] ) {
 	if ( argc <= 1 ) return 0;
 
@@ -569,5 +570,7 @@ int main( int argc, char* argv[] ) {
 		lex->MoveNext();
 		tok = lex->GetNextTokenPointer();
 	}
+	delete lex;
 	getchar();
 }
+#endif //_CS_LEXER_TEST_

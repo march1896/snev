@@ -7,7 +7,7 @@
 class FunctionTable {
 public:
 						~FunctionTable();
-	void 				RegisterFunction( const std::string& funcName, Function func );
+	void 				RegisterFunction( const std::string& funcName, Function* func );
 	void 				UnregisterFunction( const std::string& funcName );
 
 	Function* 			GetFunction( const std::string& funcName );
@@ -17,7 +17,7 @@ public:
 
 private:
 						FunctionTable();
-	std::map< std::string, Function > m_mTable;
+	std::map< std::string, Function* > m_mTable;
 };
 
 class VariableTable {
@@ -33,7 +33,7 @@ public:
 
 private:
 						VariableTable();
-	std::map< std::string, Variable > m_mTable;
+	std::map< std::string, Variable* > m_mTable;
 };
 
 
