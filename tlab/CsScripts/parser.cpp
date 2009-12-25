@@ -25,6 +25,7 @@ const char* Parser::ErrorInfo[] = {
 	"Two operands types are different",
 	"Opreator && error",
 	"opreator error",
+	"Missing Operand before right brace",
 	"Statementlist must be quoted with braces",
 	"Statementlist braces do not match",
 };
@@ -377,6 +378,9 @@ void Expression::Parse() {
 	while ( true ) {
 		// pre judge if the expression is end
 		const Token* ptok = lex->GetNextTokenPointer();
+		if ( ptok->GetType() == E_TOKEN_END ) {
+			break;
+		}
 		//printf( "%s\n", lex->GetNextTokenPointer()->GetTokenTypeString() );
 		if ( m_bIsLastVariable ) {
 			if ( ptok->GetType() == E_TOKEN_DOLLAR || ptok->GetType() == E_TOKEN_AMPER || ptok->GetType() == E_TOKEN_IDENTITY ) {
@@ -964,6 +968,10 @@ void StatementList::Parse() {
 			if ( lex->GetNextTokenPointer()->GetType() == E_TOKEN_RBRACE ) {
 				// come across '}', the just return
 				lex->MoveNext();
+				break;
+			}
+			else if ( lex->GetNextTokenPointer()->GetType() == E_TOKEN_END ) {
+				GetParser()->SetError( Parser::E_PAERR_SML_BRACEUNMATCH );
 				break;
 			}
 
