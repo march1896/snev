@@ -21,6 +21,8 @@ public:
 						LFile( const char* filename );
 		 				~LFile();
 	const char* 		GetNextLine();
+	int 			Tell() const;
+	void 			Seek( int pos );
 private:
 	static const int 	N_LINE;
 #ifdef PC
@@ -50,6 +52,14 @@ const char* LFile::GetNextLine() {
 	else {
 		return NULL;
 	}
+}
+
+int LFile::Tell() const {
+	return ftell( m_pfile );
+}
+
+void LFile::Seek( int pos ) {
+	fseek( m_pfile, pos, SEEK_SET);
 }
 #endif
 
@@ -231,6 +241,7 @@ const Token& Token::operator=( const Token& tok ) {
   below is the implementation of lexer
   ***************************************************/
 const int Lexer::N_FILE_NAME = 100;
+const int Lexer::N_POSSTACK_SIZE = 100;
 
 const char* Lexer::ErrorInfo[ E_ERROR_END ] = {
 	"OK",
@@ -239,6 +250,7 @@ const char* Lexer::ErrorInfo[ E_ERROR_END ] = {
 	"Quotes do not match",
 	"Some symbols are out of my consideration",
 	"Strange float number",
+	"Lexer's positions stack over flow",
 };
 
 Lexer::Lexer():
@@ -247,6 +259,9 @@ Lexer::Lexer():
 	m_prev( NULL ),
 	m_next( NULL ),
 	m_linebuff( NULL ),
+	m_positionstack( NULL ),
+	m_linenumberstack( NULL ),
+	m_posidx( 0 ),
 	m_errtype( E_ERROR_NONE )
 {
 }
@@ -256,6 +271,9 @@ Lexer::Lexer( const char *filename):
 	m_prev( NULL ),
 	m_next( NULL ),
 	m_linebuff( NULL ),
+	m_positionstack( NULL ),
+	m_linenumberstack( NULL ),
+	m_posidx( 0 ),
 	m_errtype( E_ERROR_NONE )
 {
 	int len = strlen( filename );
@@ -271,6 +289,8 @@ Lexer::~Lexer() {
 	RELEASEPOINTER( m_pfile );
 	RELEASEPOINTER( m_prev );
 	RELEASEPOINTER( m_next );
+	RELEASEPOINTER( m_positionstack );
+	RELEASEPOINTER( m_linenumberstack );
 #undef RELEASEPOINTER
 }
 
@@ -300,6 +320,10 @@ void Lexer::Initialize() {
 
 	m_next->Assign( m_linebuff, m_linebuff, E_TOKEN_NONE );
 	MoveNext();
+
+	m_positionstack = new int[ N_POSSTACK_SIZE ];
+	m_linenumberstack = new int[ N_POSSTACK_SIZE ];
+	m_posidx = 0;
 }
 
 bool IsAlpha( const char* p ) {
@@ -541,6 +565,67 @@ void Lexer::MoveNext() {
 		m_errtype = E_ERROR_MISSINGSYMBOL;
 	}
 	return;
+}
+
+void Lexer::PushPos() {
+	if ( m_positionstack == NULL || m_linenumberstack == NULL ) {
+		m_errtype = E_ERROR_MEMORY;
+		return;
+	}
+	if ( m_posidx >= N_POSSTACK_SIZE ) {
+		m_errtype = E_ERROR_STACKOVERFLOW;
+		return;
+	}
+	int pos = m_pfile->Tell();
+	// because we use the getline() function, so the file position is already at 
+	// the end of the line, we should get the accurate pos
+	const char *p = m_next->m_start;
+	if ( p != NULL ) {
+		const char* p_end = &m_linebuff[ strlen( m_linebuff ) - 1 ];
+		while ( p <= p_end ) {
+			p ++;
+			pos --;
+		}
+	}
+	m_positionstack[ m_posidx ] = pos;
+	m_linenumberstack[ m_posidx ] = m_linenumber;
+	m_posidx ++;
+}
+
+void Lexer::PopPos() {
+	if ( m_positionstack == NULL || m_linenumberstack == NULL ) {
+		m_errtype = E_ERROR_MEMORY;
+		return;
+	}
+	if ( m_posidx < 1 ) {
+		m_errtype = E_ERROR_STACKOVERFLOW;
+		return;
+	}
+
+	m_posidx--;
+	//m_pfile->Seek( m_positionstack[ m_posidx ] );
+	m_linenumber = m_linenumberstack[ m_posidx ];
+}
+
+void Lexer::GotoTopPos() {
+	if ( m_positionstack == NULL || m_linenumberstack == NULL ) {
+		m_errtype = E_ERROR_MEMORY;
+		return;
+	}
+	if ( m_posidx < 1 ) {
+		m_errtype = E_ERROR_STACKOVERFLOW;
+		return;
+	}
+
+	// recover the position
+	m_pfile->Seek( m_positionstack[ m_posidx-1 ] );
+	m_linenumber = m_linenumberstack[ m_posidx-1 ];
+
+	// here we should recover the two token pointer
+	m_linebuff = m_pfile->GetNextLine();
+	(*m_prev) = (*m_next);
+	m_next->Assign( m_linebuff, m_linebuff, E_TOKEN_NONE );
+	MoveNext();
 }
 
 /********************************************************************
