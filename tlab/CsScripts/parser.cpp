@@ -89,7 +89,9 @@ void Parser::Parse() {
 
 	//printf( "%d", fac->GetType() );
 	StatementList* sml = new StatementList( this );
+	GetRuntime()->PushVarTable();
 	sml->Parse();
+	GetRuntime()->PopVarTable();
 
 	if ( HasError() ) {
 		printf( "error: %s\tline: %d\ttoken: %s\n", 
@@ -162,6 +164,9 @@ void Factor::Parse() {
 		// just for key word, because functions and variables have special prefix
 		const char* str = tok.GetCharValue();
 		if ( strcmp( str, "if" ) == 0 || strcmp( str, "elif" ) == 0 || strcmp( str, "else" ) == 0 ) {
+			m_eType = E_FACTOR_KEYWORD;
+		}
+		else if ( strcmp( str, "while" ) == 0 || strcmp( str, "break" ) == 0 ) {
 			m_eType = E_FACTOR_KEYWORD;
 		}
 		else {
@@ -766,7 +771,9 @@ void Statement::Parse() {
 	if ( e_ttype == E_TOKEN_LBRACE ) {
 		// TODO: this is a code part, includes many statement
 		sml->Clear();
+		rt->PushVarTable();
 		sml->Parse();
+		rt->PopVarTable();
 	}
 	else if ( e_ttype == E_TOKEN_IDENTITY ) {
 		// 'if-elif-else' or 'while' statement
@@ -792,7 +799,9 @@ void Statement::Parse() {
 					sml->Clear();
 
 					if ( IsVariableTrue( var ) ) {
+						rt->PushVarTable();
 						sml->Parse();
+						rt->PopVarTable();
 						IsProcessed = true;
 					}
 					else {
@@ -819,7 +828,9 @@ void Statement::Parse() {
 									Variable* var = expr->GetValue();
 									
 									if ( IsVariableTrue( var ) ) {
+										rt->PushVarTable();
 										sml->Parse();
+										rt->PopVarTable();
 										IsProcessed = true;
 									}
 									else {
@@ -842,7 +853,9 @@ void Statement::Parse() {
 								sml->Clear();
 
 								if ( !IsProcessed ) {
+									rt->PushVarTable();
 									sml->Parse();
+									rt->PopVarTable();
 									IsProcessed = true;
 								}
 								else {
@@ -865,7 +878,49 @@ void Statement::Parse() {
 			}
 			else if ( strcmp( lex->GetNextTokenPointer()->GetCharValue(), "while" ) == 0 ) {
 				// is hard to process 'while' statement, because we should record the expression after keyword'while'
-				// TODO:
+				// the better idea is to record the position use lexer
+				m_eType = E_STATEMENT_WHILE;
+
+				lex->PushPos();
+				lex->MoveNext();
+
+				rt->PushVarTable();
+				while ( true ) {
+					lex->MoveNext();
+
+					expr->Clear();
+					expr->Parse();
+
+					if ( GetParser()->HasError() ) {
+						// process error
+						break;
+					}
+
+					Variable* var = expr->GetValue();
+					sml->Clear();
+
+					if ( IsVariableTrue( var ) ) {
+						sml->Parse();
+					}
+					else {
+						sml->GoThrough();
+						break;
+					}
+
+					if ( GetParser()->HasError() ) {
+						// process error
+						break;
+					}
+
+					lex->GotoTopPos();
+					// now the next token is 'while'
+				}
+				rt->PopVarTable();
+
+				lex->PopPos();
+			}
+			else if ( strcmp( lex->GetNextTokenPointer()->GetCharValue(), "break" ) == 0 ) {
+				// 'while-break' statement
 			}
 		}
 	}
@@ -961,7 +1016,6 @@ void StatementList::Parse() {
 	E_TOKEN_TYPE e_ttype = ptok->GetType();
 
 	if ( e_ttype == E_TOKEN_LBRACE ) {
-		rt->PushVarTable();
 		lex->MoveNext();
 
 		while ( true ) {
@@ -982,7 +1036,6 @@ void StatementList::Parse() {
 				break;
 			}
 		}
-		rt->PopVarTable();
 	}
 	else {
 		GetParser()->SetError( Parser::E_PAERR_SML_START );

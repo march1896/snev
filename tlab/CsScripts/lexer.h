@@ -94,6 +94,7 @@ public:
 		E_ERROR_STRING,
 		E_ERROR_MISSINGSYMBOL,
 		E_ERROR_FLOAT,
+		E_ERROR_STACKOVERFLOW,
 		E_ERROR_END,
 	};
 
@@ -118,6 +119,13 @@ public:
 	// after this initialization, the current token will be E_TOKEN_NONE, and the next token will be the first token of the file 
 	void 			Initialize();
 
+	// record the position of current lexer
+	void 			PushPos();
+	// pop the last position recorded
+	void 			PopPos();
+	// goto the position in the pos stack
+	void 			GotoTopPos();
+
 	E_ERROR_TYPE 	GetErrorType() const { return m_errtype; } 			
 	const char* 		GetErrorInfo() const { return ErrorInfo[ m_errtype ]; }
 	int 			GetErrorLine() const { return m_linenumber; }
@@ -125,6 +133,7 @@ private:
 	
 private:
 	static const int N_FILE_NAME;
+	static const int N_POSSTACK_SIZE;
 	
 	LFile* 			m_pfile;
 	const char* 	m_linebuff;
@@ -132,6 +141,11 @@ private:
 
 	Token 			*m_prev, *m_next;
 	E_ERROR_TYPE 	m_errtype;
+
+	int* 		m_positionstack;
+	int* 		m_linenumberstack;
+	int 		m_posidx;
 };
+
 
 #endif // _CS_LEXER_
