@@ -628,6 +628,10 @@ void Lexer::GotoTopPos() {
 	MoveNext();
 }
 
+bool Lexer::PosStackEmpty() const {
+	return m_posidx == 0;
+}
+
 /********************************************************************
   below is the test code for lexer
   *******************************************************************/
