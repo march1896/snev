@@ -25,6 +25,7 @@ public:
 		E_PAERR_EXP_PARERROR,
 		E_PAERR_SML_START,
 		E_PAERR_SML_BRACEUNMATCH,
+		E_PAERR_CANNOTBREAK,
 
 		E_PAERR_END,
 	};
@@ -131,6 +132,7 @@ enum E_STATEMENT_TYPE {
 	E_STATEMENT_ASSIGNMENT,
 	E_STATEMENT_IFELSE,
 	E_STATEMENT_WHILE,
+	E_STATEMENT_BREAK,
 	E_STATEMENT_COMMENT,
 	E_STATEMENT_END,
 };
@@ -168,8 +170,10 @@ public:
 	void 						Clear();
 	// just go throuth the text without parse
 	void 						GoThrough();
+	bool 						IsBreaked() const;
 private:
 	Variable* 					m_pVar;
+	bool 						m_bIsBreaked;
 };
 
 /*

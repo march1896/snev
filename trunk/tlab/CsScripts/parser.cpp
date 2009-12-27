@@ -28,6 +28,7 @@ const char* Parser::ErrorInfo[] = {
 	"Missing Operand before right brace",
 	"Statementlist must be quoted with braces",
 	"Statementlist braces do not match",
+	"Can not break, no while statement",
 };
 	
 Parser::Parser() :
@@ -170,7 +171,6 @@ void Factor::Parse() {
 			m_eType = E_FACTOR_KEYWORD;
 		}
 		else {
-			// now we just support if-else gramma
 			GetParser()->SetError( Parser::E_PAERR_KEYWORD_UNDEF );
 		}
 	}
@@ -329,6 +329,11 @@ void Expression::Parse() {
 	m_bIsSingleVariable = false;
 
 	fac->Parse();
+
+	if ( GetParser()->HasError() ) {
+		delete fac;
+		return;
+	}
 
 	// deal with the first input
 	if ( fac->GetType() == E_FACTOR_VARIABLE || fac->GetType() == E_FACTOR_VARIABLE_TEMP ) {
@@ -774,6 +779,10 @@ void Statement::Parse() {
 		rt->PushVarTable();
 		sml->Parse();
 		rt->PopVarTable();
+
+		if ( sml->IsBreaked() ) {
+			m_eType = E_STATEMENT_BREAK;
+		}
 	}
 	else if ( e_ttype == E_TOKEN_IDENTITY ) {
 		// 'if-elif-else' or 'while' statement
@@ -782,6 +791,8 @@ void Statement::Parse() {
 			GetParser()->SetError( Parser::E_PAERR_KEYWORD_UNDEF );
 		}
 		else {
+			// process if-elif-else and while-break statement
+			
 			if ( strcmp( lex->GetNextTokenPointer()->GetCharValue(), "if" ) == 0 ) {
 				// assume if-else statement
 				// NB. after fac->Parse(), lex->next stops at the factor's last token, 
@@ -802,6 +813,9 @@ void Statement::Parse() {
 						rt->PushVarTable();
 						sml->Parse();
 						rt->PopVarTable();
+						if ( sml->IsBreaked() ) {
+							m_eType = E_STATEMENT_BREAK;
+						}
 						IsProcessed = true;
 					}
 					else {
@@ -831,6 +845,9 @@ void Statement::Parse() {
 										rt->PushVarTable();
 										sml->Parse();
 										rt->PopVarTable();
+										if ( sml->IsBreaked() ) {
+											m_eType = E_STATEMENT_BREAK;
+										}
 										IsProcessed = true;
 									}
 									else {
@@ -856,6 +873,9 @@ void Statement::Parse() {
 									rt->PushVarTable();
 									sml->Parse();
 									rt->PopVarTable();
+									if ( sml->IsBreaked() ) {
+										m_eType = E_STATEMENT_BREAK;
+									}
 									IsProcessed = true;
 								}
 								else {
@@ -874,7 +894,6 @@ void Statement::Parse() {
 						}
 					}
 				}
-				m_eType = E_STATEMENT_IFELSE;
 			}
 			else if ( strcmp( lex->GetNextTokenPointer()->GetCharValue(), "while" ) == 0 ) {
 				// is hard to process 'while' statement, because we should record the expression after keyword'while'
@@ -908,7 +927,11 @@ void Statement::Parse() {
 					}
 
 					if ( GetParser()->HasError() ) {
-						// process error
+						break;
+					}
+
+					if ( sml->IsBreaked() ) {
+						// check if there exist 'break' in the statement list
 						break;
 					}
 
@@ -921,6 +944,14 @@ void Statement::Parse() {
 			}
 			else if ( strcmp( lex->GetNextTokenPointer()->GetCharValue(), "break" ) == 0 ) {
 				// 'while-break' statement
+				if ( lex->PosStackEmpty() ) {
+					// error here, no while statment to break
+					GetParser()->SetError( Parser::E_PAERR_CANNOTBREAK );
+				}
+				else {
+					lex->MoveNext();
+					m_eType = E_STATEMENT_BREAK;
+				}
 			}
 		}
 	}
@@ -985,7 +1016,8 @@ void Statement::Parse() {
  StatementList implementation
 ****************************************************************************/
 StatementList::StatementList( Parser* par ) : 
-	Parsable( par )
+	Parsable( par ),
+	m_bIsBreaked( false )
 {
 	m_pVar = new Variable();
 }
@@ -998,6 +1030,7 @@ StatementList::~StatementList() {
 }
 
 void StatementList::Clear() {
+	m_bIsBreaked = false;
 	// nothing to do
 }
 
@@ -1031,6 +1064,30 @@ void StatementList::Parse() {
 
 			stm->Clear();
 			stm->Parse();
+
+			if ( stm->GetType() == E_STATEMENT_BREAK ) {
+				// go through the codes below
+				int brace_count = 0;
+				do {
+					if ( lex->GetNextTokenPointer()->GetType() == E_TOKEN_END ){
+						GetParser()->SetError( Parser::E_PAERR_SML_BRACEUNMATCH );
+						break;
+					}
+					else if ( lex->GetNextTokenPointer()->GetType() == E_TOKEN_RBRACE && brace_count == 0 ) {
+						lex->MoveNext();
+						break;
+					}
+					else if ( lex->GetNextTokenPointer()->GetType() == E_TOKEN_LBRACE ) {
+						brace_count ++;
+					}
+					else if ( lex->GetNextTokenPointer()->GetType() == E_TOKEN_RBRACE ) {
+						brace_count --;
+					}
+					lex->MoveNext();
+				} while ( true );
+				m_bIsBreaked = true;
+				break;
+			}
 
 			if ( GetParser()->HasError() ) {
 				break;
@@ -1080,8 +1137,9 @@ void StatementList::GoThrough() {
 	return;
 }
 
-
-
+bool StatementList::IsBreaked() const {
+	return m_bIsBreaked;
+}
 
 #define _CS_PARSER_TEST_
 #ifdef _CS_PARSER_TEST_

@@ -125,6 +125,7 @@ public:
 	void 			PopPos();
 	// goto the position in the pos stack
 	void 			GotoTopPos();
+	bool 			PosStackEmpty() const;
 
 	E_ERROR_TYPE 	GetErrorType() const { return m_errtype; } 			
 	const char* 		GetErrorInfo() const { return ErrorInfo[ m_errtype ]; }
