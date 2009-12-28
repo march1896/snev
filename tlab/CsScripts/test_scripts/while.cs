@@ -4,17 +4,15 @@
 		
 		$var2 = 1
 		while ( $var2 < 10 ) {
-			if ( $var2 == 4 ) {
-				break
-			}
 			&print($var, $var2 )
 			$var2 = $var2 + 1
 		}
 		if ( $var == 3 ) {
+			&print( "breaked" )
 			break
 		}
 		else {
-			&print( "k" )
+			&print( "fuck" )
 		}
 		$var = $var + 1
 	}

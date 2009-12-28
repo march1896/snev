@@ -28,6 +28,7 @@ private:
 #ifdef PC
 	FILE* 				m_pfile;
 	char* 				m_linebuff;
+	int					m_linenumber;
 #endif 
 };
 const int LFile::N_LINE = 200;
@@ -35,6 +36,7 @@ const int LFile::N_LINE = 200;
 #ifdef PC
 LFile::LFile( const char* filename ) {
 	m_pfile = fopen( filename, "r" );
+	m_linenumber = 0;
 
 	m_linebuff = new char[ N_LINE ];
 }
@@ -47,6 +49,7 @@ LFile::~LFile() {
 
 const char* LFile::GetNextLine() {
 	if ( fgets( m_linebuff, N_LINE, m_pfile ) ) {
+		m_linenumber ++;
 		return m_linebuff;
 	}
 	else {
@@ -576,9 +579,13 @@ void Lexer::PushPos() {
 		m_errtype = E_ERROR_STACKOVERFLOW;
 		return;
 	}
+
+	/*
 	int pos = m_pfile->Tell();
 	// because we use the getline() function, so the file position is already at 
 	// the end of the line, we should get the accurate pos
+	// something wrong here, we can tell the pos and seek back,
+	// but we don't know the the accurate number of the pos
 	const char *p = m_next->m_start;
 	if ( p != NULL ) {
 		const char* p_end = &m_linebuff[ strlen( m_linebuff ) - 1 ];
@@ -587,6 +594,17 @@ void Lexer::PushPos() {
 			pos --;
 		}
 	}
+	*/
+	int pos = 0;
+	const char *p = m_next->m_start;
+	if ( p != NULL ) {
+		const char* p_start = m_linebuff;
+		while ( p_start < p ) {
+			pos ++;
+			p_start ++;
+		}
+	}
+
 	m_positionstack[ m_posidx ] = pos;
 	m_linenumberstack[ m_posidx ] = m_linenumber;
 	m_posidx ++;
@@ -604,7 +622,7 @@ void Lexer::PopPos() {
 
 	m_posidx--;
 	//m_pfile->Seek( m_positionstack[ m_posidx ] );
-	m_linenumber = m_linenumberstack[ m_posidx ];
+	//m_linenumber = m_linenumberstack[ m_posidx ];
 }
 
 void Lexer::GotoTopPos() {
@@ -618,13 +636,23 @@ void Lexer::GotoTopPos() {
 	}
 
 	// recover the position
-	m_pfile->Seek( m_positionstack[ m_posidx-1 ] );
+	//m_pfile->Seek( m_positionstack[ m_posidx-1 ] );
+	m_pfile->Seek( 0 );
 	m_linenumber = m_linenumberstack[ m_posidx-1 ];
+	int x = m_linenumber;
+	while ( x -- ) {
+		m_linebuff = m_pfile->GetNextLine();
+	}
+	const char* p = m_linebuff;
+	for ( int i = 0; i < m_positionstack[ m_posidx-1 ]; i ++ ) {
+		p ++;
+	}
 
 	// here we should recover the two token pointer
-	m_linebuff = m_pfile->GetNextLine();
+	//m_linebuff = m_pfile->GetNextLine();
 	(*m_prev) = (*m_next);
-	m_next->Assign( m_linebuff, m_linebuff, E_TOKEN_NONE );
+	//m_next->Assign( m_linebuff, m_linebuff, E_TOKEN_NONE );
+	m_next->Assign( p, p, E_TOKEN_NONE );
 	MoveNext();
 }
 
