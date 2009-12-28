@@ -350,6 +350,16 @@ void Expression::Parse() {
 			PushSym( E_TOKEN_LPAR );
 			m_bIsLastVariable = false;
 		}
+		else if ( lex->GetNextTokenPointer()->GetType() == E_TOKEN_MINUS ) {
+			m_bIsLastVariable = false;
+			PushVar( Variable( 0 ) );
+			PushSym( E_TOKEN_MINUS );
+		}
+		else if ( lex->GetNextTokenPointer()->GetType() == E_TOKEN_PLUS ) {
+			m_bIsLastVariable = false;
+			PushVar( Variable( 0 ) );
+			PushSym( E_TOKEN_PLUS );
+		}
 		else {
 			GetParser()->SetError( Parser::E_PAERR_EXP_START );
 		}
@@ -529,7 +539,8 @@ void Expression::Parse() {
 			else {
 				// normal symbols
 				op = TopSym();
-				while ( SymLessThen( lex->GetNextTokenPointer()->GetType(), op ) ) {
+				//while ( SymLessThen( lex->GetNextTokenPointer()->GetType(), op ) ) {
+				while ( !SymLessThen( op, lex->GetNextTokenPointer()->GetType() ) ) {
 					PROCESS_STACK;
 				}
 
@@ -570,7 +581,7 @@ void Expression::InitSymWeight() {
 
 bool Expression::SymLessThen( E_TOKEN_TYPE sym1, E_TOKEN_TYPE sym2 ) {
 	//printf( "symbweight %d, %d\n", SymWeight[ sym1 ], SymWeight[ sym2 ] );
-	if ( sym2 == E_TOKEN_LPAR ) return false;
+	if ( sym1 == E_TOKEN_LPAR ) return true;
 	return SymWeight[ sym1 ] < SymWeight[ sym2 ];
 }
 
@@ -1173,7 +1184,6 @@ bool StatementList::IsBreaked() const {
 int main( int argc, char* argv[] ) {
 	if ( argc <= 1 ) return 0;
 
-	//const char* filename = "d:\\tangel\\svn\\snev\\tlab\\CsScripts\\test_scripts\\ifelse.cs";
 	const char* filename = argv[1];
 	Parser* par = new Parser();
 	par->Initialize( filename );

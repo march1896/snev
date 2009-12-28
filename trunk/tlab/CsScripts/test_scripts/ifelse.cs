@@ -1,4 +1,8 @@
 {
+	$m = -7 
+	&print( $m )
+	$m = - 7.0 + 3
+	&print( $m )
 	$var1 = 5
 	$var2 = 5
 
