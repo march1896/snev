@@ -4,7 +4,7 @@
 #include <cstdio>
 #include <cstring>
 
-//#define _DEBUG
+#undef _DEBUG
 
 /****************************************************************************
  Parser implementation
@@ -26,6 +26,8 @@ const char* Parser::ErrorInfo[] = {
 	"Opreator && error",
 	"opreator error",
 	"Missing Operand before right brace",
+	"Expression parathese do not match",
+	"Expression before '='",
 	"Statementlist must be quoted with braces",
 	"Statementlist braces do not match",
 	"Can not break, no while statement",
@@ -391,7 +393,17 @@ void Expression::Parse() {
 		if ( ptok->GetType() == E_TOKEN_END ) {
 			break;
 		}
+		if ( ptok->GetType() == E_TOKEN_LBRACE || ptok->GetType() == E_TOKEN_RBRACE ) {
+			while ( true ) {
+				PROCESS_STACK;
+			}
+			if ( m_VarStack.size() != 1 || m_SymStack.size() != 0 ) {
+				GetParser()->SetError( Parser::E_PAERR_EXP_UNCALCABLE );
+			}
+			break;
+		}
 		//printf( "%s\n", lex->GetNextTokenPointer()->GetTokenTypeString() );
+		
 		if ( m_bIsLastVariable ) {
 			if ( ptok->GetType() == E_TOKEN_DOLLAR || ptok->GetType() == E_TOKEN_AMPER || ptok->GetType() == E_TOKEN_IDENTITY ) {
 				while ( true ) {
@@ -488,15 +500,30 @@ void Expression::Parse() {
 					if ( TopSym() == E_TOKEN_LPAR ) {
 						PopSym();
 					}
+					else {
+						GetParser()->SetError( Parser::E_PAERR_EXP_PAREUNMATCH );
+					}
+					
 					#ifdef _DEBUG
 					printf( "VarStack Size: %d\nSymStack Size: %d\n", m_VarStack.size(), m_SymStack.size() );
 					#endif
 
+					/*
 					if ( m_VarStack.size() != 1 || m_SymStack.size() != 0 ) {
 						GetParser()->SetError( Parser::E_PAERR_EXP_UNCALCABLE );
 					}
-					lex->MoveNext();
+					*/
+					//lex->MoveNext();
+					//break;
+				}
+			}
+			else if ( lex->GetNextTokenPointer()->GetType() == E_TOKEN_EQUAL ) {
+				if ( m_bIsSingleVariable ) {
 					break;
+				}
+				else {
+					// '=' left should not be a expression 
+					GetParser()->SetError( Parser::E_PAERR_ASSIGNMENT_LEFT );
 				}
 			}
 			else {
@@ -536,6 +563,7 @@ void Expression::InitSymWeight() {
 	Expression::SymWeight[ E_TOKEN_LESSEQUAL ] = 2;
 	Expression::SymWeight[ E_TOKEN_GREATER ] = 2;
 	Expression::SymWeight[ E_TOKEN_GREATEREQUAL ] = 2;
+	Expression::SymWeight[ E_TOKEN_EQEQUAL ] = 2;
 	Expression::SymWeight[ E_TOKEN_LPAR ] = 5;
 	Expression::SymWeight[ E_TOKEN_RPAR ] = 0;
 }
@@ -905,8 +933,6 @@ void Statement::Parse() {
 
 				rt->PushVarTable();
 				while ( true ) {
-					lex->MoveNext();
-
 					expr->Clear();
 					expr->Parse();
 
@@ -937,6 +963,7 @@ void Statement::Parse() {
 
 					lex->GotoTopPos();
 					// now the next token is 'while'
+					lex->MoveNext();
 				}
 				rt->PopVarTable();
 
@@ -976,8 +1003,8 @@ void Statement::Parse() {
 
 				(*pvar) = *( stm->GetValue() );
 				(*m_pVar) = (*pvar);
+				m_eType = E_STATEMENT_ASSIGNMENT;
 			}
-			m_eType = E_STATEMENT_ASSIGNMENT;
 		}
 		else {
 			// expression
@@ -1146,7 +1173,7 @@ bool StatementList::IsBreaked() const {
 int main( int argc, char* argv[] ) {
 	if ( argc <= 1 ) return 0;
 
-	//const char* filename = "c:\\Projects\\Topspin4\\TOPSPIN4SVN\\Wii\\WiiProjects\\GameTopSpin4\\Code\\Common\\Cutscene\\CsScripts\\a.txt";
+	//const char* filename = "d:\\tangel\\svn\\snev\\tlab\\CsScripts\\test_scripts\\ifelse.cs";
 	const char* filename = argv[1];
 	Parser* par = new Parser();
 	par->Initialize( filename );

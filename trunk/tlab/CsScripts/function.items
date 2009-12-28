@@ -33,3 +33,4 @@ class Add : public Function {
 		m_ReturnValue = var;
 	}
 };
+
