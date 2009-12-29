@@ -4,7 +4,7 @@
 #include <cstdio>
 #include <cstring>
 
-#undef _DEBUG
+#undef PARSER_DEBUG
 
 /****************************************************************************
  Parser implementation
@@ -419,7 +419,7 @@ void Expression::Parse() {
 				while ( true ) {
 					PROCESS_STACK;
 				}
-				#ifdef _DEBUG
+				#ifdef PARSER_DEBUG
 				printf( "VarStack Size: %d\nSymStack Size: %d\n", m_VarStack.size(), m_SymStack.size() );
 				#endif
 
@@ -444,7 +444,7 @@ void Expression::Parse() {
 				while ( true ) {
 					PROCESS_STACK;
 				}
-				#ifdef _DEBUG
+				#ifdef PARSER_DEBUG
 				printf( "VarStack Size: %d\nSymStack Size: %d\n", m_VarStack.size(), m_SymStack.size() );
 				#endif
 
@@ -465,7 +465,7 @@ void Expression::Parse() {
 					PROCESS_STACK;
 				}
 
-				#ifdef _DEBUG
+				#ifdef PARSER_DEBUG
 				printf( "VarStack Size: %d\nSymStack Size: %d\n", m_VarStack.size(), m_SymStack.size() );
 				#endif
 
@@ -480,7 +480,7 @@ void Expression::Parse() {
 					while ( true ) {
 						PROCESS_STACK;
 					}
-					#ifdef _DEBUG
+					#ifdef PARSER_DEBUG
 					printf( "VarStack Size: %d\nSymStack Size: %d\n", m_VarStack.size(), m_SymStack.size() );
 					#endif
 
@@ -514,7 +514,7 @@ void Expression::Parse() {
 						GetParser()->SetError( Parser::E_PAERR_EXP_PAREUNMATCH );
 					}
 					
-					#ifdef _DEBUG
+					#ifdef PARSER_DEBUG
 					printf( "VarStack Size: %d\nSymStack Size: %d\n", m_VarStack.size(), m_SymStack.size() );
 					#endif
 
@@ -554,7 +554,7 @@ void Expression::Parse() {
 		lex->MoveNext();
 #undef PROCESS_STACK
 	}
-	#ifdef _DEBUG
+	#ifdef PARSER_DEBUG
 	printf( "expression end, next token : %s\n", lex->GetNextTokenPointer()->GetTokenTypeString() );
 	#endif
 	delete fac;
@@ -1041,7 +1041,7 @@ void Statement::Parse() {
 		m_eType = E_STATEMENT_EXPRESSION;
 	}
 
-#ifdef _DEBUG
+#ifdef PARSER_DEBUG
 	printf( "Statement end %d, next token %s\n", GetType(), lex->GetNextTokenPointer()->GetTokenTypeString() );
 #endif
 	delete stm;

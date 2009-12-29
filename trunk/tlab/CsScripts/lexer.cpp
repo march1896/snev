@@ -1,4 +1,5 @@
 #include "lexer.h"
+#include "lfile.h"
 
 #define PC
 #ifdef PC
@@ -11,60 +12,6 @@
 static inline bool IsAlpha( const char* p );
 static inline bool IsPunct( const char* p );
 static inline bool IsDigit( const char* p );
-
-/**********************************************************
-  abstract file class, internal use only
-  *********************************************************/
-
-class LFile {
-public:
-						LFile( const char* filename );
-		 				~LFile();
-	const char* 		GetNextLine();
-	int 			Tell() const;
-	void 			Seek( int pos );
-private:
-	static const int 	N_LINE;
-#ifdef PC
-	FILE* 				m_pfile;
-	char* 				m_linebuff;
-	int					m_linenumber;
-#endif 
-};
-const int LFile::N_LINE = 200;
-
-#ifdef PC
-LFile::LFile( const char* filename ) {
-	m_pfile = fopen( filename, "r" );
-	m_linenumber = 0;
-
-	m_linebuff = new char[ N_LINE ];
-}
-
-LFile::~LFile() {
-	fclose( m_pfile );
-
-	delete[] m_linebuff;
-}
-
-const char* LFile::GetNextLine() {
-	if ( fgets( m_linebuff, N_LINE, m_pfile ) ) {
-		m_linenumber ++;
-		return m_linebuff;
-	}
-	else {
-		return NULL;
-	}
-}
-
-int LFile::Tell() const {
-	return ftell( m_pfile );
-}
-
-void LFile::Seek( int pos ) {
-	fseek( m_pfile, pos, SEEK_SET);
-}
-#endif
 
 /**********************************************************
   below is the implementation of token
