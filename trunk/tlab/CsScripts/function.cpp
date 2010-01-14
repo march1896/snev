@@ -1,5 +1,6 @@
 #include "function.h"
 
+using namespace CSSPT;
 void Function::AddParam( const Variable& var ) {
 	m_vParamlist.push_back( var );
 }

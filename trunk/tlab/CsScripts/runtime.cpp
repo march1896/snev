@@ -4,8 +4,9 @@
 #include <map>
 #include <vector>
 #include <cstdio>
-#include "function.items"
 
+using namespace CSSPT;
+#include "function.items"
 /******************************************************************************
   implementation for functiontable class 
   ****************************************************************************/
@@ -98,9 +99,11 @@ Variable* VariableTable::GetVariable( const std::string& variableName ) {
 /******************************************************************************
   implementation for runtime
   ****************************************************************************/
-Runtime::Runtime()
+Runtime::Runtime() :
+	m_pFuncTable( NULL ),
+	m_bInited( false )
 {
-	Initialize();
+	m_vVtList.clear();
 }
 
 Runtime::~Runtime() {
@@ -121,6 +124,11 @@ Runtime::~Runtime() {
 }
 
 void Runtime::Initialize() {
+	if ( m_bInited ) {
+		return;
+	}
+	
+	m_bInited = true;
 	InitFunctionTable();
 	PushVarTable();
 }
@@ -159,7 +167,8 @@ Variable* Runtime::AddVariable( const std::string& varName, Variable var ) {
 void Runtime::InitFunctionTable() {
 	// TODO:
 	m_pFuncTable = new FunctionTable();
-	m_pFuncTable->RegisterFunction( "print", new Print() );
+
+	m_pFuncTable->RegisterFunction( "print", new CsPrint() );
 	m_pFuncTable->RegisterFunction( "add", new Add() );
 	return;
 }

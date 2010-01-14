@@ -4,6 +4,8 @@
 #include "variable.h"
 #include <map>
 
+namespace CSSPT {
+
 class FunctionTable {
 public:
 						~FunctionTable();
@@ -46,6 +48,7 @@ public:
 
 	// init all functions use in the runtime environment
 	void				InitFunctionTable();
+	FunctionTable* 		GetFunctionTable() { return m_pFuncTable; }
 	Function* 			GetFunction( const std::string& funcName ) { return m_pFuncTable->GetFunction( funcName ); }
 
 	void 				PushVarTable();
@@ -56,6 +59,8 @@ public:
 private:
 	FunctionTable* 		m_pFuncTable;
 	std::vector< VariableTable* > m_vVtList;
+	bool 				m_bInited;
 };
-
+	
+};
 #endif // _CS_RUNTIME_

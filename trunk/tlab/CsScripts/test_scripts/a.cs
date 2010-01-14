@@ -44,7 +44,7 @@
 		&print( "hello, world", "fuck you, Tangel",  $str )
 	}
 	else {
-		&print( &var )
+		&print( $var )
 	}
 
 	&print( $str, $var )

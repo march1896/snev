@@ -4,6 +4,8 @@
 #include "lexer.h"
 #include "runtime.h"
 
+namespace CSSPT {
+	
 class Parser {
 public:
 	enum E_PAERR_TYPE {
@@ -38,7 +40,7 @@ private:
 public:
 								Parser();
 								~Parser();
-	void 						Initialize( const char* filename );
+	void 						Initialize( Lexer* lex, Runtime* rt );
 	bool 						SeekPos( const char* def, const char* name );
 	void 						PreParse();
 	void 						Parse();
@@ -85,7 +87,7 @@ enum E_FACTOR_TYPE {
 
 class Factor: public Parsable {
 public:
-								Factor( Parser* par ): Parsable( par ) {}
+								Factor( Parser* par );
 								~Factor();
 	void 						Parse();
 	void 						Clear();
@@ -197,4 +199,6 @@ private:
 								Parser();
 };
 */
+}
+
 #endif //_CS_PARSER_H_

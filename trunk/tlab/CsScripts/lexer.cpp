@@ -1,13 +1,13 @@
 #include "lexer.h"
 #include "lfile.h"
 
-#define PC
-#ifdef PC
+//#define PC
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cctype>
-#endif
+
+using namespace CSSPT;
 
 static inline bool IsAlpha( const char* p );
 static inline bool IsPunct( const char* p );
@@ -212,6 +212,7 @@ Lexer::Lexer():
 	m_positionstack( NULL ),
 	m_linenumberstack( NULL ),
 	m_posidx( 0 ),
+	m_bInited( false ),
 	m_errtype( E_ERROR_NONE )
 {
 }
@@ -224,6 +225,7 @@ Lexer::Lexer( const char *filename):
 	m_positionstack( NULL ),
 	m_linenumberstack( NULL ),
 	m_posidx( 0 ),
+	m_bInited( false ),
 	m_errtype( E_ERROR_NONE )
 {
 	int len = strlen( filename );
@@ -239,6 +241,12 @@ Lexer::~Lexer() {
 	RELEASEPOINTER( m_pfile );
 	RELEASEPOINTER( m_prev );
 	RELEASEPOINTER( m_next );
+#undef RELEASEPOINTER
+#define RELEASEPOINTER( pointer ) \
+	if ( pointer ) { \
+		delete[] pointer; \
+		pointer = NULL; \
+	}
 	RELEASEPOINTER( m_positionstack );
 	RELEASEPOINTER( m_linenumberstack );
 #undef RELEASEPOINTER
@@ -252,8 +260,14 @@ void Lexer::BindFile( const char *filename ) {
 }
 
 void Lexer::Initialize() {
-	m_prev = new Token();
-	m_next = new Token();
+	if ( !m_bInited ) {
+		m_bInited = true;
+		m_prev = new Token();
+		m_next = new Token();
+		m_positionstack = new int[ N_POSSTACK_SIZE ];
+		m_linenumberstack = new int[ N_POSSTACK_SIZE ];
+	}
+	
 	if ( m_prev == NULL || m_next == NULL ) {
 		m_errtype = E_ERROR_MEMORY;
 		return;
@@ -271,8 +285,6 @@ void Lexer::Initialize() {
 	m_next->Assign( m_linebuff, m_linebuff, E_TOKEN_NONE );
 	MoveNext();
 
-	m_positionstack = new int[ N_POSSTACK_SIZE ];
-	m_linenumberstack = new int[ N_POSSTACK_SIZE ];
 	m_posidx = 0;
 }
 
@@ -290,7 +302,8 @@ bool IsDigit( const char* p ) {
 
 static inline bool IsBlack( const char* p ) {
 	// 13 is for linux
-	if ( *p == ' ' || *p == '\t' || *p == 10 || *p == '\n' || *p == 13 ) return true;
+	// '\r' is for WII platform
+	if ( *p == ' ' || *p == '\t' || *p == 10 || *p == '\n' || *p == 13 || *p == '\r' ) return true;
 	else return false;
 }
 
