@@ -1,24 +1,216 @@
-class Print : public Function {
+#include "platform.h"
+using namespace CSSPT;
+
+#define CHECK_ARGUMENTS_NUMBER( funcname, n ) \
+	if ( m_vParamlist.size() != n ) { \
+		OSReport( "%s arguments number wrong!, should be %d\n", funcname, n ); \
+		return; \
+	} \
+
+class FUNC_AddSingle : public CSSPT::Function {
+	void Compute() {
+		// check arguments size
+		if ( m_vParamlist.size() != 1 ) {
+			OSReport( "Cutscene Error: AddActor param size wrong!\n" );
+			return;
+		}
+
+		const CSSPT::Variable& var = m_vParamlist[0];
+		NW4R_ASSERT( var.GetType() == CSSPT::Variable::E_STRING );
+		std::string single = var.GetStringValue();
+
+		OSReport( "Single %s added\n", single.c_str() );
+		
+		return;
+	}
+};
+
+class FUNC_GetPlayerGender : public CSSPT::Function {
+	void Compute() {
+		if ( m_vParamlist.size() != 1 ) {
+			OSReport( "AddCam param size wrong!\n" );
+			return;
+		}
+		const CSSPT::Variable& cam = m_vParamlist[0];
+		std::string gender;
+		NW4R_ASSERT( cam.GetType() == CSSPT::Variable::E_INT );
+		
+		m_ReturnValue = Variable( "Male" );
+	}
+};
+
+class FUNC_GetPlayerName : public CSSPT::Function {
+	void Compute() {
+		if ( m_vParamlist.size() != 1 ) {
+			OSReport( "AddCam param size wrong!\n" );
+			return;
+		}
+		const CSSPT::Variable& cam = m_vParamlist[0];
+		std::string player;
+		NW4R_ASSERT( cam.GetType() == CSSPT::Variable::E_INT );
+		
+		m_ReturnValue = Variable( "Nadal" );
+	}
+};
+
+class FUNC_GetSingleDouble : public CSSPT::Function {
+	void Compute() {
+		int isSingle = 1;
+		if ( isSingle ) {
+			m_ReturnValue = Variable( std::string( "Single" ) );
+		}
+		else {
+			m_ReturnValue = Variable( std::string( "Double" ) );
+		}
+	}
+};
+
+class FUNC_GetCurrentGameNumber: public CSSPT::Function {
+	void Compute() {
+		m_ReturnValue = Variable( 5 );
+	}
+};
+
+class FUNC_GetVolleyPlayerName: public CSSPT::Function {
+	void Compute() {
+		CHECK_ARGUMENTS_NUMBER( "VolleyPlayerName" , 0 );
+
+		m_ReturnValue = Variable( "Nadal" );
+	}
+};
+
+class FUNC_GetVenueName: public CSSPT::Function {
+	void Compute() {
+		CHECK_ARGUMENTS_NUMBER( "VenueName" , 0 );
+		
+		m_ReturnValue = Variable( "Melbourne" );
+	}
+};
+
+class FUNC_GetServePlayerIDX: public CSSPT::Function {
+	void Compute() {
+		CHECK_ARGUMENTS_NUMBER( "ServePlayerIdx" , 0 );
+
+		// TODO:
+		int idx = 0;
+		
+		m_ReturnValue = Variable( idx );
+	}
+};
+
+class FUNC_GetVolleyPlayerIDX: public CSSPT::Function {
+	void Compute() {
+		CHECK_ARGUMENTS_NUMBER( "VolleyPlayerIdx" , 0 );
+
+		m_ReturnValue = Variable( 0 );
+	}
+};
+class FUNC_GetWinTeamIDX: public CSSPT::Function {
+	void Compute() {
+		CHECK_ARGUMENTS_NUMBER( "WinTeam" , 0 );
+		int iWinTeam = 0;
+
+		m_ReturnValue = Variable( iWinTeam );
+	}
+};
+
+class FUNC_GetLoseTeamIDX: public CSSPT::Function {
+	void Compute() {
+		CHECK_ARGUMENTS_NUMBER( "LoseTeam" , 0 );
+		int iLoseTeam = 1;
+
+		m_ReturnValue = Variable( iLoseTeam );
+	}
+};
+		
+class FUNC_IsPlayerInVolley: public CSSPT::Function {
+	void Compute() {
+		CHECK_ARGUMENTS_NUMBER( "IsPlayerInVolley" , 0 );
+		
+		int ret = 0;
+		m_ReturnValue = Variable( ret );
+	}
+};
+
+class FUNC_IsBreakPoint: public CSSPT::Function {
+	void Compute() {
+		CHECK_ARGUMENTS_NUMBER( "BreakPoint" , 0 );
+		m_ReturnValue = Variable( 0 );
+	}
+};
+
+class FUNC_IsEndofGame: public CSSPT::Function {
+	void Compute() {
+		CHECK_ARGUMENTS_NUMBER( "EndofGame" , 0 );
+		m_ReturnValue = Variable( 1 );
+	}
+};
+
+class FUNC_IsEndofSet: public CSSPT::Function {
+	void Compute() {
+		CHECK_ARGUMENTS_NUMBER( "EndofSet" , 0 );
+		m_ReturnValue = Variable( 1 );
+	}
+};
+
+class FUNC_IsEndofMatch: public CSSPT::Function {
+	void Compute() {
+		CHECK_ARGUMENTS_NUMBER( "EndofMatch" , 0 );
+		m_ReturnValue = Variable( 0 );
+	}
+};
+
+class FUNC_IsPlayerWin: public CSSPT::Function {
+	void Compute() {
+		CHECK_ARGUMENTS_NUMBER( "PlayerWin" , 1 );
+
+		const CSSPT::Variable& name = m_vParamlist[0];
+		NW4R_ASSERT( name.GetType() == CSSPT::Variable::E_INT );
+		int player = name.GetIntValue();
+		int iWinTeam = 1;
+
+		if ( player == iWinTeam ) {
+			m_ReturnValue = Variable( 1 );
+		}
+		else {
+			m_ReturnValue = Variable( 0 );
+		}
+	}
+};
+
+class FUNC_GetRandomNumber: public CSSPT::Function {
+	void Compute() {
+		CHECK_ARGUMENTS_NUMBER( "RandomNumber" , 1 );
+
+		const CSSPT::Variable& boundary = m_vParamlist[0];
+		NW4R_ASSERT( boundary.GetType() == CSSPT::Variable::E_INT );
+
+		m_ReturnValue = Variable( 8 );
+	}
+};
+
+class CsPrint : public Function {
 	void Compute() {
 		std::vector< Variable >::iterator itr = m_vParamlist.begin();
+		OSReport( "CSScript:\t" );
 
 		for ( ; itr != m_vParamlist.end(); itr ++ ) {
 			switch ( itr->GetType() ) {
 				case Variable::E_NULL:
-					printf( "NULL\t" );
+					OSReport( "NULL\t" );
 					break;
 				case Variable::E_INT:
-					printf( "%d\t", itr->GetIntValue() );
+					OSReport( "%d\t", itr->GetIntValue() );
 					break;
 				case Variable::E_FLOAT:
-					printf( "%f\t", itr->GetFloatValue() );
+					OSReport( "%f\t", itr->GetFloatValue() );
 					break;
 				case Variable::E_STRING:
-					printf( "%s\t", itr->GetStringValue().c_str() );
+					OSReport( "%s\t", itr->GetStringValue().c_str() );
 					break;
 			}
 		}
-		printf( "\n" );
+		OSReport( "\n" );
 	}
 };
 

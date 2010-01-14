@@ -1,6 +1,8 @@
 #ifndef _CS_LEXER_
 #define _CS_LEXER_
 
+namespace CSSPT {
+	
 enum E_TOKEN_TYPE {
 	E_TOKEN_NULL = 0,
 	E_TOKEN_STRING,
@@ -146,7 +148,9 @@ private:
 	int* 		m_positionstack;
 	int* 		m_linenumberstack;
 	int 		m_posidx;
+	bool 			m_bInited;
 };
 
+}
 
 #endif // _CS_LEXER_

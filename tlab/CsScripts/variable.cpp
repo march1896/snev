@@ -1,5 +1,7 @@
 #include "variable.h"
 
+using namespace CSSPT;
+
 static int getInt( void *p ) {
 	return *( static_cast<int*>( p ) );
 }
@@ -314,7 +316,7 @@ std::string Variable::GetStringValue() const {
 	}
 }
 
-Variable operator+( const Variable& lhs, const Variable& rhs ) {
+Variable CSSPT::operator+( const Variable& lhs, const Variable& rhs ) {
 	Variable ret;
 
 	if ( lhs.GetType() - rhs.GetType() == 1 || lhs.GetType() - rhs.GetType() == -1 ) {
@@ -344,7 +346,7 @@ Variable operator+( const Variable& lhs, const Variable& rhs ) {
 	// Error Here;
 }
 
-Variable operator-( const Variable& lhs, const Variable& rhs ) {
+Variable CSSPT::operator-( const Variable& lhs, const Variable& rhs ) {
 	Variable ret;
 	if ( lhs.GetType() - rhs.GetType() == 1 || lhs.GetType() - rhs.GetType() == -1 ) {
 		ret.SetType( Variable::E_FLOAT );
@@ -374,7 +376,7 @@ Variable operator-( const Variable& lhs, const Variable& rhs ) {
 	// Error
 }
 
-Variable operator*( const Variable& lhs, const Variable& rhs ) {
+Variable CSSPT::operator*( const Variable& lhs, const Variable& rhs ) {
 	Variable ret;
 
 	if ( lhs.GetType() - rhs.GetType() == 1 || lhs.GetType() - rhs.GetType() == -1 ) {
@@ -403,7 +405,7 @@ Variable operator*( const Variable& lhs, const Variable& rhs ) {
 	return ret;
 }
 
-Variable operator/( const Variable& lhs, const Variable& rhs ) {
+Variable CSSPT::operator/( const Variable& lhs, const Variable& rhs ) {
 	Variable ret;
 
 	if ( lhs.GetType() - rhs.GetType() == 1 || lhs.GetType() - rhs.GetType() == -1 ) {
@@ -433,6 +435,38 @@ Variable operator/( const Variable& lhs, const Variable& rhs ) {
 	// Error
 	return ret;
 }
+
+Variable CSSPT::operator%( const Variable& lhs, const Variable& rhs ) {
+	Variable ret;
+
+	if ( lhs.GetType() - rhs.GetType() == 1 || lhs.GetType() - rhs.GetType() == -1 ) {
+		ret.SetType( Variable::E_FLOAT );
+		ret.m_pData = new float( lhs.GetFloatValue() / rhs.GetFloatValue() );
+	}
+	else if ( lhs.GetType() == rhs.GetType() ) {
+		ret.SetType( lhs.GetType() );
+		switch ( lhs.GetType() ) {
+			case Variable::E_NULL:
+				ret.m_pData = NULL;
+				break;
+			case Variable::E_INT:
+				ret.m_pData = new int( getInt( lhs.m_pData ) % getInt( rhs.m_pData ) );
+				break;
+			case Variable::E_FLOAT:
+				//ret.m_pData = new float( getFloat( lhs.m_pData) % getFloat( rhs.m_pData ) );
+				break;
+			case Variable::E_STRING:
+				// no opeator - defined for string type
+				// ret.m_pData = new std::string( getString( lhs.m_pData) - getString( rhs.m_pData ) );
+				break;
+		}
+		return ret;
+	}
+
+	// Error
+	return ret;
+}
+
 
 //***********************************************************************************************
 #ifdef _CS_VARIABLE_TEST_

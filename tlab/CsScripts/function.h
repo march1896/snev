@@ -5,9 +5,11 @@
 #include "variable.h"
 #include "interactive.h"
 
+namespace CSSPT {
+	
 class Function: public Interactive {
 public:
-						~Function(){};
+	virtual				~Function(){ m_vParamlist.clear(); };
 	virtual void 	 	Compute() = 0;
 	void 				AddParam( const Variable& var );
 	void				ClearParam();
@@ -17,5 +19,5 @@ protected:
 	std::vector< Variable > 	m_vParamlist;
 };
 
-
+};
 #endif //_CS_FUNCTION_

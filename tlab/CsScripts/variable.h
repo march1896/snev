@@ -4,6 +4,8 @@
 #include <string>
 #include "interactive.h"
 
+namespace CSSPT {
+
 class Variable: public Interactive {
 public:
 	enum E_VTYPE {
@@ -45,12 +47,20 @@ public:
 	friend Variable 	operator-( const Variable& lhs, const Variable& rhs );
 	friend Variable 	operator*( const Variable& lhs, const Variable& rhs );
 	friend Variable 	operator/( const Variable& lhs, const Variable& rhs );
+	friend Variable 	operator%( const Variable& lhs, const Variable& rhs );
 protected:
 	void 				SetType( E_VTYPE t ) { m_eType = t; }
 	E_VTYPE 			m_eType;
 	void* 				m_pData;
 };
 
+Variable 	operator+( const Variable& lhs, const Variable& rhs );
+Variable 	operator-( const Variable& lhs, const Variable& rhs );
+Variable 	operator*( const Variable& lhs, const Variable& rhs );
+Variable 	operator/( const Variable& lhs, const Variable& rhs );
+Variable 	operator%( const Variable& lhs, const Variable& rhs );
+
+}
 
 //Variable operator+( const Variable& lhs, const Variable& rhs );
 //Variable operator-( const Variable& lhs, const Variable& rhs );

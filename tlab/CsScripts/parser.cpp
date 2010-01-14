@@ -1,3 +1,4 @@
+#include "platform.h"
 #include "parser.h"
 #include "variable.h"
 #include "function.h"
@@ -5,7 +6,7 @@
 #include <cstring>
 
 #undef PARSER_DEBUG
-
+using namespace CSSPT;
 /****************************************************************************
  Parser implementation
 ****************************************************************************/
@@ -20,7 +21,7 @@ const char* Parser::ErrorInfo[] = {
 	"Expression start error",
 	"Expression used undefined variable",
 	"Expression can not be parsed",
-	"String can only support operator+",
+	"String can only support operator+, ==, !=",
 	"Operator Undefined",
 	"Two operands types are different",
 	"Opreator && error",
@@ -34,28 +35,18 @@ const char* Parser::ErrorInfo[] = {
 };
 	
 Parser::Parser() :
-	m_eParErr( E_PAERR_OK )
+	m_eParErr( E_PAERR_OK ),
+	m_pLexer( NULL ),
+	m_pRuntime( NULL )
 {
-	m_pLexer = new Lexer();
-	m_pRuntime = new Runtime();
 }
 
 Parser::~Parser() {
-	if ( m_pLexer ) {
-		delete m_pLexer;
-		m_pLexer = NULL;
-	}
-
-	if ( m_pRuntime ) {
-		delete m_pRuntime;
-		m_pRuntime = NULL;
-	}
 }
 
-void Parser::Initialize( const char* filename ) {
-	m_pLexer->BindFile( filename );
-	m_pLexer->Initialize();
-	m_pRuntime->Initialize();
+void Parser::Initialize( Lexer* lex, Runtime* rt ) {
+	m_pLexer = lex;
+	m_pRuntime = rt;
 }
 
 bool Parser::SeekPos( const char* def, const char* name ) {
@@ -65,24 +56,6 @@ bool Parser::SeekPos( const char* def, const char* name ) {
 
 void Parser::PreParse() {
 	// TODO:
-	return;
-}
-
-static void print( const Variable* var ) {
-	switch ( var->GetType() ) {
-		case Variable::E_NULL:
-			printf( "NULL\n" );
-			break;
-		case Variable::E_INT:
-			printf( "%d\n", var->GetIntValue() );
-			break;
-		case Variable::E_FLOAT:
-			printf( "%f\n", var->GetFloatValue() );
-			break;
-		case Variable::E_STRING:
-			printf( "%s\n", var->GetStringValue().c_str() );
-			break;
-	}
 	return;
 }
 
@@ -97,41 +70,13 @@ void Parser::Parse() {
 	GetRuntime()->PopVarTable();
 
 	if ( HasError() ) {
-		printf( "error: %s\tline: %d\ttoken: %s\n", 
+		OSReport( "CSScript error: %s\tline: %d\ttoken: %s\n", 
 			GetErrorString(), GetLexer()->GetErrorLine(), GetLexer()->GetPrevTokenPointer()->GetCharValue() );
 	}
 	else {
-		printf( "parse over\n" );
+		OSReport( "CSScript parse over\n" );
 	}
 	delete sml;
-
-	/*
-	Expression* expr = new Expression( this );
-	expr->Parse();
-
-	if ( !HasError() ) {
-		Variable* var = expr->GetValue();
-		printf( "\nresult:\t" );
-		print( var );
-		printf( "\n" );
-	}
-	else {
-		printf( "expression error: %s\n", GetErrorString() );
-	}
-
-	expr->Clear();
-	expr->Parse();
-	if ( !HasError() ) {
-		Variable* var = expr->GetValue();
-		printf( "\nresult:\t" );
-		print( var );
-		printf( "\n" );
-	}
-	else {
-		printf( "expression error: %s\n", GetErrorString() );
-	}
-	delete expr;
-	*/
 
 	return;
 }
@@ -139,14 +84,20 @@ void Parser::Parse() {
 /****************************************************************************
  factor implementation
 ****************************************************************************/
+Factor::Factor( Parser* par ):
+	Parsable( par ),
+	m_pVar( NULL )
+{
+	//m_pVar = new Variable();
+}
 
 void Factor::Clear() {
-	if ( m_eType == E_FACTOR_VARIABLE_TEMP ) {
+	if ( m_eType == E_FACTOR_VARIABLE_TEMP || m_eType == E_FACTOR_FUNCTION ) {
 		if ( m_pVar != NULL ) {
 			delete m_pVar;
-			m_pVar = NULL;
 		}
 	}
+	m_pVar = NULL;
 }
 
 Factor::~Factor() {
@@ -166,10 +117,10 @@ void Factor::Parse() {
 	if ( t_type == E_TOKEN_IDENTITY ) {
 		// just for key word, because functions and variables have special prefix
 		const char* str = tok.GetCharValue();
-		if ( strcmp( str, "if" ) == 0 || strcmp( str, "elif" ) == 0 || strcmp( str, "else" ) == 0 ) {
+		if ( std::strcmp( str, "if" ) == 0 || std::strcmp( str, "elif" ) == 0 || std::strcmp( str, "else" ) == 0 ) {
 			m_eType = E_FACTOR_KEYWORD;
 		}
-		else if ( strcmp( str, "while" ) == 0 || strcmp( str, "break" ) == 0 ) {
+		else if ( std::strcmp( str, "while" ) == 0 || std::strcmp( str, "break" ) == 0 ) {
 			m_eType = E_FACTOR_KEYWORD;
 		}
 		else {
@@ -181,12 +132,15 @@ void Factor::Parse() {
 		m_eType = E_FACTOR_VARIABLE_TEMP;
 		switch ( t_type ) {
 			case E_TOKEN_STRING:
+				NW4R_ASSERT( m_pVar == NULL );
 				m_pVar = new Variable( tok.GetCharValue() );
 				break;
 			case E_TOKEN_FLOAT:
+				NW4R_ASSERT( m_pVar == NULL );
 				m_pVar = new Variable( tok.GetFloatValue() );
 				break;
 			case E_TOKEN_INT:
+				NW4R_ASSERT( m_pVar == NULL );
 				m_pVar = new Variable( tok.GetIntValue() );
 				break;
 		}
@@ -239,6 +193,10 @@ void Factor::Parse() {
 				ptok = lex->GetNextTokenPointer();
 
 				while ( true ) {
+					if ( ptok->GetType() == E_TOKEN_RPAR ) {
+						break;
+					}
+					
 					Expression* express = new Expression( GetParser() );
 					express->Parse();
 					if ( GetParser()->HasError() ) {
@@ -267,6 +225,7 @@ void Factor::Parse() {
 				}
 				func->Compute();
 				func->ClearParam();
+				NW4R_ASSERT( m_pVar == NULL );
 				m_pVar = new Variable( func->GetReturnValue() );
 				m_eType = E_FACTOR_FUNCTION;
 			}
@@ -307,6 +266,7 @@ bool Expression::CheckLegalSymbol( E_TOKEN_TYPE e ) {
 		case E_TOKEN_MINUS:
 		case E_TOKEN_STAR:
 		case E_TOKEN_SLASH:
+		case E_TOKEN_PERCENT:
 		case E_TOKEN_AND:
 		case E_TOKEN_OR:
 		case E_TOKEN_LESS:
@@ -314,6 +274,7 @@ bool Expression::CheckLegalSymbol( E_TOKEN_TYPE e ) {
 		case E_TOKEN_GREATER:
 		case E_TOKEN_GREATEREQUAL:
 		case E_TOKEN_EQEQUAL:
+		case E_TOKEN_NOTEQUAL:
 		case E_TOKEN_LPAR:
 		case E_TOKEN_RPAR:
 			return true;
@@ -438,7 +399,7 @@ void Expression::Parse() {
 			break;
 		}
 
-		if ( fac->GetType() == E_FACTOR_VARIABLE || fac->GetType() == E_FACTOR_VARIABLE_TEMP ) {
+		if ( fac->GetType() == E_FACTOR_VARIABLE || fac->GetType() == E_FACTOR_VARIABLE_TEMP || fac->GetType() == E_FACTOR_FUNCTION ) {
 			if ( m_bIsLastVariable  ) {
 				// variable follows variable, the expression is end
 				while ( true ) {
@@ -568,6 +529,7 @@ void Expression::InitSymWeight() {
 	Expression::SymWeight[ E_TOKEN_MINUS ] = 3;
 	Expression::SymWeight[ E_TOKEN_STAR ] = 4;
 	Expression::SymWeight[ E_TOKEN_SLASH ] = 4;
+	Expression::SymWeight[ E_TOKEN_PERCENT ] = 4;
 	Expression::SymWeight[ E_TOKEN_AND ] = 1;
 	Expression::SymWeight[ E_TOKEN_OR ] = 1;
 	Expression::SymWeight[ E_TOKEN_LESS ] = 2;
@@ -575,6 +537,7 @@ void Expression::InitSymWeight() {
 	Expression::SymWeight[ E_TOKEN_GREATER ] = 2;
 	Expression::SymWeight[ E_TOKEN_GREATEREQUAL ] = 2;
 	Expression::SymWeight[ E_TOKEN_EQEQUAL ] = 2;
+	Expression::SymWeight[ E_TOKEN_NOTEQUAL ] = 2;
 	Expression::SymWeight[ E_TOKEN_LPAR ] = 5;
 	Expression::SymWeight[ E_TOKEN_RPAR ] = 0;
 }
@@ -601,7 +564,7 @@ Variable Expression::Calculate( const Variable &var1, const Variable &var2, E_TO
 		GetParser()->SetError( Parser::E_PAERR_EXP_OPUNDEF );
 		return Variable();
 	} 
-	else if ( var1.GetType() == Variable::E_STRING && op != E_TOKEN_PLUS ) {
+	else if ( var1.GetType() == Variable::E_STRING && op != E_TOKEN_PLUS && op != E_TOKEN_EQEQUAL && op != E_TOKEN_NOTEQUAL ) {
 		GetParser()->SetError( Parser::E_PAERR_EXP_STRINGOPERATION );
 		return Variable();
 	}
@@ -619,6 +582,9 @@ Variable Expression::Calculate( const Variable &var1, const Variable &var2, E_TO
 			break;
 		case E_TOKEN_SLASH:
 			return var1 / var2;
+			break;
+		case E_TOKEN_PERCENT:
+			return var1 % var2;
 			break;
 		case E_TOKEN_AND:
 			ret = true;
@@ -684,6 +650,9 @@ Variable Expression::Calculate( const Variable &var1, const Variable &var2, E_TO
 			else return Variable( 0 );
 		case E_TOKEN_EQEQUAL:
 			if ( var1 == var2 ) return Variable( 1 );
+			else return Variable( 0 );
+		case E_TOKEN_NOTEQUAL:
+			if ( var1 != var2 ) return Variable( 1 );
 			else return Variable( 0 );
 		default:
 			GetParser()->SetError( Parser::E_PAERR_EXP_OPOTHER );
@@ -785,7 +754,7 @@ bool Statement::IsVariableTrue( const Variable* var ) {
 			}
 			break;
 		case Variable::E_STRING:
-			if ( strcmp( var->GetStringValue().c_str(), "" ) == 0 ) {
+			if ( std::strcmp( var->GetStringValue().c_str(), "" ) == 0 ) {
 				return false;
 			}
 			else {
@@ -832,7 +801,7 @@ void Statement::Parse() {
 		else {
 			// process if-elif-else and while-break statement
 			
-			if ( strcmp( lex->GetNextTokenPointer()->GetCharValue(), "if" ) == 0 ) {
+			if ( std::strcmp( lex->GetNextTokenPointer()->GetCharValue(), "if" ) == 0 ) {
 				// assume if-else statement
 				// NB. after fac->Parse(), lex->next stops at the factor's last token, 
 				// after expr->Parse(), stm->Parse(), sml->Parse() , lex->next stops at the token follows the expression
@@ -867,7 +836,7 @@ void Statement::Parse() {
 							break;
 						}
 
-						if ( strcmp( lex->GetNextTokenPointer()->GetCharValue(), "elif" ) == 0 ) {
+						if ( std::strcmp( lex->GetNextTokenPointer()->GetCharValue(), "elif" ) == 0 ) {
 							lex->MoveNext();
 
 							expr->Clear();
@@ -902,7 +871,7 @@ void Statement::Parse() {
 								break;
 							}
 						}
-						else if ( strcmp( lex->GetNextTokenPointer()->GetCharValue(), "else" ) == 0 ) {
+						else if ( std::strcmp( lex->GetNextTokenPointer()->GetCharValue(), "else" ) == 0 ) {
 							lex->MoveNext();
 
 							if ( !GetParser()->HasError() ) {
@@ -934,7 +903,7 @@ void Statement::Parse() {
 					}
 				}
 			}
-			else if ( strcmp( lex->GetNextTokenPointer()->GetCharValue(), "while" ) == 0 ) {
+			else if ( std::strcmp( lex->GetNextTokenPointer()->GetCharValue(), "while" ) == 0 ) {
 				// is hard to process 'while' statement, because we should record the expression after keyword'while'
 				// the better idea is to record the position use lexer
 				m_eType = E_STATEMENT_WHILE;
@@ -980,7 +949,7 @@ void Statement::Parse() {
 
 				lex->PopPos();
 			}
-			else if ( strcmp( lex->GetNextTokenPointer()->GetCharValue(), "break" ) == 0 ) {
+			else if ( std::strcmp( lex->GetNextTokenPointer()->GetCharValue(), "break" ) == 0 ) {
 				// 'while-break' statement
 				if ( lex->PosStackEmpty() ) {
 					// error here, no while statment to break
@@ -1048,6 +1017,7 @@ void Statement::Parse() {
 	delete sml;
 	delete expr;
 	delete fac;
+	return;
 }
 
 /****************************************************************************
@@ -1179,17 +1149,61 @@ bool StatementList::IsBreaked() const {
 	return m_bIsBreaked;
 }
 
+#ifdef __PC__
 #define _CS_PARSER_TEST_
+#endif
+
 #ifdef _CS_PARSER_TEST_
+#include "function.items"
 int main( int argc, char* argv[] ) {
 	if ( argc <= 1 ) return 0;
-
 	const char* filename = argv[1];
-	Parser* par = new Parser();
-	par->Initialize( filename );
 
-	par->Parse();
+	CSSPT::Parser* par = new CSSPT::Parser();
+	CSSPT::Lexer* lex = new CSSPT::Lexer();
+	CSSPT::Runtime* rt = new CSSPT::Runtime();
+	
+	do {
+		// initialize lexer, parser, runtime
+		lex->BindFile( filename );
+		//if ( lex->HasError() ) break;
+		lex->Initialize();
 
+		rt->Initialize();
+		rt->GetFunctionTable()->RegisterFunction( "AddSingle", new FUNC_AddSingle() );
+		
+		rt->GetFunctionTable()->RegisterFunction( "GetPlayerName", new FUNC_GetPlayerName() );
+		rt->GetFunctionTable()->RegisterFunction( "GetPlayerGender", new FUNC_GetPlayerGender() );
+		rt->GetFunctionTable()->RegisterFunction( "GetSingleDouble", new FUNC_GetSingleDouble() );
+		rt->GetFunctionTable()->RegisterFunction( "GetGameNumber", new FUNC_GetCurrentGameNumber() );
+		rt->GetFunctionTable()->RegisterFunction( "GetVolleyPlayerName", new FUNC_GetVolleyPlayerName() );
+		rt->GetFunctionTable()->RegisterFunction( "GetVenueName", new FUNC_GetVenueName() );
+		rt->GetFunctionTable()->RegisterFunction( "GetServePlayerIdx", new FUNC_GetServePlayerIDX() );
+		rt->GetFunctionTable()->RegisterFunction( "GetVolleyPlayerIdx", new FUNC_GetVolleyPlayerIDX() );
+		rt->GetFunctionTable()->RegisterFunction( "GetWinTeamIdx", new FUNC_GetWinTeamIDX() );
+		rt->GetFunctionTable()->RegisterFunction( "GetLoseTeamIdx", new FUNC_GetLoseTeamIDX() );
+		
+		rt->GetFunctionTable()->RegisterFunction( "IsPlayerInVolley", new FUNC_IsPlayerInVolley() );
+		rt->GetFunctionTable()->RegisterFunction( "IsBreakPoint", new FUNC_IsBreakPoint() );
+		rt->GetFunctionTable()->RegisterFunction( "IsEndofGame", new FUNC_IsEndofGame() );
+		rt->GetFunctionTable()->RegisterFunction( "IsEndofSet", new FUNC_IsEndofSet() );
+		rt->GetFunctionTable()->RegisterFunction( "IsEndofMatch", new FUNC_IsEndofMatch() );
+		rt->GetFunctionTable()->RegisterFunction( "IsPlayerWin", new FUNC_IsPlayerWin() );
+		
+		rt->GetFunctionTable()->RegisterFunction( "GetRandomNumber", new FUNC_GetRandomNumber() );
+		
+		par->Initialize( lex, rt);
+		par->Parse();
+		
+		if ( par->HasError() ) {
+			// error recovering, deal with g_WorkingDPL, please
+		}
+	} while ( 0 );
+
+	delete par;
+	delete rt;
+	delete lex;
+	
 	getchar();
 }
 #endif //_CS_PARSER_TEST_
