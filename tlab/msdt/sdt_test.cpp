@@ -5,6 +5,7 @@
 #include <cstdio>
 
 #define N_NUMBER 43560
+#define N_PERLINE 70
 
 int main(int argc, char* argv[])
 {
@@ -13,19 +14,19 @@ int main(int argc, char* argv[])
 	printf( "size of frame %d\n", sizeof( sdt_frame_unit ) );
 
 	MSDT* msdt = new MSDT();
-	msdt->Initialize( 10, 0.0001f );
+	msdt->Initialize( N_PERLINE, 0.0001f );
 
 	FILE *pf = fopen( "in.txt" ,"r" );
-	float a[11];
+	float a[N_PERLINE + 1];
 
 	for ( int i = 0; i < N_NUMBER; i ++ ) {
-		for ( int j = 0; j < 10; j ++ ) {
+		for ( int j = 0; j < N_PERLINE; j ++ ) {
 			fscanf( pf, "%f", &a[j] );
 		}
 		msdt->PushBack( a );
 	}
 	//fclose( pf );
-	fseek( pf, 0, 0 );
+	//fseek( pf, 0, 0 );
 
 	msdt->Flush();
 	printf( "%d\n", msdt->GetValidDataLength() );
@@ -42,7 +43,7 @@ int main(int argc, char* argv[])
 			fscanf( pf, "%f", &a[j] );
 		}
 		*/
-		for ( int j = 0; j < 10; j ++ ) {
+		for ( int j = 0; j < N_PERLINE; j ++ ) {
 			fprintf( pout, "%5.6f\t", a[j]);
 		}
 	
