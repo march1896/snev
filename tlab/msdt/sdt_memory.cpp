@@ -21,9 +21,11 @@ void SDT_Memory::Initialize( int size ) {
 	if ( b_inited ) return;
 
 	// get memory by system call;
-#ifdef __PC__
+#if defined ( __PC__ )
 	p_buffer = (char*)malloc( size );
-#elif __WII__
+#elif defined ( __WII__ ) 
+	CResourceSystemPrivateImpl* pRes = dynamic_cast<CResourceSystemPrivateImpl*>(&CTKCSystemFactory::GetInstance().GetResourceSystemPrivate());
+	p_buffer = (char*)pRes->SimpleAlloc(size );
 #endif
 	
 	if ( !p_buffer ) return; 
@@ -46,9 +48,11 @@ void SDT_Memory::Initialize( int size ) {
 void SDT_Memory::Destroy() {
 	if ( !b_inited ) return;
 
-#ifdef __PC__
+#if defined ( __PC__ )
 	if ( p_buffer ) free( p_buffer );
-#elif __WII__
+#elif defined ( __WII__ ) 
+	CResourceSystemPrivateImpl* pRes = dynamic_cast<CResourceSystemPrivateImpl*>(&CTKCSystemFactory::GetInstance().GetResourceSystemPrivate());
+	if ( p_buffer ) pRes->SimpleDealloc( p_buffer );
 #endif
 
 	b_inited = false;

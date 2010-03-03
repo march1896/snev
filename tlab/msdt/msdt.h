@@ -18,7 +18,7 @@ public:
 	void 					PushBack( const sdt_data* const data );
 
 	// get the index'th data in this pipe, if index < 0, it will count inverse.
-	const sdt_data* 		GetData( int index ) const;
+	bool			 		GetData( sdt_data* data, int index ) const;
 
 	// return the useful data length
 	int 					GetValidDataLength() const;

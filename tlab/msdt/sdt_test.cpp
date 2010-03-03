@@ -35,7 +35,7 @@ int main(int argc, char* argv[])
 	FILE *pout = fopen( "out.txt", "w" );
 	for ( int i = 0; i < length; i ++ ) {
 		//printf( "i = %d\n", i );
-		const f32 *pa = msdt->GetData( i );
+		msdt->GetData( a, i );
 
 		/*
 		for ( int j = 0; j < 10; j ++ ) {
@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
 		}
 		*/
 		for ( int j = 0; j < 10; j ++ ) {
-			fprintf( pout, "%5.6f\t", pa[j]);
+			fprintf( pout, "%5.6f\t", a[j]);
 		}
 	
 		fprintf( pout, "\n" );
@@ -52,6 +52,6 @@ int main(int argc, char* argv[])
 	delete msdt;
 
 	int stop_flag;
-	//scanf( "%d", &stop_flag );
+	scanf( "%d", &stop_flag );
 	return 0;
 }

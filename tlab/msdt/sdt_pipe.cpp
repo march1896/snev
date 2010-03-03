@@ -60,7 +60,13 @@ bool SDT_Pipe::PushBack( sdt_data data ) {
 }
 
 void SDT_Pipe::Flush() {
+	if ( curr_length == 0 ) return;
+
 	sdt_frame* pfr = GetNewFrame();
+	if ( pfr == NULL ) {
+		//error 
+	}
+	
 	pfr->start = curr_start;
 	pfr->slope = float2slope( (curr_upper_slope + curr_lower_slope ) / 2 );
 	pfr->length = curr_length;
@@ -148,6 +154,8 @@ sdt_frame* SDT_Pipe::GetNewFrame() {
 		if ( p_frame_unit_curr->end == FRAME_PER_UNIT ) {
 			// need a new frame unit
 			sdt_frame_unit* pfu = p_memory->Alloc();
+			if ( pfu == NULL ) return NULL;
+			
 			n_memory ++;
 			sdt_frame_unit_init( pfu );
 
