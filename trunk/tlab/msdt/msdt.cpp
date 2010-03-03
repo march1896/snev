@@ -99,7 +99,7 @@ void MSDT::CleanUpMemory() {
 	SDT_Pipe* pp = NULL;
 	int size = 0;
 
-	while ( p_memory->GetUsedPercent() > 0.99 ) {
+	while ( p_memory->GetUsedPercent() > 0.96 ) {
 		for ( int i = 0; i < n_pipes; i ++ ) {
 			if ( p_pipes[i].GetMemorySize() > 1 && p_pipes[i].GetLength() - p_pipes[i].GetFirstUnitLength() > size ) {
 				size = p_pipes[i].GetLength() - p_pipes[i].GetFirstUnitLength();
