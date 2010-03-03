@@ -68,19 +68,20 @@ int MSDT::GetValidDataLength() const {
 	return ret;
 }
 
-const sdt_data* MSDT::GetData( int index ) const {
+bool MSDT::GetData( sdt_data* data, int index ) const {
 	int valid_data_length = GetValidDataLength();
-	if ( index > valid_data_length || index < -valid_data_length ) return NULL;
+	if ( index > valid_data_length || index < -valid_data_length ) return false;
 
 	if ( index > 0 ) {
 		index -= valid_data_length;
 	}
 
 	for ( int i = 0; i < n_pipes; i ++ ) {
-		p_dummy_dataline[i] = p_pipes[i].GetData( index );
+		data[i] = p_dummy_dataline[i] = p_pipes[i].GetData( index );
 	}
 
-	return p_dummy_dataline;
+	return true;
+	//return p_dummy_dataline;
 }
 
 void MSDT::Flush() {
@@ -91,22 +92,22 @@ void MSDT::Flush() {
 	return;
 }
 
+#include <cstdio>
 void MSDT::CleanUpMemory() {
-	if ( p_memory->GetUsedPercent() < 0.99 ) {
-		return;
-	}
+	printf( "memory used percent %f\n", p_memory->GetUsedPercent() );
 
 	SDT_Pipe* pp = NULL;
 	int size = 0;
 
-	for ( int i = 0; i < n_pipes; i ++ ) {
-		if ( p_pipes[i].GetMemorySize() > 1 && p_pipes[i].GetLength() - p_pipes[i].GetFirstUnitLength() > size ) {
-			size = p_pipes[i].GetLength() - p_pipes[i].GetFirstUnitLength();
-			pp = &p_pipes[i];
+	while ( p_memory->GetUsedPercent() > 0.99 ) {
+		for ( int i = 0; i < n_pipes; i ++ ) {
+			if ( p_pipes[i].GetMemorySize() > 1 && p_pipes[i].GetLength() - p_pipes[i].GetFirstUnitLength() > size ) {
+				size = p_pipes[i].GetLength() - p_pipes[i].GetFirstUnitLength();
+				pp = &p_pipes[i];
+			}
 		}
+		pp->PopFirstUnit();
 	}
-
-	pp->PopFirstUnit();
 
 	return;
 }
