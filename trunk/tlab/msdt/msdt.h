@@ -26,7 +26,7 @@ public:
 	// flush all the pipes, see sdt_pipe.h to why we should flush
 	// we should flush the data, then call 'GetData()' func
 	void 					Flush();
-private:
+	
 	// if the memory is not enough to use, just clean up, 
 	// this process will automaticly done.
 	void 					CleanUpMemory();

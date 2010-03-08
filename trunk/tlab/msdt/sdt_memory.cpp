@@ -24,8 +24,6 @@ void SDT_Memory::Initialize( int size ) {
 #if defined ( __PC__ )
 	p_buffer = (char*)malloc( size );
 #elif defined ( __WII__ ) 
-	CResourceSystemPrivateImpl* pRes = dynamic_cast<CResourceSystemPrivateImpl*>(&CTKCSystemFactory::GetInstance().GetResourceSystemPrivate());
-	p_buffer = (char*)pRes->SimpleAlloc(size );
 #endif
 	
 	if ( !p_buffer ) return; 
@@ -35,7 +33,7 @@ void SDT_Memory::Initialize( int size ) {
 	sdt_frame_unit* fu = ( sdt_frame_unit* )p_buffer;
 	n_total_size = size / block_size;
 
-	for ( int i = 0; i < n_total_size; i ++ ) {
+	for ( int i = 0; i < n_total_size - 1; i ++ ) {
 		fu->next = fu + 1;
 		fu = fu->next;
 	}
@@ -51,8 +49,6 @@ void SDT_Memory::Destroy() {
 #if defined ( __PC__ )
 	if ( p_buffer ) free( p_buffer );
 #elif defined ( __WII__ ) 
-	CResourceSystemPrivateImpl* pRes = dynamic_cast<CResourceSystemPrivateImpl*>(&CTKCSystemFactory::GetInstance().GetResourceSystemPrivate());
-	if ( p_buffer ) pRes->SimpleDealloc( p_buffer );
 #endif
 
 	b_inited = false;
@@ -74,6 +70,7 @@ void SDT_Memory::Dealloc( void* p ) {
 
 	if ( p_curr == NULL ) {
 		p_curr = addr;
+		p_curr->next = NULL;
 	}
 	else {
 		addr->next = p_curr->next;

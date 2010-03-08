@@ -1,7 +1,8 @@
 #include "sdt_pipe.h"
 #include "sdt_memory.h"
+#include "msdt.h"
 
-SDT_Pipe::SDT_Pipe( f32 error, SDT_Memory* pmem ) :
+SDT_Pipe::SDT_Pipe( f32 error, SDT_Memory* pmem, MSDT* pown ) :
 	curr_upper_slope( 0.0f ),
 	curr_lower_slope( 0.0f ),
 	curr_start( 0.0f ),
@@ -10,6 +11,7 @@ SDT_Pipe::SDT_Pipe( f32 error, SDT_Memory* pmem ) :
 	n_data( 0 ),
 	n_memory( 0 ),
 	p_memory( pmem ),
+	p_owner( pown ),
 	p_frame_unit_first( NULL ),
 	p_frame_unit_curr( NULL )
 {
@@ -28,7 +30,7 @@ bool SDT_Pipe::PushBack( sdt_data data ) {
 		curr_length ++;
 	}
 	else {
-		if ( curr_length + 1 == MAX_LENGTH ) {
+		if ( curr_length + 1 >= MAX_LENGTH ) {
 			// the length extend the max length
 			Flush();
 			PushBack( data );
@@ -63,9 +65,6 @@ void SDT_Pipe::Flush() {
 	if ( curr_length == 0 ) return;
 
 	sdt_frame* pfr = GetNewFrame();
-	if ( pfr == NULL ) {
-		//error 
-	}
 	
 	pfr->start = curr_start;
 	pfr->slope = float2slope( (curr_upper_slope + curr_lower_slope ) / 2 );
@@ -106,7 +105,7 @@ int SDT_Pipe::GetMemorySize() const {
 sdt_data SDT_Pipe::GetData( int index ) {
 	// assert( curr_length == 0 ); // the data is flushed to used
 
-	if ( index > n_data || index < -n_data ) {
+	if ( index >= n_data || index < -n_data ) {
 		// error index!!
 		return 0.0f;
 	}
@@ -154,7 +153,10 @@ sdt_frame* SDT_Pipe::GetNewFrame() {
 		if ( p_frame_unit_curr->end == FRAME_PER_UNIT ) {
 			// need a new frame unit
 			sdt_frame_unit* pfu = p_memory->Alloc();
-			if ( pfu == NULL ) return NULL;
+			while ( pfu == NULL ) {
+				p_owner->CleanUpMemory();
+				pfu = p_memory->Alloc();
+			}
 			
 			n_memory ++;
 			sdt_frame_unit_init( pfu );
