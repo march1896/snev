@@ -5,12 +5,13 @@
 #include <cstdlib>
 
 class SDT_Memory;
+class MSDT;
 
 class SDT_Pipe {
 public:
 public:
 
-							SDT_Pipe( f32 max_error = 0.0f, SDT_Memory* pmem = NULL );
+							SDT_Pipe( f32 max_error = 0.0f, SDT_Memory* pmem = NULL, MSDT* owner = NULL );
 							~SDT_Pipe();
 
 	// push back a data in this pipe, return true if new memory is allocated, vice versa
@@ -39,6 +40,7 @@ public:
 
 	void 					SetMaxError( f32 me ) { max_error = me; }
 	void 					SetMemoryCallback( SDT_Memory* pmem );
+	void 					SetOwner( MSDT* pown ) { p_owner = pown; }
 private:
 	sdt_frame* 				GetNewFrame();
 
@@ -54,6 +56,7 @@ private:
 	int 					n_memory;  // size of memery this pipe used
 
 	SDT_Memory* 			p_memory;
+	MSDT* 					p_owner;
 
 	sdt_frame_unit* 		p_frame_unit_first;
 	sdt_frame_unit* 		p_frame_unit_curr;

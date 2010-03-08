@@ -1,6 +1,8 @@
 #include "sdt_def.h"
 #include <cstdlib>
 
+// the algorithm is copied from
+// http://www.fox-toolkit.org/ftp/fasthalffloatconversion.pdf
 static u32 mantissatable[ 2048 ];
 static u32 exponenttable[ 64 ];
 static u32 offsettable[ 64 ];

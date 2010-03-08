@@ -48,7 +48,7 @@ struct sdt_frame {
 void hlaf_float_init();
 sdt_data sdt_frame_get( sdt_frame* pf, sdt_length l );
 
-#define FRAME_PER_UNIT 16
+#define FRAME_PER_UNIT 8
 struct sdt_frame_unit {
 	sdt_frame_unit* 		next; 			
 	u16 					start;   // frames[ start ] is the first used frame in this unit
