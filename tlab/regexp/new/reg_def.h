@@ -46,6 +46,25 @@ typedef struct __s_nfa {
 	struct __s_nodelist* 	pnl_l; 	// pointer to the last node in nodelist
 } s_nfa, *p_nfa;
 
+typedef struct __s_dfa {
+	struct __s_nodelist* 	pnl_f;
+	struct __s_nodelist* 	pnl_l;
+} s_dfa, *p_dfa;
+
+#define ID_SENTINEL 100000
+#define ID_NOTEXSIT -1
+typedef struct __s_idlist {
+	int 			id;
+	struct __s_idlist* 	next;
+} s_idlist, *p_idlist;
+
+typedef struct __s_idmap {
+	int 			dfa_id;
+	struct __s_idlist* 	nfa_idlist;
+
+	struct __s_idmap* 	next;
+} s_idmap, *p_idmap;
+
 p_edge 	edge_new( int w, p_node pdn );
 void 	edge_del( p_edge pn );
 
@@ -63,14 +82,23 @@ void 	nfa_addnode( p_nfa pa, p_node pn );
 
 /** concat two nfa to to dest */
 p_nfa nfa_concat( p_nfa source, p_nfa second );
-/** */
 p_nfa nfa_branch( p_nfa first, p_nfa second );
-/** */
 p_nfa nfa_closure( p_nfa source );
-
 p_nfa nfa_make_from_stringconcat( const char* str );
-
 p_nfa nfa_make_from_stringbranch( const char* str );
+
+/* an id list used in dfa */
+void 	idlist_addid( p_idlist pil, int id );
+p_idlist idlist_new();
+p_idlist idlist_copy();
+void 	idlist_del( p_idlist pil );
+
+/* map an id list to a single dfa id */
+p_idmap idmap_new();
+int idmap_add( p_idmap pim, p_idlist pil );
+int idmap_find( p_idmap pim, p_idlist pil );
+void 	idmap_del( p_idmap pim );
+
 
 #ifdef _ENABLE_PRINT_
 void nfa_print( p_nfa pa );

@@ -205,6 +205,44 @@ p_nfa nfa_branch( p_nfa first, p_nfa second ) {
 }
 
 p_nfa nfa_closure( p_nfa source ) {
+ 	p_nfa res;
+	p_nfa pa_copy;
+	p_node pn_start, pn_accept;
+	p_node pn;
+	p_edge pe;
+
+	/* copy the nfas */
+	pa_copy = nfa_copy( source );
+	
+	/* find the start and accept nodes in first nfa, and second nfa */
+	pn_start = findnode_via_info( pa_copy->pnl_f, NODE_START );
+	pn_accept = findnode_via_info( pa_copy->pnl_f, NODE_ACCEPT );
+	pn_start->info = pn_accept->info = NODE_NORMAL;
+
+	pe = edge_new( EPSILON, pn_start );
+	node_addedge( pn_accept, pe );
+
+	res = nfa_new();
+	/* make EPSILON edge from the new node to the startnodes of the two */
+	pn = node_new( node_make_id() );
+	pn->info = NODE_START;
+	pe = edge_new( EPSILON, pn_start );
+	node_addedge( pn, pe );
+	nfa_addnode( res, pn );
+
+	pn = node_new( node_make_id() );
+	pn->info = NODE_ACCEPT;
+	pe = edge_new( EPSILON, pn );
+	node_addedge( pn_accept, pe );
+	nfa_addnode( res, pn );
+
+	res->pnl_l->next = pa_copy->pnl_f;
+	res->pnl_l = pa_copy->pnl_l;
+
+	/* just release the nfa but not the content */
+	t_free( pa_copy );
+
+	return res;
 }
 
 p_nfa nfa_make_from_stringconcat( const char* str ) {

@@ -24,7 +24,13 @@ int main() {
 	nfa_del( pa );
 	nfa_del( pb );
 
-	nfa_print( pc );
+	p_nfa pd = nfa_closure( pc );
+	nfa_del( pc );
+
+	nfa_print( pd );
+
+	nfa_del( pd );
+	CheckLeakPoint();
 
 	DeinitHeap();
 	free( memory );
