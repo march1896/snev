@@ -1,71 +1,78 @@
 #ifndef _REG_DEF_
 #define _REG_DEF_
 
-struct s_node, s_nodelist, s_edge, s_edgelist;
+#define _ENABLE_PRINT_
 
-typedef struct __s_node {
-	int 		id;
-	p_edge_list el;
-} s_node, *p_node;
+#include "heap2.h"
+#define t_alloc Allocate
+#define t_free Free
 
-void node_new( p_node pn );
-void node_del( p_node pn );
-void node_addedge( p_node pn, p_edge pe )
-
-typedef struct __s_nodelist {
-	p_node 		element;
-	p_node_list next;
-} s_nodelist, *p_nodelist;
-
-void nodelist_new( p_nodelist pnl );
-void nodelist_del( p_nodelist pnl );
-void nodelist_add( p_nodelist pnl, p_node pn );
-
+#define EPSILON 256
 typedef struct __s_edge {
-	int 		id;
-	p_node 		dest;
+	int 			weight;
+	struct __s_node* 	dest;
 } s_edge, *p_edge;
 
-void edge_new( p_edge pn );
-void edge_del( p_edge pn );
+#define NODE_NORMAL 0
+#define NODE_START 1
+#define NODE_ACCEPT 2
+typedef struct __s_node {
+	int 			id; 	// the identity of the node, it's a unique interger
+	int 			info; 	// the infomation of the node, like it's START_NODE or ACCEPT_NODE
+	struct __s_edgelist* 	pel_f; 	// pointer to the first node in the edgelist
+	struct __s_edgelist* 	pel_l; 	// pointer to the last node in the edgelist
+} s_node, *p_node;
 
-typedef struct __s_edge_list {
-	p_edge 		element;
-	p_edge_list next;
+/** 
+	edgelist is a list maintain in a certain node, when we create a new edge and add it to a
+	node, we should add it to the nodelist
+ */
+typedef struct __s_edgelist {
+	struct __s_edge* 	element;
+	struct __s_edgelist* 	next;
 } s_edgelist, *p_edgelist;
 
-void edgelist_new( p_edgelist pnl );
-void edgelist_del( p_edgelist pnl );
-void edgelist_add( p_edgelist pnl, p_node pn );
-
-/*
-const int NUM_NODE = 1000;
-const int NUM_EDGE = 3000;
-typedef struct __s_graph {
-	p_nodelist 	starts;
-	p_nodelist 	accepts;
-
-	p_nodelist 	nodes;
-
-	int 		node_id_index;
-} s_graph, *p_graph;
-
-void graph_new( p_graph pg );
-void graph_del( p_graph pg );
-int  graph_get_nodeid( p_graph pg );
-*/
+/** 
+	nodelist is a list maintain in a certain graph, when we create a new node and add it to a
+	graph, we should add it to the nodelist
+ */
+typedef struct __s_nodelist {
+	struct __s_node* 	element;
+	struct __s_nodelist* 	next;
+} s_nodelist, *p_nodelist;
 
 typedef struct __s_nfa {
-	p_node 		start;
-	p_node 		accept;
-
-	p_nodelist 	nodes;
-
-	int 		node_id_index;
+	struct __s_nodelist* 	pnl_f; 	// pointer to the fisrt node in nodelist
+	struct __s_nodelist* 	pnl_l; 	// pointer to the last node in nodelist
 } s_nfa, *p_nfa;
 
-void nfa_new( p_nfa pa );
-void nfa_del( p_nfa pa );
-int  nfa_get_nodeid( p_nfa pa );
+p_edge 	edge_new( int w, p_node pdn );
+void 	edge_del( p_edge pn );
 
+int  	node_make_id(); 		// return a unique id for node
+p_node 	node_new( int node_id );
+void 	node_del( p_node pn );
+void 	node_addedge( p_node pn, p_edge pe );
+p_edge 	node_findedge( p_node dest, p_node source );
+
+
+p_nfa 	nfa_new();
+p_nfa 	nfa_copy( p_nfa source );
+void 	nfa_del( p_nfa pa );
+void 	nfa_addnode( p_nfa pa, p_node pn );
+
+/** concat two nfa to to dest */
+p_nfa nfa_concat( p_nfa source, p_nfa second );
+/** */
+p_nfa nfa_branch( p_nfa first, p_nfa second );
+/** */
+p_nfa nfa_closure( p_nfa source );
+
+p_nfa nfa_make_from_stringconcat( const char* str );
+
+p_nfa nfa_make_from_stringbranch( const char* str );
+
+#ifdef _ENABLE_PRINT_
+void nfa_print( p_nfa pa );
+#endif
 #endif // _REG_DEF_
