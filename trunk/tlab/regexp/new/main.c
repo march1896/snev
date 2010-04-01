@@ -31,8 +31,11 @@ int main() {
 
 	p_dfa pda = dfa_convert_from_nfa( pd );
 
-	dfa_del( pda );
+	dfa_print( pda );
+	printf( "\n-------------------------\n" );
+
 	nfa_del( pd );
+	dfa_del( pda );
 	CheckLeakPoint();
 
 	DeinitHeap();
