@@ -3,7 +3,7 @@
 #include "stdio.h"
 #include "assert.h"
 
-static int g_nfa_id_index = 0;
+static int g_dfa_id_index = 0;
 p_ndmap ndmap_new() {
 	p_ndmap pim;
 
@@ -66,7 +66,7 @@ void ndmap_add( p_ndmap pim, p_node pn, p_nodelist pnl ) {
 }
 
 int make_unique_dfaid() {
-	return g_nfa_id_index ++;
+	return g_dfa_id_index ++;
 }
 
 int nodelist_compare( p_nodelist first, p_nodelist second ) {
@@ -159,7 +159,7 @@ p_dfa dfa_convert_from_nfa( p_nfa pna ) {
 	int i;
 	p_dfa pda;
 	p_ndmap pim;
-	p_nodelist pnl, pnl_first, pnl_last, pnl_x, pnl_y, pnl_new;
+	p_nodelist pnl, pnl_first, pnl_last, pnl_x, pnl_y, pnl_z, pnl_new;
 	p_node pn, pn_new, pn_nfa_start, pn_nfa_accept, pn_x;
 	p_edge pe_x;
 	int dfa_id;
@@ -203,7 +203,7 @@ p_dfa dfa_convert_from_nfa( p_nfa pna ) {
 	
 		pnl = ndmap_find_via_dfanode( pim, pn );
 
-		nodelist_print( pnl );
+		//nodelist_print( pnl );
 
 		for (i = 0; i < WT_SIZE; i++ ) {
 			pnl_y = nodelist_find_edge( pnl, i );
@@ -218,6 +218,14 @@ p_dfa dfa_convert_from_nfa( p_nfa pna ) {
 					// find a new node
 					pn_x = node_new( make_unique_dfaid() );
 					ndmap_add( pim, pn_x, pnl_x );
+
+					pnl_z = pnl_x;
+					while ( pnl_z != NULL ) {
+						if ( pnl_z->element->info == NODE_ACCEPT ) {
+							pn_x->info = NODE_ACCEPT;
+						}
+						pnl_z = pnl_z->next;
+					}
 
 					pnl_new = (p_nodelist)t_alloc( sizeof( s_nodelist) );
 					pnl_new->element = pn_x;
@@ -357,7 +365,29 @@ p_nodelist nodelist_epsilon_closure( p_nodelist pnl ) {
 	return ret;
 }
 
-void dfa_print( p_dfa dfa ) {
+void dfa_print( p_dfa pa ) {
+	p_nodelist pnl;
+	p_node pn;
+	p_edgelist pel;
+	p_edge pe;
+
+	pnl = pa->pnl_f;
+	while ( pnl != NULL ) {
+		pn = pnl->element;
+		printf( "node: %d %d\n", pn->id, pn->info );
+		pel = pn->pel_f;
+
+		while ( pel != NULL ) {
+			pe = pel->element;
+			
+			printf( "    edge: %c %d\n", (char)pe->weight, pe->dest->id );
+			pel = pel->next;
+		}
+
+		pnl = pnl->next;
+	}
+
+	return;
 }
 
 void dfa_print_table( p_dfa dfa ) {
