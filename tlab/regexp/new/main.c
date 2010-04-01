@@ -26,9 +26,12 @@ int main() {
 
 	p_nfa pd = nfa_closure( pc );
 	nfa_del( pc );
-
 	nfa_print( pd );
+	printf( "\n-------------------------\n" );
 
+	p_dfa pda = dfa_convert_from_nfa( pd );
+
+	dfa_del( pda );
 	nfa_del( pd );
 	CheckLeakPoint();
 
