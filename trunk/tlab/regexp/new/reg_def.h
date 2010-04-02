@@ -100,6 +100,9 @@ void 	dfa_del( p_dfa pa );
 void 	dfa_addnode( p_dfa pa, p_node pn );
 void  	dfa_del( p_dfa pda );
 p_dfa 	dfa_convert_from_nfa( p_nfa nfa );
+
+/* */
+p_dfa 	build_dfa_from_string( char* str );
 #ifdef _ENABLE_PRINT_
 void 	nfa_print( p_nfa pa );
 void 	dfa_print( p_dfa dfa );

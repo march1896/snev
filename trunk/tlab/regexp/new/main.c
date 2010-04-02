@@ -10,7 +10,13 @@ int main() {
 	memory = (char*)malloc( sizeof(char) * MEMORY_SIZE );
 	InitHeap( memory, MEMORY_SIZE, 32 );
 
-	const char* str = "Tangel";
+	char* str = "\\d*";
+	//char* str = "a*";
+	p_dfa ppp = build_dfa_from_string( str );
+	dfa_print( ppp );
+	dfa_del( ppp );
+		
+	/*
 	p_nfa pa = nfa_make_from_stringconcat( str );
 	nfa_print( pa );
 	printf( "\n-------------------------\n" );
@@ -24,6 +30,9 @@ int main() {
 	nfa_del( pa );
 	nfa_del( pb );
 
+	nfa_print( pc );
+	printf( "\n-------------------------\n" );
+
 	p_nfa pd = nfa_closure( pc );
 	nfa_del( pc );
 	nfa_print( pd );
@@ -36,6 +45,7 @@ int main() {
 
 	nfa_del( pd );
 	dfa_del( pda );
+	*/
 	CheckLeakPoint();
 
 	DeinitHeap();
