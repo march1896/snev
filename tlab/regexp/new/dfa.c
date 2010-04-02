@@ -184,12 +184,18 @@ p_dfa dfa_convert_from_nfa( p_nfa pna ) {
 	}
 
 	pnl = node_epsilon_closure( pn_nfa_start );
-	printf( "here\n" );
 	dfa_id = make_unique_dfaid();
 
 	/* add the start node to dfa */
 	pn_new = node_new( dfa_id );
 	pn_new->info = NODE_START;
+	pnl_z = pnl;
+	while ( pnl_z != NULL ) {
+		if ( pnl_z->element->info == NODE_ACCEPT ) {
+			pn_new->info |= NODE_ACCEPT;
+		}
+		pnl_z = pnl_z->next;
+	}
 	dfa_addnode( pda, pn_new );
 
 	ndmap_add( pim, pn_new, pnl );
@@ -222,7 +228,7 @@ p_dfa dfa_convert_from_nfa( p_nfa pna ) {
 					pnl_z = pnl_x;
 					while ( pnl_z != NULL ) {
 						if ( pnl_z->element->info == NODE_ACCEPT ) {
-							pn_x->info = NODE_ACCEPT;
+							pn_x->info |= NODE_ACCEPT;
 						}
 						pnl_z = pnl_z->next;
 					}

@@ -208,7 +208,7 @@ p_nfa nfa_closure( p_nfa source ) {
  	p_nfa res;
 	p_nfa pa_copy;
 	p_node pn_start, pn_accept;
-	p_node pn;
+	p_node pn_x, pn_y;
 	p_edge pe;
 
 	/* copy the nfas */
@@ -224,17 +224,20 @@ p_nfa nfa_closure( p_nfa source ) {
 
 	res = nfa_new();
 	/* make EPSILON edge from the new node to the startnodes of the two */
-	pn = node_new( node_make_id() );
-	pn->info = NODE_START;
+	pn_x = node_new( node_make_id() );
+	pn_x->info = NODE_START;
 	pe = edge_new( EPSILON, pn_start );
-	node_addedge( pn, pe );
-	nfa_addnode( res, pn );
+	node_addedge( pn_x, pe );
+	nfa_addnode( res, pn_x );
 
-	pn = node_new( node_make_id() );
-	pn->info = NODE_ACCEPT;
-	pe = edge_new( EPSILON, pn );
+	pn_y = node_new( node_make_id() );
+	pn_y->info = NODE_ACCEPT;
+	pe = edge_new( EPSILON, pn_y );
 	node_addedge( pn_accept, pe );
-	nfa_addnode( res, pn );
+	nfa_addnode( res, pn_y );
+
+	pe = edge_new( EPSILON, pn_y );
+	node_addedge( pn_x, pe );
 
 	res->pnl_l->next = pa_copy->pnl_f;
 	res->pnl_l = pa_copy->pnl_l;
@@ -252,11 +255,23 @@ p_nfa nfa_make_from_stringconcat( const char* str ) {
 
 	if ( str == NULL ) return NULL;
 
-	printf( "start\n" );
+	printf( "make from string concat\n" );
 	pa = nfa_new();
 	pn_prev = node_new( node_make_id() );
 	pn_prev->info = NODE_START;
 	nfa_addnode( pa, pn_prev );
+
+	if ( (*str) == 0 ) {
+		/* empty string indicate epsilon */
+		printf( "Only Epsilon\n" );
+		pn_next = node_new( node_make_id() );
+		pn_next->info = NODE_ACCEPT;
+		pe = edge_new( EPSILON, pn_next );
+		node_addedge( pn_prev, pe );
+		nfa_addnode( pa, pn_next );
+
+		return pa;
+	}
 
 	while ( (*str) != 0 ) {
 		pn_next = node_new( node_make_id() );
@@ -266,7 +281,6 @@ p_nfa nfa_make_from_stringconcat( const char* str ) {
 
 		pn_prev = pn_next;
 		str ++;
-		printf( "str %c\n", *str );
 	}
 
 	pn_prev->info = NODE_ACCEPT;
@@ -288,6 +302,15 @@ p_nfa nfa_make_from_stringbranch( const char* str ) {
 
 	nfa_addnode( pa, pn_prev );
 	nfa_addnode( pa, pn_next );
+
+	if ( (*str) == 0 ) {
+		/* empty string indicate epsilon */
+		printf( "Only Epsilon\n" );
+		pe = edge_new( EPSILON, pn_next );
+		node_addedge( pn_prev, pe );
+
+		return pa;
+	}
 
 	while ( (*str) != 0 ) {
 		pe = edge_new( (int)(*str), pn_next );
