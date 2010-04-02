@@ -235,6 +235,15 @@ int is_normal_char( char c ) {
 	return 1;
 }
 
+#define MAX_RIGHT_BOUND 20
+void find_bound( const char* str, int *lb, int* rb ) {
+	int t;
+
+	str ++;
+	if ( *str == ',' ) *lb = 0;
+
+}
+
 #define BUFF_SIZE 100
 p_dfa build_dfa_from_string( char* str ) {
 	p_dfa pdfa;
@@ -269,6 +278,7 @@ p_dfa build_dfa_from_string( char* str ) {
 			case ']':
 				break;
 			case '{':
+				find_bound( str, &left_b, &right_b );
 				break;
 			case '}':
 				break;
