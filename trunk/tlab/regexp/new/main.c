@@ -1,18 +1,20 @@
 #include "reg_def.h"
 #include "heap2.h"
 #include "stdlib.h"
+#include "reader.h"
 
 #include "stdio.h"
 
 #define MEMORY_SIZE 1<<20
+
 int main() {
 	char* memory;
 	memory = (char*)malloc( sizeof(char) * MEMORY_SIZE );
 	InitHeap( memory, MEMORY_SIZE, 32 );
 
-	char* str = "\\d*";
-	//char* str = "a*";
-	p_dfa ppp = build_dfa_from_string( str );
+	//char* str = "abc*(d|ef)da\\{\\}dfadf{3,5}\\d{13,15}\\d*[^a-z0-9XYZ][ABCD]\\[\\]";
+	char* str = "abc(d|e)?";
+	p_dfa ppp = build_dfa_from_memory( str );
 	dfa_print( ppp );
 	dfa_del( ppp );
 		
