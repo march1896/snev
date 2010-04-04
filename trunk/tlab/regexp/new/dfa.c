@@ -209,7 +209,7 @@ p_dfa dfa_convert_from_nfa( p_nfa pna ) {
 	
 		pnl = ndmap_find_via_dfanode( pim, pn );
 
-		//nodelist_print( pnl );
+		nodelist_print( pnl );
 
 		for (i = 0; i < WT_SIZE; i++ ) {
 			pnl_y = nodelist_find_edge( pnl, i );
@@ -277,11 +277,14 @@ p_nodelist nodelist_find_edge( p_nodelist pnl, int w ) {
 
 			if ( pe->weight == w ) {
 				/* find a edge */
+				//printf( "%c %d\n", pe->weight, pe->dest->id );
 
 				/* check if the node is already in list */
 				pnl_new = ret;
 				while ( pnl_new != NULL ) {
-					if ( pnl_new->element = pe->dest ) break;
+					if ( pnl_new->element == pe->dest ) { 
+						break;
+					}
 					pnl_new = pnl_new->next;
 				}
 
