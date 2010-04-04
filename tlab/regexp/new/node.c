@@ -1,6 +1,6 @@
 #include "reg_def.h"
 
-static int g_node_index = 0;
+int g_node_index = 0;
 
 p_edge edge_new( int w, p_node pdn ) {
 	p_edge pe;

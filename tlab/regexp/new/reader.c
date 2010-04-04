@@ -671,6 +671,7 @@ int is_normal_char( char c ) {
 }
 
 #define MAX_RIGHT_BOUND 20
+
 void find_bound( const char* str, int *lb, int* rb ) {
 	int t;
 
@@ -679,15 +680,20 @@ void find_bound( const char* str, int *lb, int* rb ) {
 
 }
 
+const char* chset_num = "0123456789";
+const char* chset_word = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_";
+const char* chset_black = " \t\f\r";
+
 #define BUFF_SIZE 500
+#define CHARACTER_SET_SIZE 128
 p_dfa build_dfa_from_memory( char* str ) {
 	p_dfa pdfa;
 	p_regc prc;
 	p_stack ps;
 	p_stack_ele pse;
-	p_nfa pa, pa_x, pa_y;
-	char *pc0, *buffer, *pc1;
-	int  v, i, j;
+	p_nfa pa, pa_x, pa_y, pa_z, pa_w;
+	char *pc0, *buffer, *pc1, *ch;
+	int  v, i, j, k, x, y, z;
 
 	prc = regc_compile_from_memory( str );
 
@@ -699,18 +705,27 @@ p_dfa build_dfa_from_memory( char* str ) {
 
 	ps = stack_new();
 	buffer = (char*)t_alloc( sizeof(char) * BUFF_SIZE );
+	ch = (char*)t_alloc( sizeof(char) * CHARACTER_SET_SIZE );
 
 	/* TODO: check the str is comfortable */
 
 	for (i = 0;i < prc->size; i++ ) {
 		switch ( prc->buffer[i] ) {
-			/*
-			case '\\':
-				str ++;
-				pa = nfa_get_from_specialchar( *str );
+			case REG_NUMBER:
+				printf( "%s\n", chset_num );
+				pa = nfa_make_from_stringbranch( chset_num );
 				stack_push_nfa( ps, pa );
 				break;
-				*/
+			case REG_WORDS:
+				printf( "%s\n", chset_word );
+				pa = nfa_make_from_stringbranch( chset_word );
+				stack_push_nfa( ps, pa );
+				break;
+			case REG_BLACK:
+				printf( "%s\n", chset_black );
+				pa = nfa_make_from_stringbranch( chset_black );
+				stack_push_nfa( ps, pa );
+				break;
 			case REG_LEFTPAR:
 				//stack_process( ps, LEFT_PAR );
 				stack_push_op( ps, CONCAT );
@@ -720,12 +735,100 @@ p_dfa build_dfa_from_memory( char* str ) {
 				stack_process( ps, RIGHT_PAR );
 				break;
 			case REG_LEFTSQUARE:
+				v = 1;
+				if ( prc->buffer[++i] == REG_NOT ) {
+					v = 0;
+					i ++;
+				}
+
+				for (j = 1; j < CHARACTER_SET_SIZE; j ++ ) ch[j] = 0;
+				do {
+					if ( prc->buffer[i] == REG_RIGHTSQUARE ) break;
+					else if ( prc->buffer[i] == REG_BETWEEN ) {
+						i ++;
+						x = prc->buffer[i++];
+						y = prc->buffer[i++];
+						if ( x > y ) {
+							z = x;
+							x = y;
+							y = z;
+						}
+						while ( x <= y ) ch[x++] = 1;
+					}
+					else {
+						x = prc->buffer[i++];
+						ch[x] = 1;
+					}
+				} while ( i < prc->size );
+
+				for (j = 1, k = 0; j < CHARACTER_SET_SIZE; j ++ ) {
+					if ( !( ch[j] ^ v ) ) {
+						printf( "%c", (char)j );
+						buffer[k++] = (char)j;
+					}
+				}
+				buffer[k] = '\0';
+				printf( "%s\n", buffer );
+				pa = nfa_make_from_stringbranch( buffer );
+				stack_push_nfa( ps, pa );
 				break;
 			case REG_RIGHTSQUARE:
+				printf( "FATALERROR: right square\n" );
 				break;
 			case REG_LEFTBRACE:
+				pse = stack_top( ps );
+
+				if ( pse->type != e_nfa ) {
+					printf( "error!" );
+					break;
+				}
+
+				i ++;
+				x = prc->buffer[i++];
+				y = prc->buffer[i++];
+				i ++;
+
+				pa = pse->value.pa;
+
+				pa_z = nfa_multiple( pa, x );
+
+				for (j = 0; j <= y-x; j ++ ) {
+					pa_x = nfa_multiple( pa, j );
+					printf( "!!!------------------------------------\n" );
+					nfa_print( pa_x );
+					printf( "------------------------------------\n" );
+
+					if ( j == 0 ) {
+						pa_y = nfa_copy( pa_x );
+					}
+					else {
+						pa_w = pa_y;
+						pa_y = nfa_branch( pa_w, pa_x );
+						nfa_del( pa_w );
+					}
+					printf( "$$$$$$$--------------------------------\n" );
+					nfa_print( pa_y );
+					printf( "------------------------------------\n" );
+					printf( "fuck\n" );
+					p_dfa pda = dfa_convert_from_nfa( pa_y );
+					dfa_print( pda );
+					dfa_del( pda );
+					nfa_del( pa_x );
+				}
+
+
+				nfa_del( pa );
+				pa = nfa_concat( pa_z, pa_y );
+				nfa_del( pa_z );
+				nfa_del( pa_y );
+				
+				printf( "------------------------------------\n" );
+
+				stack_pop( ps );
+				stack_push_nfa( ps, pa );
 				break;
 			case REG_RIGHTBRACE:
+				printf( "FATALERROR: right brace\n" );
 				break;
 			case REG_BRANCH:
 				stack_process( ps, BRANCH );
@@ -827,6 +930,7 @@ p_dfa build_dfa_from_memory( char* str ) {
 	nfa_del( pa );
 
 	stack_del( ps );
+	t_free( ch );
 	t_free( buffer );
 	return pdfa;
 }
