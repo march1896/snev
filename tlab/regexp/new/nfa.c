@@ -319,7 +319,7 @@ p_nfa nfa_make_from_stringconcat( const char* str ) {
 
 	if ( str == NULL ) return NULL;
 
-	printf( "make from string concat\n" );
+	//printf( "make from string concat\n" );
 	pa = nfa_new();
 	pn_prev = node_new( node_make_id() );
 	pn_prev->info = NODE_START;
@@ -327,7 +327,7 @@ p_nfa nfa_make_from_stringconcat( const char* str ) {
 
 	if ( (*str) == 0 ) {
 		/* empty string indicate epsilon */
-		printf( "Only Epsilon\n" );
+		//printf( "Only Epsilon\n" );
 		pn_next = node_new( node_make_id() );
 		pn_next->info = NODE_ACCEPT;
 		pe = edge_new( EPSILON, pn_next );
@@ -369,7 +369,7 @@ p_nfa nfa_make_from_stringbranch( const char* str ) {
 
 	if ( (*str) == 0 ) {
 		/* empty string indicate epsilon */
-		printf( "Only Epsilon\n" );
+		//printf( "Only Epsilon\n" );
 		pe = edge_new( EPSILON, pn_next );
 		node_addedge( pn_prev, pe );
 

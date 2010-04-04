@@ -209,7 +209,7 @@ p_dfa dfa_convert_from_nfa( p_nfa pna ) {
 	
 		pnl = ndmap_find_via_dfanode( pim, pn );
 
-		nodelist_print( pnl );
+		//nodelist_print( pnl );
 
 		for (i = 0; i < WT_SIZE; i++ ) {
 			pnl_y = nodelist_find_edge( pnl, i );

@@ -118,13 +118,12 @@ void stack_process( p_stack ps, int op ) {
 	p_stack_ele pse;
 	p_nfa pa_x, pa_y, pa;
 	int op_prev;
-		printf( "%d here\n", op );
 
 	if ( ps->top == NULL ) return;
 
 	pse = stack_top( ps );
 	if ( pse->type == e_op ) {
-		printf( "two continuous operator A\n" );
+		printf( "FATAL: two continuous operator A\n" );
 		return;
 	}
 	pa_x = pse->value.pa;
@@ -133,11 +132,11 @@ void stack_process( p_stack ps, int op ) {
 	while ( ps->top != NULL ) {
 		pse = stack_top( ps );
 		if ( !pse ) {
-			printf( "empty stack\n" );
+			printf( "FATAL: empty stack\n" );
 			return;
 		}
 		else if ( pse->type == e_nfa ) {
-			printf( "two continuous nfa\n" );
+			printf( "FATAL: two continuous nfa\n" );
 			return;
 		}
 		op_prev = pse->value.op;
@@ -152,7 +151,7 @@ void stack_process( p_stack ps, int op ) {
 
 		pse = stack_top( ps );
 		if ( !pse || pse->type != e_nfa ) {
-			printf( "two continuous operator\n" );
+			printf( "FATAL: two continuous operator\n" );
 			return;
 		}
 		pa_y = pse->value.pa;
@@ -292,11 +291,15 @@ void regc_print( p_regc prc ) {
 }
 
 #define REG_MAX_SIZE 100
+#define REG_TYPE_NONE 0
+#define REG_TYPE_OP 1
+#define REG_TYPE_FA 2
 p_regc regc_compile_from_memory( const char* str ) {
 	p_regc prc;
 	int size, num;
 	int i, j;
 	int last_j, is_prev_str;
+	int last_type;
 
 	size = 0;
 	while ( *(str+size) != '\0' ) {
@@ -312,13 +315,22 @@ p_regc regc_compile_from_memory( const char* str ) {
 
 	last_j = -1;
 	is_prev_str = 0;
+	last_type = REG_TYPE_NONE;
 	for (i = 0, j = 0; i < size; ) {
 		if ( str[i] == '{' ) {
+			last_type = REG_TYPE_FA;
 			if ( is_prev_str ) {
-				prc->buffer[j+1] = prc->buffer[j-1];
-				prc->buffer[j-1] = REG_CONCAT;
-				prc->buffer[j] = REG_STRFRAGMENT;
-				j += 2;
+				if ( j == 0 ) {
+					printf( "error: '{' has special meaning, should have a word before\n" );
+					regc_del( prc );
+					return NULL;
+				}
+				if ( prc->buffer[j-2] != REG_STRFRAGMENT ) {
+					prc->buffer[j+1] = prc->buffer[j-1];
+					prc->buffer[j-1] = REG_CONCAT;
+					prc->buffer[j] = REG_STRFRAGMENT;
+					j += 2;
+				}
 			}
 
 			prc->buffer[j] = REG_LEFTBRACE;
@@ -433,6 +445,10 @@ p_regc regc_compile_from_memory( const char* str ) {
 			return NULL;
 		}
 		else if ( str[i] == '[' ) {
+			if ( last_type == REG_TYPE_FA ) {
+				prc->buffer[j++] = REG_CONCAT;
+			}
+			last_type = REG_TYPE_FA;
 			i ++;
 			prc->buffer[j ++] = REG_LEFTSQUARE;
 			if ( str[i] == '^' ) {
@@ -477,44 +493,74 @@ p_regc regc_compile_from_memory( const char* str ) {
 			return NULL;
 		}
 		else if ( str[i] == '(' ) {
+			if ( last_type == REG_TYPE_FA ) {
+				prc->buffer[j++] = REG_CONCAT;
+				last_type = REG_TYPE_OP;
+			}
 			prc->buffer[j++] = REG_LEFTPAR;
 			i ++;
 		}
 		else if ( str[i] == ')' ) {
+			last_type = REG_TYPE_FA;
 			prc->buffer[j++] = REG_RIGHTPAR;
 			i ++;
 		}
 		else if ( str[i] == '*' ) {
+			last_type = REG_TYPE_FA;
 			if ( is_prev_str ) {
-				prc->buffer[j+1] = prc->buffer[j-1];
-				prc->buffer[j-1] = REG_CONCAT;
-				prc->buffer[j] = REG_STRFRAGMENT;
-				j += 2;
+				if ( j == 0 ) {
+					printf( "error: '*' has special meaning, should have a word before\n" );
+					regc_del( prc );
+					return NULL;
+				}
+				if ( prc->buffer[j-2] != REG_STRFRAGMENT ) {
+					prc->buffer[j+1] = prc->buffer[j-1];
+					prc->buffer[j-1] = REG_CONCAT;
+					prc->buffer[j] = REG_STRFRAGMENT;
+					j += 2;
+				}
 			}
 			prc->buffer[j++] = REG_STAR;
 			i ++;
 		}
 		else if ( str[i] == '+' ) {
+			last_type = REG_TYPE_FA;
 			if ( is_prev_str ) {
-				prc->buffer[j+1] = prc->buffer[j-1];
-				prc->buffer[j-1] = REG_CONCAT;
-				prc->buffer[j] = REG_STRFRAGMENT;
-				j += 2;
+				if ( j == 0 ) {
+					printf( "error: '+' has special meaning, should have a word before\n" );
+					regc_del( prc );
+					return NULL;
+				}
+				if ( prc->buffer[j-2] != REG_STRFRAGMENT ) {
+					prc->buffer[j+1] = prc->buffer[j-1];
+					prc->buffer[j-1] = REG_CONCAT;
+					prc->buffer[j] = REG_STRFRAGMENT;
+					j += 2;
+				}
 			}
 			prc->buffer[j++] = REG_PLUS;
 			i ++;
 		}
 		else if ( str[i] == '?' ) {
+			last_type = REG_TYPE_FA;
 			if ( is_prev_str ) {
-				prc->buffer[j+1] = prc->buffer[j-1];
-				prc->buffer[j-1] = REG_CONCAT;
-				prc->buffer[j] = REG_STRFRAGMENT;
-				j += 2;
+				if ( j == 0 ) {
+					printf( "error: '?' has special meaning, should have a word before\n" );
+					regc_del( prc );
+					return NULL;
+				}
+				if ( prc->buffer[j-2] != REG_STRFRAGMENT ) {
+					prc->buffer[j+1] = prc->buffer[j-1];
+					prc->buffer[j-1] = REG_CONCAT;
+					prc->buffer[j] = REG_STRFRAGMENT;
+					j += 2;
+				}
 			}
 			prc->buffer[j++] = REG_QUESTION;
 			i ++;
 		}
 		else if ( str[i] == '|' ) {
+			last_type = REG_TYPE_OP;
 			prc->buffer[j++] = REG_BRANCH;
 			i ++;
 		}
@@ -528,6 +574,11 @@ p_regc regc_compile_from_memory( const char* str ) {
 		}
 		else if ( str[i] == '\\' ) {
 			i++;
+			if ( last_type == REG_TYPE_FA ) {
+				if ( str[i] == 'd' || str[i] == 'D' || str[i] == 's' || str[i] == 'S' 
+					|| str[i] == 'w' || str[i] == 'W' )
+				prc->buffer[j++] = REG_CONCAT;
+			}
 			switch ( str[i] ) {
 				case 'd':
 					/* match only numbers */
@@ -559,11 +610,6 @@ p_regc regc_compile_from_memory( const char* str ) {
 					i ++;
 					/* not a word */
 					break;
-				case 'b':
-					break;
-				case 'B':
-					break;
-
 				case '{':
 				case '}':
 				case '[':
@@ -578,7 +624,18 @@ p_regc regc_compile_from_memory( const char* str ) {
 				case '^':
 				case '$':
 					/* match the charactor used for sepcial means */
-					prc->buffer[j++] = (int)str[i++];
+					if ( is_prev_str ) {
+						prc->buffer[j++] = (int)str[i++];
+					}
+					else {
+						if ( last_type == REG_TYPE_FA ) {
+							prc->buffer[j++] = REG_CONCAT;
+						}
+						prc->buffer[j++] = REG_STRFRAGMENT;
+						prc->buffer[j++] = (int)str[i++];
+						is_prev_str = 1;
+					}
+					last_type = REG_TYPE_FA;
 					last_j = j;
 					break;
 
@@ -593,10 +650,15 @@ p_regc regc_compile_from_memory( const char* str ) {
 				prc->buffer[j++] = (int)str[i++];
 			}
 			else {
+				if ( last_type == REG_TYPE_FA ) {
+					prc->buffer[j++] = REG_CONCAT;
+				}
 				prc->buffer[j++] = REG_STRFRAGMENT;
 				prc->buffer[j++] = (int)str[i++];
 				is_prev_str = 1;
 			}
+			last_type = REG_TYPE_FA;
+
 			last_j = j;
 		}
 
@@ -621,64 +683,6 @@ const char* b_num = "0123456789";
 const char* b_word = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_";
 const char* b_black = " \t\f";
 
-p_nfa nfa_get_from_specialchar( char c ) {
-	p_nfa pa;
-	const char* str;
-
-	switch ( c ) {
-		case 't':
-			str = b_t;
-			break;
-		case 'n':
-			str = b_n;
-			break;
-		case 'r':
-			str = b_r;
-			break;
-		case '\\':
-			str = b_bs;
-			break;
-		case '^':
-			str = b_bn;
-			break;
-		case '$':
-			str = b_ed;
-			break;
-		case 'd':
-			str = b_num;
-			break;
-		case 'w':
-			str = b_word;
-			break;
-		case 's':
-			str = b_black;
-			break;
-	}
-	
-	pa = nfa_make_from_stringbranch( str );
-
-	return pa;
-}
-
-int is_normal_char( char c ) {
-	//printf( "is normal %c\n", c );
-	if ( c == '*' || c == '+' || c == '?' || c == '|' ||
-			c == '\\' || c == '{' || c == '}' ||
-			c == '[' || c == ']' || c == '(' || c == ')' ||
-			c == 0  )
-		return 0;
-	return 1;
-}
-
-#define MAX_RIGHT_BOUND 20
-
-void find_bound( const char* str, int *lb, int* rb ) {
-	int t;
-
-	str ++;
-	if ( *str == ',' ) *lb = 0;
-
-}
 
 const char* chset_num = "0123456789";
 const char* chset_word = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_";
@@ -712,27 +716,32 @@ p_dfa build_dfa_from_memory( char* str ) {
 	for (i = 0;i < prc->size; i++ ) {
 		switch ( prc->buffer[i] ) {
 			case REG_NUMBER:
-				printf( "%s\n", chset_num );
+				//printf( "%s\n", chset_num );
 				pa = nfa_make_from_stringbranch( chset_num );
 				stack_push_nfa( ps, pa );
 				break;
 			case REG_WORDS:
-				printf( "%s\n", chset_word );
+				//printf( "%s\n", chset_word );
 				pa = nfa_make_from_stringbranch( chset_word );
 				stack_push_nfa( ps, pa );
 				break;
 			case REG_BLACK:
-				printf( "%s\n", chset_black );
+				//printf( "%s\n", chset_black );
 				pa = nfa_make_from_stringbranch( chset_black );
 				stack_push_nfa( ps, pa );
 				break;
 			case REG_LEFTPAR:
 				//stack_process( ps, LEFT_PAR );
-				stack_push_op( ps, CONCAT );
+				//stack_push_op( ps, CONCAT );
 				stack_push_op( ps, LEFT_PAR );
 				break;
 			case REG_RIGHTPAR:
 				stack_process( ps, RIGHT_PAR );
+				/*
+				if ( prc->buffer[i+1] == REG_STRFRAGMENT ) {
+					stack_push_op( ps, CONCAT );
+				}
+				*/
 				break;
 			case REG_LEFTSQUARE:
 				v = 1;
@@ -763,12 +772,11 @@ p_dfa build_dfa_from_memory( char* str ) {
 
 				for (j = 1, k = 0; j < CHARACTER_SET_SIZE; j ++ ) {
 					if ( !( ch[j] ^ v ) ) {
-						printf( "%c", (char)j );
 						buffer[k++] = (char)j;
 					}
 				}
 				buffer[k] = '\0';
-				printf( "%s\n", buffer );
+				//printf( "%s\n", buffer );
 				pa = nfa_make_from_stringbranch( buffer );
 				stack_push_nfa( ps, pa );
 				break;
@@ -786,7 +794,6 @@ p_dfa build_dfa_from_memory( char* str ) {
 				i ++;
 				x = prc->buffer[i++];
 				y = prc->buffer[i++];
-				i ++;
 
 				pa = pse->value.pa;
 
@@ -794,9 +801,11 @@ p_dfa build_dfa_from_memory( char* str ) {
 
 				for (j = 0; j <= y-x; j ++ ) {
 					pa_x = nfa_multiple( pa, j );
+					/*
 					printf( "!!!------------------------------------\n" );
 					nfa_print( pa_x );
 					printf( "------------------------------------\n" );
+					*/
 
 					if ( j == 0 ) {
 						pa_y = nfa_copy( pa_x );
@@ -806,6 +815,7 @@ p_dfa build_dfa_from_memory( char* str ) {
 						pa_y = nfa_branch( pa_w, pa_x );
 						nfa_del( pa_w );
 					}
+					/*
 					printf( "$$$$$$$--------------------------------\n" );
 					nfa_print( pa_y );
 					printf( "------------------------------------\n" );
@@ -813,6 +823,7 @@ p_dfa build_dfa_from_memory( char* str ) {
 					p_dfa pda = dfa_convert_from_nfa( pa_y );
 					dfa_print( pda );
 					dfa_del( pda );
+					*/
 					nfa_del( pa_x );
 				}
 
@@ -822,8 +833,6 @@ p_dfa build_dfa_from_memory( char* str ) {
 				nfa_del( pa_z );
 				nfa_del( pa_y );
 				
-				printf( "------------------------------------\n" );
-
 				stack_pop( ps );
 				stack_push_nfa( ps, pa );
 				break;
@@ -907,14 +916,14 @@ p_dfa build_dfa_from_memory( char* str ) {
 				}
 				if ( j == prc->size ) buffer[j-i] = '\0';
 
-				printf( "%d %s\n", j, buffer );
+				//printf( "%d %s\n", j, buffer );
 				pa = nfa_make_from_stringconcat( buffer );
 				stack_push_nfa( ps, pa );
 
 				i = j-1;
 				break;
 			default:
-				printf( "FATAL ERROR\n" );
+				printf( "FATAL ERROR %s\n", reg_str[ -prc->buffer[i] ] );
 		}
 	}
 
@@ -931,170 +940,6 @@ p_dfa build_dfa_from_memory( char* str ) {
 
 	stack_del( ps );
 	t_free( ch );
-	t_free( buffer );
-	return pdfa;
-}
-
-p_dfa build_dfa_from_string( char* str ) {
-	p_dfa pdfa;
-	p_stack ps;
-	p_stack_ele pse;
-	p_nfa pa, pa_x, pa_y;
-	char *pc0, *buffer, *pc1;
-	int  v;
-
-	ps = stack_new();
-	buffer = (char*)t_alloc( sizeof(char) * BUFF_SIZE );
-
-	/* TODO: check the str is comfortable */
-
-	while ( *str != '\0' ) {
-		switch ( *str ) {
-			case '\\':
-				str ++;
-				pa = nfa_get_from_specialchar( *str );
-				stack_push_nfa( ps, pa );
-				break;
-			case '(':
-				//stack_process( ps, LEFT_PAR );
-				stack_push_op( ps, CONCAT );
-				stack_push_op( ps, LEFT_PAR );
-				break;
-			case ')':
-				stack_process( ps, RIGHT_PAR );
-				break;
-			case '[':
-				break;
-			case ']':
-				break;
-			case '{':
-				break;
-			case '}':
-				break;
-			case '|':
-				stack_process( ps, BRANCH );
-				stack_push_op( ps, BRANCH );
-				break;
-			case '*':
-				pse = stack_top( ps );
-
-				if ( pse->type != e_nfa ) {
-					printf( "error!" );
-					break;
-				}
-				pa = pse->value.pa;
-				pa_x = nfa_closure( pa );
-				nfa_del( pa );
-
-				stack_pop( ps );
-				stack_push_nfa( ps, pa_x );
-				break;
-			case '+':
-				pse = stack_top( ps );
-
-				if ( pse->type != e_nfa ) {
-					printf( "error!" );
-					break;
-				}
-				pa = pse->value.pa;
-				pa_x = nfa_closure( pa );
-				pa_y = nfa_copy( pa );
-				nfa_del( pa );
-
-				pa = nfa_concat( pa_y, pa_x );
-				nfa_del( pa_x );
-				nfa_del( pa_y );
-
-				stack_pop( ps );
-				stack_push_nfa( ps, pa );
-				break;
-			case '?':
-				pse = stack_top( ps );
-
-				if ( pse->type != e_nfa ) {
-					printf( "error!" );
-					break;
-				}
-				pa = pse->value.pa;
-				pa_x = nfa_make_from_stringconcat( "" );
-
-				pa_y = nfa_branch( pa, pa_x );
-				nfa_del( pa_x );
-				nfa_del( pa );
-
-				stack_pop( ps );
-				stack_push_nfa( ps, pa_y );
-				break;
-			case '.':
-				break;
-			case '^':
-				break;
-			case '$':
-				break;
-			default:
-				/* normal char */
-				pc0 = str;
-				pc1 = buffer;
-
-				while ( is_normal_char( *pc0 ) ) {
-					*pc1 ++ = *pc0 ++;
-				}
-
-				if ( *pc0 != '*' && *pc0 != '{' && *pc0 != '+' && *pc0 != '?' ) {
-					*pc1 = '\0';
-					printf( "%s\n", buffer );
-					pa = nfa_make_from_stringconcat( buffer );
-
-					/*
-					stack_process( ps, CONCAT );
-					if ( ps->top != NULL ) {
-						stack_push_op( ps, CONCAT );
-					}
-					*/
-					stack_push_nfa( ps, pa );
-
-					str = pc0-1;
-				}
-				else {
-					pc0 --;
-					pc1 --;
-
-					if ( pc0 != str ) {
-						/* two or more continues char */
-						*pc1 = '\0';
-						pa = nfa_make_from_stringconcat( buffer );
-
-						//stack_push_op( ps, CONCAT );
-						stack_push_nfa( ps, pa );
-
-						//stack_process( ps, CONCAT );
-						stack_push_op( ps, CONCAT );
-					}
-
-					*buffer = *pc0;
-					*(buffer+1) = '\0';
-					printf( "buffer %s\n", buffer );
-
-					pa = nfa_make_from_stringconcat( buffer );
-					stack_push_nfa( ps, pa );
-
-					str = pc0;
-				}
-				break;
-		}
-		str ++;
-	}
-
-	stack_process( ps, END );
-
-	if ( ps->top->next != NULL ) printf( "error!\n" );
-	pse = stack_top( ps );
-	pa = pse->value.pa;
-
-	pdfa = dfa_convert_from_nfa( pa );
-	nfa_del( pa );
-
-	stack_del( ps );
 	t_free( buffer );
 	return pdfa;
 }

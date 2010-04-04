@@ -12,7 +12,7 @@ int main() {
 	memory = (char*)malloc( sizeof(char) * MEMORY_SIZE );
 	InitHeap( memory, MEMORY_SIZE, 32 );
 
-	char* str = "abc*(def)da\\{\\}dfadf{3,5}\\d{13,15}\\d*[^a-z0-9XYZ][ABCD]\\[\\]";
+	char* str = "a(b)|c[xyz]d*c{1,3}d(d|e|f)ada\\{\\}dfadf{3,5}x\\d*[a-z0-9XYZ][ABCD]\\[\\]";
 	//char* str = "ab{1,4}";
 	//char* str = "abc(d|e)?";
 	p_dfa ppp = build_dfa_from_memory( str );
