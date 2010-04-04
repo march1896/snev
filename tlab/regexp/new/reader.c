@@ -1,33 +1,10 @@
-#include "reg_def.h"
+#include "fa.h"
+#include "nfastack.h"
 #include "heap2.h"
 #include "stdio.h"
 #include "reader.h"
 
 /*
-typedef struct __s_nfa_stack_element {
-	p_nfa 	nfa;
-	struct __s_nfa_stack_element* next;
-} s_nfa_stack_element, *p_nfa_stack_element;
-
-typedef struct __s_nfa_stack {
-	p_nfa_stack_element 	top;
-} s_nfa_stack, *p_nfa_stack;
-
-p_nfa_stack nfa_stack_new() {
-}
-
-void nfa_stack_del( p_nfa_stack pnas ) {
-}
-
-void nfa_stack_push( p_nfa_stack pnas, p_nfa pa ) {
-}
-
-p_nfa nfa_stack_pop( p_nfa_stack pnas ) {
-}
-
-p_nfa nfa_stack_top( p_nfa_stack pnas ) {
-}
-*/
 #define END 0
 #define LEFT_PAR 3
 #define RIGHT_PAR 4
@@ -177,7 +154,7 @@ void stack_process( p_stack ps, int op ) {
 
 	return;
 }
-
+*/
 
 #define REG_ENDOFREG -1
 #define REG_TAB -2
@@ -387,7 +364,7 @@ p_regc regc_compile_from_memory( const char* str ) {
 
 				if ( str[i] == '}' ) {
 					/* case {num} */
-					//prc->buffer[j++] = num;
+					prc->buffer[j++] = num;
 					prc->buffer[j++] = REG_RIGHTBRACE;
 
 					i ++;
@@ -572,6 +549,10 @@ p_regc regc_compile_from_memory( const char* str ) {
 			prc->buffer[j++] = REG_EOL;
 			i ++;
 		}
+		else if ( str[i] == '.' ) {
+			prc->buffer[j++] = REG_WILDCAST;
+			i ++;
+		}
 		else if ( str[i] == '\\' ) {
 			i++;
 			if ( last_type == REG_TYPE_FA ) {
@@ -623,6 +604,7 @@ p_regc regc_compile_from_memory( const char* str ) {
 				case '\\':
 				case '^':
 				case '$':
+				case '.':
 					/* match the charactor used for sepcial means */
 					if ( is_prev_str ) {
 						prc->buffer[j++] = (int)str[i++];
@@ -672,17 +654,6 @@ p_regc regc_compile_from_memory( const char* str ) {
 
 p_regc regc_compile_from_rawstring( const char* str ) {
 }
-
-const char* b_t = "\t";
-const char* b_n = "\n";
-const char* b_r = "\r";
-const char* b_bs= "\\";
-const char* b_bn = "^";
-const char* b_ed = "$";
-const char* b_num = "0123456789";
-const char* b_word = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_";
-const char* b_black = " \t\f";
-
 
 const char* chset_num = "0123456789";
 const char* chset_word = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_";
@@ -799,34 +770,24 @@ p_dfa build_dfa_from_memory( char* str ) {
 
 				pa_z = nfa_multiple( pa, x );
 
-				for (j = 0; j <= y-x; j ++ ) {
-					pa_x = nfa_multiple( pa, j );
-					/*
-					printf( "!!!------------------------------------\n" );
-					nfa_print( pa_x );
-					printf( "------------------------------------\n" );
-					*/
-
-					if ( j == 0 ) {
-						pa_y = nfa_copy( pa_x );
-					}
-					else {
-						pa_w = pa_y;
-						pa_y = nfa_branch( pa_w, pa_x );
-						nfa_del( pa_w );
-					}
-					/*
-					printf( "$$$$$$$--------------------------------\n" );
-					nfa_print( pa_y );
-					printf( "------------------------------------\n" );
-					printf( "fuck\n" );
-					p_dfa pda = dfa_convert_from_nfa( pa_y );
-					dfa_print( pda );
-					dfa_del( pda );
-					*/
-					nfa_del( pa_x );
+				if ( y == REG_INFINITE ) {
+					pa_y = nfa_closure( pa );
 				}
+				else {
+					for (j = 0; j <= y-x; j ++ ) {
+						pa_x = nfa_multiple( pa, j );
 
+						if ( j == 0 ) {
+							pa_y = nfa_copy( pa_x );
+						}
+						else {
+							pa_w = pa_y;
+							pa_y = nfa_branch( pa_w, pa_x );
+							nfa_del( pa_w );
+						}
+						nfa_del( pa_x );
+					}
+				}
 
 				nfa_del( pa );
 				pa = nfa_concat( pa_z, pa_y );
@@ -898,6 +859,16 @@ p_dfa build_dfa_from_memory( char* str ) {
 				stack_push_nfa( ps, pa_y );
 				break;
 			case REG_WILDCAST:
+				for (j = 1, k = 0; j < CHARACTER_SET_SIZE; j ++ ) {
+					if ( j != '\n' ) {
+						buffer[k++] = (char)j;
+					}
+				}
+				buffer[k] = '\0';
+				//printf( "%s\n", buffer );
+				pa = nfa_make_from_stringbranch( buffer );
+				stack_push_nfa( ps, pa );
+				break;
 				break;
 			case REG_BOL:
 				break;
