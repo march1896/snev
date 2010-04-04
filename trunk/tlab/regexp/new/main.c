@@ -1,7 +1,8 @@
-#include "reg_def.h"
+#include "fa.h"
 #include "heap2.h"
-#include "stdlib.h"
+#include "nfastack.h"
 #include "reader.h"
+#include "stdlib.h"
 
 #include "stdio.h"
 
@@ -12,11 +13,15 @@ int main() {
 	memory = (char*)malloc( sizeof(char) * MEMORY_SIZE );
 	InitHeap( memory, MEMORY_SIZE, 32 );
 
-	char* str = "a(b)|c[xyz]d*c{1,3}d(d|e|f)ada\\{\\}dfadf{3,5}x\\d*[a-z0-9XYZ][ABCD]\\[\\]";
+	//char* str = "a(b)|c[xyz]d*c{1,3}d(d|e|f)ada\\{\\}dfadf{3,5}x\\d*[a-z0-9XYZ][ABCD]\\[\\]";
 	//char* str = "ab{1,4}";
 	//char* str = "abc(d|e)?";
-	p_dfa ppp = build_dfa_from_memory( str );
+	char* patten = "[a-zA-z]+://[^\\s]*";
+	char* text = "420503198603205555";
+	p_dfa ppp = build_dfa_from_memory( patten );
 	dfa_print( ppp );
+
+	printf( "\n\npatten accept text: %s\n", dfa_accept_string( ppp, text ) ? "YES": "NO" );
 	dfa_del( ppp );
 		
 	/*

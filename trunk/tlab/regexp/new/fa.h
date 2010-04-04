@@ -1,5 +1,5 @@
-#ifndef _REG_DEF_
-#define _REG_DEF_
+#ifndef _REG_FA_
+#define _REG_FA_
 
 #define _ENABLE_PRINT_
 
@@ -102,6 +102,7 @@ void 	dfa_del( p_dfa pa );
 void 	dfa_addnode( p_dfa pa, p_node pn );
 void  	dfa_del( p_dfa pda );
 p_dfa 	dfa_convert_from_nfa( p_nfa nfa );
+int 	dfa_accept_string( p_dfa pa, const char* str );
 
 /* */
 p_dfa 	build_dfa_from_string( char* str );
@@ -111,4 +112,4 @@ void 	dfa_print( p_dfa dfa );
 void 	dfa_print_table( p_dfa dfa );
 void 	nodelist_print( p_nodelist pnl );
 #endif
-#endif // _REG_DEF_
+#endif // _REG_FA_
