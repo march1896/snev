@@ -77,6 +77,7 @@ p_edge 	node_findedge( p_node dest, p_node source );
 
 p_nfa 	nfa_new();
 p_nfa 	nfa_copy( p_nfa source );
+p_nfa 	nfa_copy_with_different_id( p_nfa source );
 void 	nfa_del( p_nfa pa );
 void 	nfa_addnode( p_nfa pa, p_node pn );
 
@@ -84,6 +85,7 @@ void 	nfa_addnode( p_nfa pa, p_node pn );
 p_nfa 	nfa_concat( p_nfa source, p_nfa second );
 p_nfa 	nfa_branch( p_nfa first, p_nfa second );
 p_nfa 	nfa_closure( p_nfa source );
+p_nfa 	nfa_multiple( p_nfa source, int times );
 p_nfa 	nfa_make_from_stringconcat( const char* str );
 p_nfa 	nfa_make_from_stringbranch( const char* str );
 

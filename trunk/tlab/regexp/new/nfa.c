@@ -104,6 +104,43 @@ p_nfa nfa_copy( p_nfa source ) {
 	return dest;
 }
 
+extern int g_node_index;
+p_nfa nfa_copy_with_different_id( p_nfa pa ) {
+	int min_id, max_id, new_id, diff;
+	p_nfa dest;
+	p_nodelist pnl;
+	p_node pn;
+	
+	dest = nfa_copy( pa );
+
+	/* first, find the min_id and the max_id */
+	min_id = 100000, max_id = -1;
+	pnl = dest->pnl_f;
+	while ( pnl != NULL ) {
+		pn = pnl->element;
+
+		if ( pn->id < min_id ) min_id = pn->id;
+		if ( pn->id > max_id ) max_id = pn->id;
+
+		pnl = pnl->next;
+	}
+	new_id = node_make_id();
+
+	diff = max_id - min_id;
+	g_node_index += diff + 1;
+
+	pnl = dest->pnl_f;
+	while ( pnl != NULL ) {
+		pn = pnl->element;
+		pn->id = pn->id - min_id + new_id;
+
+		pnl = pnl->next;
+	}
+
+	return dest;
+}
+
+
 p_node findnode_via_id( p_nodelist pnl, int node_id ) {
 	while ( pnl != NULL ) {
 		if ( pnl->element->id == node_id ) {
@@ -246,6 +283,33 @@ p_nfa nfa_closure( p_nfa source ) {
 	t_free( pa_copy );
 
 	return res;
+}
+
+p_nfa nfa_multiple( p_nfa pa, int times ) {
+ 	p_nfa res;
+	p_nfa pa_copy, pa_x;
+	int i;
+
+	if ( times < 0 ) return NULL;
+
+	if ( times == 0 ) {
+		return nfa_make_from_stringconcat( "" );
+	}
+	else if ( times == 1 ) {
+		return nfa_copy_with_different_id( pa );
+	}
+	else {
+		res = nfa_copy_with_different_id( pa );
+
+		for (i = 1; i < times; i ++ ) {
+			pa_copy = res;
+			pa_x = nfa_copy_with_different_id( pa );
+			res = nfa_concat( pa_copy, pa_x );
+			nfa_del( pa_copy );
+			nfa_del( pa_x );
+		}
+		return res;
+	}
 }
 
 p_nfa nfa_make_from_stringconcat( const char* str ) {
