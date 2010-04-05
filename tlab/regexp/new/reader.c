@@ -542,10 +542,18 @@ p_regc regc_compile_from_memory( const char* str ) {
 			i ++;
 		}
 		else if ( str[i] == '^' ) {
+			if ( last_type == REG_TYPE_FA ) {
+				prc->buffer[j++] = REG_CONCAT;
+			}
+			last_type = REG_TYPE_FA;
 			prc->buffer[j++] = REG_BOL;
 			i ++;
 		}
 		else if ( str[i] == '$' ) {
+			if ( last_type == REG_TYPE_FA ) {
+				prc->buffer[j++] = REG_CONCAT;
+			}
+			last_type = REG_TYPE_FA;
 			prc->buffer[j++] = REG_EOL;
 			i ++;
 		}
@@ -873,10 +881,13 @@ p_dfa build_dfa_from_memory( char* str ) {
 				pa = nfa_make_from_stringbranch( buffer );
 				stack_push_nfa( ps, pa );
 				break;
-				break;
 			case REG_BOL:
+				pa = nfa_make_from_stringconcat( "\n" );
+				stack_push_nfa( ps, pa );
 				break;
 			case REG_EOL:
+				pa = nfa_make_from_stringconcat( "\n" );
+				stack_push_nfa( ps, pa );
 				break;
 			case REG_STRFRAGMENT:
 				i ++;

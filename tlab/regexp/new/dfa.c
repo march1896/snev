@@ -3,6 +3,8 @@
 #include "stdio.h"
 #include "assert.h"
 
+#include <string.h>
+
 static int g_dfa_id_index = 0;
 p_ndmap ndmap_new() {
 	p_ndmap pim;
@@ -402,11 +404,13 @@ void dfa_print( p_dfa pa ) {
 void dfa_print_table( p_dfa dfa ) {
 }
 
-int dfa_accept_string( p_dfa dfa, const char* str ) {
+int dfa_accept_string( p_dfa dfa, const char* raw_str ) {
 	p_nodelist pnl;
 	p_node pn;
 	p_edgelist pel;
 	p_edge pe;
+	char* str;
+	int len, i;
 
 	if ( dfa == NULL ) return 0;
 
@@ -421,6 +425,18 @@ int dfa_accept_string( p_dfa dfa, const char* str ) {
 	}
 
 	if ( pnl == NULL ) return 0;
+
+	/* push front and push back '\n' to enable match ^ $ */
+	len = strlen( raw_str );
+	str = (char*)t_alloc( len + 3 );
+	str[0] = '\n';
+	for (i = 0; i < len; i ++ ) {
+		str[i+1] = raw_str[i];
+	}
+	str[i+1] = '\n';
+	str[i+2] = '\0';
+
+	printf( "after emendation for ^ and $: %s\n", str );
 
 	while ( *str != '\0' ) {
 		pel = pn->pel_f;
@@ -438,6 +454,8 @@ int dfa_accept_string( p_dfa dfa, const char* str ) {
 		}
 		str ++;
 	}
+
+	t_free( str );
 
 	return pn->info & NODE_ACCEPT;
 }
