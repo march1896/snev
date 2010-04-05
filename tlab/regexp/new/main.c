@@ -16,8 +16,8 @@ int main() {
 	//char* str = "a(b)|c[xyz]d*c{1,3}d(d|e|f)ada\\{\\}dfadf{3,5}x\\d*[a-z0-9XYZ][ABCD]\\[\\]";
 	//char* str = "ab{1,4}";
 	//char* str = "abc(d|e)?";
-	char* patten = "[a-zA-z]+://[^\\s]*";
-	char* text = "420503198603205555";
+	char* patten = "https?://[0-9a-zX-Z_.]*";
+	char* text = "http://www.google.com";
 	p_dfa ppp = build_dfa_from_memory( patten );
 	dfa_print( ppp );
 

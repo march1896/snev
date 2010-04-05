@@ -550,8 +550,12 @@ p_regc regc_compile_from_memory( const char* str ) {
 			i ++;
 		}
 		else if ( str[i] == '.' ) {
+			if ( last_type == REG_TYPE_FA ) {
+				prc->buffer[j++] = REG_CONCAT;
+			}
 			prc->buffer[j++] = REG_WILDCAST;
 			i ++;
+			is_prev_str = 1;
 		}
 		else if ( str[i] == '\\' ) {
 			i++;
