@@ -18,8 +18,6 @@ int main() {
 		printf( "%d: %c\n", c, (char)c );
 	}
 
-	//char* str = "a(b)|c[xyz]d*c{1,3}d(d|e|f)ada\\{\\}dfadf{3,5}x\\d*[a-z0-9XYZ][ABCD]\\[\\]";
-	//char* str = "ab{1,4}";
 	char* pattern = "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
 	char* text = "202.114.5.127";
 	p_dfa ppp = dfa_compile_from_string( pattern );

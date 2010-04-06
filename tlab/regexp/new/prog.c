@@ -66,7 +66,7 @@ p_dfa dfa_compile_from_string( const char* str ) {
 					i ++;
 				}
 
-				for (j = CHARACTER_SET_START; j < CHARACTER_SET_END; j ++ ) ch[j] = 0;
+				for (j = 0; j < CHARACTER_SET_END; j ++ ) ch[j] = 0;
 				do {
 					if ( prc->buffer[i] == REG_RIGHTSQUARE ) break;
 					else if ( prc->buffer[i] == REG_BETWEEN ) {
@@ -91,6 +91,8 @@ p_dfa dfa_compile_from_string( const char* str ) {
 						buffer[k++] = (char)j;
 					}
 				}
+				if ( !( ch['\t'] ^ v ) ) { buffer[k++] = (char)'\t'; }
+				if ( !( ch['\n'] ^ v ) ) { buffer[k++] = (char)'\n'; }
 				buffer[k] = '\0';
 				//printf( "%s\n", buffer );
 				pa = nfa_make_from_stringbranch( buffer );
@@ -205,10 +207,9 @@ p_dfa dfa_compile_from_string( const char* str ) {
 				break;
 			case REG_WILDCAST:
 				for (j = CHARACTER_SET_START, k = 0; j < CHARACTER_SET_END; j ++ ) {
-					if ( j != '\n' ) {
-						buffer[k++] = (char)j;
-					}
+					buffer[k++] = (char)j;
 				}
+				buffer[k++] = '\t';
 				buffer[k] = '\0';
 				//printf( "%s\n", buffer );
 				pa = nfa_make_from_stringbranch( buffer );
