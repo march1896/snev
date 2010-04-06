@@ -41,7 +41,6 @@ void node_del( p_node pn ) {
 	while ( pel != NULL ) {
 		pe = pel->element;
 		edge_del( pe );
-
 		pel_prev = pel;
 		pel = pel->next;
 

@@ -1,192 +1,18 @@
+#include "regc.h"
 #include "fa.h"
-#include "nfastack.h"
 #include "heap2.h"
-#include "stdio.h"
-#include "reader.h"
 
-/*
-#define END 0
-#define LEFT_PAR 3
-#define RIGHT_PAR 4
-#define BRANCH 5
-#define CONCAT 6
-typedef struct __s_stack_ele {
-	enum {
-		e_op,
-		e_nfa,
-	} type;
-	union {
-		int 				op;  // operator
-		p_nfa 				pa;
-	} value;
-	struct __s_stack_ele* 	next;
-} s_stack_ele, *p_stack_ele;
+#include <stdio.h>
 
-typedef struct __s_stack {
-	p_stack_ele 			top;
-} s_stack, *p_stack;
+/* compiled regular expression */
+#define REGC_BUFFER_SIZE 400
+#define REG_RAWSTRING_SIZE 100
+#define REG_TYPE_NONE 0
+#define REG_TYPE_OP 1
+#define REG_TYPE_FA 2
 
-p_stack stack_new() {
-	p_stack ret;
-	ret = (p_stack)t_alloc( sizeof( s_stack ) );
-	ret->top = NULL;
-	return ret;
-}
-
-void stack_del( p_stack ps ) {
-	p_stack_ele prev, next;
-
-	next = ps->top;
-	while ( next != NULL ) {
-		prev = next;
-		next = next->next;
-		t_free( prev );
-	}
-
-	t_free( ps );
-
-	return;
-}
-
-void stack_push_op( p_stack ps, int op ) {
-	p_stack_ele pse;
-
-	pse = (p_stack_ele)t_alloc( sizeof( s_stack_ele ) );
-	pse->type = e_op;
-	pse->value.op = op;
-	pse->next = ps->top;
-
-	ps->top = pse;
-
-	return;
-}
-
-void stack_push_nfa( p_stack ps, p_nfa pa ) {
-	p_stack_ele pse;
-
-	pse = (p_stack_ele)t_alloc( sizeof( s_stack_ele ) );
-	pse->type = e_nfa;
-	pse->value.pa = pa;
-	pse->next = ps->top;
-
-	ps->top = pse;
-
-	return;
-}
-
-void stack_pop( p_stack ps ) {
-	p_stack_ele pse;
-
-	if ( ps->top != NULL ) {
-		pse = ps->top;
-		ps->top = ps->top->next;
-
-		t_free( pse );
-	}
-
-	return;
-}
-
-p_stack_ele stack_top( p_stack ps ) {
-	return ps->top;
-}
-
-void stack_process( p_stack ps, int op ) {
-	p_stack_ele pse;
-	p_nfa pa_x, pa_y, pa;
-	int op_prev;
-
-	if ( ps->top == NULL ) return;
-
-	pse = stack_top( ps );
-	if ( pse->type == e_op ) {
-		printf( "FATAL: two continuous operator A\n" );
-		return;
-	}
-	pa_x = pse->value.pa;
-	stack_pop( ps );
-
-	while ( ps->top != NULL ) {
-		pse = stack_top( ps );
-		if ( !pse ) {
-			printf( "FATAL: empty stack\n" );
-			return;
-		}
-		else if ( pse->type == e_nfa ) {
-			printf( "FATAL: two continuous nfa\n" );
-			return;
-		}
-		op_prev = pse->value.op;
-
-		if ( op_prev == LEFT_PAR && op == RIGHT_PAR ) {
-			stack_pop( ps );
-			break;
-		}
-		if ( op_prev < op ) break;
-
-		stack_pop( ps );
-
-		pse = stack_top( ps );
-		if ( !pse || pse->type != e_nfa ) {
-			printf( "FATAL: two continuous operator\n" );
-			return;
-		}
-		pa_y = pse->value.pa;
-		stack_pop( ps );
-
-		if ( op_prev == BRANCH ) {
-			pa = nfa_branch( pa_y, pa_x );
-			nfa_del( pa_y );
-			nfa_del( pa_x );
-		}
-		else if ( op_prev == CONCAT ) {
-			pa = nfa_concat( pa_y, pa_x );
-			nfa_del( pa_y );
-			nfa_del( pa_x );
-		}
-
-		pa_x = pa;
-
-		if ( ps->top == NULL ) break;
-	}
-
-	stack_push_nfa( ps, pa_x );
-
-	return;
-}
-*/
-
-#define REG_ENDOFREG -1
-#define REG_TAB -2
-#define REG_NEWLINE -3
-#define REG_BACKSPLAH -4
-#define REG_BOL -5
-#define REG_EOL -6
-#define REG_NUMBER -7
-#define REG_WORDS -8
-#define REG_BLACK -9
-#define REG_LEFTBRACE -10
-#define REG_RIGHTBRACE -11
-#define REG_LEFTPAR -12
-#define REG_RIGHTPAR -13
-#define REG_LEFTSQUARE -14
-#define REG_RIGHTSQUARE -15
-#define REG_STAR -16
-#define REG_PLUS -17
-#define REG_QUESTION -18
-#define REG_WILDCAST -19
-#define REG_BRANCH -20
-#define REG_NOT -21
-#define REG_NOT_WORDS -22
-#define REG_NOT_NUMBER -23
-#define REG_NOT_BLACK -24
-#define REG_BETWEEN -25
-#define REG_STRFRAGMENT -26
-#define REG_CONCAT -27
-
-#define REG_INFINITE 10000
-
-const char *reg_str[] = {
+/* the strings below are use for printing */
+const char *regc_str[] = {
 	"ZERO",
 	"ENDOFREG",
 	"TAB",
@@ -217,8 +43,6 @@ const char *reg_str[] = {
  	"CONCAT",
 };
 
-/* compiled regular expression */
-#define REGC_BUFFER_SIZE 400
 
 p_regc regc_new() {
 	p_regc prc;
@@ -234,10 +58,6 @@ void regc_del( p_regc prc ) {
 	return;
 }
 
-static int r_is_digit( char ch ) {
-	return ch >= '0' && ch <= '9';
-}
-
 void regc_print( p_regc prc ) {
 	int i; 
 	int inbrace;
@@ -250,7 +70,7 @@ void regc_print( p_regc prc ) {
 		if ( prc->buffer[i] < 0 ) {
 			if ( prc->buffer[i] == REG_LEFTBRACE ) inbrace = 1;
 			else if ( prc->buffer[i] == REG_RIGHTBRACE ) inbrace = 0;
-			printf( " %s ", reg_str[-prc->buffer[i]] );
+			printf( " %s ", regc_str[-prc->buffer[i]] );
 		}
 		else {
 			if ( inbrace ) {
@@ -267,11 +87,11 @@ void regc_print( p_regc prc ) {
 	return;
 }
 
-#define REG_MAX_SIZE 100
-#define REG_TYPE_NONE 0
-#define REG_TYPE_OP 1
-#define REG_TYPE_FA 2
-p_regc regc_compile_from_memory( const char* str ) {
+static int r_is_digit( char ch ) {
+	return ch >= '0' && ch <= '9';
+}
+
+p_regc regc_compile( const char* str ) {
 	p_regc prc;
 	int size, num;
 	int i, j;
@@ -283,7 +103,7 @@ p_regc regc_compile_from_memory( const char* str ) {
 		size ++;
 	}
 
-	if ( size > REG_MAX_SIZE ) {
+	if ( size > REG_RAWSTRING_SIZE ) {
 		printf( "error: reg extends the max size limit\n" );
 		return NULL;
 	}
@@ -662,270 +482,4 @@ p_regc regc_compile_from_memory( const char* str ) {
 	prc->size = j;
 
 	return prc;
-}
-
-p_regc regc_compile_from_rawstring( const char* str ) {
-}
-
-const char* chset_num = "0123456789";
-const char* chset_word = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_";
-const char* chset_black = " \t\f\r";
-
-#define BUFF_SIZE 500
-#define CHARACTER_SET_SIZE 128
-p_dfa build_dfa_from_memory( char* str ) {
-	p_dfa pdfa;
-	p_regc prc;
-	p_stack ps;
-	p_stack_ele pse;
-	p_nfa pa, pa_x, pa_y, pa_z, pa_w;
-	char *pc0, *buffer, *pc1, *ch;
-	int  v, i, j, k, x, y, z;
-
-	prc = regc_compile_from_memory( str );
-
-	if ( prc == NULL ) {
-		return NULL;
-	}
-
-	regc_print( prc );
-
-	ps = stack_new();
-	buffer = (char*)t_alloc( sizeof(char) * BUFF_SIZE );
-	ch = (char*)t_alloc( sizeof(char) * CHARACTER_SET_SIZE );
-
-	/* TODO: check the str is comfortable */
-
-	for (i = 0;i < prc->size; i++ ) {
-		switch ( prc->buffer[i] ) {
-			case REG_NUMBER:
-				//printf( "%s\n", chset_num );
-				pa = nfa_make_from_stringbranch( chset_num );
-				stack_push_nfa( ps, pa );
-				break;
-			case REG_WORDS:
-				//printf( "%s\n", chset_word );
-				pa = nfa_make_from_stringbranch( chset_word );
-				stack_push_nfa( ps, pa );
-				break;
-			case REG_BLACK:
-				//printf( "%s\n", chset_black );
-				pa = nfa_make_from_stringbranch( chset_black );
-				stack_push_nfa( ps, pa );
-				break;
-			case REG_LEFTPAR:
-				//stack_process( ps, LEFT_PAR );
-				//stack_push_op( ps, CONCAT );
-				stack_push_op( ps, LEFT_PAR );
-				break;
-			case REG_RIGHTPAR:
-				stack_process( ps, RIGHT_PAR );
-				/*
-				if ( prc->buffer[i+1] == REG_STRFRAGMENT ) {
-					stack_push_op( ps, CONCAT );
-				}
-				*/
-				break;
-			case REG_LEFTSQUARE:
-				v = 1;
-				if ( prc->buffer[++i] == REG_NOT ) {
-					v = 0;
-					i ++;
-				}
-
-				for (j = 1; j < CHARACTER_SET_SIZE; j ++ ) ch[j] = 0;
-				do {
-					if ( prc->buffer[i] == REG_RIGHTSQUARE ) break;
-					else if ( prc->buffer[i] == REG_BETWEEN ) {
-						i ++;
-						x = prc->buffer[i++];
-						y = prc->buffer[i++];
-						if ( x > y ) {
-							z = x;
-							x = y;
-							y = z;
-						}
-						while ( x <= y ) ch[x++] = 1;
-					}
-					else {
-						x = prc->buffer[i++];
-						ch[x] = 1;
-					}
-				} while ( i < prc->size );
-
-				for (j = 1, k = 0; j < CHARACTER_SET_SIZE; j ++ ) {
-					if ( !( ch[j] ^ v ) ) {
-						buffer[k++] = (char)j;
-					}
-				}
-				buffer[k] = '\0';
-				//printf( "%s\n", buffer );
-				pa = nfa_make_from_stringbranch( buffer );
-				stack_push_nfa( ps, pa );
-				break;
-			case REG_RIGHTSQUARE:
-				printf( "FATALERROR: right square\n" );
-				break;
-			case REG_LEFTBRACE:
-				pse = stack_top( ps );
-
-				if ( pse->type != e_nfa ) {
-					printf( "error!" );
-					break;
-				}
-
-				i ++;
-				x = prc->buffer[i++];
-				y = prc->buffer[i++];
-
-				pa = pse->value.pa;
-
-				pa_z = nfa_multiple( pa, x );
-
-				if ( y == REG_INFINITE ) {
-					pa_y = nfa_closure( pa );
-				}
-				else {
-					for (j = 0; j <= y-x; j ++ ) {
-						pa_x = nfa_multiple( pa, j );
-
-						if ( j == 0 ) {
-							pa_y = nfa_copy( pa_x );
-						}
-						else {
-							pa_w = pa_y;
-							pa_y = nfa_branch( pa_w, pa_x );
-							nfa_del( pa_w );
-						}
-						nfa_del( pa_x );
-					}
-				}
-
-				nfa_del( pa );
-				pa = nfa_concat( pa_z, pa_y );
-				nfa_del( pa_z );
-				nfa_del( pa_y );
-				
-				stack_pop( ps );
-				stack_push_nfa( ps, pa );
-				break;
-			case REG_RIGHTBRACE:
-				printf( "FATALERROR: right brace\n" );
-				break;
-			case REG_BRANCH:
-				stack_process( ps, BRANCH );
-				stack_push_op( ps, BRANCH );
-				break;
-			case REG_CONCAT:
-				stack_process( ps, CONCAT );
-				stack_push_op( ps, CONCAT );
-				break;
-			case REG_STAR:
-				pse = stack_top( ps );
-
-				if ( pse->type != e_nfa ) {
-					printf( "error!" );
-					break;
-				}
-				pa = pse->value.pa;
-				pa_x = nfa_closure( pa );
-				nfa_del( pa );
-
-				stack_pop( ps );
-				stack_push_nfa( ps, pa_x );
-				break;
-			case REG_PLUS:
-				pse = stack_top( ps );
-
-				if ( pse->type != e_nfa ) {
-					printf( "error!" );
-					break;
-				}
-				pa = pse->value.pa;
-				pa_x = nfa_closure( pa );
-				pa_y = nfa_copy( pa );
-				nfa_del( pa );
-
-				pa = nfa_concat( pa_y, pa_x );
-				nfa_del( pa_x );
-				nfa_del( pa_y );
-
-				stack_pop( ps );
-				stack_push_nfa( ps, pa );
-				break;
-			case REG_QUESTION:
-				pse = stack_top( ps );
-
-				if ( pse->type != e_nfa ) {
-					printf( "error!" );
-					break;
-				}
-				pa = pse->value.pa;
-				pa_x = nfa_make_from_stringconcat( "" );
-
-				pa_y = nfa_branch( pa, pa_x );
-				nfa_del( pa_x );
-				nfa_del( pa );
-
-				stack_pop( ps );
-				stack_push_nfa( ps, pa_y );
-				break;
-			case REG_WILDCAST:
-				for (j = 1, k = 0; j < CHARACTER_SET_SIZE; j ++ ) {
-					if ( j != '\n' ) {
-						buffer[k++] = (char)j;
-					}
-				}
-				buffer[k] = '\0';
-				//printf( "%s\n", buffer );
-				pa = nfa_make_from_stringbranch( buffer );
-				stack_push_nfa( ps, pa );
-				break;
-			case REG_BOL:
-				pa = nfa_make_from_stringconcat( "\n" );
-				stack_push_nfa( ps, pa );
-				break;
-			case REG_EOL:
-				pa = nfa_make_from_stringconcat( "\n" );
-				stack_push_nfa( ps, pa );
-				break;
-			case REG_STRFRAGMENT:
-				i ++;
-				for (j = i; j < prc->size; j ++ ) {
-					if ( prc->buffer[j] <= 0 ) {
-						buffer[j-i] = '\0';
-						break;
-					}
-					else {
-						buffer[j-i] = (char)prc->buffer[j];
-					}
-				}
-				if ( j == prc->size ) buffer[j-i] = '\0';
-
-				//printf( "%d %s\n", j, buffer );
-				pa = nfa_make_from_stringconcat( buffer );
-				stack_push_nfa( ps, pa );
-
-				i = j-1;
-				break;
-			default:
-				printf( "FATAL ERROR %s\n", reg_str[ -prc->buffer[i] ] );
-		}
-	}
-
-	stack_process( ps, END );
-
-	if ( ps->top->next != NULL ) printf( "error!\n" );
-	pse = stack_top( ps );
-	pa = pse->value.pa;
-
-	regc_del( prc );
-
-	pdfa = dfa_convert_from_nfa( pa );
-	nfa_del( pa );
-
-	stack_del( ps );
-	t_free( ch );
-	t_free( buffer );
-	return pdfa;
 }
