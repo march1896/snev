@@ -1,7 +1,7 @@
 #include "fa.h"
 #include "heap2.h"
 #include "nfastack.h"
-#include "reader.h"
+#include "prog.h"
 #include "stdlib.h"
 
 #include "stdio.h"
@@ -13,15 +13,19 @@ int main() {
 	memory = (char*)malloc( sizeof(char) * MEMORY_SIZE );
 	InitHeap( memory, MEMORY_SIZE, 32 );
 
+	int c;
+	for (c = 0; c < 32; c ++ ) {
+		printf( "%d: %c\n", c, (char)c );
+	}
+
 	//char* str = "a(b)|c[xyz]d*c{1,3}d(d|e|f)ada\\{\\}dfadf{3,5}x\\d*[a-z0-9XYZ][ABCD]\\[\\]";
 	//char* str = "ab{1,4}";
-	//char* str = "abc(d|e)?";
-	char* patten = "^https?://[0-9a-zX-Z_.]*$";
-	char* text = "http://www.google.com";
-	p_dfa ppp = build_dfa_from_memory( patten );
-	dfa_print( ppp );
+	char* pattern = "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
+	char* text = "202.114.5.127";
+	p_dfa ppp = dfa_compile_from_string( pattern );
 
-	printf( "\n\npatten accept text: %s\n", dfa_accept_string( ppp, text ) ? "YES": "NO" );
+	printf( "patten accept text: %s\n", dfa_accept_string( ppp, text ) ? "YES": "NO" );
+	dfa_print( ppp );
 	dfa_del( ppp );
 		
 	/*
