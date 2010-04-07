@@ -2,6 +2,7 @@
 #include "heap2.h"
 #include "nfastack.h"
 #include "prog.h"
+#include "fatable.h"
 #include "stdlib.h"
 
 #include "stdio.h"
@@ -24,6 +25,8 @@ int main() {
 
 	printf( "patten accept text: %s\n", dfa_accept_string( ppp, text ) ? "YES": "NO" );
 	dfa_print( ppp );
+
+	table_print( ppp );
 	dfa_del( ppp );
 		
 	/*
