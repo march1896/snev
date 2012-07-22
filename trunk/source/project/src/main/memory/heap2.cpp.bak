@@ -2,20 +2,21 @@
 #include <cstdlib>
 #include <cstring>
 
+/* the below align macros just apply for align with exponents of 2 */
 #define ALIGNDOWN( x, ALIGN_T ) ( (x) & ~( ALIGN_T - 1 ))
 #define ALIGNUP( x, ALIGN_T ) ( ( (x) + ALIGN_T - 1 ) & ~( ALIGN_T - 1 ) )
 
 #define SPLIT_THRESHOLD 64
 
-typedef struct _Block {
-	_Block* pPrevMem;
-	_Block* pNextMem;
-	_Block* pPrevFree;
-	_Block* pNextFree;
+typedef struct block_t {
+	block_t* pPrevMem;
+	block_t* pNextMem;
+	block_t* pPrevFree;
+	block_t* pNextFree;
 
 #ifdef _MEM_DEBUG_
-	uint 	Line;
-	const char* 	FileName;
+	unsigned int 	line;
+	const char* 	file;
 #endif
 }Block;
 const size_t BLOCKSIZE = sizeof( Block );
@@ -29,16 +30,14 @@ inline size_t GetBlockDataSize( Block* b ) {
 }
 
 // VC's log2 function
-inline uint uint_log2( uint Value ) {
-uint bit;
+inline unsigned int unsigned int_log2( unsigned int Value ) {
+	unsigned int bit;
 
-	//Ensure Value is non-zero
 	if( Value == 0 ) return 0;
 
-	//Use a binary chop algorithm to find bit
 	bit = 0;
 
-	if( ((uint)Value & 0xffff0000) != 0 ) {
+	if( ((unsigned int)Value & 0xffff0000) != 0 ) {
 		Value >>= 16;
 		bit = 16;
 	}
@@ -62,12 +61,11 @@ uint bit;
 		bit++;
 	}
 
-	//Return bit number found
 	return bit;
 }
 
 
-inline uint Mylog2( uint x ) {
+inline unsigned int Mylog2( unsigned int x ) {
 	// assert( x > 0 );
 	int ret = 31;
 	while ( ( x & ( 0x00000001 << ret ) ) == 0 ) {
@@ -77,7 +75,7 @@ inline uint Mylog2( uint x ) {
 }
 
 // #define log2( x ) Mylog2( x )
-#define log2( x ) uint_log2( x )
+#define log2( x ) unsigned int_log2( x )
 #define MemCopy( dest, source, size ) memcpy( dest, source, size )
 
 Block* 	pEndSentinel;
@@ -100,13 +98,13 @@ size_t GetMemoryBlockSize( void* Mem ) {
 	return 0;
 }
 
-void InitHeap( void *Buffer, size_t Size, uint Alignment ) {
+void InitHeap( void *Buffer, size_t Size, unsigned int Alignment ) {
 	pHeapStart = Buffer;
 	AlignMent = Alignment;
-	for ( uint i = 0; i < 32; i ++ ) pFreeList[i] = NULL;
+	for ( unsigned int i = 0; i < 32; i ++ ) pFreeList[i] = NULL;
 
-	void* _start = (void*)ALIGNUP( (uint)Buffer, AlignMent );
-	void* _end = (void*)ALIGNDOWN( (uint)((char*)Buffer + Size ), AlignMent );
+	void* _start = (void*)ALIGNUP( (unsigned int)Buffer, AlignMent );
+	void* _end = (void*)ALIGNDOWN( (unsigned int)((char*)Buffer + Size ), AlignMent );
 
 	pStartSentinel = (Block*)_start;
 	pEndSentinel = (Block*)_end;
@@ -124,7 +122,7 @@ void DeinitHeap() {
 
 void* AllocateLowClean( size_t Size ) {
 	if ( Size <= 0 ) return NULL;
-	uint bit = log2( Size );
+	unsigned int bit = log2( Size );
 	Block* b = NULL;
 
 	while ( bit < 32 ) {
@@ -161,7 +159,7 @@ void* AllocateLowClean( size_t Size ) {
 	else {
 		PopFromFreeList( b );
 		void* addr = (char*)b + BLOCKSIZE + Size;
-		addr = (void*)ALIGNUP( (uint)addr, AlignMent );
+		addr = (void*)ALIGNUP( (unsigned int)addr, AlignMent );
 
 		Block* new_b = (Block*)addr;
 
@@ -178,7 +176,7 @@ void* AllocateLowClean( size_t Size ) {
 
 void* AllocateHighClean( size_t Size ) {
 	if ( Size <= 0 ) return NULL;
-	uint bit = 31;
+	unsigned int bit = 31;
 	Block* b = NULL;
 
 	// find a large enough block
@@ -207,7 +205,7 @@ void* AllocateHighClean( size_t Size ) {
 	else {
 		PopFromFreeList( b );
 		void* addr = (char*)b + BLOCKSIZE + Size;
-		addr = (void*)ALIGNUP( (uint)addr, AlignMent );
+		addr = (void*)ALIGNUP( (unsigned int)addr, AlignMent );
 
 		Block* new_b = (Block*)addr;
 
@@ -293,7 +291,7 @@ void FreeClean( void* ToFree ) {
 
 size_t GetLargestFree() {
 	Block* b;
-	uint bit = 31;
+	unsigned int bit = 31;
 	while ( pFreeList[ bit ] == NULL ) {
 		bit --;
 	}
@@ -308,7 +306,7 @@ size_t GetLargestFree() {
 
 void PushIntoFreeList( Block* b ) {
 	size_t b_size = GetBlockSize( b );
-	uint bit = log2( b_size );
+	unsigned int bit = log2( b_size );
 
 	Block* pFree = pFreeList[ bit ];
 	if ( pFree == NULL ) {
@@ -342,8 +340,8 @@ void PushIntoFreeList( Block* b ) {
 void PopFromFreeList( Block* b ) {
 	if ( !CheckBlock( b ) ) return;
 
-	uint size = GetBlockSize( b );
-	uint bit = log2( size );
+	unsigned int size = GetBlockSize( b );
+	unsigned int bit = log2( size );
 
 	Block* prev = b->pPrevFree;
 	Block* next = b->pNextFree;
@@ -399,32 +397,32 @@ bool IsBlockFree( Block* b ) {
 }
 
 #ifdef _MEM_DEBUG_
-void* AllocateLowDebug( size_t Size, uint line, const char* filename ) {
+void* AllocateLowDebug( size_t Size, unsigned int line, const char* file ) {
 	void* mem = AllocateLowClean( Size );
 	Block* b = (Block*)( (char*)mem - BLOCKSIZE );
-	b->Line = line;
-	b->FileName = filename;
+	b->line = line;
+	b->file = file;
 	return mem;
 }
-void* AllocateHighDebug( size_t Size, uint line, const char* filename ) {
+void* AllocateHighDebug( size_t Size, unsigned int line, const char* file ) {
 	void* mem = AllocateHighClean( Size );
 	Block* b = (Block*)( (char*)mem - BLOCKSIZE );
-	b->Line = line;
-	b->FileName = filename;
+	b->line = line;
+	b->file = file;
 	return mem;
 }
-void* ReAllocateDebug( void* Mem, size_t Size, uint line, const char* filename ) {
+void* ReAllocateDebug( void* Mem, size_t Size, unsigned int line, const char* file ) {
 	void* mem = ReAllocateClean( Mem, Size );
 	Block* b = (Block*)( (char*)mem - BLOCKSIZE );
-	b->Line = line;
-	b->FileName = filename;
+	b->line = line;
+	b->file = file;
 	return mem;
 }
 
-void FreeDebug( void* Mem, uint line, const char* filename ) {
+void FreeDebug( void* Mem, unsigned int line, const char* file ) {
 	Block* b = (Block*)( (char*)Mem - BLOCKSIZE );
-	b->Line = line;
-	b->FileName = filename;
+	b->line = line;
+	b->file = file;
 	FreeClean( Mem );
 	return;
 }
@@ -433,7 +431,7 @@ void FreeDebug( void* Mem, uint line, const char* filename ) {
 // TODO: remove this
 #include <cstdio>
 void DumpFreeList() {
-	for ( uint i = 0; i < 32; i ++ ) {
+	for ( unsigned int i = 0; i < 32; i ++ ) {
 		printf( "FL %d", i );
 		Block* b = pFreeList[i];
 
@@ -443,7 +441,7 @@ void DumpFreeList() {
 		}
 
 		while ( b != NULL ) {
-			printf( "\t\tBlock Addr 0x%08x\tSize %d\n", (uint)( (char*)b + BLOCKSIZE ), GetBlockSize( b ) );
+			printf( "\t\tBlock Addr 0x%08x\tSize %d\n", (unsigned int)( (char*)b + BLOCKSIZE ), GetBlockSize( b ) );
 			b = b->pNextFree;
 		}
 	}
@@ -456,9 +454,9 @@ void CheckLeakPoint() {
 	while ( b < pEndSentinel ) {
 		if ( CheckBlock( b ) && !IsBlockFree( b ) ) {
 #ifdef _MEM_DEBUG_
-			printf( "Leak point, addr: 0x%08x\tline: %d\tfile %s\n", (uint)(b + BLOCKSIZE), b->Line, b->FileName );
+			printf( "Leak point, addr: 0x%08x\tline: %d\tfile %s\n", (unsigned int)(b + BLOCKSIZE), b->line, b->file );
 #else 
-			printf( "Leak point, addr: 0x%08x\tline: %d\tfile %s\n",(uint)(b + BLOCKSIZE), -1, "" );
+			printf( "Leak point, addr: 0x%08x\tline: %d\tfile %s\n",(unsigned int)(b + BLOCKSIZE), -1, "" );
 #endif
 		}
 		b = b->pNextMem;

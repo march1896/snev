@@ -1,0 +1,35 @@
+// prototype 
+typedef int protofunc_add(int, int);
+//typedef (protofunc_add*) pf_add;
+
+//func_add my_add;
+
+//typedef int (*pf_add)(int, int);
+
+int my_add(int a, int b) {
+	return a + b;
+}
+
+int wrong_add(int a, float b) {
+	return a + b;
+}
+
+#include <stdio.h>
+
+// test start 
+int main() {
+	//protofunc_add add = wrong_add;
+	protofunc_add* add = my_add;
+
+	int a = 5, b = 3;
+
+	printf("%d\n", add(a, b));
+
+	scanf("%d", &a);
+
+	return 0;
+}
+
+
+
+
