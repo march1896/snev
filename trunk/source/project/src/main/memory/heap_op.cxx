@@ -6,6 +6,10 @@
 
 #include <stdlib.h>
 
+#pragma push_macro("new")
+
+#undef new
+
 using namespace::Core;
 using namespace::Core::Memory;
 
@@ -40,64 +44,62 @@ void HeapOP::Deinit() {
 	return;
 }
 
-void* HeapOP::operator new(std::size_t size) throw(std::bad_alloc) {
-	void* buff = hOps.alloc(hHeap, (std::size_t)size);
-	if (buff == NULL) throw new std::bad_alloc();
+void* HeapOP::operator new(std::size_t size) {
+	void* buff = hOps.alloc(hHeap, (std::size_t)size, __FILE__, __LINE__);
 
 	Util::DebugPrintf("HeapOP alloc size %d on 0x%08X\n", size, *((unsigned int*)&buff));
 
 	return buff;
 }
 
-void  HeapOP::operator delete(void* buff) throw() {
+void  HeapOP::operator delete(void* buff)  {
 	Util::DebugPrintf("HeapOP dealloc on 0x%08X\n", *((int*)&buff));
-	hOps.dealloc(hHeap, buff);
+	hOps.dealloc(hHeap, buff, __FILE__, __LINE__);
 	return;
 }
 
-void* HeapOP::operator new[](std::size_t size) throw(std::bad_alloc) {
-	void* buff = hOps.alloc(hHeap, (std::size_t)size);
-	if (buff == NULL) throw new std::bad_alloc();
+void* HeapOP::operator new[](std::size_t size) {
+	void* buff = hOps.alloc(hHeap, (std::size_t)size, __FILE__, __LINE__);
+	
 	Util::DebugPrintf("HeapOP alloc size %d on 0x%08X\n", size, *((int*)&buff));
 	return buff;
 }
 
-void  HeapOP::operator delete[](void* buff) throw() {
+void  HeapOP::operator delete[](void* buff) {
 	Util::DebugPrintf("HeapOP dealloc on 0x%08X\n", *((int*)&buff));
-	hOps.dealloc(hHeap, buff);
+	hOps.dealloc(hHeap, buff, __FILE__, __LINE__);
 	return;
 }
 
-#ifdef HEAPOP_DEBUG_MODE
-void* HeapOP::operator new(std::size_t size, const char* file, size_t line) throw(std::bad_alloc) {
+void* HeapOP::operator new(std::size_t size, const char* file, size_t line) {
 		void* buff = hOps.alloc(hHeap, (size_t)size, file, line);
-		if (buff == NULL) throw new std::bad_alloc();
 
 		Util::DebugPrintf("HeapOP alloc size %d on 0x%08X\n", size, *((unsigned int*)&buff));
 
 		return buff;
 }
 
-void  HeapOP::operator delete(void* buff, const char* file, size_t line) throw() {
+void  HeapOP::operator delete(void* buff, const char* file, size_t line) {
 	Util::DebugPrintf("HeapOP dealloc on 0x%08X\n", *((int*)&buff));
 	hOps.dealloc(hHeap, buff, file, line);
 	return;
 }
 
-void* HeapOP::operator new[](std::size_t size, const char* file, size_t line) throw(std::bad_alloc) {
+void* HeapOP::operator new[](std::size_t size, const char* file, size_t line) {
 	void* buff = hOps.alloc(hHeap, (std::size_t)size, file, line);
-	if (buff == NULL) throw new std::bad_alloc();
+
 	Util::DebugPrintf("HeapOP alloc size %d on 0x%08X\n", size, *((int*)&buff));
 	return buff;
 }
 
-void  HeapOP::operator delete[](void* buff, const char* file, size_t line) throw() {
+void  HeapOP::operator delete[](void* buff, const char* file, size_t line) {
 	Util::DebugPrintf("HeapOP dealloc on 0x%08X\n", *((int*)&buff));
 	hOps.dealloc(hHeap, buff, file, line);
 	return;
 }
 
-#endif
+
+#pragma pop_macro("new")
 
 /*
 void* HeapOP::operator new(std::size_t size, void* p) throw(std::bad_alloc) {

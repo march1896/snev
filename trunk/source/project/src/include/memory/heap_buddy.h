@@ -10,11 +10,11 @@ heap_handle cb_heap_init_buddy	(void *buff, int size);
 
 void	cb_heap_destroy_buddy	(heap_handle pheap);
 
-void*	cb_heap_alloc_buddy		(heap_handle pheap, int size);
+void*	cb_heap_alloc_buddy		(heap_handle pheap, int size, const char* file, size_t line);
 
-void	cb_heap_dealloc_buddy	(heap_handle pheap, void *buff);
+void	cb_heap_dealloc_buddy	(heap_handle pheap, void *buff, const char* file, size_t line);
 
-void*	cb_heap_realloc_buddy	(heap_handle pheap, void *buff, int size);
+void*	cb_heap_realloc_buddy	(heap_handle pheap, void *buff, int size, const char* file, size_t line);
 
 void 	cb_heap_dump_buddy		(heap_handle pheap);
 

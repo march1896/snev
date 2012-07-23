@@ -8,12 +8,12 @@ typedef struct heap_t Heap;
 
 
 // declaration of the function of this file
-Heap* 	InitHeap(void *Buffer, size_t Size, unsigned int Alignment);
-void 	DeinitHeap(Heap* pheap);
-void* 	AllocateLowClean(Heap* pheap, size_t Size);
-void* 	AllocateHighClean(Heap* pheap, size_t Size);
-void* 	ReAllocateClean(Heap* pheap, void* Mem, size_t Size);
-void 	FreeClean(Heap* pheap, void* ToFree);
+static Heap* 	InitHeap(void *Buffer, size_t Size, unsigned int Alignment);
+static void 	DeinitHeap(Heap* pheap);
+static void* 	AllocateLowClean(Heap* pheap, size_t Size);
+static void* 	AllocateHighClean(Heap* pheap, size_t Size);
+static void* 	ReAllocateClean(Heap* pheap, void* Mem, size_t Size);
+static void 	FreeClean(Heap* pheap, void* ToFree);
 
 #ifndef MEMORY_DEBUG
 
@@ -26,15 +26,15 @@ void cb_heap_destroy_buddy(heap_handle pheap) {
 	DeinitHeap((Heap*)pheap);
 }	
 
-void* cb_heap_alloc_buddy(heap_handle pheap, int size) {
+void* cb_heap_alloc_buddy(heap_handle pheap, int size, const char* file, size_t line) {
 	return AllocateLowClean((Heap*)pheap, (size_t)size);
 }
 
-void cb_heap_dealloc_buddy(heap_handle pheap, void *buff) {
+void cb_heap_dealloc_buddy(heap_handle pheap, void *buff, const char* file, size_t line) {
 	FreeClean((Heap*)pheap, buff);
 }
 
-void* cb_heap_realloc_buddy(heap_handle pheap, void *buff, int size) {
+void* cb_heap_realloc_buddy(heap_handle pheap, void *buff, int size, const char* file, size_t line) {
 	return ReAllocateClean((Heap*)pheap, buff, (size_t)size);
 }
 
@@ -44,10 +44,10 @@ void cb_heap_dump_buddy(heap_handle pheap) {
 
 #else // MEMORY_DEBUG
 
-void* 	AllocateLowDebug(Heap* pheap, size_t Size, unsigned int line, const char* file);
-void* 	AllocateHighDebug(Heap* pheap, size_t Size, unsigned int line, const char* file);
-void* 	ReAllocateDebug(Heap* pheap, void* Mem, size_t Size, unsigned int line, const char* file);
-void 	FreeDebug(Heap* pheap, void* Mem, unsigned int line, const char* file);
+static void* 	AllocateLowDebug(Heap* pheap, size_t Size, unsigned int line, const char* file);
+static void* 	AllocateHighDebug(Heap* pheap, size_t Size, unsigned int line, const char* file);
+static void* 	ReAllocateDebug(Heap* pheap, void* Mem, size_t Size, unsigned int line, const char* file);
+static void 	FreeDebug(Heap* pheap, void* Mem, unsigned int line, const char* file);
 
 heap_handle cb_heap_init_buddy_debug(void *buff, int size) {
 	return (heap_handle)InitHeap(buff, (size_t)size, DEFAULT_ALIGNMENT);
@@ -154,7 +154,7 @@ static inline size_t GetBlockDataSize(Block* b) {
 }
 
 // faster log2
-static inline unsigned int unsigned int_log2(unsigned int Value) {
+static inline unsigned int int_log2(unsigned int Value) {
 	if(Value == 0) return 0;
 
 	unsigned int bit = 0;
@@ -190,12 +190,12 @@ static inline unsigned int unsigned int_log2(unsigned int Value) {
 #define MemCopy( dest, source, size ) memcpy( dest, source, size )
 
 // push a free block to heap, return true if successfully pushed the block into the heap
-bool PushIntoFreeList(Heap* h, Block* b);
+static bool PushIntoFreeList(Heap* h, Block* b);
 // pop a given block from a heap, return true if successfully poped the block.
-bool PopFromFreeList(Heap*h, Block* b);
-bool CheckPointer(Heap* h, Block*b, bool ForFree);
-bool CheckBlock(Heap* h, Block* b );
-bool IsBlockFree(Block* b);
+static bool PopFromFreeList(Heap*h, Block* b);
+static bool CheckPointer(Heap* h, Block*b, bool ForFree);
+static bool CheckBlock(Heap* h, Block* b );
+static bool IsBlockFree(Block* b);
 
 // static size_t GetMemoryBlockSize(void* Mem) {
 // 	Block* b = (Block*)( (char*)Mem - BLOCK_HEADER_SIZE );
