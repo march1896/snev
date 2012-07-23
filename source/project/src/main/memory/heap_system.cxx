@@ -1,4 +1,5 @@
 #include <heap_system.h>
+#include <log.h>
 
 #include <cstdlib>
 
@@ -11,15 +12,15 @@ void cb_heap_destroy_sys(heap_handle pheap) {
 	return;
 }
 
-void* cb_heap_alloc_sys(heap_handle pheap, int size) {
+void* cb_heap_alloc_sys(heap_handle pheap, int size, const char* file, size_t line) {
 	return malloc((size_t)size);
 }
 
-void cb_heap_dealloc_sys(heap_handle pheap, void *buff) {
+void cb_heap_dealloc_sys(heap_handle pheap, void *buff, const char* file, size_t line) {
 	free(buff);
 }
 
-void* cb_heap_realloc_sys(heap_handle pheap, void *buff, int size) {
+void* cb_heap_realloc_sys(heap_handle pheap, void *buff, int size, const char* file, size_t line) {
 	return realloc(buff, size);
 }
 
@@ -30,7 +31,6 @@ void cb_heap_dump_sys(heap_handle pheap) {
 #else // MEMORY_DEBUG
 
 #include <set>
-#include <multiset>
 class HeapSysDebug {
 public:
 	void AddRecord(const void* addr, int size, const char* file, int line) {
@@ -41,7 +41,7 @@ public:
 
 	void RemoveRecord(const void* addr, const char* file, int line) {
 		Record rec(addr, 0, file, line);
-		std::set::const_iterator itr = mAllocates.find(rec);
+		std::set<Record>::const_iterator itr = mAllocates.find(rec);
 
 		if (itr != mAllocates.end()) {
 			mTotalAllocatedSize -= itr->size;
@@ -67,7 +67,7 @@ public:
 				GetTotalAllocatedSize(), // total allocated memory size
 				-1, // total free memory block number
 				-1, // total free memory size
-				-1, // largest free memory block size
+				-1 // largest free memory block size
 				);
 
 		Core::Util::DebugPrintf("Detailed allocates information: \n");
@@ -77,7 +77,7 @@ public:
 		}
 
 		Core::Util::DebugPrintf("\nDetailed mis-deallocates information:\n");
-		for (std::multiset<Records>::const_iterator itr = mDeallocates.begin();
+		for (std::multiset<Record>::const_iterator itr = mDeallocates.begin();
 				itr != mDeallocates.end(); itr ++) {
 			Core::Util::DebugPrintf("0x%8X (file %s, line %d)\n", *((unsigned int*)&itr->addr), itr->file, itr->line);
 		}
@@ -101,7 +101,7 @@ private:
 		}
 
 		bool operator < (const Record& rec) const {
-			return (char*)addr < (char*)rec->addr;
+			return (char*)addr < (char*)rec.addr;
 		}
 	};
 
@@ -117,21 +117,15 @@ private:
 	int mTotalAllocatedSize;
 };
 
-HeapSysDebug& HeapSysDebug::GetInstance() {
-	static HeapSysDebug theInstance;
-
-	return &theInstance;
-}
-
 heap_handle cb_heap_init_sys_debug(void *buff, int size) {
 	// TODO: it's better not to use the system heap
-	HeapSysDebug* pHeap = new pHeap();
+	HeapSysDebug* pHeap = new HeapSysDebug();
 
 	return (heap_handle)pHeap;
 }
 
 void cb_heap_destroy_sys_debug(heap_handle pheap) {
-	delete pHeap;
+	delete (HeapSysDebug*)pheap;
 	return;
 }
 
@@ -150,7 +144,7 @@ void cb_heap_dealloc_sys_debug(heap_handle pheap, void *buff, const char* file, 
 	free(buff);
 
 	HeapSysDebug* pHeap = (HeapSysDebug*) pheap;
-	pHeap->RemoveRecord(addr, file, line);
+	pHeap->RemoveRecord(buff, file, line);
 }
 
 void* cb_heap_realloc_sys_debug(heap_handle pheap, void *buff, int size, const char* file, size_t line) {

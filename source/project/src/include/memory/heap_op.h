@@ -1,14 +1,18 @@
 #ifndef _OO_HEAP_H_
 #define _OO_HEAP_H_
+
 #include <heap_interface.h>
 
 #include <new>
 
-#ifdef MEMORY_DEBUG
-#define HEAPOP_DEBUG_MODE
-#endif
+#pragma push_macro("new")
+#pragma push_macro("delete")
 
-namespace Core { namespace Memory {
+#undef new
+#undef delete
+
+namespace Core { 
+namespace Memory {
 
 	class HeapOP {
 		public:
@@ -19,33 +23,37 @@ namespace Core { namespace Memory {
 			};
 
 		public:
-			static void* operator new(std::size_t) 		throw(std::bad_alloc); 
-			static void  operator delete(void*) 			throw(); 
-			static void* operator new[](std::size_t) 		throw(std::bad_alloc); 
-			static void  operator delete[](void*) 			throw(); 
 
-#ifdef HEAPOP_DEBUG_MODE
-			static void* operator new(std::size_t, const char*, std::size_t) 		throw(std::bad_alloc); 
-			static void  operator delete(void*, const char*, std::size_t) 			throw(); 
-			static void* operator new[](std::size_t, const char*, std::size_t) 		throw(std::bad_alloc); 
-			static void  operator delete[](void*, const char*, std::size_t) 		throw(); 
-#endif
-			/*
-			 * not allow to use replacement new currently
-			 *
-			void* operator new(std::size_t, void* p) 	throw(std::bad_alloc); 
-			void  operator delete(void* p, void*) 		throw(); 
-			void* operator new[](std::size_t, void* p) 	throw(std::bad_alloc); 
-			void  operator delete[](void* p, void*) 	throw(); 
-			*/
+			static void* operator new(std::size_t); 
+			static void  operator delete(void*); 
+			static void* operator new[](std::size_t); 
+			static void  operator delete[](void*); 
+
+			static void* operator new(std::size_t, const char*, std::size_t); 
+			static void  operator delete(void*, const char*, std::size_t); 
+			static void* operator new[](std::size_t, const char*, std::size_t); 
+			static void  operator delete[](void*, const char*, std::size_t); 
+
+			//not allow to use replacement new currently
+			static void* operator new(std::size_t sizeInBytes, void* p)			{return p;}
+			static void* operator new[](std::size_t sizeInBytes, void* p)		{return p;}
+			static void  operator delete(void *, void*)							{}
+			static void	 operator delete[](void *, void*)						{}
 
 			static void Init(EHeapAllocType allocType, int size);
 			static void Deinit();
 	};
-#ifdef HEAPOP_DEBUG_MODE
-#undef new
-#define new new(__FILE__, __LINE__)
-#endif // MEM_DEBUG
 }
 };
+
+#pragma pop_macro("delete")
+#pragma pop_macro("new")
+
+#ifdef MEMORY_DEBUG
+#undef new
+#define new new(__FILE__, __LINE__)
+// #undef delete
+// #define delete DeleteTracker(__FILE__, __LINE__), delete
+#endif // MEM_DEBUG
+
 #endif // _OO_HEAP_H_
