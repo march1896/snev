@@ -9,7 +9,7 @@ class HeapAllocClass: public HeapOP {
 
 int main() {
 	//Core::Util::DebugPrintf("Hello, world!\n");
-	HeapOP::Init(HeapOP::E_HEAP_SYSTEM, 0);
+	HeapOP::Init(HeapOP::E_HEAP_BUDDY, 0);
 	HeapAllocClass* tester = new HeapAllocClass();
 	delete tester;
 	return 0;
