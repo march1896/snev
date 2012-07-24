@@ -3,7 +3,6 @@
 
 #include <cstdlib>
 
-#ifndef MEMORY_DEBUG
 heap_handle cb_heap_init_sys(void *buff, int size) {
 	return (heap_handle) NULL;
 }
@@ -27,8 +26,6 @@ void* cb_heap_realloc_sys(heap_handle pheap, void *buff, int size, const char* f
 void cb_heap_dump_sys(heap_handle pheap) {
 	return;
 }
-
-#else // MEMORY_DEBUG
 
 #include <set>
 class HeapSysDebug {
@@ -163,7 +160,6 @@ void cb_heap_dump_sys_debug(heap_handle pheap) {
 
 	return;
 }
-#endif // MEMORY_DEBUG
 
 void fill_heap_operations_sys (heap_operations* ops) {
 #ifndef MEMORY_DEBUG

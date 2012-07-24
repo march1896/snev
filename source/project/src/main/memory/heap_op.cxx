@@ -72,11 +72,11 @@ void  HeapOP::operator delete[](void* buff) {
 }
 
 void* HeapOP::operator new(std::size_t size, const char* file, size_t line) {
-		void* buff = hOps.alloc(hHeap, (size_t)size, file, line);
+	void* buff = hOps.alloc(hHeap, (size_t)size, file, line);
 
-		Util::DebugPrintf("HeapOP alloc size %d on 0x%08X\n", size, *((unsigned int*)&buff));
+	Util::DebugPrintf("HeapOP alloc size %d on 0x%08X\n", size, *((unsigned int*)&buff));
 
-		return buff;
+	return buff;
 }
 
 void  HeapOP::operator delete(void* buff, const char* file, size_t line) {

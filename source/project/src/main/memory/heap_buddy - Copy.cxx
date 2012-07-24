@@ -7,120 +7,13 @@
 typedef struct heap_t Heap;
 
 
-// declaration of the function of this file
-static Heap* 	InitHeap(void *Buffer, size_t Size, unsigned int Alignment);
-static void 	DeinitHeap(Heap* pheap);
-static void* 	AllocateLowClean(Heap* pheap, size_t Size);
-static void* 	AllocateHighClean(Heap* pheap, size_t Size);
-static void* 	ReAllocateClean(Heap* pheap, void* Mem, size_t Size);
-static void 	FreeClean(Heap* pheap, void* ToFree);
-
-#ifndef MEMORY_DEBUG
-
-/* implementation of the public interface */
-heap_handle cb_heap_init_buddy(void *buff, int size) {
-	return (heap_handle)InitHeap(buff, (size_t)size, DEFAULT_ALIGNMENT);
-}
-
-void cb_heap_destroy_buddy(heap_handle pheap) {
-	DeinitHeap((Heap*)pheap);
-}	
-
-void* cb_heap_alloc_buddy(heap_handle pheap, int size, const char* file, size_t line) {
-	return AllocateLowClean((Heap*)pheap, (size_t)size);
-}
-
-void cb_heap_dealloc_buddy(heap_handle pheap, void *buff, const char* file, size_t line) {
-	FreeClean((Heap*)pheap, buff);
-}
-
-void* cb_heap_realloc_buddy(heap_handle pheap, void *buff, int size, const char* file, size_t line) {
-	return ReAllocateClean((Heap*)pheap, buff, (size_t)size);
-}
-
-void cb_heap_dump_buddy(heap_handle pheap) {
-	return;
-}
-
-#else // MEMORY_DEBUG
-
-static void* 	AllocateLowDebug(Heap* pheap, size_t Size, unsigned int line, const char* file);
-static void* 	AllocateHighDebug(Heap* pheap, size_t Size, unsigned int line, const char* file);
-static void* 	ReAllocateDebug(Heap* pheap, void* Mem, size_t Size, unsigned int line, const char* file);
-static void 	FreeDebug(Heap* pheap, void* Mem, unsigned int line, const char* file);
-
-heap_handle cb_heap_init_buddy_debug(void *buff, int size) {
-	return (heap_handle)InitHeap(buff, (size_t)size, DEFAULT_ALIGNMENT);
-}
-
-void cb_heap_destroy_buddy_debug(heap_handle pheap) {
-	DeinitHeap((Heap*)pheap);
-}
-
-void* cb_heap_alloc_buddy_debug(heap_handle pheap, int size, const char* file, size_t line) {
-	return AllocateLowDebug((Heap*)pheap, (size_t)size, line, file);
-}
-
-void cb_heap_dealloc_buddy_debug(heap_handle pheap, void *buff, const char* file, size_t line) {
-	FreeDebug((Heap*)pheap, buff, line, file);
-}
-
-void* cb_heap_realloc_buddy_debug(heap_handle pheap, void *buff, int size, const char* file, size_t line) {
-	return ReAllocateDebug((Heap*)pheap, buff, (size_t)size, line, file);
-}
-
-void cb_heap_dump_buddy_debug(heap_handle pheap) {
-}
-
-#endif // MEMORY_DEBUG
-
-void fill_heap_operations_buddy (heap_operations* ops) {
-#ifndef MEMORY_DEBUG
-	ops->init = cb_heap_init_buddy;
-	ops->destroy = cb_heap_destroy_buddy;
-	ops->alloc = cb_heap_alloc_buddy;
-	ops->dealloc = cb_heap_dealloc_buddy;
-	ops->realloc = cb_heap_realloc_buddy;
-	ops->dump = cb_heap_dump_buddy;
-#else // MEMORY_DEBUG
-	ops->init = cb_heap_init_buddy_debug;
-	ops->destroy = cb_heap_destroy_buddy_debug;
-	ops->alloc = cb_heap_alloc_buddy_debug;
-	ops->dealloc = cb_heap_dealloc_buddy_debug;
-	ops->realloc = cb_heap_realloc_buddy_debug;
-	ops->dump = cb_heap_dump_buddy_debug;
-#endif // MEMORY_DEBUG
-}
-
-/* below private function and variable of this file */
-
 /* the below align macros just apply for align with exponents of 2 */
 #define ALIGNDOWN( x, ALIGN_T ) ( (x) & ~( (ALIGN_T) - 1 ))
 #define ALIGNUP( x, ALIGN_T ) ( ( (x) + (ALIGN_T) - 1 ) & ~( (ALIGN_T) - 1 ) )
 
 #define SPLIT_THRESHOLD 64
 
-typedef struct block_t {
-	block_t* pPrevMem;
-	block_t* pNextMem;
-	block_t* pPrevFree;
-	block_t* pNextFree;
-
-#ifdef MEMORY_DEBUG
-	unsigned int 	line;
-	const char* 	file;
-#endif
-} Block;
-
-struct heap_t {
-	Block* 	pEndSentinel;
-	Block* 	pStartSentinel;
-	void* 	pHeapStart;
-	Block*  pFreeList[32];
-	size_t 	AlignMent;
-	int 	errorCode;
-};
-
+/* error code related definitions */
 #define ERR_HEAP_INIT			(1<<0)
 #define ERR_HEAP_DEINIT			(1<<1)
 #define ERR_HEAP_ALLOCATE		(1<<2)
@@ -142,6 +35,151 @@ struct heap_t {
 #define GetInternalErr(h) ((h->errorCode) & ERR_HEAPINTERNAL_MASK)
 
 #define RaiseError(h, err) ((h->errorCode) |= err)
+
+/* Heap and Block definitions */
+
+typedef struct block_t {
+	struct block_t* prev_mem;
+	struct block_t* next_mem;
+	struct block_t* prev_free;
+	struct block_t* next_free;
+
+	// for the clean version, the below members are never used
+	// this information must be defined after the pointers
+	const char* 	file;
+	unsigned int 	line;
+} block;
+
+inline int block_header_size() {
+#ifdef HEAP_BUDDY_DEBUG
+	return sizeof(block);
+#else 
+	// for the release version, we just ignore file/line information.
+	return sizeof(block*) * 4;
+#endif 
+}
+
+typedef struct heap_t {
+	void*	pbuff;
+	int		size;
+
+	block*	block_start;	// points to the start of the block buffer
+	block*	block_end;		// points to the end of the block buffer
+	block*	block_lastvalid;	// points to the last valid block in the block boffer
+	block*  block_free[32];
+
+	int		alignment;
+	int 	error;
+} heap;
+
+
+// TODO: remove this
+// #define BLOCK_PREV_FREE 0x173ED825
+// #define BLOCK_NEXT_FREE 0x83A5F007
+
+inline bool block_in_freelist(block* pb) {
+	// let (prev_free == NULL && next_free == NULL) indicates the block is allocated, 
+	// then if the block is in free list, at least one of the two will not be NULL, 
+	// but if we have only one block that occupy the entire block address space, in this
+	// case, it will not have prev_free and next_free either, it's in the free list, but 
+	// both pointers are free. So prev_free == NULL && next_free == NULL can not represent 
+	// all cases of free blocks. 
+	if (pb->prev_free != NULL || pb->next_free != NULL) return true;
+
+	if (pb->prev_mem == NULL && pb->next_mem == NULL) return 
+}
+
+// given an addr, return a block pointer if the addr is a valid block address
+inline block* block_from_addr(heap* ph, void* addr) {
+	if (addr < ph->block_start || addr > ph->block_lastvalid) return NULL;
+
+	return (block*)addr;
+}
+
+inline void* block_data_addr(block* pb) {
+}
+
+inline block* block_find_from_list(block* phead) {
+}
+
+inline block* block_from_data_addr(void* addr) {
+}
+
+inline void block_comb_two(block* pf, block* pe) {
+}
+
+inline void block_comb_three(block* pf, block* pm, block* pe) {
+}
+
+/********************************************************************************
+ 
+  *****  heap memory distribution ****
+                                                                                  
+  		heap header	                     block buffer
+      |-----------|--|----------------------------------------------|------|--|
+    pbuff            ^                                              ^      ^      
+                     |                                              |      |      
+                block_start                                         |   block_end    
+                                                              block_lastvalid     
+                                                                                  
+    the small gaps indicates align gaps                                           
+
+*********************************************************************************
+                                                                                  
+  *****  block memory distribution ****
+                                                                                  
+        prev block               current block                        next block  
+      |--------------|----------------|-----------------------------|---------|
+                     ^ block header   ^      block data                           
+                   pblock          data begin                                     
+                                                                                  
+                                                                                  
+*********************************************************************************/
+
+heap* heap_init(void* buff, int size) {
+	
+	int HeapSize = sizeof(Heap);
+
+	// initialize pheap handler
+	Heap* pheap = (Heap*)Buffer;
+	pheap->pHeapStart	= Buffer;
+	pheap->AlignMent	= Alignment;
+	pheap->errorCode	= 0;
+	for (int i = 0; i < 32; i ++) {
+		pheap->pFreeList[i]	= NULL;
+	}
+
+	// add HeapSize to buffer since it's used by the heap header
+	Buffer = (void*)((char*)Buffer + HeapSize);
+
+	void* _start = (void*)ALIGNUP((unsigned int)Buffer, Alignment);
+	void* _end = (void*)ALIGNDOWN((unsigned int)((char*)Buffer + Size ), Alignment);
+
+	pheap->pStartSentinel	= (Block*)_start;
+	pheap->pEndSentinel		= (Block*)_end;
+
+	Block* b 	= (Block*)_start + 1;
+	b->pPrevMem = NULL;
+	b->pNextMem = pheap->pEndSentinel;
+
+	bool succeed = PushIntoFreeList(pheap, b);
+	if (!succeed) RaiseError(pheap, ERR_HEAP_INIT);
+
+	return pheap;
+}
+
+void heap_deinit(heap* ph) {
+}
+
+void* heap_alloc(heap* ph, int size) {
+}
+
+void heap_dealloc(heap* ph, void* addr) {
+}
+
+void heap_realloc(heap* ph, void* addr, int nsize) {
+}
+
 
 const size_t BLOCK_HEADER_SIZE = sizeof(Block);
 
@@ -588,6 +626,83 @@ static void FreeDebug(Heap* pheap, void* Mem, unsigned int line, const char* fil
 	return;
 }
 #endif // MEMORY_DEBUG
+
+#ifndef MEMORY_DEBUG
+
+/* implementation of the public interface */
+heap_handle cb_heap_init_buddy(void *buff, int size) {
+	return (heap_handle)InitHeap(buff, (size_t)size, DEFAULT_ALIGNMENT);
+}
+
+void cb_heap_destroy_buddy(heap_handle pheap) {
+	DeinitHeap((Heap*)pheap);
+}	
+
+void* cb_heap_alloc_buddy(heap_handle pheap, int size, const char* file, size_t line) {
+	return AllocateLowClean((Heap*)pheap, (size_t)size);
+}
+
+void cb_heap_dealloc_buddy(heap_handle pheap, void *buff, const char* file, size_t line) {
+	FreeClean((Heap*)pheap, buff);
+}
+
+void* cb_heap_realloc_buddy(heap_handle pheap, void *buff, int size, const char* file, size_t line) {
+	return ReAllocateClean((Heap*)pheap, buff, (size_t)size);
+}
+
+void cb_heap_dump_buddy(heap_handle pheap) {
+	return;
+}
+
+#else // MEMORY_DEBUG
+
+static void* 	AllocateLowDebug(Heap* pheap, size_t Size, unsigned int line, const char* file);
+static void* 	AllocateHighDebug(Heap* pheap, size_t Size, unsigned int line, const char* file);
+static void* 	ReAllocateDebug(Heap* pheap, void* Mem, size_t Size, unsigned int line, const char* file);
+static void 	FreeDebug(Heap* pheap, void* Mem, unsigned int line, const char* file);
+
+heap_handle cb_heap_init_buddy_debug(void *buff, int size) {
+	return (heap_handle)InitHeap(buff, (size_t)size, DEFAULT_ALIGNMENT);
+}
+
+void cb_heap_destroy_buddy_debug(heap_handle pheap) {
+	DeinitHeap((Heap*)pheap);
+}
+
+void* cb_heap_alloc_buddy_debug(heap_handle pheap, int size, const char* file, size_t line) {
+	return AllocateLowDebug((Heap*)pheap, (size_t)size, line, file);
+}
+
+void cb_heap_dealloc_buddy_debug(heap_handle pheap, void *buff, const char* file, size_t line) {
+	FreeDebug((Heap*)pheap, buff, line, file);
+}
+
+void* cb_heap_realloc_buddy_debug(heap_handle pheap, void *buff, int size, const char* file, size_t line) {
+	return ReAllocateDebug((Heap*)pheap, buff, (size_t)size, line, file);
+}
+
+void cb_heap_dump_buddy_debug(heap_handle pheap) {
+}
+
+#endif // MEMORY_DEBUG
+
+void fill_heap_operations_buddy (heap_operations* ops) {
+#ifndef MEMORY_DEBUG
+	ops->init = cb_heap_init_buddy;
+	ops->destroy = cb_heap_destroy_buddy;
+	ops->alloc = cb_heap_alloc_buddy;
+	ops->dealloc = cb_heap_dealloc_buddy;
+	ops->realloc = cb_heap_realloc_buddy;
+	ops->dump = cb_heap_dump_buddy;
+#else // MEMORY_DEBUG
+	ops->init = cb_heap_init_buddy_debug;
+	ops->destroy = cb_heap_destroy_buddy_debug;
+	ops->alloc = cb_heap_alloc_buddy_debug;
+	ops->dealloc = cb_heap_dealloc_buddy_debug;
+	ops->realloc = cb_heap_realloc_buddy_debug;
+	ops->dump = cb_heap_dump_buddy_debug;
+#endif // MEMORY_DEBUG
+}
 
 // TODO: remove this
 // #include <cstdio>
