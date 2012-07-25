@@ -41,7 +41,7 @@ typedef struct heap_t Heap;
  *
  * when the block is allocated, it is not in the free list, we should know:
  *    1, the previous/next adjacent block. (when it is given back to the heap
- *       it should know the preivous/next block address to do the combine work).
+ *       it should know the preivous/next block address to do the merge work).
  *
  * when the block is not allocated, it is in the free list, we should know:
  *    1, the size of the block. (in order to deside if it's allocatable)
@@ -56,97 +56,195 @@ typedef struct heap_t Heap;
  *       next pointer will never changed if it's allocated), this rule is duplicated
  *       with rule 1 since if we know the address and size of a block, we will 
  *       certainly know the next adjacent block.
+ *    4, the previous adjacent block( this is the hardest part to understand, I
+ *       was unsuccessfully design the data structure, because I thought this member
+ *       is not useful for in_freelist blocks. Indeed, when maintianing the free list,
+ *       prev_adj is not need to known. But when we allocate a free block from freelist,
+ *       the block comes to allocated immediately, in other words, we must know the 
+ *       prev_adj/next_adj immediately. I spent a lot of time to define data structure 
+ *       and algorithm based on the absent of prev_adj for in_freelist block, until 
+ *       I am starting to write allocate(), what a pity.
  *
- *  at any time, when a get a pointer of a block, we should tell if the block is in
- *    free list. (this is also related for combination work, when we try to combine 
+ *  at any time, when a get a pointer of a block, we could tell if the block is in
+ *    free list. (this is also related for merging work, when we try to merge 
  *    the current block with prev/next adjacent block, we should first prev/next 
  *    adjacent blocks are in free list)
+ *  at any time, we could tell if the block is valid, because we may get a pointer of
+ *    a block from the adjacent block. 
  * 	
  * 	conclusion:
- * 	for allocated block, we should keep the header information as few as possible,
- * 	from the header we could get the prev/next adjacent block, and if the block is
- * 	allocated.
+ * 	  Ideally, for allocated block, we should keep the header information as few as 
+ * 	  possible, at least we could get the prev/next adjacent block, and we could tell 
+ * 	  if the block is valid or free.
+ * 	  from implementation point of view, if we use two pointers to keep prev/next adjacent
+ * 	  blocks, we should add another member to suggest if the block is free.
+ * 	  If we use a pointer points to prev adjacent block, and record the size of current
+ * 	  block, the next adjacent block could be computed from the current address and 
+ * 	  the size of the block, then we could compress is_free information into size, of 
+ * 	  course, the maximum presented size will decrease.
+ * 	  for is_valid, we could put two sentinel in front/back end of the block buffer.
  *
- * 	for in freelist block, the header size is not sensitive, we could save a lot of
- * 	information in the header.
+ *    For in_freelist block, we are not care about the header length, if it is not 
+ *    toooooooooo long.
  */
 
-struct block_h {
-	/* use prev_adj to judge if the block is allocated or in freelist.
-	 * since if the block is in freelist, prev_adj is not useful, so we can set to 
-	 * any value we want.
-	 * prev_adj == self_addr represent the block is in freelist 
-	 * fields for allocated blocks start. */
-	struct block_h* prev_adj; 
-	struct block_h* next_adj;
-	/* fields for allocated blocks end. */
-
-	/* these fields of data stucture is the key of managing free blocks, 
-	 * changing algorithm only impacts on these fields */
-	struct block_h* prev_free;
-	struct block_h* next_free;
-
-	/* below is information for check and debug */
-	struct heap_t*  onwer;
-	const char* 	file;
-	const int		line;
+/* block header common part, no matter if the block is allocated or in freelist, 
+ * it should keep the following common information.
+ * every custom block header should contains this struct at the very beginning */
+struct block_com_h {
+	struct block_com_h* prev_adj; // points to the previous block
+	unsigned int 		info; // contains is_free and size information
 };
 
-typedef struct block_h block;
+typedef struct block_com_h block_c;
 
-/* this is a dummy struct, the only reason it's defined is to get the allocated 
- * block header size, DON'T use it directly */
-struct __block_allocated_h {
-	struct __block_allocated_h* prev_adj;
-	struct __block_allocated_h* next_adj;
-};
-
-const int BLOCK_ALLOCATED_SIZE = sizeof(__block_allocated_h);
+const int BLOCK_COMMON_SIZE = sizeof(block_c);
 
 /* block_com_ series are common functions for kinds of algorithm */
 
-// return true if pb is in free list 
-inline bool block_com_isfree(block* pb) {
-	// see the data definition.
-	if (pb == pb->prev_free) return true;
-	return false;
+// return true if pbc is valid
+inline bool block_com_valid(block_c* pbc) {
+	if (pbc == NULL || pbc->prev_adj == NULL) {
+		assert(pbc->info == 0);
+		return false;
+	}
+
+	return true;
 }
 
-// mark pb as it is in free list
-inline void block_com_markfree(block* pb) {
-	pb->prev_free = pb;
+// mark pbc as an invalid block
+inline void block_com_invalidate(block_c* pbc) {
+	pbc->next_adj = NULL;
+	pbc->info = 0;
+}
+
+// block valid information are judged based on sentinel blocks, 
+// this function make two sentinel based on the given block buffer(from *ppstart
+// to *ppend), after that, ppstart and ppend will points to the new block start/end
+// buffer.
+inline void block_com_make_sentinels(block_c** ppstart, block_c** ppend) {
+	assert(ppstart && ppend && (*ppstart < *ppend));
+
+	block_c* sentinel = *ppstart;
+	block_com_invalidate(sentinel);
+	ppstart = &(sentinel + 1);
+
+	sentinel = (block_c*)((char*)(*ppend) - sizeof(block_c));
+	block_com_invalidate(sentinel);
+	ppend = &sentinel;
+
+	return;
+}
+
+inline block_c* block_com_prev_adj(block_c* pbc) {
+	return block_com_valid(pbc->prev_adj) ? pbc->prev_adj : NULL;
+}
+
+
+#define BLOCK_COM_FREE_BIT 31
+#define BLOCK_COM_FREE_MASK (1 << BLOCK_COM_FREE_BIT)
+#define BLOCK_COM_SIZE_MASK (BLOCK_COM_FREE_MASK - 1)
+
+// return true if pbc is in free list 
+inline bool block_com_isfree(block_c* pbc) {
+	return pbc->info & BLOCK_COM_FREE_MASK;
+}
+
+// mark pbc as it is in free list
+inline void block_com_markfree(block_c* pbc) {
+	pbc->info |= BLOCK_COM_FREE_MASK; 
 }
 
 // return the data address of the pb
-inline void* block_com_get_data(block* pb) {
-	return (void*)((char*)pb + BLOCK_ALLOCATED_SIZE);
+inline void* block_com_get_data(block_c* pb) {
+	return (void*)((char*)pb + sizeof(block_c));
 }
 
-inline block* block_com_from_data(void* addr) {
-	return (block*)((char*)addr - BLOCK_ALLOCATED_SIZE);
+// return the block address according to data its carrying
+inline block_c* block_com_from_data(void* addr) {
+	return (block_c*)((char*)addr - sizeof(block_c));
 }
 
+// return the size of the block
+inline int block_com_size(block_c* pb) {
+	return (char*)pb->next_adj - (char*)pb;
+}
+
+// return the largest data size that pb can carry
 inline int block_com_data_size(block* pb) {
 	return (char*)pb->next_adj - (char*)pb - BLOCK_ALLOCATED_SIZE;
 }
 
-inline int block_com_merge_two(block* pf, block* pe) {
+inline block* block_com_merge_two(block* pf, block* pe) {
+	assert(pf->next_adj == pe);
+
+	block* p_after = pe->next_adj;
+
+	// if p_after is valid, it is allocated
+	assert(!block_com_valid(p_after) || !block_com_isfree(p_after));
+
+	pf->next_adj = p_after;
+	p_after->prev_adj = pf;
+
+	return pf;
 }
 
-inline int block_com_merge_three(block *pf, block *pm, block *pe) {
+inline void block_com_merge_three(block *pf, block *pm, block *pe) {
+	assert(pf->next_adj == pm && pm->next_adj == pe);
+
+	block* p_after = pe->next_adj;
+
+	// if p_after is valid, it is allocated
+	assert(!block_com_valid(p_after) || !block_com_isfree(p_after));
+
+	pf->next_adj = p_after;
+	p_after->prev_adj = pf;
+
+	return pf;
 }
 
-/* use double linked list(dll) to manage free list, block_dll_ implement 
- * related functions */
+/* use double linked list(dll) to manage free list, block_dll_* 
+ * implement related functions */
 
-// find a suitable block of given size.
+/* for dll(double linked list), we should provide the following method.
+ * 1, find 
+ * to manage dll(double linked list), we have three ways.
+ * 1, sorted the dll in increasing order, related functions: block_dllinc_*
+ * 2, sorted the dll in decreasing order, related functions: block_dlldec_* 
+ * 3, don't sort the dll, related functions: block_dllrdm_*
+ */
+
+// find a suitable block of given data size.
 inline block* block_dll_find(block* phead, int size) {
+	assert(!phead || block_com_isfree(phead));
+
+	block* itr = phead;
+	while (itr != NULL) {
+		if (block_com_data_size(itr) >= size) {
+			return itr;
+		}
+	}
+	return NULL;
 }
 
-inline void block_dll_insert(block **pphead, block* pin) {
+inline void block_dll_insert(block **pphead, block* pb) {
+	block* phead = *pphead;
+	if (phead == NULL) {
+		pphead = &pb;
+		return;
+	}
+	else {
+		assert(block_com_isfree(phead));
+
+		// just make sure you have mark pb as a free block before
+		// it is inserted into free list
+		assert(block_com_isfree(pb));
+
+
+	}
 }
 
-inline void block_dll_erase(block **pphead, block* pre) {
+inline void block_dll_erase(block **pphead, block* pb) {
 }
 
 /********************************************************************************
@@ -180,7 +278,7 @@ typedef struct heap_t {
 
 	block*	block_start;	// points to the start of the block buffer
 	block*	block_end;		// points to the end of the block buffer
-	block*	block_lastvalid;	// points to the last valid block in the block boffer
+	block*	block_sentinel;	// points to the last block in the block buffer, which is marked as invalid
 	block*  block_free[32];
 
 	int		alignment;
