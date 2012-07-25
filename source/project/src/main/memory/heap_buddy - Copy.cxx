@@ -37,78 +37,116 @@ typedef struct heap_t Heap;
 #define RaiseError(h, err) ((h->errorCode) |= err)
 
 /* Heap and Block definitions */
+/* design requirements for struct block:
+ *
+ * when the block is allocated, it is not in the free list, we should know:
+ *    1, the previous/next adjacent block. (when it is given back to the heap
+ *       it should know the preivous/next block address to do the combine work).
+ *
+ * when the block is not allocated, it is in the free list, we should know:
+ *    1, the size of the block. (in order to deside if it's allocatable)
+ *    2, the previous/next free block. (to maintain the free list)
+ *    3, the next adjacent block,(it is a little hard to understand this 
+ *       rule, consider the current block is in free list, and the prev/next 
+ *       adjacent blocks are both allocated, and now the prev adjacent freed and 
+ *       combined with the current block, now the next block is still allocated,
+ *       so it should know the previous adjacent block, which will be changed 
+ *       after the combination, so we should notify the next adjacent block that
+ *       its prev is changed, the prev adjacent block is no need to know since its 
+ *       next pointer will never changed if it's allocated), this rule is duplicated
+ *       with rule 1 since if we know the address and size of a block, we will 
+ *       certainly know the next adjacent block.
+ *
+ *  at any time, when a get a pointer of a block, we should tell if the block is in
+ *    free list. (this is also related for combination work, when we try to combine 
+ *    the current block with prev/next adjacent block, we should first prev/next 
+ *    adjacent blocks are in free list)
+ * 	
+ * 	conclusion:
+ * 	for allocated block, we should keep the header information as few as possible,
+ * 	from the header we could get the prev/next adjacent block, and if the block is
+ * 	allocated.
+ *
+ * 	for in freelist block, the header size is not sensitive, we could save a lot of
+ * 	information in the header.
+ */
 
-typedef struct block_t {
-	struct block_t* prev_mem;
-	struct block_t* next_mem;
-	struct block_t* prev_free;
-	struct block_t* next_free;
+struct block_h {
+	/* use prev_adj to judge if the block is allocated or in freelist.
+	 * since if the block is in freelist, prev_adj is not useful, so we can set to 
+	 * any value we want.
+	 * prev_adj == self_addr represent the block is in freelist 
+	 * fields for allocated blocks start. */
+	struct block_h* prev_adj; 
+	struct block_h* next_adj;
+	/* fields for allocated blocks end. */
 
-	// for the clean version, the below members are never used
-	// this information must be defined after the pointers
+	/* these fields of data stucture is the key of managing free blocks, 
+	 * changing algorithm only impacts on these fields */
+	struct block_h* prev_free;
+	struct block_h* next_free;
+
+	/* below is information for check and debug */
+	struct heap_t*  onwer;
 	const char* 	file;
-	unsigned int 	line;
-} block;
+	const int		line;
+};
 
-inline int block_header_size() {
-#ifdef HEAP_BUDDY_DEBUG
-	return sizeof(block);
-#else 
-	// for the release version, we just ignore file/line information.
-	return sizeof(block*) * 4;
-#endif 
+typedef struct block_h block;
+
+/* this is a dummy struct, the only reason it's defined is to get the allocated 
+ * block header size, DON'T use it directly */
+struct __block_allocated_h {
+	struct __block_allocated_h* prev_adj;
+	struct __block_allocated_h* next_adj;
+};
+
+const int BLOCK_ALLOCATED_SIZE = sizeof(__block_allocated_h);
+
+/* block_com_ series are common functions for kinds of algorithm */
+
+// return true if pb is in free list 
+inline bool block_com_isfree(block* pb) {
+	// see the data definition.
+	if (pb == pb->prev_free) return true;
+	return false;
 }
 
-typedef struct heap_t {
-	void*	pbuff;
-	int		size;
-
-	block*	block_start;	// points to the start of the block buffer
-	block*	block_end;		// points to the end of the block buffer
-	block*	block_lastvalid;	// points to the last valid block in the block boffer
-	block*  block_free[32];
-
-	int		alignment;
-	int 	error;
-} heap;
-
-
-// TODO: remove this
-// #define BLOCK_PREV_FREE 0x173ED825
-// #define BLOCK_NEXT_FREE 0x83A5F007
-
-inline bool block_in_freelist(block* pb) {
-	// let (prev_free == NULL && next_free == NULL) indicates the block is allocated, 
-	// then if the block is in free list, at least one of the two will not be NULL, 
-	// but if we have only one block that occupy the entire block address space, in this
-	// case, it will not have prev_free and next_free either, it's in the free list, but 
-	// both pointers are free. So prev_free == NULL && next_free == NULL can not represent 
-	// all cases of free blocks. 
-	if (pb->prev_free != NULL || pb->next_free != NULL) return true;
-
-	if (pb->prev_mem == NULL && pb->next_mem == NULL) return 
+// mark pb as it is in free list
+inline void block_com_markfree(block* pb) {
+	pb->prev_free = pb;
 }
 
-// given an addr, return a block pointer if the addr is a valid block address
-inline block* block_from_addr(heap* ph, void* addr) {
-	if (addr < ph->block_start || addr > ph->block_lastvalid) return NULL;
-
-	return (block*)addr;
+// return the data address of the pb
+inline void* block_com_get_data(block* pb) {
+	return (void*)((char*)pb + BLOCK_ALLOCATED_SIZE);
 }
 
-inline void* block_data_addr(block* pb) {
+inline block* block_com_from_data(void* addr) {
+	return (block*)((char*)addr - BLOCK_ALLOCATED_SIZE);
 }
 
-inline block* block_find_from_list(block* phead) {
+inline int block_com_data_size(block* pb) {
+	return (char*)pb->next_adj - (char*)pb - BLOCK_ALLOCATED_SIZE;
 }
 
-inline block* block_from_data_addr(void* addr) {
+inline int block_com_merge_two(block* pf, block* pe) {
 }
 
-inline void block_comb_two(block* pf, block* pe) {
+inline int block_com_merge_three(block *pf, block *pm, block *pe) {
 }
 
-inline void block_comb_three(block* pf, block* pm, block* pe) {
+/* use double linked list(dll) to manage free list, block_dll_ implement 
+ * related functions */
+
+// find a suitable block of given size.
+inline block* block_dll_find(block* phead, int size) {
+}
+
+inline void block_dll_insert(block **pphead, block* pin) {
+}
+
+inline void block_dll_erase(block **pphead, block* pre) {
 }
 
 /********************************************************************************
@@ -135,6 +173,22 @@ inline void block_comb_three(block* pf, block* pm, block* pe) {
                                                                                   
                                                                                   
 *********************************************************************************/
+
+typedef struct heap_t {
+	void*	pbuff;
+	int		size;
+
+	block*	block_start;	// points to the start of the block buffer
+	block*	block_end;		// points to the end of the block buffer
+	block*	block_lastvalid;	// points to the last valid block in the block boffer
+	block*  block_free[32];
+
+	int		alignment;
+	int 	flag;
+	int 	error;
+} heap;
+
+
 
 heap* heap_init(void* buff, int size) {
 	
