@@ -122,6 +122,10 @@ inline void block_com_markfree(block_c* pbc) {
 	pbc->info |= BLOCK_COM_FREE_MASK; 
 }
 
+inline void block_com_markallocated(block_c* pbc) {
+	pbc->info &= BLOCK_COM_SIZE_MASK;
+}
+
 /*
  * return size of pbc
  */
