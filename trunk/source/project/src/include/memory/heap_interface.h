@@ -11,7 +11,9 @@
 /* if this macro is defined, that means we should provide some method to record 
  * allocate/deallocate operations and provide way to dump debug information */
 
-// #define MEMORY_DEBUG
+/* 
+ * #define MEMORY_DEBUG 
+ */
 
 typedef void* heap_handle;
 
@@ -48,7 +50,7 @@ typedef void (*pf_heap_dump)(heap_handle pheap);
 void heap_dump_helper(int tot_alloc_number, int tot_alloc_size, 
 		int tot_free_number, int tot_free_size, int largest_free_size);
 
-struct heap_operations {
+typedef struct heap_operations_t {
 	pf_heap_init 	init;
 	pf_heap_destroy	destroy;
 	pf_heap_alloc	alloc;
@@ -56,6 +58,6 @@ struct heap_operations {
 	pf_heap_realloc	realloc;
 	pf_heap_dump	dump;
 
-};
+} heap_operations;
 
-#endif // _CORE_HEAP_H_
+#endif

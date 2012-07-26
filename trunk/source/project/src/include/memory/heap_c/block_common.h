@@ -1,6 +1,33 @@
 #ifndef _BLOCK_COMMON_
 #define _BLOCK_COMMON_
 
+/********************************************************************************
+ * typical heap and block memory distribution, no matter how the free block are 
+ * managed, we use the following structure to construct a block pool.
+ 
+  *****  heap memory distribution ****
+                                                                                  
+  		heap header	                     block buffer
+      |-----------|--|-------|--------------------------------------|------|--|
+    pbuff            ^       ^                                      ^      ^      
+                     |   first block                                |      |      
+                  sentinel                                          |   block_end    
+                                                                sentinel          
+                                                                                  
+    the small gaps indicates align gaps                                           
+
+*********************************************************************************
+                                                                                  
+  *****  block memory distribution ****
+                                                                                  
+        prev block               current block                        next block  
+      |--------------|----------------|-----------------------------|---------|
+                     ^ block header   ^      block data                           
+                   pblock          data begin                                     
+                                                                                  
+                                                                                  
+*********************************************************************************/
+
 /* Heap block definitions */
 /* design requirements for struct block:
  *
@@ -57,51 +84,22 @@
  * information that both allocated/infreelist blocks need. every custom block header
  * should contains this struct at the very beginning of it*/
 
-
 #define BLOCK_COM_FREE_BIT 31
 #define BLOCK_COM_FREE_MASK (1 << BLOCK_COM_FREE_BIT)
 #define BLOCK_COM_SIZE_MASK (BLOCK_COM_FREE_MASK - 1)
 
 struct block_com_h {
-	// prev_adj points to the previous adjacent block, DON'T use it directly, use 
-	// function block_com_prev_adj instead.
+	/* prev_adj points to the previous adjacent block, DON'T use it directly, use 
+	 * function block_com_prev_adj instead. */
 	struct block_com_h* prev_adj; 
 
-	// info contains is_free and size information.
+	/* info contains is_free and size information. */
 	unsigned int 		info; 
 };
 
 typedef struct block_com_h block_c;
 
-/********************************************************************************
- * typical heap and block memory distribution, no matter how the free block are 
- * managed, we use the following structure to construct a block pool.
- 
-  *****  heap memory distribution ****
-                                                                                  
-  		heap header	                     block buffer
-      |-----------|--|-------|--------------------------------------|------|--|
-    pbuff            ^       ^                                      ^      ^      
-                     |   first block                                |      |      
-                  sentinel                                          |   block_end    
-                                                                sentinel          
-                                                                                  
-    the small gaps indicates align gaps                                           
-
-*********************************************************************************
-                                                                                  
-  *****  block memory distribution ****
-                                                                                  
-        prev block               current block                        next block  
-      |--------------|----------------|-----------------------------|---------|
-                     ^ block header   ^      block data                           
-                   pblock          data begin                                     
-                                                                                  
-                                                                                  
-*********************************************************************************/
-
-// return true if pbc is valid
-inline bool block_com_is_sentinel(block_c* pbc) {
+inline bool block_com_valid(block_c* pbc) {
 	if (pbc == NULL || pbc->prev_adj == NULL) {
 		assert(pbc->info == 0);
 		return false;
@@ -110,52 +108,57 @@ inline bool block_com_is_sentinel(block_c* pbc) {
 	return true;
 }
 
-// mark pbc as an invalid block
-inline void block_com_make_sentinel(block_c* pbc) {
+inline void block_com_invalidate(block_c* pbc) {
 	pbc->next_adj = NULL;
 	pbc->info = 0;
 }
 
-/* block valid information are tested based on sentinel blocks, any heap using block_c
- * should keep two sentinels for validation test. 
- * This function make two sentinels based on the given block buffer(from *ppstart to *ppend),
- * when sentinels are prepared, ppstart and ppend will points to the new valid block 
- * start/end buffer.*/
-inline void block_com_make_sentinels(void** ppstart, void** ppend) {
-	assert(ppstart && ppend && (*ppstart < *ppend));
+/**
+ * @brief block valid information are tested based on sentinel blocks, any heap 
+ * using block_c should keep two sentinels for validation test. This function 
+ * make two sentinels based on a buffer.
+ *
+ * @param buff_start start of the buffer
+ * @param buff_end end of block buffer
+ * @param sent_first (out) address of the the first sentinel
+ * @param sent_last (out) address of the last sentinel
+ *
+ * @return firt valid block address in the buffer
+ */
+inline void* block_com_make_sentinels(void* buff_start, void* buff_end, void** sent_first, void** sent_last) {
+	assert(buff_start && buff_end && buff_start < buff_end);
 
-	block_c* sentinel = (block_c*)*ppstart;
-	block_com_make_sentinel(sentinel);
-	ppstart = (void*)&(sentinel + 1);
+	*sent_first = buff_start;
+	block_com_invalidate(*sent_first);
 
-	sentinel = (block_c*)((char*)(*ppend) - sizeof(block_c));
-	block_com_make_sentinel(sentinel);
-	ppend = (void*)&sentinel;
+	*sent_last = (void*)((block_c*)(buff_end) - 1);
+	block_com_invalidate(*sent_last);
 
-	return;
+	return (void*)((block_c*)buff_start + 1);
 }
 
-/* 
- * return true if pbc is in free list 
+/**
+ * @brief 
+ *
+ * @param pbc pointer of block_c
+ *
+ * @return true if pbc is in free list  
  */
-inline bool block_com_isfree(block_c* pbc) {
+inline bool block_com_free(block_c* pbc) {
 	return pbc->info & BLOCK_COM_FREE_MASK;
 }
 
-/*
- * mark pbc as it is in free list
+/**
+ * @brief 
+ *
+ * @param pbc pointer of block_c
+ * @param is_free the new free state
  */
-inline void block_com_markfree(block_c* pbc) {
-	pbc->info |= BLOCK_COM_FREE_MASK; 
+inline void block_com_set_free(block_c* pbc, bool is_free) {
+	if (is_free) pbc->info |= BLOCK_COM_FREE_MASK; 
+	else pbc->info &= ~BLOCK_COM_FREE_MASK;
 }
 
-inline void block_com_markallocated(block_c* pbc) {
-	pbc->info &= BLOCK_COM_SIZE_MASK;
-}
-
-/*
- * return size of pbc
- */
 inline unsigned int block_com_size(block_c* pbc) {
 	return pbc->info & BLOCK_COM_SIZE_MASK;
 }
@@ -167,36 +170,120 @@ inline unsigned int block_com_data_size(block_c* pbc) {
 	return block_com_size(pbc) - sizeof(pbc);
 }
 
-/*
- * get the previous adjacent block.
- * return NULL if no previous adjacent block available.
- */
+inline void block_com_set_size(block_c* pbc, unsigned int size) {
+	pbc->info = (pbc->info & ~BLOCK_COM_SIZE_MASK) | (size & BLOCK_COM_SIZE_MASK);
+}
+
 inline block_c* block_com_prev_adj(block_c* pbc) {
-	return block_com_is_sentinel(pbc->prev_adj) ? pbc->prev_adj : NULL;
+	return pbc->prev_adj; 
 }
 
-/*
- * get the next adjacent block.
- * return NULL if no next adjacent block available.
- */
+inline void block_com_set_prev_adj(block_c* pbc, block_c* prev_adj) {
+	pbc->prev_adj = prev_adj;
+}
+
 inline block_c* block_com_next_adj(block_c* pbc) {
-	block_c* next = (block_c*)((char*)pbc + block_com_size(pbc));
-
-	return block_com_is_sentinel(next) ? next : NULL;
+	return (block_c*)((char*)pbc + block_com_size(pbc));
 }
 
-/* 
- * return the data address of pbc
- */
-inline void* block_com_get_data(block_c* pbc) {
+inline void block_com_set_next_adj(block_c* pbc, block_c* next_adj) {
+	unsigned int size = (char*)next_adj - (char*)pbc;
+
+	block_com_set_size(pbc, size);
+}
+
+inline void* block_com_data(block_c* pbc) {
 	return (void*)((char*)pbc + sizeof(block_c));
 }
 
-/* 
- * return the block address according to data its carrying
- */
 inline block_c* block_com_from_data(void* addr) {
 	return (block_c*)((char*)addr - sizeof(block_c));
 }
 
-#endif //_BLOCK_COMMON_
+/**
+ * @brief split a block into two
+ *
+ * @param pbc the block to split
+ * @param size of data that the first block should carry after splitting
+ * @param thh the minimum threadhold that the second block's data size should be,
+ *        if the second block's data is less than it, this block should not be splited.
+ *
+ * @return address of the second block after spliting, NULL if no need to split.
+ */
+inline block_c* block_com_split(block_c* pbc, unsigned int size, unsigned int thh) {
+	assert(block_com_data_size(pbc) >= size);
+
+	char* sb_addr = (char*)block_com_data + size;
+	if (sb_addr + sizeof(block_c) + thh <= block_com_next_adj(pbc)) {
+		/* big enough, split */
+		block_c* sb = (block_c*)sb_addr;
+
+		block_c* next_adj = block_com_next_adj(pbc);
+
+		block_com_set_next_adj(pbc, sb);
+
+		block_com_set_prev_adj(sb, pbc);
+		block_com_set_next_adj(sb, next_adj);
+
+		if (block_com_valid(next_adj))
+			block_com_set_prev_adj(next_adj, sb);
+	}
+
+	/* not enough space to split */
+	return NULL;
+}
+
+/**
+ * @brief the merge method is based on the assumption that the block buffer 
+ *   have a start sentinel, and an end sentinel, about how to create this two
+ *   sentinels. @see block_com_make_sentinels
+ *
+ * @param pbc the block that is to merge.
+ */
+inline void block_com_merge(block_c* pbc) {
+	block_c* prev_adj = block_com_prev_adj(pbc);
+	block_c* next_adj = block_com_next_adj(pbc);
+
+	if (block_com_valid(prev_adj)) {
+		assert(block_com_free(prev_adj));
+
+		if (block_com_valid(next_adj)) {
+			assert(block_com_free(next_adj));
+
+			/* merge prev, cur, next */
+			block_c* n_next_adj = block_com_next_adj(next_adj);
+			block_com_set_prev_adj(n_next_adj, prev_adj);
+			block_com_set_next_adj(prev_adj, n_next_adj);
+		}
+		else {
+			/* merge prev, cur */
+
+			block_com_set_prev_adj(next_adj, prev_adj);
+			block_com_set_next_adj(prev_adj, next_adj);
+		}
+	}
+	else if (block_com_valid(next_adj)) {
+		assert(block_com_free(next_adj));
+
+		/* merge cur and next */
+		block_c* n_next_adj = block_com_next_adj(next_adj);
+		block_com_set_next_adj(pbd, n_next_adj);
+		block_com_set_prev_adj(n_next_adj, pbd);
+	}
+	/* no need to merge */
+	return;
+}
+
+inline void block_com_init_addr(block_c* pbc, void* prev_adj, void* next_adj , bool is_free) {
+	block_com_set_prev_adj(pbc, prev_adj);
+	block_com_set_next_adj(pbc, next_adj);
+	block_com_set_free(pbc, is_free);
+}
+
+inline void block_com_init_size(block_c* pbc, void* prev_adj, unsigned int size, bool is_free) {
+	block_com_set_prev_adj(pbc, prev_adj);
+	block_com_set_size(pbc, size);
+	block_com_set_free(pbc, is_free);
+}
+
+#endif 
