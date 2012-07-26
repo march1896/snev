@@ -73,6 +73,33 @@ struct block_com_h {
 
 typedef struct block_com_h block_c;
 
+/********************************************************************************
+ * typical heap and block memory distribution, no matter how the free block are 
+ * managed, we use the following structure to construct a block pool.
+ 
+  *****  heap memory distribution ****
+                                                                                  
+  		heap header	                     block buffer
+      |-----------|--|-------|--------------------------------------|------|--|
+    pbuff            ^       ^                                      ^      ^      
+                     |   first block                                |      |      
+                  sentinel                                          |   block_end    
+                                                                sentinel          
+                                                                                  
+    the small gaps indicates align gaps                                           
+
+*********************************************************************************
+                                                                                  
+  *****  block memory distribution ****
+                                                                                  
+        prev block               current block                        next block  
+      |--------------|----------------|-----------------------------|---------|
+                     ^ block header   ^      block data                           
+                   pblock          data begin                                     
+                                                                                  
+                                                                                  
+*********************************************************************************/
+
 // return true if pbc is valid
 inline bool block_com_is_sentinel(block_c* pbc) {
 	if (pbc == NULL || pbc->prev_adj == NULL) {
