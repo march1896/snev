@@ -1,5 +1,20 @@
 #include <block_dll.h>
 
+static block_dll* block_dllinc_find_ff (block_dll** pphead, unsigned int req);
+static block_dll* block_dllinc_find_bf (block_dll** pphead, unsigned int req);
+static void       block_dllinc_pop     (block_dll** pphead, block_dll* pbd);
+static void       block_dllinc_push    (block_dll** pphead, block_dll* pbd);
+
+static block_dll* block_dlldec_find_ff (block_dll** pphead, unsigned int req);
+static block_dll* block_dlldec_find_bf (block_dll** pphead, unsigned int req);
+static void       block_dlldec_pop     (block_dll** pphead, block_dll* pbd);
+static void       block_dlldec_push    (block_dll** pphead, block_dll* pbd);
+
+static block_dll* block_dllrnd_find_ff (block_dll** pphead, unsigned int req);
+static block_dll* block_dllrnd_find_bf (block_dll** pphead, unsigned int req);
+static void       block_dllrnd_pop     (block_dll** pphead, block_dll* pbd);
+static void       block_dllrnd_push    (block_dll** pphead, block_dll* pbd);
+
 /* common functions that for all three management. */
 static void inline block_c* block_dll_to_com(block_dll* pbd) {
 	assert(&(pbd->bc)== (block_c*)pbd);
@@ -191,3 +206,25 @@ void block_dllrnd_push(block_dll** pphead, block_dll* pbd) {
 
 	return;
 }
+
+void block_dll_make_operations(block_dll_ops* ops, block_dll_find_type ft, block_dll_sort_type st) {
+	if (st == E_BDLLST_INC) {
+		ops->push = block_dllinc_push;
+		ops->pop  = block_dllinc_pop;
+		if (ft == E_BDLLFT_FIRSTFIT)     ops->find = block_dllinc_find_ff;
+		else if (ft == E_BDLLFT_BESTFIT) ops->find = block_dllinc_find_bf;
+	}
+	else if (st == E_BDLLST_DEC) {
+		ops->push = block_dlldec_push;
+		ops->pop  = block_dlldec_pop;
+		if (ft == E_BDLLFT_FIRSTFIT)     ops->find = block_dlldec_find_ff;
+		else if (ft == E_BDLLFT_BESTFIT) ops->find = block_dlldec_find_bf;
+	}
+	else {
+		ops->push = block_dllrnd_push;
+		ops->pop  = block_dllrnd_pop;
+		if (ft == E_BDLLFT_FIRSTFIT)     ops->find = block_dllrnd_find_ff;
+		else if (ft == E_BDLLFT_BESTFIT) ops->find = block_dllrnd_find_bf;
+	}
+}
+

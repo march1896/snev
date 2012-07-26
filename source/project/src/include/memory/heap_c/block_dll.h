@@ -10,20 +10,9 @@ struct block_dll_t {
 	/* common part of block */
 	block_c 			bc;		
 
-	/* customize part of using double linked list as container 
-	 * of block free list */
+	/* members to maintain double linked list */
 	struct block_dll_t* prev_free;
 	struct block_dll_t* next_free;
-
-	/* we dont make any assumption about the heap that maintains 
-	 * free list, covert to your needed type */
-	void* 				heap;
-
-	/* file and line are debug information, you can just ignore them 
-	 * if you don't need them, they will not occupy space when the block
-	 * is allocated */
-	const char* 		file;
-	unsigned int		line;
 };
 
 typedef struct block_dll_t block_dll;
@@ -46,46 +35,27 @@ typedef struct block_dll_t block_dll;
  * 4, block_dll_push (push/insert a block into the dll)
  */
 
-block_dll* block_dllinc_find_ff (block_dll** pphead, unsigned int req);
-block_dll* block_dllinc_find_bf (block_dll** pphead, unsigned int req);
-void       block_dllinc_pop     (block_dll** pphead, block_dll* pbd);
-void       block_dllinc_push    (block_dll** pphead, block_dll* pbd);
+enum block_dll_find_type {
+	E_BDLLFT_FIRSTFIT,
+	E_BDLLFT_BESTFIT,
+};
 
-block_dll* block_dlldec_find_ff (block_dll** pphead, unsigned int req);
-block_dll* block_dlldec_find_bf (block_dll** pphead, unsigned int req);
-void       block_dlldec_pop     (block_dll** pphead, block_dll* pbd);
-void       block_dlldec_push    (block_dll** pphead, block_dll* pbd);
+enum block_dll_sort_type {
+	E_BDLLST_INC,
+	E_BDLLST_DEC,
+	E_BDLLST_RND
+};
 
-block_dll* block_dllrnd_find_ff (block_dll** pphead, unsigned int req);
-block_dll* block_dllrnd_find_bf (block_dll** pphead, unsigned int req);
-void       block_dllrnd_pop     (block_dll** pphead, block_dll* pbd);
-void       block_dllrnd_push    (block_dll** pphead, block_dll* pbd);
+typedef block_dll* (*pf_block_dll_find)(block_dll** pphead, unsigned int req);
+typedef void       (*pf_block_dll_pop) (block_dll** pphead, block_dll* pbd);
+typedef void       (*pf_block_dll_push)(block_dll** pphead, block_dll* pbd);
 
+typedef struct block_dll_operations_h {
+	pf_block_dll_find 	find;
+	pf_block_dll_pop	pop;
+	pf_block_dll_push   push;
+} block_dll_ops;
 
-/* block_dll additional information related operations */
-inline void block_dll_set_heap(block_dll* pbd, void* ph) {
-	pbd->heap = h;
-}
+void block_dll_make_operations(block_dll_ops* ops, block_dll_find_type ft, block_dll_sort_type st);
 
-/* 
- * if you did not set the heap info, do not get heap info, 
- * here we DO NOT guarantee the return value if it's not set
- */
-inline void* block_dll_get_heap(block_dll* pbd) {
-	return pbd->heap;
-}
-
-/* set debug information to block */
-inline void block_dll_set_debuginfo(block_dll* pbd, const char* _f, unsigned int _l) {
-	pbd->file = _f;
-	pbd->line = _l;
-	return;
-}
-
-/* get debug information from block */
-inline void block_dll_get_debuginfo(block_dll* pbd, const char** pf, unsigned int* pl) {
-	*pf = pbd->file;
-	*pl = pbd->line;
-	return;
-}
-#endif // _BLOCK_DLL_
+#endif
