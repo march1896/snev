@@ -252,11 +252,11 @@ inline void block_dll_erase(block **pphead, block* pb) {
   *****  heap memory distribution ****
                                                                                   
   		heap header	                     block buffer
-      |-----------|--|----------------------------------------------|------|--|
-    pbuff            ^                                              ^      ^      
-                     |                                              |      |      
-                block_start                                         |   block_end    
-                                                              block_lastvalid     
+      |-----------|--|-------|--------------------------------------|------|--|
+    pbuff            ^       ^                                      ^      ^      
+                     |   first block                                |      |      
+                  sentinel                                          |   block_end    
+                                                                sentinel          
                                                                                   
     the small gaps indicates align gaps                                           
 
