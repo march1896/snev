@@ -1,6 +1,9 @@
 #ifndef _BLOCK_COMMON_
 #define _BLOCK_COMMON_
 
+#include <stdbool.h>
+#include <stddef.h>
+
 /********************************************************************************
  * typical heap and block memory distribution, no matter how the free block are 
  * managed, we use the following structure to construct a block pool.
@@ -123,7 +126,7 @@ inline bool block_com_valid(block_c* pbc) {
 }
 
 inline void block_com_invalidate(block_c* pbc) {
-	pbc->next_adj = NULL;
+	pbc->prev_adj = NULL;
 	pbc->info = 0;
 }
 
@@ -260,7 +263,7 @@ inline block_c* block_com_split(block_c* pbc, unsigned int size, unsigned int th
 	assert(block_com_data_size(pbc) >= size);
 
 	char* sb_addr = (char*)block_com_data + size;
-	if (sb_addr + sizeof(block_c) + thh <= block_com_next_adj(pbc)) {
+	if (sb_addr + sizeof(block_c) + thh <= (char*)block_com_next_adj(pbc)) {
 		/* big enough, split */
 		block_c* sb = (block_c*)sb_addr;
 
@@ -305,7 +308,7 @@ inline void block_com_init_addr_ab(block_c* pbc, void* prev_adj, void* next_adj 
 inline void block_com_init_addr_extra(block_c* pbc, void* prev_adj, void* next_adj , unsigned int extra) {
 	block_com_set_prev_adj(pbc, prev_adj);
 	block_com_set_next_adj(pbc, next_adj);
-	block_com_set_extra(extra);
+	block_com_set_extra(pbc, extra);
 }
 
 inline void block_com_init_size_ab(block_c* pbc, void* prev_adj, unsigned int size, bool exta, bool extb) {
