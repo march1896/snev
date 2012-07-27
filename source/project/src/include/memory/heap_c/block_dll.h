@@ -46,8 +46,38 @@ enum block_dll_sort_type {
 	E_BDLLST_RND
 };
 
+/**
+ * @brief find a proper block in free list according size requirement
+ *
+ * @param pphead address of the header of free list
+ * @param req required data size
+ *
+ * @return 
+ */
 typedef block_dll* (*pf_block_dll_find)(block_dll** pphead, unsigned int req);
+
+/**
+ * @brief pop a block from freelist, this function just change double linked list 
+ *   related properties, it does not change any block_com related properties.
+ *   so, after you pop the block from free list, you must manually set block_com's
+ *   free property.
+ *
+ * @param pphead address of the header of free list
+ * @param pbd the block_dll to be poped
+ *
+ */
 typedef void       (*pf_block_dll_pop) (block_dll** pphead, block_dll* pbd);
+
+/**
+ * @brief push a block into freelist, this function just change double linked 
+ *   list related properties, it does not change any block_com related properties.
+ *   so, after you push a block into free list, you must manully set block_com's 
+ *   free property.
+ *
+ * @param pphead address of the header of free list
+ * @param pbd the block_dll to be pushed
+ *
+ */
 typedef void       (*pf_block_dll_push)(block_dll** pphead, block_dll* pbd);
 
 typedef struct block_dll_operations_h {

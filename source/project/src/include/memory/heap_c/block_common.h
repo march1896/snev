@@ -84,16 +84,21 @@
  * information that both allocated/infreelist blocks need. every custom block header
  * should contains this struct at the very beginning of it*/
 
-#define BLOCK_COM_FREE_BIT 31
-#define BLOCK_COM_FREE_MASK (1 << BLOCK_COM_FREE_BIT)
-#define BLOCK_COM_SIZE_MASK (BLOCK_COM_FREE_MASK - 1)
+#define BLOCK_COM_EXTRA_BIT 31
+#define BLOCK_COM_EXTRA_MASK (1 << BLOCK_COM_EXTRA_BIT)
+#define BLOCK_COM_SIZE_MASK (BLOCK_COM_EXTRA_MASK - 1)
 
 struct block_com_h {
 	/* prev_adj points to the previous adjacent block, DON'T use it directly, use 
 	 * function block_com_prev_adj instead. */
 	struct block_com_h* prev_adj; 
 
-	/* info contains is_free and size information. */
+	/* info contains size information, and one bit extra information that 
+	 * can be use to record infomation for an allocated block, 
+	 * such as info about if the block is allocated, if the free block is 
+	 * managed in a container, the extra bit can be use to fast deside if 
+	 * the block is in the container, of course, this bit should be maintianed 
+	 * by the container */
 	unsigned int 		info; 
 };
 
@@ -138,25 +143,25 @@ inline void* block_com_make_sentinels(void* buff_start, void* buff_end, void** s
 }
 
 /**
- * @brief 
+ * @brief get the extra bit information
  *
  * @param pbc pointer of block_c
  *
  * @return true if pbc is in free list  
  */
-inline bool block_com_free(block_c* pbc) {
-	return pbc->info & BLOCK_COM_FREE_MASK;
+inline bool block_com_extra(block_c* pbc) {
+	return (pbc->info & BLOCK_COM_EXTRA_MASK) != 0;
 }
 
 /**
- * @brief 
+ * @brief set the extra bit
  *
  * @param pbc pointer of block_c
- * @param is_free the new free state
+ * @param extra the new free state
  */
-inline void block_com_set_free(block_c* pbc, bool is_free) {
-	if (is_free) pbc->info |= BLOCK_COM_FREE_MASK; 
-	else pbc->info &= ~BLOCK_COM_FREE_MASK;
+inline void block_com_set_extra(block_c* pbc, bool extra) {
+	if (extra) pbc->info |= BLOCK_COM_EXTRA_MASK; 
+	else pbc->info &= ~BLOCK_COM_EXTRA_MASK;
 }
 
 inline unsigned int block_com_size(block_c* pbc) {
@@ -234,6 +239,11 @@ inline block_c* block_com_split(block_c* pbc, unsigned int size, unsigned int th
 }
 
 /**
+ * TODO: remove this function, we should provide 
+ * block_com_merge_two(block_c* pf, block_c* pe)
+ * block_com_merge_three(block_c*, block_c*, block_c*)
+ * because for common block, we don't know if the prev/next block should be 
+ * merged, here we even don't know if the prev/next block in free container
  * @brief the merge method is based on the assumption that the block buffer 
  *   have a start sentinel, and an end sentinel, about how to create this two
  *   sentinels. @see block_com_make_sentinels
@@ -245,10 +255,10 @@ inline void block_com_merge(block_c* pbc) {
 	block_c* next_adj = block_com_next_adj(pbc);
 
 	if (block_com_valid(prev_adj)) {
-		assert(block_com_free(prev_adj));
+		//assert(block_com_extra(prev_adj));
 
 		if (block_com_valid(next_adj)) {
-			assert(block_com_free(next_adj));
+			//assert(block_com_extra(next_adj));
 
 			/* merge prev, cur, next */
 			block_c* n_next_adj = block_com_next_adj(next_adj);
@@ -263,7 +273,7 @@ inline void block_com_merge(block_c* pbc) {
 		}
 	}
 	else if (block_com_valid(next_adj)) {
-		assert(block_com_free(next_adj));
+		//assert(block_com_extra(next_adj));
 
 		/* merge cur and next */
 		block_c* n_next_adj = block_com_next_adj(next_adj);
@@ -274,16 +284,16 @@ inline void block_com_merge(block_c* pbc) {
 	return;
 }
 
-inline void block_com_init_addr(block_c* pbc, void* prev_adj, void* next_adj , bool is_free) {
+inline void block_com_init_addr(block_c* pbc, void* prev_adj, void* next_adj , bool extra) {
 	block_com_set_prev_adj(pbc, prev_adj);
 	block_com_set_next_adj(pbc, next_adj);
-	block_com_set_free(pbc, is_free);
+	block_com_set_extra(pbc, extra);
 }
 
-inline void block_com_init_size(block_c* pbc, void* prev_adj, unsigned int size, bool is_free) {
+inline void block_com_init_size(block_c* pbc, void* prev_adj, unsigned int size, bool extra) {
 	block_com_set_prev_adj(pbc, prev_adj);
 	block_com_set_size(pbc, size);
-	block_com_set_free(pbc, is_free);
+	block_com_set_extra(pbc, extra);
 }
 
 #endif 

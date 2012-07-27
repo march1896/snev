@@ -22,7 +22,7 @@ static void inline block_c* block_dll_to_com(block_dll* pbd) {
 }
 
 static void block_dll_pop_common(block_dll** pphead, block_dll* pbd) {
-	assert(block_com_isfree(block_dll_to_com(pbd)));
+	/* assert(block_com_free(block_dll_to_com(pbd))); */
 
 	block_dll* prev = pbd->prev_free;
 	block_dll* next = pbd->next_free;
