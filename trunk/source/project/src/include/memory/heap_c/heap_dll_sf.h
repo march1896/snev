@@ -82,7 +82,7 @@ heap_handle heap_dsf_init(void *buff, int size) {
 void  heap_dsf_destroy(heap_handle pheap) {
 }
 
-void* heap_dsf_alloc  (heap_handle pheap, int size, const char* file, size_t line) {
+void* heap_dsf_alloc(heap_handle pheap, int size, const char* file, size_t line) {
 	heap_dsf* ph = (heap_dsf*) pheap;
 
 	block_dll* pbd = (ph->dllops).find((block_dll*)(&ph->pfreelist), size);
@@ -96,9 +96,13 @@ void* heap_dsf_alloc  (heap_handle pheap, int size, const char* file, size_t lin
 
 	/* pop current block from freelist */
 	(ph->dllops).pop(&ph->pfreelist, pbd);
+	block_com_set_free(pspt, true);
 
 	/* push the splited block into freelist */
-	if (pspt) (ph->dllops).push(&ph->pfreelist, (block_dll*)pspt);
+	if (pspt) {
+		(ph->dllops).push(&ph->pfreelist, (block_dll*)pspt);
+		block_com_set_free((block_c*)pbd, false);
+	}
 
 	return block_com_data((block_c*)pbd);
 }
@@ -107,6 +111,13 @@ void  heap_dsf_dealloc(heap_handle pheap, void *buff, const char* file, size_t l
 	heap_dsf* ph = (heap_dsf*)pheap;
 
 	block_c* pbc = block_com_from_data(buff);
+
+	block_c* prev_adj = block_com_prev_adj(pbc);
+	block_c* next_adj = block_com_next_adj(pbc);
+
+	if (block_com_valid(prev_adj) && block_com_free(prev_adj)) {
+		(pb->dllops).pop(&ph->freelist, prev_adj);
+	}
 }
 
 void* heap_dsf_realloc(heap_handle pheap, void *buff, int size, const char* file, size_t line);
