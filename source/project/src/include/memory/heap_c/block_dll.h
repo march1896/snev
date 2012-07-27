@@ -35,16 +35,16 @@ typedef struct block_dll_t block_dll;
  * 4, block_dll_push (push/insert a block into the dll)
  */
 
-enum block_dll_find_type {
+typedef enum {
 	E_BDLLFT_FIRSTFIT,
 	E_BDLLFT_BESTFIT,
-};
+}block_dll_find_type ;
 
-enum block_dll_sort_type {
+typedef enum {
 	E_BDLLST_INC,
 	E_BDLLST_DEC,
 	E_BDLLST_RND
-};
+}block_dll_sort_type ;
 
 /**
  * @brief find a proper block in free list according size requirement

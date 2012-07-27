@@ -1,5 +1,9 @@
 #include <block_dll.h>
 
+/* deprecated */
+
+#ifdef _DON_COMPILE_THIS_MODULE_
+
 static block_dll* block_dllinc_find_ff (block_dll** pphead, unsigned int req);
 static block_dll* block_dllinc_find_bf (block_dll** pphead, unsigned int req);
 static void       block_dllinc_pop     (block_dll** pphead, block_dll* pbd);
@@ -228,3 +232,4 @@ void block_dll_make_operations(block_dll_ops* ops, block_dll_find_type ft, block
 	}
 }
 
+#endif 
