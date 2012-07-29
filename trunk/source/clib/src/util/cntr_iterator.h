@@ -47,7 +47,6 @@ struct cntr_iterator_t {
 
 	/* pointer to specific iterator operations */
 	citer_operations* ops; 
-
 };
 
 inline bool citer_valid(citer* itr) {

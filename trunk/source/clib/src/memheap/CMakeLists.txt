@@ -6,7 +6,7 @@ include_directories(.)
 # endforeach(ff)
 
 FILE(GLOB SOURCE_FILES "*.c")
-add_library(${LIB_NAME}_MEMHEAP ${SOURCE_FILES})
+add_library(${LIB_NAME} ${SOURCE_FILES})
 
 FILE(GLOB C_INCLUDES "*.h")
 install (TARGETS ${HEAP_C_LIB} DESTINATION "${PROJECT_INSTALL_DIR}/lib")
