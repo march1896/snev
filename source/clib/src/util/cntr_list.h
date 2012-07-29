@@ -1,5 +1,5 @@
-#ifndef _LIST_CNTR_H_
-#define _LIST_CNTR_H_
+#ifndef _CNTR_LIST_H_
+#define _CNTR_LIST_H_
 
 /*
  * This file define linked list container, for the design aspect of view see link.h for 
@@ -31,4 +31,4 @@ struct citer;
 void  clist_citer_begin(clist* pcl, citer* itr);
 void  clist_citer_end  (clist* pcl, citer* itr);
 
-#endif /* _LIST_CNTR_H_ */
+#endif /* _CNTR_LIST_H_ */
