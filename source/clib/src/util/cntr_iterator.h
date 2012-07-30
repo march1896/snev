@@ -28,41 +28,53 @@
  */
 
 typedef struct cntr_iterator_t citer;
-typedef bool (*pf_citer_valid)(citer* itr);
-typedef void (*pf_citer_to_next)(citer* itr);
-typedef void (*pf_citer_to_prev)(citer* itr);
-typedef void* (*pf_citer_get_ref)(citer* itr);
+typedef bool (*pf_citer_valid)(citer*);
+typedef void (*pf_citer_to_next)(citer*);
+typedef void (*pf_citer_to_prev)(citer*);
+typedef void* (*pf_citer_get_ref)(citer*);
 
-struct cntr_iterator_operations_t {
+typedef struct cntr_iterator_operations_t {
 	pf_citer_valid   valid;
 	pf_citer_get_ref get_ref;
 	pf_citer_to_prev to_prev;
 	pf_citer_to_next to_next;
-};
-typedef struct cntr_iterator_operations_t citer_operations;
+} citer_operations;
 
 struct cntr_iterator_t {
 	/* pointer to the data structure that connected objects in a container */
 	void* connection;  
 
+	/* pointer to the container structure */
+	void* container;
+
 	/* pointer to specific iterator operations */
 	citer_operations* ops; 
 };
 
+extern inline bool citer_valid(citer* itr);
+
+extern inline void citer_to_next(citer* itr);
+
+extern inline void citer_to_prev(citer* itr);
+
+extern inline void* citer_ref(citer* itr);
+
+/* TODO: I dont know why the following declaration does not work 
 inline bool citer_valid(citer* itr) {
 	return (itr->ops)->valid(itr->connection);
-}
+};
 
 inline void citer_to_next(citer* itr) {
 	(itr->ops)->to_next(itr->connection);
-}
+};
 
 inline void citer_to_prev(citer* itr) {
 	(itr->ops)->to_prev(itr->connection);
-}
+};
 
 inline void* citer_ref(citer* itr) {
 	return (itr->ops)->get_ref(itr->connection);
-}
+};
+*/
 
 #endif /* _CNTR_ITERATOR_H_ */
