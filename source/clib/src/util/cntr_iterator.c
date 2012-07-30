@@ -4,6 +4,14 @@ inline bool citer_valid(citer* itr) {
 	return (itr->ops)->valid(itr);
 };
 
+inline bool citer_equal(citer* lhs, citer* rhs) {
+	if (lhs->connection == rhs->connection) {
+		dbg_assert(lhs->container == rhs->container && lhs->ops == rhs->ops);
+		return true;
+	}
+	return false;
+}
+
 inline void citer_to_next(citer* itr) {
 	(itr->ops)->to_next(itr);
 };
