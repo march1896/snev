@@ -8,7 +8,7 @@
 			citer_valid(&(ITERATOR_NAME)); \
 			citer_to_next(&(ITERATOR_NAME)))
 
-void swap(citer* first, citer* second);
+void citer_swap(citer* first, citer* second);
 
 typedef int (*pf_compare_object)(void*, void*);
 void quick_sort(citer* begin, citer* end, pf_compare_object comp);

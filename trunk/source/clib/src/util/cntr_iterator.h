@@ -92,6 +92,8 @@ struct cntr_iterator_t {
 
 extern inline bool citer_valid(citer* itr);
 
+extern inline bool citer_equal(citer* lhs, citer* rhs);
+
 extern inline void citer_to_next(citer* itr);
 
 extern inline void citer_to_prev(citer* itr);

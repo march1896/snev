@@ -47,7 +47,7 @@ void test_bubble_sort() {
 	citer begin, end, itr;
 
 	for (i = 0; i < 50; i ++) {
-		x[i] = ((i*73737)%97+50)%50;
+		x[i] = ((i*17351+73)%50+50)%50;
 		printf("%d ", x[i]);
 	}
 	printf("\n\n");
@@ -69,7 +69,8 @@ void test_bubble_sort() {
 
 	clist_citer_begin(pl, &begin);
 	clist_citer_end(pl, &end);
-
+	citer_to_next(&begin);
+	citer_to_prev(&end);
 	bubble_sort(&begin, &end, int_compare);
 
 	clist_citer_begin(pl, &itr);

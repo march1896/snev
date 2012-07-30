@@ -2,7 +2,7 @@
 #include <cntr_algorithm.h>
 #include <cntr_iterator.h>
 
-void swap(citer* first, citer* second) {
+void citer_swap(citer* first, citer* second) {
 	void *first_ref = citer_get_ref(first);
 	citer_set_ref(first, citer_get_ref(second));
 	citer_set_ref(second, first_ref);
@@ -14,24 +14,30 @@ void quick_sort(citer* begin, citer* end, pf_compare_object comp) {
 }
 
 void bubble_sort(citer* begin, citer* end, pf_compare_object comp) {
-	dbg_assert(comp != NULL);
-	if (begin == end) return;
+	citer first = *begin;
+	citer last = *end;
 
+	dbg_assert(comp != NULL && citer_valid(begin) && citer_valid(end));
+
+	if (citer_equal(&first, &last)) return;
 	while (true) {
-		bool swaped = false;
-		citer prev = *begin;
-		citer next = prev;
-		assert(citer_valid(&prev));
-		citer_to_next(&next);
-		while (citer_valid(&next)) {
+		citer prev, next, last_swaped;
+		next = prev = last_swaped = first;
+
+		do {
+			citer_to_next(&next);
+			assert(citer_valid(&next));
+
 			if (comp(citer_get_ref(&prev), citer_get_ref(&next)) > 0) {
-				swap(&prev, &next);
-				swaped = true;
+				citer_swap(&prev, &next);
+
+				last_swaped = prev;
 			}
 			prev = next;
-			citer_to_next(&next);
-		}
-		if (swaped == false) break;
+		} while (!citer_equal(&next, &last));
+
+		if (citer_equal(&last_swaped, &first)) break;
+		else last = last_swaped;
 	}
 	return;
 }
