@@ -14,6 +14,14 @@ void clist_init(clist* pcl) {
 	pcl->begin = pcl->end = NULL;
 }
 
+void clist_deinit(clist* pcl) {
+	/* DO NOTHING */
+}
+
+int clist_size(clist* pcl) {
+	return pcl->size;
+}
+
 void* clist_front(clist* pcl) {
 	if (pcl->begin == NULL) {
 		dbg_assert(pcl->size == 0);
@@ -40,14 +48,18 @@ void  clist_add_front(clist* pcl, void* object) {
 	link->next = pcl->begin;
 	link->prev = NULL;
 
-	pcl->begin->prev = link;
+	if (pcl->begin == NULL) {
+		/* contains no element */
+		dbg_assert(pcl->begin == NULL && pcl->size == 0);
 
-	pcl->begin = link;
-	if (!pcl->end) {
-		dbg_assert(pcl->size == 0);
-		pcl->end = link;
+		pcl->begin = pcl->end = link;
 	}
+	else {
+		pcl->begin->prev = link;
 
+		pcl->begin = link;
+	}
+	
 	pcl->size ++;
 }
 
@@ -58,12 +70,15 @@ void  clist_add_back (clist* pcl, void* object) {
 	link->next = NULL;
 	link->prev = pcl->end;
 
-	pcl->end->next = link;
+	if (pcl->end == NULL) {
+		/* contains no element */
+		dbg_assert(pcl->begin == NULL && pcl->size == 0);
 
-	pcl->end = link;
-	if (pcl->begin) {
-		dbg_assert(pcl->size == 0);
-		pcl->begin = link;
+		pcl->begin = pcl->end = link;
+	}
+	else {
+		pcl->end->next = link;
+		pcl->end = link;
 	}
 
 	pcl->size ++;
