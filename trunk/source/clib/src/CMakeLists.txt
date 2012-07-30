@@ -9,7 +9,10 @@ set (NONAME_VERSION_MINOR 0)
 
 # should we use our own math functions
 option(SINGLE_LIB 
-  "build an single library" ON)
+	"build an single library" ON)
+
+option(BUILD_TEST
+	"build test projects" ON)
 
 # configure a header file to pass some of the CMake settings
 # to the source code
@@ -38,10 +41,21 @@ if (SINGLE_LIB)
 		LIST(APPEND TOTAL_HEADER_FILES ${HEADER_FILES})
 	endforeach (dir)
 
-	add_library(SLIB ${TOTAL_SOURCE_FILES})
+	add_library(${LIB_NAME} ${TOTAL_SOURCE_FILES})
 
-	install (TARGETS SLIB DESTINATION "${PROJECT_INSTALL_DIR}/lib")
+	install (TARGETS ${LIB_NAME} DESTINATION "${PROJECT_INSTALL_DIR}/lib")
 	install (FILES ${TOTAL_HEADER_FILES} DESTINATION "${PROJECT_INSTALL_DIR}/include")
+
+ 	if (BUILD_TEST) 
+		MESSAGE ("HERE WE GO")
+		FILE (GLOB_RECURSE C_TESTS_FILES "../tests/*.test.c")
+		FOREACH (TESTFILE ${C_TESTS_FILES})
+			GET_FILENAME_COMPONENT(TEST ${TESTFILE} NAME_WE)
+			# MESSAGE ("NOW GLOBING : "${TESTFILE}" "${TEST})
+			add_executable (${TEST} ${TESTFILE})
+			target_link_libraries(${TEST} ${LIB_NAME})
+		ENDFOREACH (TESTFILE)
+	endif (BUILD_TEST)
 
 elseif (SINGLE_LIB)
 

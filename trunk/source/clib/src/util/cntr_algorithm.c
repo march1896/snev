@@ -17,22 +17,26 @@ void bubble_sort(citer* begin, citer* end, pf_compare_object comp) {
 	dbg_assert(comp != NULL);
 	if (begin == end) return;
 
-	while (citer_valid(begin)) {
-		citer* itr = begin;
-		citer_to_next(itr);
-		while (citer_valid(itr)) {
-			if (comp(citer_get_ref(), citer_get_ref())) {
+	while (true) {
+		bool swaped = false;
+		citer prev = *begin;
+		citer next = prev;
+		assert(citer_valid(&prev));
+		citer_to_next(&next);
+		while (citer_valid(&next)) {
+			if (comp(citer_get_ref(&prev), citer_get_ref(&next)) > 0) {
+				swap(&prev, &next);
+				swaped = true;
 			}
+			prev = next;
+			citer_to_next(&next);
 		}
-		citer_to_next(begin);
+		if (swaped == false) break;
 	}
+	return;
 }
 
 typedef bool (*pf_find_accept)(void* object, void* param);
-typedef cntr_find_criterion {
-	pf_find_accept accept;
-	void*          param;
-} cntr_fc;
 
 bool find_first(citer* begin, citer* end, citer* result, cntr_fc* criterion) {
 	return false;
