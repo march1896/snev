@@ -8,6 +8,12 @@ struct open_link_t {
 	void* object;
 } ;
 
+void clist_init(clist* pcl) {
+	pcl->size = 0;
+	pcl->flags = 0;
+	pcl->begin = pcl->end = NULL;
+}
+
 void* clist_front(clist* pcl) {
 	if (pcl->begin == NULL) {
 		assert(pcl->size == 0);

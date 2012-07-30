@@ -17,6 +17,8 @@ typedef struct cntr_list_t {
 	oplink* end;
 } clist;
 
+void clist_init(clist* pcl);
+
 void* clist_front(clist* pcl);
 void* clist_back (clist* pcl);
 
