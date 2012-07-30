@@ -21,12 +21,12 @@ static void       block_dllrnd_push    (block_dll** pphead, block_dll* pbd);
 
 /* common functions that for all three management. */
 static void inline block_c* block_dll_to_com(block_dll* pbd) {
-	assert(&(pbd->bc)== (block_c*)pbd);
+	dbg_assert(&(pbd->bc)== (block_c*)pbd);
 	return (block_c*)pbd;
 }
 
 static void block_dll_pop_common(block_dll** pphead, block_dll* pbd) {
-	/* assert(block_com_free(block_dll_to_com(pbd))); */
+	/* dbg_assert(block_com_free(block_dll_to_com(pbd))); */
 
 	block_dll* prev = pbd->prev_free;
 	block_dll* next = pbd->next_free;
@@ -58,14 +58,14 @@ static void block_dll_link_into_freelist(block** pphead, block* prev, block* pbd
 
 	if (*pphead == NULL) {
 		// link list contains no element.
-		assert(prev == NULL && next == NULL);
+		dbg_assert(prev == NULL && next == NULL);
 
 		*pphead = pbd;
 	}
 	else {
 		// contains at least one element
 		if (prev == NULL) {
-			assert(next != NULL);
+			dbg_assert(next != NULL);
 			// push at the very front of freelist
 			next->prev_free = pbd;
 			
@@ -73,7 +73,7 @@ static void block_dll_link_into_freelist(block** pphead, block* prev, block* pbd
 		}
 		else {
 			// in the middle or at the end of the list
-			assert(!next || next->prev_free == prev);
+			dbg_assert(!next || next->prev_free == prev);
 
 			prev->next = pbd;
 			if (next) next->prev_free = pbd;
@@ -107,7 +107,7 @@ void block_dllinc_pop(block_dll** pphead, block_dll* pbd) {
 
 void block_dllinc_push(block_dll** pphead, block_dll* pbd) {
 	// we should insert the block in increasing order.
-	assert(!block_com_isfree(block_dll_to_com(pbd)));
+	dbg_assert(!block_com_isfree(block_dll_to_com(pbd)));
 
 	block_dll* next = *pphead;
 	block_dll* prev = NULL;
@@ -153,7 +153,7 @@ void block_dlldec_pop(block_dll** pphead, block_dll* pbd) {
 }
 
 void block_dlldec_push(block_dll** pphead, block_dll* pbd) {
-	assert(!block_com_isfree(block_dll_to_com(pbd)));
+	dbg_assert(!block_com_isfree(block_dll_to_com(pbd)));
 
 	unsigned int bsize = block_com_size(pbd->size);
 	block_dll* next = *pphead;

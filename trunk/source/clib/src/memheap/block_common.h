@@ -117,7 +117,7 @@ typedef struct block_com_h block_c;
 
 inline bool block_com_valid(block_c* pbc) {
 	if (pbc == NULL || pbc->prev_adj == NULL) {
-		assert(pbc->info == 0);
+		dbg_assert(pbc->info == 0);
 		return false;
 	}
 
@@ -142,7 +142,7 @@ inline void block_com_invalidate(block_c* pbc) {
  * @return firt valid block address in the buffer
  */
 inline void* block_com_make_sentinels(void* buff_start, void* buff_end, void** sent_first, void** sent_last) {
-	assert(buff_start && buff_end && buff_start < buff_end);
+	dbg_assert(buff_start && buff_end && buff_start < buff_end);
 
 	*sent_first = buff_start;
 	block_com_invalidate(*sent_first);
@@ -202,7 +202,7 @@ inline unsigned int block_com_extra(block_c* pbc) {
 }
 
 inline void block_com_set_extra(block_c* pbc, unsigned int extra) {
-	assert(extra < 4);
+	dbg_assert(extra < 4);
 
 	pbc->info = (pbc->info & ~BLOCK_COM_EXTRA_MASK) | (extra << BLOCK_COM_EXTB_BIT);
 }
@@ -259,9 +259,9 @@ inline block_c* block_com_from_data(void* addr) {
  * @return address of the second block after spliting, NULL if no need to split.
  */
 inline block_c* block_com_split(block_c* pbc, unsigned int size, unsigned int thh) {
-	assert(block_com_data_size(pbc) >= size);
+	//dbg_assert(block_com_data_size(pbc) >= size);
 
-	char* sb_addr = (char*)block_com_data + size;
+	char* sb_addr = (char*)block_com_data(pbc) + size;
 	if (sb_addr + sizeof(block_c) + thh <= (char*)block_com_next_adj(pbc)) {
 		/* big enough, split */
 		block_c* sb = (block_c*)sb_addr;
