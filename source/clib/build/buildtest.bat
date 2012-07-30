@@ -5,9 +5,9 @@ if not exist %BUILDDIR%\MinGW_TEST mkdir %BUILDDIR%\MinGW_TEST
 CD %BUILDDIR%\MinGW_TEST
 cmake -G "MinGW Makefiles" ..\..\tests
 
-rem if not exist %BUILDDIR%\VS mkdir %BUILDDIR%\VS
-rem @CD %BUILDDIR%\VS
-rem cmake -G "Visual Studio 10" ..\..\tests
+if not exist %BUILDDIR%\VS mkdir %BUILDDIR%\VS
+@CD %BUILDDIR%\VS
+cmake -G "Visual Studio 10" ..\..\tests
 
 CD %OLDDIR%
 pause
