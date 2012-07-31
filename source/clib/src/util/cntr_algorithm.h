@@ -4,12 +4,12 @@
 #include <cntr_iterator.h>
 
 /*
- * ITERATOR_NAME MUST BE declared before 
+ * ITERATOR_ADDR MUST BE declared before 
  */
-#define for_each(CNTR_TYPE, CNTR_NAME, ITERATOR_NAME) \
-	for (CNTR_TYPE##_citer_begin(&(CNTR_NAME), &(ITERATOR_NAME)); \
-			citer_valid(&(ITERATOR_NAME)); \
-			citer_to_next(&(ITERATOR_NAME)))
+#define for_each(CNTR_TYPE, CNTR_ADDR, ITERATOR_ADDR) \
+	for (CNTR_TYPE##_citer_begin(CNTR_ADDR, ITERATOR_ADDR); \
+			citer_valid(ITERATOR_ADDR); \
+			citer_to_next(ITERATOR_ADDR))
 
 void citer_swap(citer* first, citer* second);
 
