@@ -6,16 +6,20 @@
  *
  * The prototype is difined like below:
  *
- * clinear cntr;
- * cntr = clinear_as_list(&cntr);
+ * container cntr = clinear_as_list();
  *
- * clinear_add(&cntr, &object);
+ * clinear_add(cntr, &object);
  *
  * citer first, last;
- * clinear_citer_begin(&cntr, &first);
- * clinear_citer_end(&cntr, &last);
+ * iterator first = iterator_create();
+ * iterator last = iterator_create();
+ * clinear_iteraotr_begin(cntr, first);
+ * clinear_iterator_end(cntr, last);
  *
  * quick_sort(&cntr, &last, compare_func)
+ *
+ * iterator_destroy(first);
+ * iterator_destroy(last);
  *
  * cset cntr;
  * cntr = cset_as_tree(&cntr);
@@ -33,9 +37,13 @@
  *
  */
 
-void clinear_as_list(container cntr);
+#include <cntr_iterator.h>
 
-void clinear_as_array(container cntr);
+typedef void* container;
+
+container clinear_as_list();
+
+container clinear_as_array();
 
 void clinear_deinit(container cntr);
 
@@ -43,17 +51,17 @@ void clinear_clean(container cntr);
 
 int  clinear_size(container cntr);
 
-containee clinear_front(container cntr);
+void* clinear_front(container cntr);
 
-containee clinear_back(container cntr);
+void* clinear_back(container cntr);
 
-void clinear_add_front(container cntr, containee obj);
+void clinear_add_front(container cntr, void* obj);
 
-void clinear_add_back(container cntr, containee obj);
+void clinear_add_back(container cntr, void* obj);
 
-containee clinear_remove_front(container cntr);
+void* clinear_remove_front(container cntr);
 
-containee clinear_remove_back(container cntr);
+void* clinear_remove_back(container cntr);
 
 void clinear_citer_begin(container cntr, citer* itr);
 

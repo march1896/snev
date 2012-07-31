@@ -81,18 +81,80 @@ void test_bubble_sort() {
 	}
 	printf("\n\n");
 
-	for_each(clist, *pl, itr) {
+	for_each(clist, pl, &itr) {
 		printf("%d ", *((int*)citer_get_ref(&itr)));
 	}
+}
 
-// 	for_each(clist, *pl, itr) {
-// 		printf("%d ", *((int*)citer_get_ref(&itr)));
-// 	}
+typedef void (*pf_param_void)(void* param);
+
+void func2() {
+	printf("func2\n");
+}
+
+void function(int* param) {
+	printf("here we go: %d", *param);
+	return func2();
+}
+
+void test_grammar() {
+	void* void_pointer;
+	int integer = 5;
+	int* int_pointer = &integer;
+
+	void_pointer = &integer;
+
+	void_pointer = int_pointer;
+
+	float floatnumber = 5.5;
+	integer = floatnumber;
+
+	printf("%d\n", integer);
+
+
+	pf_param_void pf = function;
+	pf(&integer);
+}
+
+#include <cntr_abs.h>
+void test_cntr_abs() {
+	printf("\n\ntest container begins\n\n");
+	container cntr = clinear_as_list();
+	citer begin, end, itr;
+	int x[50], i;
+
+	for (i = 0; i < 50; i ++) {
+		x[i] = (12173*i+757)%147;
+		printf("%d ", x[i]);
+	}
+
+	printf("container size is: %d\n", clinear_size(cntr));
+
+	for (i = 0; i < 50; i ++) {
+		clinear_add_back(cntr, &x[i]);
+	}
+
+	for_each(clinear, cntr, &itr) {
+		printf("%d ", *((int*)citer_get_ref(&itr)));
+	}
+	printf("\n");
+
+	clinear_citer_begin(cntr, &begin);
+	clinear_citer_end(cntr, &end);
+	quick_sort(&begin, &end, int_compare);
+
+	for_each(clinear, cntr, &itr) {
+		printf("%d ", *((int*)citer_get_ref(&itr)));
+	}
+	printf("\n");
+	clinear_deinit(cntr);
 }
 
 int main() {
 	basic_test();
 	test_bubble_sort();
+	test_grammar();
+	test_cntr_abs();
 
 	return 0;
 }

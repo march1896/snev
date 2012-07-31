@@ -18,6 +18,18 @@ void clist_deinit(clist* pcl) {
 	/* DO NOTHING */
 }
 
+void clist_clean(clist* pcl) {
+	oplink* link = pcl->begin;
+	oplink* prev = NULL;
+
+	while (link != NULL) {
+		prev = link;
+		link = link->next;
+
+		hfree(prev);
+	}
+}
+
 int clist_size(clist* pcl) {
 	return pcl->size;
 }

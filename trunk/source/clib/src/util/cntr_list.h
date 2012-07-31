@@ -20,6 +20,7 @@ typedef struct cntr_list_t {
 void clist_init(clist* pcl);
 void clist_deinit(clist* pcl);
 
+void clist_clean(clist* pcl);
 int clist_size(clist* pcl);
 
 void* clist_front(clist* pcl);
