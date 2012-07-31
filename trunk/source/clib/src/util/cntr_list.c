@@ -89,12 +89,11 @@ void  clist_add      (clist* pcl, void* object) {
 }
 
 void* clist_remove_front(clist* pcl) {
-	dbg_assert(pcl->size > 0);
-
 	oplink* link = pcl->begin;
 	void* object = link->object;
-
 	oplink* next = link->next;
+
+	dbg_assert(pcl->size > 0);
 	if (next) next->prev = NULL;
 	else {
 		/* has only one element */
@@ -111,13 +110,12 @@ void* clist_remove_front(clist* pcl) {
 }
 
 void*  clist_remove_back (clist* pcl) {
-	dbg_assert(pcl->size > 0);
-
 	oplink* link = pcl->end;
 	void* object = link->object;
 
 	oplink* prev = link->prev;
 
+	dbg_assert(pcl->size > 0);
 	if (prev) prev->next = NULL;
 	else {
 		/* only one element */

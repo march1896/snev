@@ -36,14 +36,18 @@
  * has_prev/next provides validation check, prev/next provides moving iterator as
  * well as dereference.
  *
- * So here we provide five basic raw operations for iterator.
+ * So here we provide six basic raw operations for iterator.
  * bool valid                    (check if in container)
  * void to_next                  (move to next)
  * void to_prev                  (move to prev)
  * void set_ref                  (change the reference)
  * void* get_ref                 (get the reference)
+ * bool equal					 (check if two iterators are equal)
  *
- * for some algorithm specific algorithm, we may provide more operations.
+ * For some algorithm specific algorithm, we may provide more operations.
+ * e.g. 
+ * * could we compare the relative order of two iterator in container?
+ * * could we get the size of the container for better performance?
  * TODO: provide minimum callbacks that is needed for main container algorithms.
  */
 

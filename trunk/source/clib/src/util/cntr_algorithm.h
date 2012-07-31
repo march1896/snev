@@ -3,8 +3,11 @@
 
 #include <cntr_iterator.h>
 
+/*
+ * ITERATOR_NAME MUST BE declared before 
+ */
 #define for_each(CNTR_TYPE, CNTR_NAME, ITERATOR_NAME) \
-	for (citer (ITERATIO_NAME), CNTR_TYPE##_citer_begin(&(CNTR_NAME), &(ITERATOR_NAME)); \
+	for (CNTR_TYPE##_citer_begin(&(CNTR_NAME), &(ITERATOR_NAME)); \
 			citer_valid(&(ITERATOR_NAME)); \
 			citer_to_next(&(ITERATOR_NAME)))
 

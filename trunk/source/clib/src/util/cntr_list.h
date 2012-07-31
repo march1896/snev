@@ -2,7 +2,7 @@
 #define _CNTR_LIST_H_
 
 /*
- * This file define linked list container, for the design aspect of view see link.h for 
+ * This file defines linked list container, for the design aspect of view see link.h for 
  * more details about the design of this file. 
  */
 
@@ -10,8 +10,8 @@
 
 typedef struct open_link_t oplink;
 typedef struct cntr_list_t {
-	unsigned int size;
-	unsigned int flags;
+	int     size;
+	unsigned flags;
 
 	oplink* begin;
 	oplink* end;
