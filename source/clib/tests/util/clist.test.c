@@ -71,7 +71,7 @@ void test_bubble_sort() {
 	clist_citer_end(pl, &end);
 	citer_to_next(&begin);
 	citer_to_prev(&end);
-	bubble_sort(&begin, &end, int_compare);
+	quick_sort(&begin, &end, int_compare);
 
 	clist_citer_begin(pl, &itr);
 	while (citer_valid(&itr)) {
@@ -80,6 +80,11 @@ void test_bubble_sort() {
 		citer_to_next(&itr);
 	}
 	printf("\n\n");
+
+	for_each(clist, *pl, itr) {
+		printf("%d ", *((int*)citer_get_ref(&itr)));
+	}
+
 // 	for_each(clist, *pl, itr) {
 // 		printf("%d ", *((int*)citer_get_ref(&itr)));
 // 	}
