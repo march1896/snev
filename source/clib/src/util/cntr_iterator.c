@@ -1,34 +1,49 @@
 #include <cntr_iterator.h>
+#include <cntr_iterator.ph>
 
 inline bool citer_valid(citer* itr) {
-	return (itr->ops)->valid(itr);
+	cntr_iterator* ci = (cntr_iterator*)itr;
+
+	return (ci->ops)->valid((citer*)ci);
 };
 
-inline bool citer_equal(citer* lhs, citer* rhs) {
+inline void citer_to_next(citer* itr) {
+	cntr_iterator* ci = (cntr_iterator*)itr;
+
+	(ci->ops)->to_next((citer*)ci);
+};
+
+inline void citer_to_prev(citer* itr) {
+	cntr_iterator* ci = (cntr_iterator*)itr;
+
+	(ci->ops)->to_prev((citer*)ci);
+};
+
+inline void* citer_get_ref(citer* itr) {
+	cntr_iterator* ci = (cntr_iterator*)itr;
+
+	return (ci->ops)->get_ref((citer*)ci);
+};
+
+inline void citer_set_ref(citer* itr, void* n_ref) {
+	cntr_iterator* ci = (cntr_iterator*)itr;
+
+	(ci->ops)->set_ref((citer*)ci, n_ref);
+};
+
+inline int citer_cntr_size(citer* itr) {
+	cntr_iterator* ci = (cntr_iterator*)itr;
+	return (ci->ops)->cntr_size((citer*)ci);
+}
+
+inline bool citer_equal(citer* first, citer* second) {
+	cntr_iterator* lhs = (cntr_iterator*) first;
+	cntr_iterator* rhs = (cntr_iterator*) second;
+
 	if (lhs->connection == rhs->connection) {
 		dbg_assert(lhs->container == rhs->container && lhs->ops == rhs->ops);
 		return true;
 	}
 	return false;
-}
-
-inline void citer_to_next(citer* itr) {
-	(itr->ops)->to_next(itr);
-};
-
-inline void citer_to_prev(citer* itr) {
-	(itr->ops)->to_prev(itr);
-};
-
-inline void* citer_get_ref(citer* itr) {
-	return (itr->ops)->get_ref(itr);
-};
-
-inline void citer_set_ref(citer* itr, void* n_ref) {
-	(itr->ops)->set_ref(itr, n_ref);
-};
-
-inline int citer_cntr_size(citer* itr) {
-	return (itr->ops)->cntr_size(itr);
 }
 
