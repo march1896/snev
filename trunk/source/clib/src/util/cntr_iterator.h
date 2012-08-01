@@ -51,6 +51,12 @@
  * TODO: provide minimum callbacks that is needed for main container algorithms.
  */
 
+/*
+ * About whether to expose citer structure information to user
+ * Advantage:
+ * * client could allocate iterator in stack.
+ */
+
 typedef void* citer;
 
 extern inline bool citer_valid(citer* itr);
