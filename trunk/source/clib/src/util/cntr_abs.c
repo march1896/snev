@@ -30,7 +30,6 @@ typedef struct linear_cntr_t {
  *
  * the below macro are used to disable 
  * warning: initialization from incompatible pointer type [enabled by default]
- */
 #define make_callback(cntr_type, return_type, func) \
 	static inline return_type cb_##func(container cntr) {\
 		return func((cntr_type*)cntr);\
@@ -53,20 +52,21 @@ make_callback(clist, void*, clist_remove_front);
 make_callback(clist, void*, clist_remove_back );
 make_callback_param(clist, void, clist_citer_begin, citer*);
 make_callback_param(clist, void, clist_citer_end  , citer*);
+ */
 
 static clinear_operations clist_ops = {
-	cb_clist_init, /* init */
-	cb_clist_deinit, /* deinit */
-	cb_clist_clean, /* clean */
-	cb_clist_size, /* size */
-	cb_clist_front, /* front */
-	cb_clist_back , /* back  */
-	cb_clist_add_front, /* add_front */
-	cb_clist_add_back , /* add_back  */
-	cb_clist_remove_front, /* remove_front */
-	cb_clist_remove_back , /* remove_back  */
-	cb_clist_citer_begin, /* citer_begin */
-	cb_clist_citer_end  , /* citer_end   */
+	clist_init, /* init */
+	clist_deinit, /* deinit */
+	clist_clean, /* clean */
+	clist_size, /* size */
+	clist_front, /* front */
+	clist_back , /* back  */
+	clist_add_front, /* add_front */
+	clist_add_back , /* add_back  */
+	clist_remove_front, /* remove_front */
+	clist_remove_back , /* remove_back  */
+	clist_citer_begin, /* citer_begin */
+	clist_citer_end  , /* citer_end   */
 };
 
 container clinear_as_list() {

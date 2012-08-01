@@ -7,15 +7,7 @@
  */
 
 #include <cntr_iterator.h>
-
-typedef struct open_link_t oplink;
-typedef struct cntr_list_t {
-	int     size;
-	unsigned flags;
-
-	oplink* begin;
-	oplink* end;
-} clist;
+typedef void* clist;
 
 void clist_init(clist* pcl);
 void clist_deinit(clist* pcl);
