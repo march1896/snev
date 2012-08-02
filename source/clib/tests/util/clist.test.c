@@ -92,8 +92,10 @@ void func2() {
 	printf("func2\n");
 }
 
-void function(int* param) {
-	printf("here we go: %d", *param);
+typedef void* type;
+
+void function(type param) {
+	printf("here we go: %d", *((int*)param));
 	return func2();
 }
 
@@ -110,7 +112,6 @@ void test_grammar() {
 	integer = floatnumber;
 
 	printf("%d\n", integer);
-
 
 	pf_param_void pf = function;
 	pf(&integer);
