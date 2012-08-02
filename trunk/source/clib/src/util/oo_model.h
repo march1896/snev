@@ -19,11 +19,120 @@
  *    (virtual function table) is determined and unique(exactly the callbacks of the casted interface).
  *
  * From implementation aspect of view, when we got a pointer that is casted to an interface, we should 
- *    know the offset of the virtual funtion.
+ *    know the offset of the virtual funtions, by naming rules.
+ * A problem is that when casting a sub class to an interface, we should get a pointer to the structure
+ *    if the interface's virtual table, the sub class's information is totally missed, then when we want
+ *    to cast this interface into another, we should call the right cast fucntion, but since the sub-class
+ *    information is missed, we could not find the cast_virtual_function by name.
  *
  * A complete object-orient model in C.
  */
+/* befor everything */
+// erase any type information of class, this is unknown
+typedef void* unknown;
+// unique_id decribes run-time(compile) information, since no oo in c, so compile time info in also 
+// described by it.
+typedef int unique_id;
+// since compile will can not cast to father from child(change to the right virtual pointer), we should 
+// do it our self.
+typedef unknown (*pf_cast)(unknown obj, unique_id interface_id);
 
+typedef struct unknown_interface_vtable_structure_t {
+	/*
+	 * static cast is implemented by compiler in OO language, it just compute the offset of parent body.
+	 *   in C, we should provide it ourself, by provide the virtual function, we can always call the right
+	 *   function of the concrete class, that class should handle all casting cases.
+	 * dynamic cast is also supported by compiler, since it knowns class hierachy, the compiler should provide
+	 *   an implicate cast method if a father class can cast into sub class. For a child class we can easy 
+	 *   know which parent class it can cast to, so by virtual call to child class' cast function, we should
+	 *   know all kinds of class the current object can cast to.
+	 *
+	 * The cast function will always points the concrete created class.
+	 */
+	pf_cast                    __cast;
+	/* 
+	 * interface specific functions are defined below.
+	 */
+} unknown_interface_vtable;
+
+typedef struct unknown_interface_body_t {
+	/*
+	 * for interface method, it should know which concrete function it calls(by virtual table), and 
+	 * which data it operates on(by the offset to this pointer. So to perform a virtual function call
+	 * we should at least save the virtual function pointer, and this pointer.
+	 */
+	unknown                   __this;
+	unknown_interface_vtable* __vt;
+	/* 
+	 * interface do not have member variables, for classes members are defined below
+	 */
+} unknown_interface_body;
+
+unknown __cast(unknown body, unique_id id) {
+	/*
+	 * since all object's body memory layout follows unknown_interface_body, we can assume that the first 
+	 * member is pointer to __this, and the second member is pointer to __vt.
+	 */
+	unknown_interface_vtable* vt = ((unknown_interface_body*)body)->__vt;
+
+	/*
+	 * since all object's virtual table memory layout follows unknown_interface_vtable, we can assume 
+	 * that the first member is pointer to __cast.
+	 */
+	return vt->__cast(((unknown_interface_body*)body)->__this, id);
+}
+
+typedef struct unknown_class_vtable_structure_t {
+	/*
+	 * see definition of unknown_interfact_vtable.
+	 */
+	pf_cast                   __cast;
+
+	/*
+	 * new defined virtual functions
+	*/
+} unknown_class_vtable;
+
+typedef struct unknown_class_body_t {
+	unknown                  __this;
+	unknown_class_vtable*    __vt;
+
+	/*
+	 * interface body that this class inherite
+	 */
+	unknown_interface_body   __pib;
+
+	unknown                  class_specific_variables;
+} unknown_class_body;
+
+/******************************************************************************************************************
+ *
+ ******************************************************************************************************************
+ *
+ ******************************************************************************************************************
+ *
+ ******************************************************************************************************************
+ *                       A concrete example.
+ ******************************************************************************************************************
+ *
+ ******************************************************************************************************************
+ *
+ ******************************************************************************************************************
+ */
+
+#define interface_function_implement_noparam(inter_name, return_type, function_name) \
+	return_type function_name(unknown body) {\
+		inter_name##_interface_vtable* vt = (inter_name##_interface_vtable*)((unknown_interface_body*)body)->__vt;\
+		return vt->__##function_name(((unknown_interface_body*)body)->__this);\
+	}
+
+#define interface_function_implement_oneparam(inter_name, return_type, function_name, param_type) \
+	return_type function_name(unknown body, param_type param) {\
+		inter_name##_interface_vtable* vt = (inter_name##_interface_vtable*)((unknown_interface_body*)body)->__vt;\
+		return vt->__##function_name(((unknown_interface_body*)body)->__this, param);\
+	}
+
+/***********************************************************************************************/
 /*
  suppose we want to realize the below code in c:
  
@@ -67,115 +176,59 @@
  * comment will be add in front of each declaration and definiation. 
  */
 
-/* public */     /* public, could exposed in *.h */
-/* protected */  /* protected, should be visible for derived class, but not exposed */
-/* private */    /* private, should be contained in *.c */
+#define __public 
+#define __protected
+#define __private
 
 #include <stdio.h>
 #include <stdlib.h>
-/* befor everything */
-// erase any type information of class, this is unknown
-typedef void* unknown;
-// unique_id decribes run-time(compile) information, since no oo in c, so compile time info in also 
-// described by it.
-typedef int unique_id;
-// since compile will can not cast to father from child(change to the right virtual pointer), we should 
-// do it our self.
-typedef unknown (*pf_cast)(unknown obj, unique_id interface_id);
-
-typedef struct unknown_structure_t {
-	void*     ops;
-	unique_id rtti;
-	pf_cast   cast;
-	/* 
-	 * points to the object's address, since when object is casted, we may got an offset to
-	 * the original address, but when applying another cast, we should do it on the original 
-	 * object, addr helps us to it.
-	 */
-	unknown   addr;   
-} unknown_structure;
-
-unknown cast(unknown obj, unique_id interface_id) {
-	unknown_structure* us = (unknown_structure*)obj;
-	return us->cast(obj, interface_id);
-}
 /***********************************************************************************************
  * start if animal interface 
  ***********************************************************************************************/
-// define of interface animal
-/* public */ #define animal_int 0
-/* public */ void eat(unknown obj, int food);  // the first parameter is always pointer to the object.
-/* public */ void breath(unknown obj);
+__public unique_id animal_int = 0;
 
-// virtual funtion declaration, this should be the same as public interface, exclude pointer to object.
-/* protected */ typedef void (*pf_eat)(int food);
-/* protected */ typedef void (*pf_breath)();
+// public interface animal
+__public void eat(unknown obj);
+__public void set_eat(unknown obj, int how_many);
+__public void breath(unknown obj);
 
-// virtual table declaration, definition is only needed for non virtual class.
-/* protected */ typedef struct {
-	void*     ops;
-	unique_id rtti;
-	pf_cast   cast;
+/* virtual function table */
+__protected typedef void (*pf_eat)(unknown body);
+__protected typedef void (*pf_set_eat)(unknown body, int food);
+__protected typedef void (*pf_breath)(unknown body);
 
+__protected typedef struct {
+	pf_cast                   __cast;
 	/* start of virtual function table */
-	pf_eat    eat;
-	pf_breath breath;
-} animal_operations;
+	pf_eat                    __eat;
+	pf_set_eat                __set_eat;
+	pf_breath                 __breath;
+} animal_interface_vtable;
 
-// public interface inplementation, call correct virtual function.
-/* private */ void eat(unknown obj, int food) {
-	animal_operations* ops = (animal_operations*)obj;
+interface_function_implement_noparam(animal, void, eat);
+interface_function_implement_oneparam(animal, void, set_eat, int);
+interface_function_implement_noparam(animal, void, breath);
 
-	(ops->eat)(food);
-}
-
-/* private */ void breath(unknown obj) {
-	animal_operations* ops = (animal_operations*)obj;
-
-	(ops->breath)();
-}
-
-/* private */ unknown animal_cast(unknown obj, unique_id interface_id) {
-	animal_operations* ops = (animal_operations*)obj;
-	if (interface_id == ops->rtti) {
-		/* cast to it self */
-		return obj;
-	}
-	return NULL;
-}	
+/*
+ * interface body are the same, we do not need to define a new body here.
+ */
 
 /***********************************************************************************************
  * start if flyable interface 
  ***********************************************************************************************/
+__public int flyable_int = 1;
+
 // interface declaration.
-/* public */ #define flyable_int 1
-/* public */ void fly(unknown object);
+__public void fly(unknown);
 
-// virtual function declaration.
-/* protected */ typedef void (*pf_fly)();
-// virtual table declaration.
-/* protected */ typedef struct {
-	void*     ops;
-	unique_id rtti;
-	pf_cast   cast;
+__protected typedef void (*pf_fly)(unknown);
+__protected typedef struct {
+	pf_cast                   __cast;
+	/* start of virtual function table */
+	pf_fly                    __fly;
+} flyable_interface_vtable;
 
-	pf_fly    fly;
-} flyable_operations;
-
-/* private */ void fly(unknown obj) {
-	flyable_operations* ops = (flyable_operations*)obj;
-
-	(ops->fly)();
-}
-
-/* private */ unknown flyable_cast(unknown obj, unique_id interface_id) {
-	flyable_operations* ops = (flyable_operations*)obj;
-	if (interface_id == ops->rtti) {
-		return obj;
-	}
-
-	return NULL;
-}
+interface_function_implement_noparam(flyable, void, fly);
 
 /***********************************************************************************************
  * start if bird class 
@@ -184,87 +237,97 @@ unknown cast(unknown obj, unique_id interface_id) {
 typedef unknown bird;
 
 // class basic method declaration.
-/* public */ #define bird_int 2
-/* public */ bird bird_create(); // constructor
-/* public */ void bird_destroy(bird); // destructor
-// cast, always run-time cast, since compiler will not static cast for us.
-/* public */ unknown bird_cast(unknown pb, unique_id interface_id); 
-
+__public int bird_int = 2;
 
 // functionality implements 
-/* protected */ void bird_local_fly() { printf("bird fly\n"); }
-/* protected */ void bird_local_breath() { printf("bird breath\n"); }
-/* protected */ void bird_local_eat(int food) { printf("bird eat %d\n", food); }
-
 // vitual table declaration.
-/* protected */ typedef struct {
-	animal_operations*  animal_ops;
-	flyable_operations* flyable_ops;
-} bird_operations;
+__protected typedef struct {
+	pf_cast                   __cast;
+} bird_class_vtable;
 
-// virtual table definition.
-/* private */ static animal_operations bird_animal_vtb = {
-	&bird_animal_vtb,
-	bird_int,
-	bird_cast,
+void bird_local_fly(unknown body);
+void bird_local_breath(unknown body);
+void bird_local_eat(unknown body);
+void bird_local_set_eat(unknown body, int food);
+unknown bird_cast(unknown body, unique_id id);
 
-	bird_local_eat,
-	bird_local_breath,
+__private static animal_interface_vtable bird_animal_vtb = {
+	bird_cast,               /* __cast */
+
+	bird_local_eat,          /* __eat */
+	bird_local_set_eat,      /* __set_eat */
+	bird_local_breath        /* __breath */
 };
 
-/* private */ static flyable_operations bird_flyable_vtb = {
-	(&bird_flyable_vtb) - 1,
-	bird_int,
+__private static flyable_interface_vtable bird_flyable_vtb = {
 	bird_cast,
 
 	bird_local_fly
 };
 
-/* private */ static bird_operations bird_all_vtb = {
-	&bird_animal_vtb,
-	&bird_flyable_vtb
+__private static bird_class_vtable bird_vtb = {
+	bird_cast
 };
 
 // concrete type information.
-/* protected */ typedef struct bird_local_t {
-	bird_operations* ops;
-	unique_id        rtti;
-	pf_cast          cast;
+__protected typedef struct bird_local_t {
+	unknown                  __this;
+	bird_class_vtable*       __vt;
 
-	int age;
-	int info;
-	int anything;
-} bird_local;
+	unknown_interface_body   __pbd_animal;
+	unknown_interface_body   __pbd_flyable;
 
-// constructor, destructor implementation
-/* private */ bird bird_create() {
-	bird_local* lb = (bird_local*)malloc(sizeof(bird_local));
+	int                      age;
+	int                      anything;
+} bird_body;
 
-	lb->age = lb->info = lb->anything = 0;
-
-	lb->ops = &bird_all_vtb;
-	lb->rtti = bird_int;
-	lb->cast = bird_cast;
-
-	// do initialize work
-	return (bird)lb;
+__protected void bird_local_fly(unknown body)    { printf("bird fly\n"); }
+__protected void bird_local_breath(unknown body) { printf("bird breath\n"); }
+__protected void bird_local_eat(unknown body)    { 
+	bird_body* pb = (bird_body*)body;
+	printf("bird eat %d\n", pb->anything); 
+}
+__protected void bird_local_set_eat(unknown body, int food) { 
+	bird_body* pb = (bird_body*)body;
+	pb->anything = food;
+	printf("set bird eat %d\n", pb->anything);
 }
 
-/* private */ void bird_destroy(bird b) {
+
+// constructor, destructor implementation
+__private bird bird_create() {
+	bird_body* bb = (bird_body*)malloc(sizeof(bird_body));
+	
+	bb->__this = (unknown)bb;
+	bb->__vt   = &bird_vtb;
+
+	(bb->__pbd_animal).__this = bb->__this;
+	(bb->__pbd_animal).__vt = (unknown_interface_vtable*)&bird_animal_vtb;
+
+	(bb->__pbd_flyable).__this = bb->__this;
+	(bb->__pbd_flyable).__vt = (unknown_interface_vtable*)&bird_flyable_vtb;
+
+	bb->age = 0;
+	bb->anything = 0;
+
+	return (bird)bb;
+}
+
+__private void bird_destroy(bird b) {
 	free(b);
 }
 
 // cast implementation
-/* private */ unknown bird_cast(bird pb, unique_id interface_id) {
-	bird_local* lb = (bird_local*) pb;
+__private unknown bird_cast(bird pb, unique_id interface_id) {
+	bird_body* bb = (bird_body*) pb;
 	if (interface_id == animal_int) {
-		return (unknown)((lb->ops)->animal_ops);
+		return (unknown)&(bb->__pbd_animal);
 	}
 	else if (interface_id == flyable_int) {
-		return (unknown)((lb->ops)->flyable_ops);
+		return (unknown)&(bb->__pbd_flyable);
 	}
 	else if (interface_id == bird_int) {
-		return pb;
+		return bb;
 	}
 	return (unknown)NULL;
 }
@@ -276,80 +339,107 @@ typedef unknown bird;
 typedef unknown swallow;
 
 // class basic method declaration.
-/* public */ #define swallow_int 3
-/* public */ swallow swallow_create(); // constructor
-/* public */ void swallow_destroy(swallow); // destructor
-// cast, always run-time cast, since compiler will not static cast for us.
-/* public */ unknown swallow_cast(swallow pb, unique_id interface_id); 
+__public int swallow_int = 3;
 
+__protected typedef struct {
+	pf_cast                   __cast;
+} swallow_class_vtable;
 
-// functionality implements 
-/* protected */ void swallow_local_fly() { printf("swallow fly\n"); }
-/* protected */ void swallow_local_eat(int food) { printf("swallow eat %d\n", food); }
+void swallow_local_fly(unknown body);
+void swallow_local_breath(unknown body);
+void swallow_local_eat(unknown body);
+void swallow_local_set_eat(unknown body, int food);
+unknown swallow_cast(unknown body, unique_id id);
 
-// virtual table definition.
-/* private */ static animal_operations swallow_animal_vtb = {
-	&swallow_animal_vtb,
-	swallow_int,
-	swallow_cast,
+__private static animal_interface_vtable swallow_animal_vtb = {
+	swallow_cast,               /* __cast */
 
-	swallow_local_eat,
-	bird_local_breath, // super breathe
+	swallow_local_eat,          /* __eat */
+	swallow_local_set_eat,      /* __set_eat */
+	swallow_local_breath        /* __breath */
 };
 
-/* private */ static flyable_operations swallow_flyable_vtb = {
-	(&swallow_flyable_vtb)-1,
-	swallow_int,
+__private static flyable_interface_vtable swallow_flyable_vtb = {
 	swallow_cast,
 
 	swallow_local_fly
 };
 
-/* private */ static bird_operations swallow_all_vtb = {
-	&swallow_animal_vtb,
-	&swallow_flyable_vtb
+__private static bird_class_vtable swallow_bird_vtb = {
+	swallow_cast,
+};
+
+__private static swallow_class_vtable swallow_vtb = {
+	swallow_cast
 };
 
 // concrete type information.
-/* protected */ typedef struct swallow_local_t {
-	bird_operations* ops;
-	unique_id        rtti;
-	pf_cast          cast;
+__protected typedef struct swallow_local_t {
+	unknown                  __this;
+	swallow_class_vtable*     __vt;
 
-	bird_local       super;
-	int swallow_local_data;
-} swallow_local;
+	bird_body                __pbd_bird;
 
-// constructor, destructor implementation
-/* private */ swallow swallow_create() {
-	swallow_local* lb = (swallow_local*)malloc(sizeof(swallow_local));
+	int                      anything;
+} swallow_body;
 
-	/* super's default setting */
-	(lb->super).age = (lb->super).info = (lb->super).anything = 0;
-	/* super's virtual table should never be visited */
-	(lb->super).ops = &swallow_all_vtb;
-
-	lb->ops = &swallow_all_vtb;
-	lb->rtti = swallow_int;
-	lb->cast = swallow_cast;
-
-	// do initialize work
-	return (swallow)lb;
+__protected void swallow_local_fly(unknown body)    { printf("swallow fly\n"); }
+__protected void swallow_local_breath(unknown body) { printf("swallow breath\n"); }
+__protected void swallow_local_eat(unknown body)    { 
+	swallow_body* pb = (swallow_body*)body;
+	printf("swallow eat %d\n", pb->anything); 
+}
+__protected void swallow_local_set_eat(unknown body, int food) { 
+	swallow_body* pb = (swallow_body*)body;
+	pb->anything = food;
+	printf("set swallow eat %d\n", pb->anything);
 }
 
-/* private */ void swallow_destroy(swallow b) {
+
+// constructor, destructor implementation
+__private swallow swallow_create() {
+	swallow_body* bb = (swallow_body*)malloc(sizeof(swallow_body));
+	
+	bb->__this = (unknown)bb;
+	bb->__vt   = &swallow_vtb;
+
+
+	{
+		(bb->__pbd_bird).__this = (unknown)bb;
+		(bb->__pbd_bird).__vt   = &swallow_bird_vtb;
+
+		((bb->__pbd_bird).__pbd_animal).__this = bb->__this;
+		((bb->__pbd_bird).__pbd_animal).__vt = (unknown_interface_vtable*)&swallow_animal_vtb;
+
+		((bb->__pbd_bird).__pbd_flyable).__this = bb->__this;
+		((bb->__pbd_bird).__pbd_flyable).__vt = (unknown_interface_vtable*)&swallow_flyable_vtb;
+
+		(bb->__pbd_bird).age = 0;
+		(bb->__pbd_bird).anything = 0;
+	}
+
+	bb->anything = 0;
+
+	return (swallow)bb;
+}
+
+__private void swallow_destroy(swallow b) {
 	free(b);
 }
 
 // cast implementation
-/* private */ unknown swallow_cast(swallow pb, unique_id interface_id) {
-	swallow_local* lb = (swallow_local*) pb;
-	if (interface_id == swallow_int || interface_id == bird_int) {
-		return pb;
+__private unknown swallow_cast(swallow pb, unique_id interface_id) {
+	swallow_body* bb = (swallow_body*) pb;
+	if (interface_id == swallow_int) {
+		return bb;
 	}
-	return bird_cast(pb, interface_id);
+	if (interface_id == bird_int) {
+		return (unknown)(&(bb->__pbd_bird));
+	}
+	else {
+		return bird_cast(&(bb->__pbd_bird), interface_id);
+	}
 }
-
 /***********************************************************************************************
  * start if magpie class 
  ***********************************************************************************************/
@@ -357,107 +447,149 @@ typedef unknown swallow;
 typedef unknown magpie;
 
 // class basic method declaration.
-/* public */ #define magpie_int 4
-/* public */ magpie magpie_create(); // constructor
-/* public */ void magpie_destroy(magpie); // destructor
-// cast, always run-time cast, since compiler will not static cast for us.
-/* public */ unknown magpie_cast(magpie pb, unique_id interface_id); 
+__public int magpie_int = 3;
 
+__protected typedef struct {
+	pf_cast                   __cast;
+} magpie_class_vtable;
 
-// functionality implements 
-/* protected */ void magpie_local_fly() { printf("magpie fly\n"); }
-/* protected */ void magpie_local_eat(int food) { printf("magpie eat %d\n", food); }
+void magpie_local_fly(unknown body);
+void magpie_local_breath(unknown body);
+void magpie_local_eat(unknown body);
+void magpie_local_set_eat(unknown body, int food);
+unknown magpie_cast(unknown body, unique_id id);
 
-// virtual table definition.
-/* private */ static animal_operations magpie_animal_vtb = {
-	&magpie_animal_vtb,
-	magpie_int,
-	magpie_cast,
+__private static animal_interface_vtable magpie_animal_vtb = {
+	magpie_cast,               /* __cast */
 
-	magpie_local_eat,
-	bird_local_breath, // super breathe
+	magpie_local_eat,          /* __eat */
+	magpie_local_set_eat,      /* __set_eat */
+	magpie_local_breath        /* __breath */
 };
 
-/* private */ static flyable_operations magpie_flyable_vtb = {
-	(&magpie_animal_vtb)-1,
-	magpie_int,
+__private static flyable_interface_vtable magpie_flyable_vtb = {
 	magpie_cast,
 
 	magpie_local_fly
 };
 
-/* private */ static bird_operations magpie_all_vtb = {
-	&magpie_animal_vtb,
-	&magpie_flyable_vtb
+__private static bird_class_vtable magpie_bird_vtb = {
+	magpie_cast,
+};
+
+
+__private static magpie_class_vtable magpie_vtb = {
+	magpie_cast
 };
 
 // concrete type information.
-/* protected */ typedef struct magpie_local_t {
-	bird_operations* ops;
-	unique_id        rtti;
-	pf_cast          cast;
+__protected typedef struct magpie_local_t {
+	unknown                  __this;
+	magpie_class_vtable*     __vt;
 
-	bird_local super;
-	int magpie_local_data;
-} magpie_local;
+	bird_body                __pbd_bird;
 
-// constructor, destructor implementation
-/* private */ magpie magpie_create() {
-	magpie_local* lb = (magpie_local*)malloc(sizeof(magpie_local));
+	int                      anything;
+} magpie_body;
 
-	/* super's default setting */
-	(lb->super).age = (lb->super).info = (lb->super).anything = 0;
-	(lb->super).ops = &magpie_all_vtb;
-
-	lb->ops = &magpie_all_vtb;
-	lb->rtti = magpie_int;
-	lb->cast = magpie_cast;
-
-
-	// do initialize work
-	return (magpie)lb;
+__protected void magpie_local_fly(unknown body)    { printf("magpie fly\n"); }
+__protected void magpie_local_breath(unknown body) { printf("magpie breath\n"); }
+__protected void magpie_local_eat(unknown body)    { 
+	magpie_body* pb = (magpie_body*)body;
+	printf("magpie eat %d\n", pb->anything); 
+}
+__protected void magpie_local_set_eat(unknown body, int food) { 
+	magpie_body* pb = (magpie_body*)body;
+	pb->anything = food;
+	printf("set magpie eat %d\n", pb->anything);
 }
 
-/* private */ void magpie_destroy(magpie b) {
+
+// constructor, destructor implementation
+__private magpie magpie_create() {
+	magpie_body* bb = (magpie_body*)malloc(sizeof(magpie_body));
+	
+	bb->__this = (unknown)bb;
+	bb->__vt   = &magpie_vtb;
+
+
+	{
+		(bb->__pbd_bird).__this = (unknown)bb;
+		(bb->__pbd_bird).__vt   = &magpie_bird_vtb;
+
+		((bb->__pbd_bird).__pbd_animal).__this = bb->__this;
+		((bb->__pbd_bird).__pbd_animal).__vt = (unknown_interface_vtable*)&magpie_animal_vtb;
+
+		((bb->__pbd_bird).__pbd_flyable).__this = bb->__this;
+		((bb->__pbd_bird).__pbd_flyable).__vt = (unknown_interface_vtable*)&magpie_flyable_vtb;
+
+		(bb->__pbd_bird).age = 0;
+		(bb->__pbd_bird).anything = 0;
+	}
+
+	bb->anything = 0;
+
+	return (magpie)bb;
+}
+
+__private void magpie_destroy(magpie b) {
 	free(b);
 }
 
 // cast implementation
-/* private */ unknown magpie_cast(magpie pb, unique_id interface_id) {
-	magpie_local* lb = (magpie_local*) pb;
-	if (interface_id == magpie_int || interface_id == bird_int) {
-		return pb;
+__private unknown magpie_cast(magpie pb, unique_id interface_id) {
+	magpie_body* bb = (magpie_body*) pb;
+	if (interface_id == magpie_int) {
+		return bb;
 	}
-	return bird_cast(pb, interface_id);
+	if (interface_id == bird_int) {
+		return (unknown)(&(bb->__pbd_bird));
+	}
+	else {
+		return bird_cast(&(bb->__pbd_bird), interface_id);
+	}
 }
+
 
 int __run_test() {
 	unknown bd, swa, mag;
 	unknown unk, casted;
 	bd = bird_create();
-	eat(cast(bd, animal_int), 10);
-	fly(cast(bd, flyable_int));
-	breath(cast(bd, animal_int));
+	set_eat(__cast(bd, animal_int), 5);
+	eat(__cast(bd, animal_int));
+	fly(__cast(bd, flyable_int));
+	breath(__cast(bd, animal_int));
 
 	printf("\n");
 
 	swa = swallow_create();
-	eat(cast(swa, animal_int), 8);
-	fly(cast(swa, flyable_int));
-	breath(cast(swa, animal_int));
+	set_eat(__cast(swa, animal_int), 8);
+	eat(__cast(swa, animal_int));
+	fly(__cast(swa, flyable_int));
+	breath(__cast(swa, animal_int));
 
 	printf("\n");
 
 	mag = magpie_create();
-	eat(cast(mag, animal_int), 8);
-	fly(cast(mag, flyable_int));
-	breath(cast(mag, animal_int));
+	set_eat(__cast(mag, animal_int), 15);
+	eat(__cast(mag, animal_int));
+	fly(__cast(mag, flyable_int));
+	breath(__cast(mag, animal_int));
 
-	casted = cast(bd, animal_int);
-	unk = cast(casted, flyable_int);
+	printf("\n");
 
+	casted = __cast(bd, animal_int);
+	unk = __cast(casted, flyable_int);
 	fly(unk);
+
+	casted = __cast(mag, animal_int);
+	unk = __cast(casted, flyable_int);
+	fly(unk);
+
+	casted = __cast(swa, animal_int);
+	unk = __cast(casted, flyable_int);
+	fly(unk);
+	return 0;
 }
 
 #endif /* _OBJECT_ORIENTED_MODEL_ */
-
