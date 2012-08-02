@@ -447,7 +447,7 @@ __private unknown swallow_cast(swallow pb, unique_id interface_id) {
 typedef unknown magpie;
 
 // class basic method declaration.
-__public int magpie_int = 3;
+__public int magpie_int = 4;
 
 __protected typedef struct {
 	pf_cast                   __cast;
@@ -589,6 +589,18 @@ int __run_test() {
 	casted = __cast(swa, animal_int);
 	unk = __cast(casted, flyable_int);
 	fly(unk);
+
+	casted = __cast(swa, magpie_int);
+	printf("swallaw cast to magpie : %s\n", casted == NULL ? "fasle" : "true");
+
+	casted = __cast(mag, magpie_int);
+	printf("magpie cast to magpie : %s\n", casted == NULL ? "fasle" : "true");
+
+	casted = __cast(mag, bird_int);
+	printf("magpie cast to bird : %s\n", casted == NULL ? "fasle" : "true");
+
+	casted = __cast(bird, magpie_int);
+	printf("bird cast to magpie : %s\n", casted == NULL ? "fasle" : "true");
 	return 0;
 }
 
