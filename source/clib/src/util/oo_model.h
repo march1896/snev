@@ -1,7 +1,7 @@
 #ifndef _OBJECT_ORIENTED_MODEL_
 #define _OBJECT_ORIENTED_MODEL_
 /*
- * This is a document file, no *.c file should include this file, But all demo code could be 
+ * This is a document file, no *.c file should include this file, but all demo code could be 
  * compiled and run. It demostrates a object-oriented coding pattern in C language.
  *
  * Before designing, for simplicity, we make following assumptions.
@@ -16,14 +16,17 @@
  *    and the name is not visible from others, but the callback funtion pointer should be the same name
  *    with interface method.
  * The first and third rules together ensures that when calling interface method, the callback set
- *    (virtual function table) is determined and unique(exactly the callbacks of the casted interface).
+ *    (virtual function table) is determined and unique(exactly the callbacks of the casted interface,
+ *    there is no virtual pointer combination problem when make interface calls).
  *
  * From implementation aspect of view, when we got a pointer that is casted to an interface, we should 
- *    know the offset of the virtual funtions, by naming rules.
+ *    know the offset of the virtual funtions, since we know the type of the interface.
  * A problem is that when casting a sub class to an interface, we should get a pointer to the structure
  *    if the interface's virtual table, the sub class's information is totally missed, then when we want
  *    to cast this interface into another, we should call the right cast fucntion, but since the sub-class
  *    information is missed, we could not find the cast_virtual_function by name.
+ * Solution is put __this and __cast in relative fixed position to each interface and class, so we could 
+ *    use the relative offset to call the virtual function.
  *
  * A complete object-orient model in C.
  */
@@ -385,14 +388,27 @@ __protected typedef struct swallow_local_t {
 
 __protected void swallow_local_fly(unknown body)    { printf("swallow fly\n"); }
 __protected void swallow_local_breath(unknown body) { printf("swallow breath\n"); }
+/*
+ * directly inherite parent virtual function need a little work since compile will not find 
+ * the correct parent memebers.
+ */
 __protected void swallow_local_eat(unknown body)    { 
 	swallow_body* pb = (swallow_body*)body;
-	printf("swallow eat %d\n", pb->anything); 
+
+	/*
+	 * when sub class want to directly use parent's virtual funtion, it can not 
+	 * directly set parent's local function in its own virtual table, because when parent
+	 * virtual is called, it take parameter __this as it self, so here we should add an 
+	 * wrapper on it.
+	 */
+	bird_body* pbird = &(pb->__pbd_bird);
+	bird_local_eat(pbird);
 }
 __protected void swallow_local_set_eat(unknown body, int food) { 
 	swallow_body* pb = (swallow_body*)body;
-	pb->anything = food;
-	printf("set swallow eat %d\n", pb->anything);
+
+	bird_body* pbird = &(pb->__pbd_bird);
+	bird_local_set_eat(pbird, food);
 }
 
 
@@ -591,7 +607,7 @@ int __run_test() {
 	fly(unk);
 
 	casted = __cast(swa, magpie_int);
-	printf("swallaw cast to magpie : %s\n", casted == NULL ? "fasle" : "true");
+	printf("swallow cast to magpie : %s\n", casted == NULL ? "fasle" : "true");
 
 	casted = __cast(mag, magpie_int);
 	printf("magpie cast to magpie : %s\n", casted == NULL ? "fasle" : "true");
@@ -599,7 +615,7 @@ int __run_test() {
 	casted = __cast(mag, bird_int);
 	printf("magpie cast to bird : %s\n", casted == NULL ? "fasle" : "true");
 
-	casted = __cast(bird, magpie_int);
+	casted = __cast(bd, magpie_int);
 	printf("bird cast to magpie : %s\n", casted == NULL ? "fasle" : "true");
 	return 0;
 }
