@@ -1,6 +1,8 @@
 #include <cntr_iterator.h>
 #include <cntr_iterator.ph>
 
+typedef citer cntr_iterator;
+
 inline bool citer_valid(citer* itr) {
 	cntr_iterator* ci = (cntr_iterator*)itr;
 
