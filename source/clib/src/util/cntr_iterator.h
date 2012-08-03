@@ -1,7 +1,6 @@
 #ifndef _CNTR_ITERATOR_H_
 #define _CNTR_ITERATOR_H_
 
-#include <cominc.h>
 /* 
  * Using of iterator.
  *
@@ -51,13 +50,45 @@
  * TODO: provide minimum callbacks that is needed for main container algorithms.
  */
 
-/*
- * About whether to expose citer structure information to user
- * Advantage:
- * * client could allocate iterator in stack.
- */
+#include <cominc.h>
+#include <oos_model.h>
 
-typedef void* citer;
+typedef struct cntr_iterator_t citer;
+typedef bool (*pf_citer_valid)(citer*);
+typedef void (*pf_citer_to_next)(citer*);
+typedef void (*pf_citer_to_prev)(citer*);
+typedef void* (*pf_citer_get_ref)(citer*);
+typedef void (*pf_citer_set_ref)(citer*, void*);
+typedef int (*pf_citer_cntr_size)(citer*);
+
+typedef struct cntr_iterator_operations_t {
+	pf_citer_valid   valid;
+	pf_citer_get_ref get_ref;
+	pf_citer_set_ref set_ref;
+	pf_citer_to_prev to_prev;
+	pf_citer_to_next to_next;
+	pf_citer_cntr_size cntr_size;
+} citer_operations;
+/*
+ * Instead of * typedef unknow citer * , I expose the details of iterator to let 
+ * client to declare a citer on stack.
+ */
+struct cntr_iterator_t {
+	/* 
+	 * pointer to specific iterator operations
+	 */
+	citer_operations* ops; 
+
+	/* 
+	 * pointer to the data structure that connected objects in a container 
+	 */
+	void* connection;  
+
+	void* container;
+} ;
+
+
+
 
 extern inline bool citer_valid(citer* itr);
 
