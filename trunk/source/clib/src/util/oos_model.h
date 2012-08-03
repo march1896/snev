@@ -1,5 +1,6 @@
 #ifndef _OOS_MODEL_H_
 #define _OOS_MODEL_H_
+#include <cominc.h>
 
 typedef void* unknown;
 
@@ -24,14 +25,15 @@ typedef struct __struct_fourpointer_long_variable_t {
  * unknown_name is the name of the unknown object.
  * init_unknown_address is the address that unknown object to init with.
  */
+__twopointer_long_variable __twopointer_long_null;
+__fourpointer_long_variable __fourpointer_long_null; 
+
 #define alloc_two_pointers_on_stack(unknown_name, init_unknown_address) \
-	__twopointer_long_variable ##unknown_name##_never_reference_me;\
-	if (init_unknown_address) ##unknown_name##_never_reference_me = *init_unknown_address;\
-	unknown unknown_name = (unknown)&##unknown_name##_never_reference_me;
+	__twopointer_long_variable unknown_name##_never_reference_me = init_unknown_address == NULL ?  __twopointer_long_null : *((__twopointer_long_variable*)init_unknown_address);\
+	unknown unknown_name = (unknown)&##unknown_name##_never_reference_me
 
 #define alloc_four_pointers_on_stack(unknown_name, init_unknown_address) \
-	__fourpointer_long_variable ##unknown_name##_never_reference_me;\
-	if (init_unknown_address) ##unknown_name##_never_reference_me = *init_unknown_address;\
+	__fourpointer_long_variable unknown_name##_never_reference_me = init_unknown_address == NULL ? __fourpointer_long_null : *((__fourpointer_long_variable*)init_unknown_address);\
 	unknown unknown_name = (unknown)&##unknown_name##_never_reference_me;
 
 #endif /* _OOS_MODEL_H_ */

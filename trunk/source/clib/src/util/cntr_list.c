@@ -1,15 +1,13 @@
 #include <cntr_list.h>
 #include <cntr_iterator.h>
-#include <cntr_iterator.ph>
+#include <cntr_iterator.local.h>
 
-struct open_link_t {
+typedef struct open_link_t {
 	struct open_link_t* prev;
 	struct open_link_t* next;
 
 	void* object;
-};
-
-typedef struct open_link_t oplink;
+} oplink;
 
 typedef struct cntr_list_t {
 	int     size;
@@ -17,19 +15,27 @@ typedef struct cntr_list_t {
 
 	oplink* begin;
 	oplink* end;
-} clist;
+} cntr_list;
 
-void clist_init(clist* pcl) {
+clist clist_create() {
+	cntr_list* pcl = (cntr_list*)halloc(sizeof(cntr_list));
+
 	pcl->size = 0;
 	pcl->flags = 0;
 	pcl->begin = pcl->end = NULL;
+
+	return pcl;
 }
 
-void clist_deinit(clist* pcl) {
-	/* DO NOTHING */
+void clist_destroy(clist pcl) {
+	clist_clear(pcl);
+
+	hfree(pcl);
 }
 
-void clist_clean(clist* pcl) {
+void clist_clear(clist cl) {
+	cntr_list* pcl = (cntr_list*)cl;
+
 	oplink* link = pcl->begin;
 	oplink* prev = NULL;
 
@@ -41,11 +47,15 @@ void clist_clean(clist* pcl) {
 	}
 }
 
-int clist_size(clist* pcl) {
+int clist_size(clist cl) {
+	cntr_list* pcl = (cntr_list*)cl;
+	
 	return pcl->size;
 }
 
-void* clist_front(clist* pcl) {
+void* clist_front(clist cl) {
+	cntr_list* pcl = (cntr_list*)cl;
+
 	if (pcl->begin == NULL) {
 		dbg_assert(pcl->size == 0);
 		return NULL;
@@ -54,7 +64,9 @@ void* clist_front(clist* pcl) {
 	return (pcl->begin)->object;
 }
 
-void* clist_back (clist* pcl) {
+void* clist_back (clist cl) {
+	cntr_list* pcl = (cntr_list*)cl;
+
 	if (pcl->end == NULL) {
 		dbg_assert(pcl->size == 0);
 
@@ -64,7 +76,8 @@ void* clist_back (clist* pcl) {
 	return (pcl->end)->object;
 }
 
-void  clist_add_front(clist* pcl, void* object) {
+void  clist_add_front(clist cl, void* object) {
+	cntr_list* pcl = (cntr_list*)cl;
 	oplink* link = (oplink*)halloc(sizeof(oplink));
 
 	link->object = object;
@@ -86,7 +99,8 @@ void  clist_add_front(clist* pcl, void* object) {
 	pcl->size ++;
 }
 
-void  clist_add_back (clist* pcl, void* object) {
+void  clist_add_back (clist cl, void* object) {
+	cntr_list* pcl = (cntr_list*)cl;
 	oplink* link = (oplink*)halloc(sizeof(oplink));
 
 	link->object = object;
@@ -107,11 +121,14 @@ void  clist_add_back (clist* pcl, void* object) {
 	pcl->size ++;
 }
 
-void  clist_add      (clist* pcl, void* object) {
+void  clist_add      (clist cl, void* object) {
+	cntr_list* pcl = (cntr_list*)cl;
+
 	clist_add_front(pcl, object);
 }
 
-void* clist_remove_front(clist* pcl) {
+void* clist_remove_front(clist cl) {
+	cntr_list* pcl = (cntr_list*)cl;
 	oplink* link = pcl->begin;
 	void* object = link->object;
 	oplink* next = link->next;
@@ -132,7 +149,8 @@ void* clist_remove_front(clist* pcl) {
 	return object;
 }
 
-void*  clist_remove_back (clist* pcl) {
+void*  clist_remove_back (clist cl) {
+	cntr_list* pcl = (cntr_list*)cl;
 	oplink* link = pcl->end;
 	void* object = link->object;
 
@@ -156,7 +174,7 @@ void*  clist_remove_back (clist* pcl) {
 
 /* iterator related operations */
 
-static void oplink_to_prev(citer* itr) {
+static void oplink_to_prev(citer itr) {
 	cntr_iterator* cur = (cntr_iterator*)itr;
 	oplink* link_cur = (oplink*)(cur->connection);
 
@@ -164,7 +182,7 @@ static void oplink_to_prev(citer* itr) {
 	cur->connection = link_cur->prev;
 }
 
-static void oplink_to_next(citer* itr) {
+static void oplink_to_next(citer itr) {
 	cntr_iterator* cur = (cntr_iterator*)itr;
 	oplink* link_cur = (oplink*)(cur->connection);
 
@@ -172,7 +190,7 @@ static void oplink_to_next(citer* itr) {
 	cur->connection = link_cur->next;
 }
 
-static bool oplink_valid(citer* itr) {
+static bool oplink_valid(citer itr) {
 	cntr_iterator* cur = (cntr_iterator*)itr;
 	oplink* link_cur = (oplink*)(cur->connection);
 
@@ -180,7 +198,7 @@ static bool oplink_valid(citer* itr) {
 	else return false;
 }
 
-static void* oplink_get_ref(citer* itr) {
+static void* oplink_get_ref(citer itr) {
 	cntr_iterator* cur = (cntr_iterator*)itr;
 	oplink* link_cur = (oplink*)(cur->connection);
 
@@ -188,7 +206,7 @@ static void* oplink_get_ref(citer* itr) {
 	return link_cur->object;
 }
 
-static void oplink_set_ref(citer* itr, void* n_ref) {
+static void oplink_set_ref(citer itr, void* n_ref) {
 	cntr_iterator* cur = (cntr_iterator*)itr;
 	oplink* link_cur = (oplink*)(cur->connection);
 
@@ -196,44 +214,36 @@ static void oplink_set_ref(citer* itr, void* n_ref) {
 	link_cur->object = n_ref;
 }
 
-static int oplink_cntr_size(citer* itr) {
+/*
+static int oplink_cntr_size(citer itr) {
 	cntr_iterator* cur = (cntr_iterator*)itr;
 	clist* list = (clist*)(cur->container);
 
 	dbg_assert(list);
 	return list->size;
 }
-
-static citer_operations oplink_citer_operations = {
-#if defined(__GCC__)
-	.valid   = oplink_valid,
-	.get_ref = oplink_get_ref,
-	.set_ref = oplink_set_ref,
-	.to_prev = oplink_to_prev,
-	.to_next = oplink_to_next,
-	.cntr_size = oplink_cntr_size;
-#else 
+*/
+static citer_interface oplink_citer_operations = {
 	oplink_valid,
 	oplink_get_ref,
 	oplink_set_ref,
 	oplink_to_prev,
 	oplink_to_next,
-	oplink_cntr_size
-#endif 
 };
 
-void  clist_citer_begin(clist* pcl, citer* cur) {
+void  clist_citer_begin(clist cl, citer cur) {
 	cntr_iterator* itr = (cntr_iterator*)cur;
-	itr->ops = &oplink_citer_operations;
+	cntr_list* pcl = (cntr_list*)cl;
 
+	itr->__vt = &oplink_citer_operations;
 	itr->connection = (void*)pcl->begin;
-	itr->container = (void*)pcl;
 }
 
-void  clist_citer_end  (clist* pcl, citer* cur) {
+void  clist_citer_end  (clist cl, citer cur) {
 	cntr_iterator* itr = (cntr_iterator*)cur;
-	itr->ops = &oplink_citer_operations;
+	cntr_list* pcl = (cntr_list*)cl;
 
+	itr->__vt = &oplink_citer_operations;
 	itr->connection = (void*)pcl->end;
-	itr->container = (void*)pcl;
 }
+

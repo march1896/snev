@@ -6,17 +6,24 @@
 /*
  * ITERATOR_ADDR MUST BE declared before 
  */
-#define for_each(CNTR_TYPE, CNTR_ADDR, ITERATOR_ADDR) \
-	for (CNTR_TYPE##_citer_begin(CNTR_ADDR, ITERATOR_ADDR); \
-			citer_valid(ITERATOR_ADDR); \
-			citer_to_next(ITERATOR_ADDR))
+#define for_each(CNTR_TYPE, CNTR_NAME, ITERATOR_NAME) \
+	for (CNTR_TYPE##_citer_begin(CNTR_NAME, ITERATOR_NAME); \
+			citer_valid(ITERATOR_NAME); \
+			citer_to_next(ITERATOR_NAME))
 
-void citer_swap(citer* first, citer* second);
+extern inline void citer_swap(citer first, citer second);
 
+extern inline bool citer_equal(citer first, citer second);
+
+extern inline void citer_assign(citer first, citer second);
+
+/*
+ * sorting algorithm.
+ */
 typedef int (*pf_compare_object)(void*, void*);
-void quick_sort(citer* begin, citer* end, pf_compare_object comp);
+void quick_sort(citer begin, citer end, pf_compare_object comp);
 
-void bubble_sort(citer* begin, citer* end, pf_compare_object comp);
+void bubble_sort(citer begin, citer end, pf_compare_object comp);
 
 typedef bool (*pf_find_accept)(void* object, void* param);
 typedef struct cntr_find_criterion {
@@ -24,8 +31,8 @@ typedef struct cntr_find_criterion {
 	void*          param;
 } cntr_fc;
 
-bool find_first(citer* begin, citer* end, citer* result, cntr_fc* criterion);
-bool find_last(citer* begin, citer* end, citer* result, cntr_fc* criterion);
+bool find_first(citer begin, citer end, citer result, cntr_fc* criterion);
+bool find_last(citer begin, citer end, citer result, cntr_fc* criterion);
 
 
 #endif /* _CNTR_ALGORITHM_H_ */

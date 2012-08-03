@@ -53,55 +53,21 @@
 #include <cominc.h>
 #include <oos_model.h>
 
-typedef struct cntr_iterator_t citer;
-typedef bool (*pf_citer_valid)(citer*);
-typedef void (*pf_citer_to_next)(citer*);
-typedef void (*pf_citer_to_prev)(citer*);
-typedef void* (*pf_citer_get_ref)(citer*);
-typedef void (*pf_citer_set_ref)(citer*, void*);
-typedef int (*pf_citer_cntr_size)(citer*);
+typedef unknown citer;
 
-typedef struct cntr_iterator_operations_t {
-	pf_citer_valid   valid;
-	pf_citer_get_ref get_ref;
-	pf_citer_set_ref set_ref;
-	pf_citer_to_prev to_prev;
-	pf_citer_to_next to_next;
-	pf_citer_cntr_size cntr_size;
-} citer_operations;
+extern inline bool     citer_valid(citer itr);
+
+extern inline void     citer_to_next(citer itr);
+
+extern inline void     citer_to_prev(citer itr);
+
+extern inline void*    citer_get_ref(citer itr);
+
+extern inline void     citer_set_ref(citer itr, void* nref);
+
 /*
- * Instead of * typedef unknow citer * , I expose the details of iterator to let 
- * client to declare a citer on stack.
+ * define a citer on stack, assign the it as citer_as_init.
  */
-struct cntr_iterator_t {
-	/* 
-	 * pointer to specific iterator operations
-	 */
-	citer_operations* ops; 
-
-	/* 
-	 * pointer to the data structure that connected objects in a container 
-	 */
-	void* connection;  
-
-	void* container;
-} ;
-
-
-
-
-extern inline bool citer_valid(citer* itr);
-
-extern inline bool citer_equal(citer* lhs, citer* rhs);
-
-extern inline void citer_to_next(citer* itr);
-
-extern inline void citer_to_prev(citer* itr);
-
-extern inline void* citer_get_ref(citer* itr);
-
-extern inline void citer_set_ref(citer* itr, void* nref);
-
-extern inline int citer_cntr_size(citer* itr);
+#define citer_dos(citer_name, citer_as_init) alloc_two_pointers_on_stack(citer_name, citer_as_init)
 
 #endif /* _CNTR_ITERATOR_H_ */
