@@ -7,26 +7,25 @@
  */
 
 #include <cntr_iterator.h>
-typedef void* clist;
+typedef unknown clist;
 
-void clist_init(clist* pcl);
-void clist_deinit(clist* pcl);
+clist clist_create();
+void  clist_destroy    (clist cl);
 
-void clist_clean(clist* pcl);
-int clist_size(clist* pcl);
+void  clist_clear      (clist cl);
+int   clist_size       (clist cl);
 
-void* clist_front(clist* pcl);
-void* clist_back (clist* pcl);
+void* clist_front      (clist cl);
+void* clist_back       (clist cl);
 
-void  clist_add_front(clist* pcl, void* object);
-void  clist_add_back (clist* pcl, void* object);
-void  clist_add      (clist* pcl, void* object);
+void  clist_add_front  (clist cl, void* object);
+void  clist_add_back   (clist cl, void* object);
+void  clist_add        (clist cl, void* object);
 
-void* clist_remove_front(clist* pcl);
-void* clist_remove_back (clist* pcl);
+void* clist_remove_front(clist cl);
+void* clist_remove_back (clist cl);
 
-struct citer;
-void  clist_citer_begin(clist* pcl, citer* itr);
-void  clist_citer_end  (clist* pcl, citer* itr);
+void  clist_citer_begin(clist cl, citer itr);
+void  clist_citer_end  (clist cl, citer itr);
 
 #endif /* _CNTR_LIST_H_ */

@@ -39,35 +39,36 @@
 
 #include <cntr_iterator.h>
 
-typedef void* container;
+typedef unknown cntr;
 
-container clinear_as_list();
+cntr clinear_as_list();
 
-container clinear_as_array();
+cntr clinear_as_array();
 
-void clinear_deinit(container cntr);
+void clinear_destroy(cntr c);
 
-void clinear_clean(container cntr);
+void clinear_clear(cntr c);
 
-int  clinear_size(container cntr);
+int  clinear_size(cntr c);
 
-void* clinear_front(container cntr);
+void* clinear_front(cntr c);
 
-void* clinear_back(container cntr);
+void* clinear_back(cntr c);
 
-void clinear_add_front(container cntr, void* obj);
+void clinear_add_front(cntr c, void* obj);
 
-void clinear_add_back(container cntr, void* obj);
+void clinear_add_back(cntr c, void* obj);
 
-void* clinear_remove_front(container cntr);
+void* clinear_remove_front(cntr c);
 
-void* clinear_remove_back(container cntr);
+void* clinear_remove_back(cntr c);
 
-void clinear_citer_begin(container cntr, citer* itr);
+void clinear_citer_begin(cntr c, citer itr);
 
-void clinear_citer_end(container cntr, citer* itr);
+void clinear_citer_end(cntr c, citer itr);
 
-void clinear_citer_copy(container cntr, citer* begin, citer* end);
+void clinear_citer_copy(cntr c, citer begin, citer end);
+
 
 
 #endif /* _CNTR_ABSTRACTION_ */

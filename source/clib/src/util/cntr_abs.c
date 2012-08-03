@@ -3,11 +3,22 @@
 #include <cntr_list.h>
 #include <cntr_array.h>
 
-#include <cntr_spec.h>
+typedef cntr (*pf_linear_cntr_create)(cntr c);
+typedef void (*pf_linear_cntr_destroy)(cntr c);
+typedef void (*pf_linear_cntr_clear)(cntr c);
+typedef int  (*pf_linear_cntr_size)(cntr c);
+typedef void* (*pf_linear_cntr_front)(cntr c);
+typedef void* (*pf_linear_cntr_back)(cntr c);
+typedef void (*pf_linear_cntr_add_front)(cntr c, void* obj);
+typedef void (*pf_linear_cntr_add_back)(cntr c, void* obj);
+typedef void* (*pf_linear_cntr_remove_front)(cntr c);
+typedef void* (*pf_linear_cntr_remove_back)(cntr c);
+typedef void (*pf_linear_cntr_citer_begin)(cntr c, citer itr);
+typedef void (*pf_linear_cntr_citer_end)(cntr c, citer itr);
+
 typedef struct linear_cntr_operations_t {
-	pf_linear_cntr_init         init;
-	pf_linear_cntr_deinit       deinit;
-	pf_linear_cntr_clean        clean;
+	pf_linear_cntr_destroy      destroy;
+	pf_linear_cntr_clear        clear;
 	pf_linear_cntr_size         size;
 	pf_linear_cntr_front        front;
 	pf_linear_cntr_back         back;
@@ -20,9 +31,9 @@ typedef struct linear_cntr_operations_t {
 } clinear_operations;
 
 typedef struct linear_cntr_t {
-	void* pcont;
+	clinear_operations* __vt;
 
-	clinear_operations* ops;
+	unknown             __cont;
 } clinear;
 
 /*
@@ -55,9 +66,8 @@ make_callback_param(clist, void, clist_citer_end  , citer*);
  */
 
 static clinear_operations clist_ops = {
-	clist_init, /* init */
-	clist_deinit, /* deinit */
-	clist_clean, /* clean */
+	clist_destroy, /* deinit */
+	clist_clear, /* clean */
 	clist_size, /* size */
 	clist_front, /* front */
 	clist_back , /* back  */
@@ -69,84 +79,83 @@ static clinear_operations clist_ops = {
 	clist_citer_end  , /* citer_end   */
 };
 
-container clinear_as_list() {
-	clinear* c = (clinear*)halloc(sizeof(clinear));
+cntr clinear_as_list() {
+	clist list = clist_create();
 
-	c->pcont = (void*)halloc(sizeof(clist));
-	c->ops = &clist_ops;
+	clinear* cl = (clinear*)halloc(sizeof(clinear));
+	cl->__vt = &clist_ops;
+	cl->__cont = (unknown)list;
 
-	(c->ops)->init((clist*)c->pcont);
-
-	return (container)c;
+	return (cntr)cl;
 }
 
-container clinear_as_array() {
+cntr clinear_as_array() {
 
 }
 
-void clinear_deinit(container cntr) {
-	clinear* c = (clinear*)cntr;
+void clinear_destroy(cntr c) {
+	clinear* cl = (clinear*)c;
 
-	hfree(c->pcont);
-	hfree(c);
+	(cl->__vt)->destroy(cl->__cont);
+	hfree(cl);
 }
 
-int clinear_size(container cntr) {
-	clinear* c = (clinear*)cntr;
+int clinear_size(cntr c) {
+	clinear* cl = (clinear*)c;
 
-	return (c->ops)->size(c->pcont);
+	return (cl->__vt)->size(cl->__cont);
 }
 
-void clinear_clean(container cntr) {
-	clinear* c = (clinear*)cntr;
+void clinear_clear(cntr c) {
+	clinear* cl = (clinear*)c;
 
-	(c->ops)->clean(c->pcont);
+	(cl->__vt)->clear(cl->__cont);
 }
 
-void* clinear_front(container cntr) {
-	clinear* c = (clinear*)cntr;
+void* clinear_front(cntr c) {
+	clinear* cl = (clinear*)c;
 
-	return (void*)(c->ops)->front(c->pcont);
+	return (void*)(cl->__vt)->front(cl->__cont);
 }
 
-void* clinear_back(container cntr) {
-	clinear* c = (clinear*)cntr;
+void* clinear_back(cntr c) {
+	clinear* cl = (clinear*)c;
 
-	return (void*)(c->ops)->back(c->pcont);
+	return (void*)(cl->__vt)->back(cl->__cont);
 }
 
-void clinear_add_front(container cntr, void* obj) {
-	clinear* c = (clinear*)cntr;
+void clinear_add_front(cntr c, void* obj) {
+	clinear* cl = (clinear*)c;
 
-	(c->ops)->add_front(c->pcont, obj);
+	(cl->__vt)->add_front(cl->__cont, obj);
 }
 
-void clinear_add_back(container cntr, void* obj) {
-	clinear* c = (clinear*)cntr;
+void clinear_add_back(cntr c, void* obj) {
+	clinear* cl = (clinear*)c;
 
-	(c->ops)->add_back(c->pcont, obj);
+	(cl->__vt)->add_back(cl->__cont, obj);
 }
 
-void* clinear_remove_front(container cntr) {
-	clinear* c = (clinear*)cntr;
+void* clinear_remove_front(cntr c) {
+	clinear* cl = (clinear*)c;
 
-	return (void*)(c->ops)->remove_front(c->pcont);
+	return (void*)(cl->__vt)->remove_front(cl->__cont);
 }
 
-void* clinear_remove_back(container cntr) {
-	clinear* c = (clinear*)cntr;
+void* clinear_remove_back(cntr c) {
+	clinear* cl = (clinear*)c;
 
-	return (void*)(c->ops)->remove_front(c->pcont);
+	return (void*)(cl->__vt)->remove_front(cl->__cont);
 }
 
-void clinear_citer_begin(container cntr, citer* itr) {
-	clinear* c = (clinear*)cntr;
+void clinear_citer_begin(cntr c, citer* itr) {
+	clinear* cl = (clinear*)c;
 
-	(c->ops)->citer_begin(c->pcont, itr);
+	(cl->__vt)->citer_begin(cl->__cont, itr);
 }
 
-void clinear_citer_end(container cntr, citer* itr) {
-	clinear* c = (clinear*)cntr;
+void clinear_citer_end(cntr c, citer* itr) {
+	clinear* cl = (clinear*)c;
 
-	(c->ops)->citer_end(c->pcont, itr);
+	(cl->__vt)->citer_end(cl->__cont, itr);
 }

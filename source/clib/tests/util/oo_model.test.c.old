@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <oo_model.h>
+#include <oos_model.h>
 
 int main() {
 	unknown bird = bird_create();
