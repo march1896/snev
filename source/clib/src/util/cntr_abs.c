@@ -36,35 +36,6 @@ typedef struct linear_cntr_t {
 	unknown             __cont;
 } clinear;
 
-/*
- * To make cntr specific method adaptive to container spec interface.
- *
- * the below macro are used to disable 
- * warning: initialization from incompatible pointer type [enabled by default]
-#define make_callback(cntr_type, return_type, func) \
-	static inline return_type cb_##func(container cntr) {\
-		return func((cntr_type*)cntr);\
-	}
-
-#define make_callback_param(cntr_type, return_type, func, param_type) \
-	static inline return_type cb_##func(container cntr, param_type param) {\
-		return func((cntr_type*)cntr, param);\
-	}
-
-make_callback(clist, void, clist_init);
-make_callback(clist, void, clist_deinit);
-make_callback(clist, void, clist_clean);
-make_callback(clist, int, clist_size);
-make_callback(clist, void*, clist_front);
-make_callback(clist, void*, clist_back );
-make_callback_param(clist, void, clist_add_front, void*);
-make_callback_param(clist, void, clist_add_back, void*);
-make_callback(clist, void*, clist_remove_front);
-make_callback(clist, void*, clist_remove_back );
-make_callback_param(clist, void, clist_citer_begin, citer*);
-make_callback_param(clist, void, clist_citer_end  , citer*);
- */
-
 static clinear_operations clist_ops = {
 	clist_destroy, /* deinit */
 	clist_clear, /* clean */
@@ -79,6 +50,20 @@ static clinear_operations clist_ops = {
 	clist_citer_end  , /* citer_end   */
 };
 
+static clinear_operations carray_ops = {
+	carray_destroy, /* deinit */
+	carray_clear, /* clean */
+	carray_size, /* size */
+	carray_front, /* front */
+	carray_back , /* back  */
+	carray_add_front, /* add_front */
+	carray_add_back , /* add_back  */
+	carray_remove_front, /* remove_front */
+	carray_remove_back , /* remove_back  */
+	carray_citer_begin, /* citer_begin */
+	carray_citer_end  , /* citer_end   */
+};
+
 cntr clinear_as_list() {
 	clist list = clist_create();
 
@@ -90,7 +75,13 @@ cntr clinear_as_list() {
 }
 
 cntr clinear_as_array() {
+	carray ary = carray_create();
 
+	clinear* cl = (clinear*)halloc(sizeof(clinear));
+	cl->__vt = &carray_ops;
+	cl->__cont = (unknown)ary;
+
+	return (cntr)cl;
 }
 
 void clinear_destroy(cntr c) {
