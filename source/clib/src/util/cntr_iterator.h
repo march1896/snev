@@ -55,6 +55,8 @@
 
 typedef unknown citer;
 
+typedef unknown cntr;
+
 extern inline bool     citer_valid(citer itr);
 
 extern inline void     citer_to_next(citer itr);

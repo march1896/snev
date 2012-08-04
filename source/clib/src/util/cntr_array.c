@@ -47,6 +47,10 @@ int   carray_size       (carray ca) {
 	return pca->size;
 }
 
+void  carray_add        (carray ca, void* object) {
+	carray_add_back(ca, object);
+}
+
 void* carray_front      (carray ca) {
 	cntr_array* pca = (cntr_array*)ca;
 
@@ -105,10 +109,6 @@ void  carray_add_back   (carray ca, void* object) {
 	if (pca->capacity == pca->size) __expand_capacity(pca);
 
 	pca->data[pca->size++] = object;
-}
-
-void  carray_add        (carray ca, void* object) {
-	carray_add_back(ca, object);
 }
 
 void* carray_remove_front(carray ca) {
@@ -198,3 +198,13 @@ void  carray_citer_end  (carray ca, citer ci) {
 	itr->__vt = &carray_citer_operations;
 	itr->connection = pca->size ? (void*)&pca->data[pca->size-1] : NULL;
 }
+
+void  carray_remove     (carray ca, citer begin, citer end) {
+	// TODO:
+}
+
+bool  carray_find       (carray ca, void* object, citer itr) {
+	// TODO:
+	return false;
+}
+

@@ -53,6 +53,10 @@ int clist_size(clist cl) {
 	return pcl->size;
 }
 
+void clist_add(clist cl, void* object) {
+	clist_add_front(cl, object);
+}
+
 void* clist_front(clist cl) {
 	cntr_list* pcl = (cntr_list*)cl;
 
@@ -119,12 +123,6 @@ void  clist_add_back (clist cl, void* object) {
 	}
 
 	pcl->size ++;
-}
-
-void  clist_add      (clist cl, void* object) {
-	cntr_list* pcl = (cntr_list*)cl;
-
-	clist_add_front(pcl, object);
 }
 
 void* clist_remove_front(clist cl) {
@@ -247,3 +245,18 @@ void  clist_citer_end  (clist cl, citer cur) {
 	itr->connection = (void*)pcl->end;
 }
 
+bool  clist_find(clist cl, void* object, citer itr) {
+	// TODO:
+	return false;
+}
+
+void  clist_remove(clist cl, citer begin, citer end) {
+	cntr_list* pcl = (cntr_list*)cl;
+	cntr_iterator* pbegin = (cntr_iterator*)begin;
+	cntr_iterator* pend = (cntr_iterator*)end;
+
+	oplink* link_begin = (oplink*)(pbegin->connection);
+	oplink* link_end = (oplink*)(pend->connection);
+
+	// TODO:
+}
