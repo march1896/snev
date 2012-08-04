@@ -63,24 +63,27 @@ void* carray_back       (carray ca) {
 	return pca->data[pca->size - 1];
 }
 
-static void __expand_capacity(cntr_array* pca) {
-	void** n_data = NULL;
-
-	n_data = (void**)halloc(sizeof(sizeof(void*) * pca->capacity));
-
-	hfree(pca->data);
-	pca->data = n_data;
-}
-
 static void memory_move(char* dest, char* src, int size) {
-	if (dest < src + size) {
-		dest += size;
-		src += size;
+	if (dest >= src && dest < src + size) {
+		dest += size - 1;
+		src += size - 1;
 
 		while (size --) *(dest --) = *(src --);
+		return;
 	}
 
 	while (size --) *(dest ++) = *(src ++);
+}
+
+static void __expand_capacity(cntr_array* pca) {
+	void** n_data = NULL;
+
+	pca->capacity += pca->expand_size;
+	n_data = (void**)halloc(sizeof(void*) * pca->capacity);
+
+	memory_move((char*)n_data, (char*)pca->data, pca->size * sizeof(void*) / sizeof(char));
+	hfree((void*)pca->data);
+	pca->data = n_data;
 }
 
 void  carray_add_front  (carray ca, void* object) {

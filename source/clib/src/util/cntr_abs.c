@@ -139,13 +139,13 @@ void* clinear_remove_back(cntr c) {
 	return (void*)(cl->__vt)->remove_front(cl->__cont);
 }
 
-void clinear_citer_begin(cntr c, citer* itr) {
+void clinear_citer_begin(cntr c, citer itr) {
 	clinear* cl = (clinear*)c;
 
 	(cl->__vt)->citer_begin(cl->__cont, itr);
 }
 
-void clinear_citer_end(cntr c, citer* itr) {
+void clinear_citer_end(cntr c, citer itr) {
 	clinear* cl = (clinear*)c;
 
 	(cl->__vt)->citer_end(cl->__cont, itr);

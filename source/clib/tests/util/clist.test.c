@@ -117,15 +117,16 @@ void test_cntr_abs() {
 	citer_dos(begin, NULL);
 	citer_dos(end, NULL);
 	citer_dos(itr, NULL);
-	int x[50], i;
+	int x[500], i;
 
-	for (i = 0; i < 50; i ++) {
+	for (i = 0; i < 500; i ++) {
 		x[i] = (12173*i+757)%147;
+		//x[i] = 500 - i;
 		printf("%d ", x[i]);
 	}
 
-	for (i = 0; i < 50; i ++) {
-		clinear_add_back(c, &x[i]);
+	for (i = 0; i < 500; i ++) {
+		clinear_add_front(c, &x[i]);
 	}
 	printf("container size is: %d\n", clinear_size(c));
 
