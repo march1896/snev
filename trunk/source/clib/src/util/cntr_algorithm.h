@@ -6,10 +6,6 @@
 /*
  * ITERATOR_ADDR MUST BE declared before 
  */
-#define for_each(CNTR_TYPE, CNTR_NAME, ITERATOR_NAME) \
-	for (CNTR_TYPE##_citer_begin(CNTR_NAME, ITERATOR_NAME); \
-			citer_valid(ITERATOR_NAME); \
-			citer_to_next(ITERATOR_NAME))
 
 extern inline void citer_swap(citer first, citer second);
 
@@ -17,6 +13,9 @@ extern inline bool citer_equal(citer first, citer second);
 
 extern inline void citer_assign(citer first, citer second);
 
+typedef void (*pf_for_each_process)(citer itr);
+
+void citer_for_each(citer begin, citer end, pf_for_each_process proc);
 /*
  * sorting algorithm.
  */

@@ -6,47 +6,31 @@
  */
 
 #include <cntr_iterator.h>
+#define default_init_capacity 64
+#define default_expand_size 64
 
-typedef struct cntr_array_t {
-	int size;
-	int capacity;
-	unsigned flags;
+typedef unknown carray;
 
-	void* data;
-} carray;
+carray carray_create();
+carray carray_create_v(int init_capacity, int expand_size);
+void  carray_destroy    (carray ca);
 
-/*
- * linear container specific interface.
- */
+void  carray_clear      (carray ca);
+int   carray_size       (carray ca);
 
-void carray_init(carray* pca);
+void* carray_front      (carray ca);
+void* carray_back       (carray ca);
 
-void carray_deinit(carray* pca);
+void  carray_add_front  (carray ca, void* object);
+void  carray_add_back   (carray ca, void* object);
+void  carray_add        (carray ca, void* object);
 
-void carray_clean(carray* pca);
+void* carray_remove_front(carray ca);
+void* carray_remove_back (carray ca);
 
-int carray_size(carray* pca);
+void  carray_citer_begin(carray ca, citer itr);
+void  carray_citer_end  (carray ca, citer itr);
 
-void* carray_front(carray* pcl);
-
-void* carray_back (carray* pcl);
-
-void  carray_add_front(carray* pcl, void* object);
-
-void  carray_add_back (carray* pcl, void* object);
-
-void* carray_remove_front(carray* pcl);
-
-void* carray_remove_back (carray* pcl);
-
-struct citer;
-void  carray_citer_begin(carray* pcl, citer* itr);
-
-void  carray_citer_end  (carray* pcl, citer* itr);
-/* linear container specific interface end.  */
-
-
-void  carray_add      (carray* pcl, void* object);
 /**
  * @brief 
  *

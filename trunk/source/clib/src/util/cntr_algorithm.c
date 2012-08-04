@@ -1,4 +1,3 @@
-#include <cominc.h>
 #include <cntr_algorithm.h>
 #include <cntr_iterator.h>
 #include <cntr_iterator.local.h>
@@ -29,6 +28,17 @@ inline void citer_assign(citer to, citer from) {
 
 	lhs->connection = rhs->connection;
 	lhs->__vt = rhs->__vt;
+}
+
+void citer_for_each(citer begin, citer end, pf_for_each_process proc) {
+	citer_dos(itr, begin);
+	bool over = false;
+
+	for (; !citer_equal(itr, end); citer_to_next(itr)) {
+		proc(itr);
+	}
+
+	proc(itr);
 }
 
 void __partition(citer begin, citer end, citer out, pf_compare_object comp) {

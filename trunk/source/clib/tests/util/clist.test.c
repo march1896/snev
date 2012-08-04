@@ -5,6 +5,8 @@
 
 #include <stdio.h>
 
+static void print(citer itr) { printf("%d ", *((int*)citer_get_ref(itr))); }
+
 void basic_test() {
 	clist list = clist_create();
 	int x = 3;
@@ -60,75 +62,58 @@ void test_bubble_sort() {
 		clist_add_back(pl, &x[i]);
 	}
 
-	clist_citer_begin(pl, itr);
-	while (citer_valid(itr)) {
-		printf("%d ", *((int*)citer_get_ref(itr)));
-
-		citer_to_next(itr);
-	}
-	printf("\n\n");
-
 	clist_citer_begin(pl, begin);
 	clist_citer_end(pl, end);
 	citer_swap(begin, end);
-	for_each(clist, pl, itr) {
-		printf("%d ", *((int*)citer_get_ref(itr)));
-	}
+	citer_for_each(begin, end, print);
+
 	printf("\n\n");
 	citer_to_next(begin);
 	citer_to_prev(end);
 	quick_sort(begin, end, int_compare);
 
-	clist_citer_begin(pl, itr);
-	while (citer_valid(itr)) {
-		printf("%d ", *((int*)citer_get_ref(itr)));
-
-		citer_to_next(itr);
-	}
+	citer_for_each(begin, end, print);
 	printf("\n\n");
-
-	for_each(clist, pl, itr) {
-		printf("%d ", *((int*)citer_get_ref(itr)));
-	}
 
 	clist_destroy(pl);
 }
 
-typedef void (*pf_param_void)(void* param);
-
-void func2() {
-	printf("func2\n");
-}
-
-typedef void* type;
-
-void function(type param) {
-	printf("here we go: %d", *((int*)param));
-	return func2();
-}
-
-void test_grammar() {
-	void* void_pointer;
-	int integer = 5;
-	int* int_pointer = &integer;
-
-	void_pointer = &integer;
-
-	void_pointer = int_pointer;
-
+// typedef void (*pf_param_void)(void* param);
+// 
+// void func2() {
+// 	printf("func2\n");
+// }
+// 
+// typedef void* type;
+// 
+// void function(type param) {
+// 	printf("here we go: %d", *((int*)param));
+// 	return func2();
+// }
+// 
+// void test_grammar() {
+// 	void* void_pointer;
+// 	int integer = 5;
+// 	int* int_pointer = &integer;
+// 
+// 	void_pointer = &integer;
+// 
+// 	void_pointer = int_pointer;
+// 
 // 	float floatnumber = 5.5;
 // 	integer = floatnumber;
-
-	//printf("%d\n", integer);
-
-	//pf_param_void pf = function;
-	//pf(&integer);
-}
+// 
+// 	printf("%d\n", integer);
+// 
+// 	pf_param_void pf = function;
+// 	pf(&integer);
+// }
 
 #include <cntr_abs.h>
+
 void test_cntr_abs() {
 	//printf("\n\ntest container begins\n\n");
-	cntr c = clinear_as_list();
+	cntr c = clinear_as_array();
 	citer_dos(begin, NULL);
 	citer_dos(end, NULL);
 	citer_dos(itr, NULL);
@@ -139,24 +124,27 @@ void test_cntr_abs() {
 		printf("%d ", x[i]);
 	}
 
-	printf("container size is: %d\n", clinear_size(c));
-
 	for (i = 0; i < 50; i ++) {
 		clinear_add_back(c, &x[i]);
 	}
-
-	for_each(clinear, c, itr) {
-		printf("%d ", *((int*)citer_get_ref(itr)));
-	}
-	printf("\n");
+	printf("container size is: %d\n", clinear_size(c));
 
 	clinear_citer_begin(c, begin);
 	clinear_citer_end(c, end);
+	printf("\ninited : \n");
+	citer_for_each(begin, end, print);
+	printf("\n");
+
+	citer_swap(begin, end);
+
+	printf("\nafter swap: \n");
+	citer_for_each(begin, end, print);
+	printf("\n");
+
+	printf("\nafter sort: \n");
 	quick_sort(begin, end, int_compare);
 
-	for_each(clinear, c, itr) {
-		printf("%d ", *((int*)citer_get_ref(itr)));
-	}
+	citer_for_each(begin, end, print);
 	printf("\n");
 	clinear_destroy(c);
 }
@@ -164,7 +152,7 @@ void test_cntr_abs() {
 int main() {
 	basic_test();
 	test_bubble_sort();
-	test_grammar();
+	//test_grammar();
 	test_cntr_abs();
 
 	return 0;
