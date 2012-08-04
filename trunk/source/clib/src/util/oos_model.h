@@ -4,6 +4,18 @@
 
 typedef void* unknown;
 
+/* 
+ * Because unknown is reference, so passing it as parameter may change the reference value. And in the
+ * oos model, type information are all erase by casting, so const keyword does not help.
+ *
+ * __in, __out gives hints to user about the use of param.
+ */
+#if !defined(_MSC_VER)
+
+#define __out
+#define __in
+
+#endif
 /*
  * Because our philosophy is to erase type information in oos, if we want to new a frequently 
  * used object on stack, we should use the following helpers.

@@ -1,7 +1,7 @@
 #include <cntr_list.h>
 #include <cntr_algorithm.h>
 #include <cntr_iterator.h>
-#include <cntr_abs.h>
+#include <cntr_linear.h>
 
 #include <stdio.h>
 
@@ -109,7 +109,7 @@ void test_bubble_sort() {
 // 	pf(&integer);
 // }
 
-#include <cntr_abs.h>
+#include <cntr_linear.h>
 
 void test_cntr_abs() {
 	//printf("\n\ntest container begins\n\n");

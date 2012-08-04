@@ -16,7 +16,7 @@ inline bool citer_equal(citer first, citer second) {
 	cntr_iterator* rhs = (cntr_iterator*)second;
 
 	if (lhs->connection == rhs->connection) {
-		// dbg_assert(lhs->container == rhs->container && lhs->ops == rhs->ops);
+		dbg_assert(lhs->__vt == rhs->__vt);
 		return true;
 	}
 	return false;
@@ -39,6 +39,16 @@ void citer_for_each(citer begin, citer end, pf_for_each_process proc) {
 	}
 
 	proc(itr);
+}
+
+
+bool cntr_equal(cntr first, cntr second) {
+	bool equals = true;
+	citer_dos(fc, NULL);
+	citer_dos(sc, NULL);
+
+	// TODO:
+	return true;
 }
 
 void __partition(citer begin, citer end, citer out, pf_compare_object comp) {
@@ -115,13 +125,11 @@ void bubble_sort(citer begin, citer end, pf_compare_object comp) {
 	return;
 }
 
-typedef bool (*pf_find_accept)(void* object, void* param);
-
-bool find_first(citer begin, citer end, citer result, cntr_fc* criterion) {
+bool find_first(citer begin, citer end, citer result, pf_find_accept accept) {
 	return false;
 }
 
-bool find_last(citer begin, citer end, citer result, cntr_fc* criterion) {
+bool find_last(citer begin, citer end, citer result, pf_find_accept accept) {
 	return false;
 }
 

@@ -13,23 +13,23 @@ typedef unknown carray;
 
 carray carray_create();
 carray carray_create_v(int init_capacity, int expand_size);
-void  carray_destroy    (carray ca);
 
+void  carray_destroy    (carray ca);
 void  carray_clear      (carray ca);
 int   carray_size       (carray ca);
+void  carray_add        (carray ca, void* object);
+void  carray_remove     (carray ca, citer begin, citer end);
+bool  carray_find       (carray ca, void* object, citer itr);
+void  carray_citer_begin(carray ca, citer itr);
+void  carray_citer_end  (carray ca, citer itr);
 
 void* carray_front      (carray ca);
 void* carray_back       (carray ca);
-
 void  carray_add_front  (carray ca, void* object);
 void  carray_add_back   (carray ca, void* object);
-void  carray_add        (carray ca, void* object);
-
 void* carray_remove_front(carray ca);
 void* carray_remove_back (carray ca);
 
-void  carray_citer_begin(carray ca, citer itr);
-void  carray_citer_end  (carray ca, citer itr);
 
 /**
  * @brief 
