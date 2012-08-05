@@ -1,6 +1,7 @@
-#include <cntr_list.h>
 #include <cntr_iterator.h>
 #include <cntr_iterator.local.h>
+
+#include <cntr_linear.local.h>
 
 typedef struct open_link_t {
 	struct open_link_t* prev;
@@ -9,31 +10,101 @@ typedef struct open_link_t {
 	void* object;
 } oplink;
 
-typedef struct cntr_list_t {
-	int     size;
-	unsigned flags;
+typedef struct cntr_list_vtable_t {
+	/* from cntr_linear_vtable */
+	pf_attribute                __attrib;
 
-	oplink* begin;
-	oplink* end;
+	pf_cntr_base_destroy        __destroy;
+	pf_cntr_base_clear          __clear;
+	pf_cntr_base_size           __size;
+	pf_cntr_base_add            __add;
+	pf_cntr_base_remove         __remove;
+	pf_cntr_base_find           __find;
+	pf_cntr_base_citer_begin    __citer_begin;
+	pf_cntr_base_citer_end      __citer_end;
+
+	/* clinear specific */
+	pf_cntr_linear_front        __front;
+	pf_cntr_linear_back         __back;
+	pf_cntr_linear_add_front    __add_front;
+	pf_cntr_linear_add_back     __add_back;
+	pf_cntr_linear_remove_front __remove_front;
+	pf_cntr_linear_remove_back  __remove_back;
+
+} cntr_list_vtable;
+
+static cntr_attr cntr_list_attribute(cntr cl);
+static void  cntr_list_destroy    (cntr cl);
+static void  cntr_list_clear      (cntr cl);
+static int   cntr_list_size       (cntr cl);
+static void  cntr_list_add        (cntr cl, void* object);
+static void  cntr_list_remove     (cntr cl, citer begin, citer end);
+static bool  cntr_list_find       (cntr cl, void* object, citer itr);
+static void  cntr_list_citer_begin(cntr cl, citer itr);
+static void  cntr_list_citer_end  (cntr cl, citer itr);
+
+static void* cntr_list_front      (cntr cl);
+static void* cntr_list_back       (cntr cl);
+static void  cntr_list_add_front  (cntr cl, void* object);
+static void  cntr_list_add_back   (cntr cl, void* object);
+static void* cntr_list_remove_front(cntr cl);
+static void* cntr_list_remove_back (cntr cl);
+
+static cntr_list_vtable cntr_list_ops = {
+	cntr_list_attribute, /* __attrib */
+	cntr_list_destroy, /* destroy */
+	cntr_list_clear, /* clean */
+	cntr_list_size, /* size */
+	cntr_list_add, /* add */
+	cntr_list_remove,
+	cntr_list_find,
+	cntr_list_citer_begin, /* citer_begin */
+	cntr_list_citer_end  , /* citer_end   */
+
+	cntr_list_front, /* front */
+	cntr_list_back , /* back  */
+	cntr_list_add_front, /* add_front */
+	cntr_list_add_back , /* add_back  */
+	cntr_list_remove_front, /* remove_front */
+	cntr_list_remove_back , /* remove_back  */
+};
+
+typedef struct cntr_list_t {
+	cntr_list_vtable*               __vt;
+
+	int                         size;
+	unsigned int                flags;
+	oplink*                     begin;
+	oplink*                     end;
 } cntr_list;
 
-clist clist_create() {
+cntr cntr_create_as_list() {
 	cntr_list* pcl = (cntr_list*)halloc(sizeof(cntr_list));
+
+	pcl->__vt = &cntr_list_ops;
 
 	pcl->size = 0;
 	pcl->flags = 0;
 	pcl->begin = pcl->end = NULL;
 
-	return pcl;
+	return (cntr)pcl;
 }
 
-void clist_destroy(clist pcl) {
-	clist_clear(pcl);
+/******************************************************************************************************
+ * local functions begin
+******************************************************************************************************/
+
+static cntr_attr cntr_list_attribute(cntr cl) {
+	return CNTR_ATTR_BASE | CNTR_ATTR_LINEAR | CNTR_ATTR_LIST;
+}
+
+static void cntr_list_destroy(cntr pcl) {
+	cntr_list_clear(pcl);
 
 	hfree(pcl);
 }
 
-void clist_clear(clist cl) {
+static void cntr_list_clear(cntr cl) {
 	cntr_list* pcl = (cntr_list*)cl;
 
 	oplink* link = pcl->begin;
@@ -47,17 +118,17 @@ void clist_clear(clist cl) {
 	}
 }
 
-int clist_size(clist cl) {
+static int cntr_list_size(cntr cl) {
 	cntr_list* pcl = (cntr_list*)cl;
 	
 	return pcl->size;
 }
 
-void clist_add(clist cl, void* object) {
-	clist_add_front(cl, object);
+static void cntr_list_add(cntr cl, void* object) {
+	cntr_list_add_front(cl, object);
 }
 
-void* clist_front(clist cl) {
+static void* cntr_list_front(cntr cl) {
 	cntr_list* pcl = (cntr_list*)cl;
 
 	if (pcl->begin == NULL) {
@@ -68,7 +139,7 @@ void* clist_front(clist cl) {
 	return (pcl->begin)->object;
 }
 
-void* clist_back (clist cl) {
+static void* cntr_list_back (cntr cl) {
 	cntr_list* pcl = (cntr_list*)cl;
 
 	if (pcl->end == NULL) {
@@ -80,7 +151,7 @@ void* clist_back (clist cl) {
 	return (pcl->end)->object;
 }
 
-void  clist_add_front(clist cl, void* object) {
+static void  cntr_list_add_front(cntr cl, void* object) {
 	cntr_list* pcl = (cntr_list*)cl;
 	oplink* link = (oplink*)halloc(sizeof(oplink));
 
@@ -103,7 +174,7 @@ void  clist_add_front(clist cl, void* object) {
 	pcl->size ++;
 }
 
-void  clist_add_back (clist cl, void* object) {
+static void  cntr_list_add_back (cntr cl, void* object) {
 	cntr_list* pcl = (cntr_list*)cl;
 	oplink* link = (oplink*)halloc(sizeof(oplink));
 
@@ -125,7 +196,7 @@ void  clist_add_back (clist cl, void* object) {
 	pcl->size ++;
 }
 
-void* clist_remove_front(clist cl) {
+static void* cntr_list_remove_front(cntr cl) {
 	cntr_list* pcl = (cntr_list*)cl;
 	oplink* link = pcl->begin;
 	void* object = link->object;
@@ -147,7 +218,7 @@ void* clist_remove_front(clist cl) {
 	return object;
 }
 
-void*  clist_remove_back (clist cl) {
+static void*  cntr_list_remove_back (cntr cl) {
 	cntr_list* pcl = (cntr_list*)cl;
 	oplink* link = pcl->end;
 	void* object = link->object;
@@ -215,7 +286,7 @@ static void oplink_set_ref(citer itr, void* n_ref) {
 /*
 static int oplink_cntr_size(citer itr) {
 	cntr_iterator* cur = (cntr_iterator*)itr;
-	clist* list = (clist*)(cur->container);
+	cntr* list = (cntr*)(cur->container);
 
 	dbg_assert(list);
 	return list->size;
@@ -229,7 +300,7 @@ static citer_interface oplink_citer_operations = {
 	oplink_to_next,
 };
 
-void  clist_citer_begin(clist cl, citer cur) {
+static void  cntr_list_citer_begin(cntr cl, citer cur) {
 	cntr_iterator* itr = (cntr_iterator*)cur;
 	cntr_list* pcl = (cntr_list*)cl;
 
@@ -237,7 +308,7 @@ void  clist_citer_begin(clist cl, citer cur) {
 	itr->connection = (void*)pcl->begin;
 }
 
-void  clist_citer_end  (clist cl, citer cur) {
+static void  cntr_list_citer_end  (cntr cl, citer cur) {
 	cntr_iterator* itr = (cntr_iterator*)cur;
 	cntr_list* pcl = (cntr_list*)cl;
 
@@ -245,12 +316,12 @@ void  clist_citer_end  (clist cl, citer cur) {
 	itr->connection = (void*)pcl->end;
 }
 
-bool  clist_find(clist cl, void* object, citer itr) {
+static bool  cntr_list_find(cntr cl, void* object, citer itr) {
 	// TODO:
 	return false;
 }
 
-void  clist_remove(clist cl, citer begin, citer end) {
+static void  cntr_list_remove(cntr cl, citer begin, citer end) {
 	cntr_list* pcl = (cntr_list*)cl;
 	cntr_iterator* pbegin = (cntr_iterator*)begin;
 	cntr_iterator* pend = (cntr_iterator*)end;

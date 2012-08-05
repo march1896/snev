@@ -1,33 +1,109 @@
-#include <cntr_array.h>
+#include <cntr_factory.h>
 #include <cntr_iterator.h>
 #include <cntr_iterator.local.h>
+#include <cntr_linear.local.h>
+
+typedef void (*pf_cntr_array_assign_capacity)(cntr pca, int n_size);
+
+typedef struct cntr_array_vtable_t {
+	/* from clinear */
+	pf_attribute                __attrib;
+
+	pf_cntr_base_destroy        __destroy;
+	pf_cntr_base_clear          __clear;
+	pf_cntr_base_size           __size;
+	pf_cntr_base_add            __add;
+	pf_cntr_base_remove         __remove;
+	pf_cntr_base_find           __find;
+	pf_cntr_base_citer_begin    __citer_begin;
+	pf_cntr_base_citer_end      __citer_end;
+
+	pf_cntr_linear_front        __front;
+	pf_cntr_linear_back         __back;
+	pf_cntr_linear_add_front    __add_front;
+	pf_cntr_linear_add_back     __add_back;
+	pf_cntr_linear_remove_front __remove_front;
+	pf_cntr_linear_remove_back  __remove_back;
+
+	/* array specific */
+	pf_cntr_array_assign_capacity __assign_capacity;
+} cntr_array_vtable;
+
+static cntr_attr cntr_array_attribute(cntr ca);
+static void  cntr_array_destroy    (cntr ca);
+static void  cntr_array_clear      (cntr ca);
+static int   cntr_array_size       (cntr ca);
+static void  cntr_array_add        (cntr ca, void* object);
+static void  cntr_array_remove     (cntr ca, citer begin, citer end);
+static bool  cntr_array_find       (cntr ca, void* object, citer itr);
+static void  cntr_array_citer_begin(cntr ca, citer itr);
+static void  cntr_array_citer_end  (cntr ca, citer itr);
+
+static void* cntr_array_front      (cntr ca);
+static void* cntr_array_back       (cntr ca);
+static void  cntr_array_add_front  (cntr ca, void* object);
+static void  cntr_array_add_back   (cntr ca, void* object);
+static void* cntr_array_remove_front(cntr ca);
+static void* cntr_array_remove_back (cntr ca);
+
+static void cntr_array_assign_capacity(cntr pca, int n_size);
+
+static cntr_array_vtable cntr_array_ops = {
+	cntr_array_attribute, /* __attrib */
+
+	cntr_array_destroy, /* destroy */
+	cntr_array_clear, /* clean */
+	cntr_array_size, /* size */
+	cntr_array_add,
+	cntr_array_remove,
+	cntr_array_find,
+	cntr_array_citer_begin, /* citer_begin */
+	cntr_array_citer_end  , /* citer_end   */
+
+	cntr_array_front, /* front */
+	cntr_array_back , /* back  */
+	cntr_array_add_front, /* add_front */
+	cntr_array_add_back , /* add_back  */
+	cntr_array_remove_front, /* remove_front */
+	cntr_array_remove_back , /* remove_back  */
+
+	cntr_array_assign_capacity /* assign capacity */
+};
 
 typedef struct cntr_array_t {
-	int size;
-	int capacity;
-	int expand_size;
-	unsigned flags;
+	cntr_array_vtable*      __vt;
 
-	void** data;
+	int                     size;
+	int                     capacity;
+	int                     expand_size;
+	unsigned                flags;
+	void**                  data;
 } cntr_array;
 
-carray carray_create() {
-	return (carray)carray_create_v(default_init_capacity, default_expand_size);
+#define default_init_capacity 64
+#define default_expand_size 64
+cntr cntr_create_as_array() {
+	return (cntr)cntr_create_as_array_v(default_init_capacity, default_expand_size);
 }
 
-carray carray_create_v(int init_capacity, int expand_size) {
+cntr cntr_create_as_array_v(int init_capacity, int expand_size) {
 	cntr_array* pca = (cntr_array*)halloc(sizeof(cntr_array));
 
+	pca->__vt = &cntr_array_ops; 
 	pca->size = 0;
 	pca->capacity = init_capacity;
 	pca->expand_size = expand_size;
 	pca->flags = 0;
 	pca->data = (void**)halloc(init_capacity * sizeof(void*));
 
-	return (carray)pca;
+	return (cntr)pca;
 }
 
-void  carray_destroy    (carray ca) {
+static cntr_attr cntr_array_attribute(cntr ca) {
+	return CNTR_ATTR_BASE | CNTR_ATTR_LINEAR | CNTR_ATTR_ARRAY;
+}
+
+static void  cntr_array_destroy    (cntr ca) {
 	cntr_array* pca = (cntr_array*)ca;
 
 	hfree(pca->data);
@@ -35,23 +111,23 @@ void  carray_destroy    (carray ca) {
 	hfree(pca);
 }
 
-void  carray_clear      (carray ca) {
+static void  cntr_array_clear      (cntr ca) {
 	cntr_array* pca = (cntr_array*)ca;
 
 	pca->size = 0;
 }
 
-int   carray_size       (carray ca) {
+static int   cntr_array_size       (cntr ca) {
 	cntr_array* pca = (cntr_array*)ca;
 	
 	return pca->size;
 }
 
-void  carray_add        (carray ca, void* object) {
-	carray_add_back(ca, object);
+static void  cntr_array_add        (cntr ca, void* object) {
+	cntr_array_add_back(ca, object);
 }
 
-void* carray_front      (carray ca) {
+static void* cntr_array_front      (cntr ca) {
 	cntr_array* pca = (cntr_array*)ca;
 
 	if (pca->size == 0) return NULL;
@@ -59,7 +135,7 @@ void* carray_front      (carray ca) {
 	return pca->data[0];
 }
 
-void* carray_back       (carray ca) {
+static void* cntr_array_back       (cntr ca) {
 	cntr_array* pca = (cntr_array*)ca;
 
 	if (pca->size == 0) return NULL;
@@ -90,7 +166,7 @@ static void __expand_capacity(cntr_array* pca) {
 	pca->data = n_data;
 }
 
-void  carray_add_front  (carray ca, void* object) {
+static void  cntr_array_add_front  (cntr ca, void* object) {
 	cntr_array* pca = (cntr_array*)ca;
 
 	dbg_assert(pca->capacity >= pca->size);
@@ -102,7 +178,7 @@ void  carray_add_front  (carray ca, void* object) {
 	pca->size ++;
 }
 
-void  carray_add_back   (carray ca, void* object) {
+static void  cntr_array_add_back   (cntr ca, void* object) {
 	cntr_array* pca = (cntr_array*)ca;
 
 	dbg_assert(pca->capacity >= pca->size);
@@ -111,7 +187,7 @@ void  carray_add_back   (carray ca, void* object) {
 	pca->data[pca->size++] = object;
 }
 
-void* carray_remove_front(carray ca) {
+static void* cntr_array_remove_front(cntr ca) {
 	cntr_array* pca = (cntr_array*)ca;
 	void* obj = pca->data[0];
 
@@ -122,7 +198,7 @@ void* carray_remove_front(carray ca) {
 	return obj;
 }
 
-void* carray_remove_back (carray ca) {
+static void* cntr_array_remove_back (cntr ca) {
 	cntr_array* pca = (cntr_array*)ca;
 
 	dbg_assert(pca->size > 0);
@@ -175,7 +251,7 @@ static void citer_local_set_ref(citer itr, void* n_ref) {
 	*ele = n_ref;
 }
 
-static citer_interface carray_citer_operations = {
+static citer_interface cntr_array_citer_operations = {
 	citer_local_valid,
 	citer_local_get_ref,
 	citer_local_set_ref,
@@ -183,28 +259,31 @@ static citer_interface carray_citer_operations = {
 	citer_local_to_next,
 };
 
-void  carray_citer_begin(carray ca, citer ci) {
+static void  cntr_array_citer_begin(cntr ca, citer ci) {
 	cntr_iterator* itr = (cntr_iterator*)ci;
 	cntr_array* pca = (cntr_array*)ca;
 
-	itr->__vt = &carray_citer_operations;
+	itr->__vt = &cntr_array_citer_operations;
 	itr->connection = pca->size ? (void*)&pca->data[0] : NULL;
 }
 
-void  carray_citer_end  (carray ca, citer ci) {
+static void  cntr_array_citer_end  (cntr ca, citer ci) {
 	cntr_iterator* itr = (cntr_iterator*)ci;
 	cntr_array* pca = (cntr_array*)ca;
 
-	itr->__vt = &carray_citer_operations;
+	itr->__vt = &cntr_array_citer_operations;
 	itr->connection = pca->size ? (void*)&pca->data[pca->size-1] : NULL;
 }
 
-void  carray_remove     (carray ca, citer begin, citer end) {
+static void  cntr_array_remove     (cntr ca, citer begin, citer end) {
 	// TODO:
 }
 
-bool  carray_find       (carray ca, void* object, citer itr) {
+static bool  cntr_array_find       (cntr ca, void* object, citer itr) {
 	// TODO:
 	return false;
 }
 
+static void cntr_array_assign_capacity(cntr pca, int n_size) {
+	// TODO:
+}
