@@ -14,6 +14,12 @@ typedef void (*pf_for_each_process)(citer itr);
 
 void citer_for_each(citer begin, citer end, pf_for_each_process proc);
 
+/* sorting algorithm.  */
+typedef int (*pf_compare_object)(const void*, const void*);
+
+void quick_sort(citer begin, citer end, pf_compare_object comp);
+
+void bubble_sort(citer begin, citer end, pf_compare_object comp);
 
 /* cntr related start */
 bool cntr_equal(cntr first, cntr second);
@@ -22,12 +28,8 @@ void cntr_swap(cntr first, cntr second);
 
 void cntr_assign(cntr first, cntr second);
 
-/* sorting algorithm.  */
-typedef int (*pf_compare_object)(void*, void*);
+void cntr_sort(cntr c);
 
-void quick_sort(citer begin, citer end, pf_compare_object comp);
-
-void bubble_sort(citer begin, citer end, pf_compare_object comp);
 
 
 
