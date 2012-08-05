@@ -1,37 +1,8 @@
-#include <cntr_list.h>
-#include <cntr_algorithm.h>
-#include <cntr_iterator.h>
-#include <cntr_linear.h>
+#include <cntr.h>
 
 #include <stdio.h>
 
 static void print(citer itr) { printf("%d ", *((int*)citer_get_ref(itr))); }
-
-void basic_test() {
-	clist list = clist_create();
-	int x = 3;
-	int y = 4;
-	int z = 1;
-	int w = 2;
-
-	clist_add_back(list, &x);
-	clist_add_back(list, &y);
-	clist_add_back(list, &z);
-	clist_add_back(list, &w);
-
-	printf("the size of list is: %d\n", clist_size(list));
-
-	while (clist_size(list) > 0) {
-		int* obj = clist_remove_front(list);
-
-		printf("removing %d\n", *obj);
-	}
-
-	printf("After removing list size : %d\n", clist_size(list));
-
-	clist_destroy(list);
-	return;
-}
 
 int int_compare(void* x, void* y) {
 	int a = *((int*)x);
@@ -45,7 +16,7 @@ int int_compare(void* x, void* y) {
 
 void test_bubble_sort() {
 	int x[50], i;
-	clist pl = NULL;
+	cntr pl = NULL;
 	citer_dos(begin, NULL);
 	citer_dos(end, NULL);
 	citer_dos(itr, NULL);
@@ -56,14 +27,14 @@ void test_bubble_sort() {
 	}
 	printf("\n\n");
 
-	pl = clist_create(pl);
+	pl = cntr_create_as_list(pl);
 
 	for (i = 0; i < 50; i ++) {
-		clist_add_back(pl, &x[i]);
+		cntr_add_back(pl, &x[i]);
 	}
 
-	clist_citer_begin(pl, begin);
-	clist_citer_end(pl, end);
+	cntr_citer_begin(pl, begin);
+	cntr_citer_end(pl, end);
 	citer_swap(begin, end);
 	citer_for_each(begin, end, print);
 
@@ -75,7 +46,7 @@ void test_bubble_sort() {
 	citer_for_each(begin, end, print);
 	printf("\n\n");
 
-	clist_destroy(pl);
+	cntr_destroy(pl);
 }
 
 // typedef void (*pf_param_void)(void* param);
@@ -113,7 +84,7 @@ void test_bubble_sort() {
 
 void test_cntr_abs() {
 	//printf("\n\ntest container begins\n\n");
-	cntr c = clinear_as_array();
+	cntr c = cntr_create_as_array();
 	citer_dos(begin, NULL);
 	citer_dos(end, NULL);
 	citer_dos(itr, NULL);
@@ -126,12 +97,12 @@ void test_cntr_abs() {
 	}
 
 	for (i = 0; i < 500; i ++) {
-		clinear_add_front(c, &x[i]);
+		cntr_add_front(c, &x[i]);
 	}
-	printf("container size is: %d\n", clinear_size(c));
+	printf("container size is: %d\n", cntr_size(c));
 
-	clinear_citer_begin(c, begin);
-	clinear_citer_end(c, end);
+	cntr_citer_begin(c, begin);
+	cntr_citer_end(c, end);
 	printf("\ninited : \n");
 	citer_for_each(begin, end, print);
 	printf("\n");
@@ -147,11 +118,10 @@ void test_cntr_abs() {
 
 	citer_for_each(begin, end, print);
 	printf("\n");
-	clinear_destroy(c);
+	cntr_destroy(c);
 }
 
 int main() {
-	basic_test();
 	test_bubble_sort();
 	//test_grammar();
 	test_cntr_abs();

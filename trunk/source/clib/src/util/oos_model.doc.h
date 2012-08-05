@@ -9,7 +9,25 @@
 /*
  * To simplicify the oo model, we could make the following assumptions.
  * * All inherit relationship is single inherit, plus that client always code towards interface, so we 
- *   don't need cast anymore, since when we got a interfce, it can not cast to anything.
+ *   don't need cast anymore, since when we got an interfce, it can not cast to anything, but dynamic test
+ *   is needed. Considering the following class derivation system, in both JAVA and C++, we should take care
+ *   about dynamic cast IA to CY, IA to IC, but in OOS model, we have a single inherited tree, and only leaves 
+ *   are concrete classes, that means all kinds of cast from bottom to up will be fine, each type in the bottom
+ *   will contains all information in the top, and will have and extended information. By default, dynamic cast
+ *   is to test if an object can be apply to a function set,
+ *                                                                                                        
+ *    IA       IB      IC    *    IA       IB      IC     *               IS                 *                                               
+ *      \      / \     /     *      \      / \     /      *              / \                 *                                                
+ *       \    /   \   /      *       \    /   \   /       *             /   \                *                                                
+ *        \  /     \ /       *        \  /     \ /        *            /     \               *                                                
+ *         CX      CY        *         CX      CY         *           IA      IB             *                                               
+ *        /  \     / \       *         |        |         *          / \       |             *                  
+ *       /    \   /   \      *         |        |         *         /   \      |             *                  
+ *      /      \ /     \     *         |        |         *        /     \     |             *                  
+ *    DA       DA      DC    *         DX      DY         *      CX      CY    CZ            *                  
+ *          C++              *           JAVA             *         OOS                      *                      
+ *                                                                                                        
+ *
  * * There is only inherit relationship between interface and class, that means the inherit depth will 
  *   at most be one. In this case, we don't need to consider __this pointer, because interface will never 
  *   have data member, so all references are class members.
@@ -17,28 +35,34 @@
 
 typedef void* unknown;
 
-typedef int unique_id;
+typedef unsigned int type_inf;
 
-typedef struct unknown_oos_interface_vtable_t {
+typedef type_inf (*pf_rtti)();
+typedef struct unknown_oos_base_interface_vtable_t {
+	pf_rtti                       __rtti;                   
 	/*
 	 * interface specific methods, all of this are function callbacks
 	 */
-} unknown_oos_interface;
+} unknown_oos_base_interface;
+
+typedef struct unknown_oos_extend_interface_vtable_t {
+	/*
+	 * keep exactly the same with base interface for callbacks in the front.
+	 */
+} unknown_oos_extend_interface;
 
 typedef struct unknown_oos_class_body_t {
 	/* 
 	 * use the first data memeber as virtual table, so we should directly convert the class body into an 
 	 * interface table.
 	 */
-	unknown_oos_interface* __vt;
-
+	unknown_oos_extend_interface* __vt;
 	/*
 	 * class specific data members.
 	 */
 } unknown_oos_class;
 
 unknown unknown_oos_factory_create(unique_id uid);
-
 /*
  * Sample codes for simplicified object-oriented model.
  */
