@@ -317,17 +317,56 @@ static void  cntr_list_citer_end  (cntr cl, citer cur) {
 }
 
 static bool  cntr_list_find(cntr cl, void* object, citer itr) {
-	// TODO:
+	cntr_list* pcl = (cntr_list*)cl;
+	cntr_iterator* ci = (cntr_iterator*)itr;
+
+	oplink* link = pcl->begin;
+
+	while (link != NULL) {
+		if (link->object == object) {
+			ci->connection = (void*)link;
+			ci->__vt = &oplink_citer_operations;
+			return true;
+		}
+		link = link->next;
+	}
+
+	ci->__vt = NULL;
+	ci->connection = NULL;
 	return false;
 }
 
 static void  cntr_list_remove(cntr cl, citer begin, citer end) {
 	cntr_list* pcl = (cntr_list*)cl;
-	cntr_iterator* pbegin = (cntr_iterator*)begin;
-	cntr_iterator* pend = (cntr_iterator*)end;
 
-	oplink* link_begin = (oplink*)(pbegin->connection);
-	oplink* link_end = (oplink*)(pend->connection);
+	oplink* link_begin = (oplink*)(((cntr_iterator*)begin)->connection);
+	oplink* link_end = (oplink*)(((cntr_iterator*)end)->connection);
 
-	// TODO:
+	oplink* link_prev = link_begin->prev;
+	oplink* link_next = link_end->next;
+
+	int count = 0;
+
+	if (link_prev == NULL) {
+		dbg_assert(pcl->begin == link_begin);
+		pcl->begin = link_next;
+	}
+	else {
+		link_prev->next = link_next;
+	}
+
+	if (link_next == NULL) {
+		dbg_assert(pcl->end == link_end);
+		pcl->end = link_prev;
+	}
+	else {
+		link_next->prev = link_prev;
+	}
+
+	count = 1;
+	while (link_begin != link_end) {
+		link_begin = link_begin->next;
+		count ++;
+	}
+	pcl->size -= count;
 }
