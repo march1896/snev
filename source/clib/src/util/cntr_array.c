@@ -1,13 +1,12 @@
 #include <cntr_factory.h>
-#include <cntr_iterator.h>
-#include <cntr_iterator.local.h>
 #include <cntr_linear.local.h>
+#include <citer_cont.local.h>
 
 typedef void (*pf_cntr_array_assign_capacity)(cntr pca, int n_size);
 
 typedef struct cntr_array_vtable_t {
 	/* from clinear */
-	pf_attribute                __attrib;
+	pf_cntr_attribute                __attrib;
 
 	pf_cntr_base_destroy        __destroy;
 	pf_cntr_base_clear          __clear;
@@ -29,7 +28,7 @@ typedef struct cntr_array_vtable_t {
 	pf_cntr_array_assign_capacity __assign_capacity;
 } cntr_array_vtable;
 
-static cntr_attr cntr_array_attribute(cntr ca);
+static cattr cntr_array_attribute(cntr ca);
 static void  cntr_array_destroy    (cntr ca);
 static void  cntr_array_clear      (cntr ca);
 static int   cntr_array_size       (cntr ca);
@@ -99,7 +98,7 @@ cntr cntr_create_as_array_v(int init_capacity, int expand_size) {
 	return (cntr)pca;
 }
 
-static cntr_attr cntr_array_attribute(cntr ca) {
+static cattr cntr_array_attribute(cntr ca) {
 	return CNTR_ATTR_BASE | CNTR_ATTR_LINEAR | CNTR_ATTR_ARRAY;
 }
 
@@ -208,33 +207,25 @@ static void* cntr_array_remove_back (cntr ca) {
 /* iterator related operations */
 
 static void citer_local_to_prev(citer itr) {
-	cntr_iterator* cur = (cntr_iterator*)itr;
+	citer_cont* cur = (citer_cont*)itr;
 
 	void** ele = (void**)cur->connection;
 	cur->connection = ele - 1;
 }
 
 static void citer_local_to_next(citer itr) {
-	cntr_iterator* cur = (cntr_iterator*)itr;
+	citer_cont* cur = (citer_cont*)itr;
 
 	void** ele = (void**)cur->connection;
 	cur->connection = ele + 1;
 }
 
-/*
- * TODO: if no container information here, we could not justfy if it's valid
- * TODO: implement algorithm, test if we really valid method.
- */
-static bool citer_local_valid(citer itr) {
-	cntr_iterator* cur = (cntr_iterator*)itr;
-	void** ele = cur->connection;
-
-	if (ele) return true;
-	else return false;
+static cattr citer_local_attribute(citer itr) {
+	return CITER_ATTR_BASE | CITER_ATTR_CONT;
 }
 
 static void* citer_local_get_ref(citer itr) {
-	cntr_iterator* cur = (cntr_iterator*)itr;
+	citer_cont* cur = (citer_cont*)itr;
 
 	void** ele = (void**)cur->connection;
 	dbg_assert(ele);
@@ -243,7 +234,7 @@ static void* citer_local_get_ref(citer itr) {
 }
 
 static void citer_local_set_ref(citer itr, void* n_ref) {
-	cntr_iterator* cur = (cntr_iterator*)itr;
+	citer_cont* cur = (citer_cont*)itr;
 
 	void** ele = (void**)cur->connection;
 	dbg_assert(ele);
@@ -251,16 +242,31 @@ static void citer_local_set_ref(citer itr, void* n_ref) {
 	*ele = n_ref;
 }
 
-static citer_interface cntr_array_citer_operations = {
-	citer_local_valid,
+static int citer_local_distance(const citer from, const citer to) {
+	return (void**)((citer_cont*)to)->connection - (void**)((citer_cont*)from)->connection + 1;
+}
+
+static void citer_local_move_n(citer from, int dis) {
+	citer_cont* cur = (citer_cont*)from;
+	void** new_addr = (void**)cur->connection + dis;
+
+	cur->connection = (void*)new_addr;
+}
+
+static citer_cont_vtable cntr_array_citer_operations = {
+	citer_local_attribute,
+
 	citer_local_get_ref,
 	citer_local_set_ref,
 	citer_local_to_prev,
 	citer_local_to_next,
+
+	citer_local_distance,
+	citer_local_move_n
 };
 
 static void  cntr_array_citer_begin(cntr ca, citer ci) {
-	cntr_iterator* itr = (cntr_iterator*)ci;
+	citer_cont* itr = (citer_cont*)ci;
 	cntr_array* pca = (cntr_array*)ca;
 
 	itr->__vt = &cntr_array_citer_operations;
@@ -268,7 +274,7 @@ static void  cntr_array_citer_begin(cntr ca, citer ci) {
 }
 
 static void  cntr_array_citer_end  (cntr ca, citer ci) {
-	cntr_iterator* itr = (cntr_iterator*)ci;
+	citer_cont* itr = (citer_cont*)ci;
 	cntr_array* pca = (cntr_array*)ca;
 
 	itr->__vt = &cntr_array_citer_operations;
@@ -278,8 +284,8 @@ static void  cntr_array_citer_end  (cntr ca, citer ci) {
 static void  cntr_array_remove     (cntr ca, citer begin, citer end) {
 	cntr_array* pca = (cntr_array*)ca;
 
-	void** ppb = (void**)((cntr_iterator*)begin)->connection;
-	void** ppe = (void**)((cntr_iterator*)end)->connection;
+	void** ppb = (void**)((citer_cont*)begin)->connection;
+	void** ppe = (void**)((citer_cont*)end)->connection;
 
 	int count = 0;
 
@@ -293,7 +299,7 @@ static void  cntr_array_remove     (cntr ca, citer begin, citer end) {
 
 static bool  cntr_array_find       (cntr ca, void* object, citer itr) {
 	cntr_array* pca = (cntr_array*)ca;
-	cntr_iterator* ci = (cntr_iterator*)itr;
+	citer_cont* ci = (citer_cont*)itr;
 	int i = 0;
 
 	for (i = 0; i < pca->size; i ++) {

@@ -6,11 +6,17 @@
  * operate on an object.
  */
 
-typedef unsigned int cntr_attr;
+typedef unsigned int cattr;
 
 #define CNTR_ATTR_BASE       (1<<0)
 #define CNTR_ATTR_LINEAR     (1<<1)
 #define CNTR_ATTR_ARRAY      (1<<2)
 #define CNTR_ATTR_LIST       (1<<3)
+
+
+#define CITER_ATTR_BASE      (1<<0)
+/* coutnuous */
+#define CITER_ATTR_CONT      (1<<1)
+#define CITER_ATTR_LINK      (1<<2)
 
 #endif /* _CNTR_ATTR_H_ */

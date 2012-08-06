@@ -1,9 +1,9 @@
 #ifndef _CNTR_BASE_LOCAL_H_
 #define _CNTR_BASE_LOCAL_H_
 
-#include <cntr_attr.h>
+#include <cattr.h>
 
-typedef cntr_attr (*pf_attribute)(cntr c);
+typedef cattr (*pf_cntr_attribute)(cntr c);
 
 typedef void (*pf_cntr_base_destroy)(cntr c);
 typedef void (*pf_cntr_base_clear)(cntr c);
@@ -15,7 +15,7 @@ typedef void (*pf_cntr_base_citer_begin)(cntr c, citer itr);
 typedef void (*pf_cntr_base_citer_end)(cntr c, citer itr);
 
 typedef struct cntr_base_vtable_t {
-	pf_attribute             __attrib;
+	pf_cntr_attribute             __attrib;
 
 	pf_cntr_base_destroy     __destroy;
 	pf_cntr_base_clear       __clear;
@@ -36,8 +36,7 @@ typedef struct cntr_common_body_t {
 /*
  * helper functions.
  */
-extern inline cntr_attr get_attr(cntr c);
 
-extern inline bool check_attr(cntr c, cntr_attr base);
+extern inline bool cntr_check_attr(cntr c, cattr base);
 
 #endif /* _CNTR_BASE_LOCAL_H_ */
