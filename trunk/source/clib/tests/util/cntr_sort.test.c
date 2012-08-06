@@ -1,4 +1,5 @@
 #include <cntr.h>
+#include <test_util.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -82,7 +83,7 @@ static void assign_x(citer itr) {
 typedef void (*pf_init_data)();
 typedef void (*pf_sort_name)(citer begin, citer end, pf_compare_object comp);
 typedef cntr (*pf_cntr_create)();
-static void test_sort_case(char* sort_name, char* cntr_name, char* data_order, 
+static void sort_correctness_test(char* sort_name, char* cntr_name, char* data_order, 
 		pf_sort_name the_sort,
 		pf_cntr_create cntr_create,
 		pf_init_data init_data 
@@ -108,6 +109,7 @@ static void test_sort_case(char* sort_name, char* cntr_name, char* data_order,
 	judge();
 
 	cntr_destroy(c);
+	printf("%s sorting on %s with order %s end\n", sort_name, cntr_name, data_order);
 }
 
 char c_sort[][30] = { "bubble", "quick" };
@@ -119,10 +121,11 @@ pf_init_data f_order[] = { init_data_increase, init_data_decrease, init_data_ran
 
 void cntr_sort_test() {
 	int i, j, k;
+
 	for (i = 0; i < 2; i ++) {
 		for (j = 0; j < 2; j ++) {
 			for (k = 0; k < 3; k ++) {
-				test_sort_case(c_sort[i], c_cntr[j], c_order[k], f_sort[i], f_create[j], f_order[k]);
+				sort_correctness_test(c_sort[i], c_cntr[j], c_order[k], f_sort[i], f_create[j], f_order[k]);
 			}
 		}
 	}

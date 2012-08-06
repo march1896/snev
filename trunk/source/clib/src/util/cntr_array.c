@@ -276,14 +276,50 @@ static void  cntr_array_citer_end  (cntr ca, citer ci) {
 }
 
 static void  cntr_array_remove     (cntr ca, citer begin, citer end) {
-	// TODO:
+	cntr_array* pca = (cntr_array*)ca;
+
+	void** ppb = (void**)((cntr_iterator*)begin)->connection;
+	void** ppe = (void**)((cntr_iterator*)end)->connection;
+
+	int count = 0;
+
+	dbg_assert(ppb >= pca->data && ppe < pca->data + pca->size);
+
+	count = ppe - ppb + 1;
+	memory_move((char*)(ppb), (char*)(ppe + 1), 
+		(((pca->data + pca->size) - ppe) - 1) * sizeof(void*) / sizeof(char));
+	pca->size -= count;
 }
 
 static bool  cntr_array_find       (cntr ca, void* object, citer itr) {
-	// TODO:
+	cntr_array* pca = (cntr_array*)ca;
+	cntr_iterator* ci = (cntr_iterator*)itr;
+	int i = 0;
+
+	for (i = 0; i < pca->size; i ++) {
+		if (*(pca->data + i) == object) {
+			ci->connection = pca->data + i;
+			ci->__vt = &cntr_array_citer_operations;
+
+			return true;
+		}
+	}
+	
+	ci->connection = NULL;
+	ci->__vt = NULL;
 	return false;
 }
 
-static void cntr_array_assign_capacity(cntr pca, int n_size) {
-	// TODO:
+static void cntr_array_assign_capacity(cntr ca, int n_size) {
+	cntr_array* pca = (cntr_array*)ca;
+	void** n_data = NULL;
+
+	dbg_assert(n_size >= pca->size);
+
+	pca->capacity = n_size;
+	n_data = (void**)halloc(sizeof(void*) * pca->capacity);
+
+	memory_move((char*)n_data, (char*)pca->data, pca->size * sizeof(void*) / sizeof(char));
+	hfree((void*)pca->data);
+	pca->data = n_data;
 }
