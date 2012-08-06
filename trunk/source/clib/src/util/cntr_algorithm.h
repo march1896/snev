@@ -1,7 +1,7 @@
 #ifndef _CNTR_ALGORITHM_H_
 #define _CNTR_ALGORITHM_H_
 
-#include <cntr_iterator.h>
+#include <citer_base.h>
 
 /* citer related start */
 extern inline void citer_swap(citer first, citer second);

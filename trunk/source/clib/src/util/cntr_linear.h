@@ -1,7 +1,7 @@
 #ifndef _CNTR_LINEAR_H_
 #define _CNTR_LINEAR_H_
 
-#include <cntr_iterator.h>
+#include <citer_base.h>
 
 void* cntr_front(cntr c);
 

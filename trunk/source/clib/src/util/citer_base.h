@@ -1,5 +1,5 @@
-#ifndef _CNTR_ITERATOR_H_
-#define _CNTR_ITERATOR_H_
+#ifndef _CITER_BASE_H_
+#define _CITER_BASE_H_
 
 /* 
  * Using of iterator.
@@ -72,4 +72,4 @@ extern inline void     citer_set_ref(citer itr, void* nref);
  */
 #define citer_dos(citer_name, citer_as_init) alloc_two_pointers_on_stack(citer_name, citer_as_init)
 
-#endif /* _CNTR_ITERATOR_H_ */
+#endif /* _CITER_BASE_H_ */

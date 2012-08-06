@@ -1,6 +1,6 @@
 #include <cntr_algorithm.h>
-#include <cntr_iterator.h>
-#include <cntr_iterator.local.h>
+#include <citer_base.h>
+#include <citer_base.local.h>
 
 void citer_swap(citer first, citer second) {
 	void *first_ref = citer_get_ref(first);
@@ -12,8 +12,8 @@ void citer_swap(citer first, citer second) {
 }
 
 inline bool citer_equal(citer first, citer second) {
-	cntr_iterator* lhs = (cntr_iterator*)first;
-	cntr_iterator* rhs = (cntr_iterator*)second;
+	citer_base* lhs = (citer_base*)first;
+	citer_base* rhs = (citer_base*)second;
 
 	if (lhs->connection == rhs->connection) {
 		dbg_assert(lhs->__vt == rhs->__vt);
@@ -23,8 +23,8 @@ inline bool citer_equal(citer first, citer second) {
 }
 
 inline void citer_assign(citer to, citer from) {
-	cntr_iterator* lhs = (cntr_iterator*) to;
-	cntr_iterator* rhs = (cntr_iterator*) from;
+	citer_base* lhs = (citer_base*) to;
+	citer_base* rhs = (citer_base*) from;
 
 	lhs->connection = rhs->connection;
 	lhs->__vt = rhs->__vt;
@@ -65,7 +65,6 @@ void __partition(citer begin, citer end, citer out, pf_compare_object comp) {
 		}
 
 		citer_to_next(fwd);
-		dbg_assert(citer_valid(fwd));
 	}
 
 	citer_swap(posed, end);
@@ -99,7 +98,7 @@ void bubble_sort(citer begin, citer end, pf_compare_object comp) {
 	citer_dos(first, begin);
 	citer_dos(last, end);
 
-	dbg_assert(comp != NULL && citer_valid(begin) && citer_valid(end));
+	dbg_assert(comp != NULL);
 
 	if (citer_equal(first, last)) return;
 	while (true) {
@@ -109,7 +108,6 @@ void bubble_sort(citer begin, citer end, pf_compare_object comp) {
 
 		do {
 			citer_to_next(next);
-			dbg_assert(citer_valid(next));
 
 			if (comp(citer_get_ref(prev), citer_get_ref(next)) > 0) {
 				citer_swap(prev, next);

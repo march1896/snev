@@ -1,5 +1,5 @@
-#include <cntr_iterator.h>
-#include <cntr_iterator.local.h>
+#include <citer_base.h>
+#include <citer_base.local.h>
 
 #include <cntr_linear.local.h>
 
@@ -12,7 +12,7 @@ typedef struct open_link_t {
 
 typedef struct cntr_list_vtable_t {
 	/* from cntr_linear_vtable */
-	pf_attribute                __attrib;
+	pf_cntr_attribute                __attrib;
 
 	pf_cntr_base_destroy        __destroy;
 	pf_cntr_base_clear          __clear;
@@ -33,7 +33,7 @@ typedef struct cntr_list_vtable_t {
 
 } cntr_list_vtable;
 
-static cntr_attr cntr_list_attribute(cntr cl);
+static cattr cntr_list_attribute(cntr cl);
 static void  cntr_list_destroy    (cntr cl);
 static void  cntr_list_clear      (cntr cl);
 static int   cntr_list_size       (cntr cl);
@@ -94,7 +94,7 @@ cntr cntr_create_as_list() {
  * local functions begin
 ******************************************************************************************************/
 
-static cntr_attr cntr_list_attribute(cntr cl) {
+static cattr cntr_list_attribute(cntr cl) {
 	return CNTR_ATTR_BASE | CNTR_ATTR_LINEAR | CNTR_ATTR_LIST;
 }
 
@@ -244,7 +244,7 @@ static void*  cntr_list_remove_back (cntr cl) {
 /* iterator related operations */
 
 static void oplink_to_prev(citer itr) {
-	cntr_iterator* cur = (cntr_iterator*)itr;
+	citer_base* cur = (citer_base*)itr;
 	oplink* link_cur = (oplink*)(cur->connection);
 
 	dbg_assert(link_cur);
@@ -252,23 +252,15 @@ static void oplink_to_prev(citer itr) {
 }
 
 static void oplink_to_next(citer itr) {
-	cntr_iterator* cur = (cntr_iterator*)itr;
+	citer_base* cur = (citer_base*)itr;
 	oplink* link_cur = (oplink*)(cur->connection);
 
 	dbg_assert(link_cur);
 	cur->connection = link_cur->next;
 }
 
-static bool oplink_valid(citer itr) {
-	cntr_iterator* cur = (cntr_iterator*)itr;
-	oplink* link_cur = (oplink*)(cur->connection);
-
-	if (link_cur) return true;
-	else return false;
-}
-
 static void* oplink_get_ref(citer itr) {
-	cntr_iterator* cur = (cntr_iterator*)itr;
+	citer_base* cur = (citer_base*)itr;
 	oplink* link_cur = (oplink*)(cur->connection);
 
 	dbg_assert(link_cur);
@@ -276,24 +268,29 @@ static void* oplink_get_ref(citer itr) {
 }
 
 static void oplink_set_ref(citer itr, void* n_ref) {
-	cntr_iterator* cur = (cntr_iterator*)itr;
+	citer_base* cur = (citer_base*)itr;
 	oplink* link_cur = (oplink*)(cur->connection);
 
 	dbg_assert(link_cur);
 	link_cur->object = n_ref;
 }
 
+static cattr oplink_attribute(citer itr) {
+	return CITER_ATTR_BASE | CITER_ATTR_LINK;
+}
+
 /*
 static int oplink_cntr_size(citer itr) {
-	cntr_iterator* cur = (cntr_iterator*)itr;
+	citer_base* cur = (citer_base*)itr;
 	cntr* list = (cntr*)(cur->container);
 
 	dbg_assert(list);
 	return list->size;
 }
 */
-static citer_interface oplink_citer_operations = {
-	oplink_valid,
+static citer_base_vtable oplink_citer_operations = {
+	oplink_attribute,
+
 	oplink_get_ref,
 	oplink_set_ref,
 	oplink_to_prev,
@@ -301,7 +298,7 @@ static citer_interface oplink_citer_operations = {
 };
 
 static void  cntr_list_citer_begin(cntr cl, citer cur) {
-	cntr_iterator* itr = (cntr_iterator*)cur;
+	citer_base* itr = (citer_base*)cur;
 	cntr_list* pcl = (cntr_list*)cl;
 
 	itr->__vt = &oplink_citer_operations;
@@ -309,7 +306,7 @@ static void  cntr_list_citer_begin(cntr cl, citer cur) {
 }
 
 static void  cntr_list_citer_end  (cntr cl, citer cur) {
-	cntr_iterator* itr = (cntr_iterator*)cur;
+	citer_base* itr = (citer_base*)cur;
 	cntr_list* pcl = (cntr_list*)cl;
 
 	itr->__vt = &oplink_citer_operations;
@@ -318,7 +315,7 @@ static void  cntr_list_citer_end  (cntr cl, citer cur) {
 
 static bool  cntr_list_find(cntr cl, void* object, citer itr) {
 	cntr_list* pcl = (cntr_list*)cl;
-	cntr_iterator* ci = (cntr_iterator*)itr;
+	citer_base* ci = (citer_base*)itr;
 
 	oplink* link = pcl->begin;
 
@@ -339,8 +336,8 @@ static bool  cntr_list_find(cntr cl, void* object, citer itr) {
 static void  cntr_list_remove(cntr cl, citer begin, citer end) {
 	cntr_list* pcl = (cntr_list*)cl;
 
-	oplink* link_begin = (oplink*)(((cntr_iterator*)begin)->connection);
-	oplink* link_end = (oplink*)(((cntr_iterator*)end)->connection);
+	oplink* link_begin = (oplink*)(((citer_base*)begin)->connection);
+	oplink* link_end = (oplink*)(((citer_base*)end)->connection);
 
 	oplink* link_prev = link_begin->prev;
 	oplink* link_next = link_end->next;
