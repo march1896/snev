@@ -88,8 +88,9 @@ cntr cntr_create_as_list() {
 
 	e_sent = (oplink*)halloc(sizeof(oplink));
 	e_sent->object = NULL;
-	e_sent->prev = s_sent;
 	e_sent->next = NULL;
+	
+	e_sent->prev = s_sent;
 	s_sent->next = e_sent;
 
 	pcl->__vt = &cntr_list_ops;
@@ -174,6 +175,8 @@ static inline void __link_insert(oplink* prev, oplink* cur, oplink* next) {
 }
 
 static inline void __link_stitch(oplink* prev, oplink* next) {
+	prev->next = next;
+	next->prev = prev;
 }
 
 static void  cntr_list_add_front(cntr cl, void* object) {

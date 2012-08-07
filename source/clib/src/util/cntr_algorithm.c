@@ -1,6 +1,7 @@
 #include <cntr_algorithm.h>
-#include <citer_base.h>
+#include <cntr.h>
 #include <citer_base.local.h>
+#include <citer_cont.local.h>
 
 void citer_swap(citer first, citer second) {
 	void *first_ref = citer_get_ref(first);
@@ -38,6 +39,14 @@ void citer_for_each(citer begin, citer end, pf_for_each_process proc) {
 	}
 
 	proc(itr);
+}
+
+void citer_for_each_v(citer begin, citer end, pf_for_each_process_v proc, void* param) {
+	citer_dos(itr, begin);
+	for (; !citer_equal(itr, end); citer_to_next(itr)) {
+		proc(itr, param);
+	}
+	proc(itr, param);
 }
 
 
@@ -122,59 +131,113 @@ void bubble_sort(citer begin, citer end, pf_compare_object comp) {
 	return;
 }
 
-// static void __list_find_middle(const citer begin, const citer end, citer mid) {
-// 	citer_dos(fast, begin);
-// 	citer_dos(slow, begin);
-// 
-// 	while (!citer_equal(fast, end)) {
-// 		citer_to_next(slow);
-// 
-// 		citer_to_next(fast);
-// 		if (citer_equal(fast, end)) break;
-// 		citer_to_next(fast);
-// 	}
-// 	citer_assign(mid, slow);
-// }
-// 
-// static void __list_merge_sort(citer begin, citer end, pf_compare_object comp) {
-// 	citer_dos(mid, NULL);
-// 	citer_dos(pre_mid, NULL);
-// 	citer_dos(n_begin, NULL);
-// 
-// 	if (citer_equal(begin, end)) return;
-// 
-// 	__list_find_middle(begin, end, mid);
-// 	citer_assign(pre_mid, mid);
-// 	citer_to_prev(pre_mid);
-// 
-// 	__list_merge_sort(begin, pre_mid, comp);
-// 	__list_merge_sort(mid, end, comp);
-// 
-// 	while (!citer_equal(begin, pre_mid) || !citer_equal(mid, end)) {
-// 		
-// 	}
-// }
-// 
-// /*
-//  * For array, we could easily divide the array into two, but we need to another O(n) space.
-//  * For list, we could easily do the merge without O(n) space, but need O(n) time to divide the list.
-//  */
-// void merge_sort(citer begin, citer end, pf_compare_object comp) {
-// 	cattr attrib= citer_attrib(begin);
-// 	
-// 	dbg_assert(attrib == citer_attrib(end) && comp != NULL);
-// 
-// 	if (citer_check_attr(attrib, CITER_ATTR_LINK) {
-// 		__list_merge_sort(begin, end, comp);
-// 	}
-// 	else if (citer_check_attr(attrib, CITER_ATTR_CONT) {
-// 
-// 	}
-// 	else {
-// 		dbg_assert(false);
-// 	}
-// 	return;
-// }
+static void __list_find_middle(citer begin, citer end, citer mid) {
+	if (!citer_check_attr(begin, CITER_ATTR_CONT)) {
+		citer_dos(fast, begin);
+		citer_dos(slow, begin);
+
+		while (!citer_equal(fast, end)) {
+			citer_to_next(slow);
+
+			citer_to_next(fast);
+			if (citer_equal(fast, end)) break;
+			citer_to_next(fast);
+		}
+		citer_assign(mid, slow);
+	}
+	else {
+		int dis = citer_dis(begin, end);
+		int half = dis / 2;
+
+		citer_assign(mid, begin);
+
+		citer_move_n(mid, half);
+	}
+}
+
+static void __merge_sort_copyback(citer itr, void* param) {
+	citer to_copy = (citer)param;
+
+	citer_set_ref(to_copy, citer_get_ref(itr));
+	citer_to_next(to_copy);
+}
+
+/*
+ * For array, we could easily divide the array into two, but we need to another O(n) space.
+ * For list, we could easily do the merge without O(n) space, but need O(n) time to divide the list.
+ */
+void merge_sort(citer _begin, citer _end, pf_compare_object comp) {
+	citer_dos(begin, _begin);
+	citer_dos(end, _end);
+	citer_dos(mid, NULL);
+	citer_dos(pre_mid, NULL);
+	cntr helper = cntr_create_as_array();
+
+	if (citer_equal(begin, end)) return;
+
+	__list_find_middle(begin, end, mid);
+	citer_assign(pre_mid, mid);
+	citer_to_prev(pre_mid);
+
+	merge_sort(begin, pre_mid, comp);
+	merge_sort(mid, end, comp);
+
+	/* merge two parts */
+	{
+		bool fpo = false;  /* first part over */
+		bool spo = false;  /* second part over */
+		while (!fpo || !spo) {
+			if (fpo) {
+				/* process second half part */
+				while (!citer_equal(mid, end)) {
+					cntr_add_back(helper, citer_get_ref(mid));
+					citer_to_next(mid);
+				}
+				cntr_add_back(helper, citer_get_ref(mid));
+				spo = true;
+			}
+			else if (spo) {
+				while (!citer_equal(begin, pre_mid)) {
+					cntr_add_back(helper, citer_get_ref(begin));
+					citer_to_next(begin);
+				}
+				cntr_add_back(helper, citer_get_ref(begin));
+				fpo = true;
+			}
+			else {
+				void* f_ref = citer_get_ref(begin);
+				void* s_ref = citer_get_ref(mid);
+
+				if (comp(f_ref, s_ref) <= 0) {
+					cntr_add_back(helper, citer_get_ref(begin));
+					if (citer_equal(begin, pre_mid)) fpo = true;
+					else citer_to_next(begin);
+				}
+				else {
+					cntr_add_back(helper, citer_get_ref(mid));
+					if (citer_equal(mid, end)) spo = true;
+					else citer_to_next(mid);
+				}
+			}
+		}
+	}
+
+	/* copy back the merged result back to the original container */
+	{
+		citer_dos(helper_begin, NULL);
+		citer_dos(helper_end, NULL);
+
+		citer_dos(orig_begin, _begin);
+
+		cntr_citer_begin(helper, helper_begin);
+		cntr_citer_end(helper, helper_end);
+
+		citer_for_each_v(helper_begin, helper_end, __merge_sort_copyback, orig_begin);
+	}
+
+	cntr_destroy(helper);
+	return;
+}
 
 bool find_first(citer begin, citer end, citer result, pf_find_accept accept) {
 	return false;
