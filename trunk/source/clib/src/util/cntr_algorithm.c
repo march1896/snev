@@ -123,6 +123,60 @@ void bubble_sort(citer begin, citer end, pf_compare_object comp) {
 	return;
 }
 
+static void __list_find_middle(const citer begin, const citer end, citer mid) {
+	citer_dos(fast, begin);
+	citer_dos(slow, begin);
+
+	while (!citer_equal(fast, end)) {
+		citer_to_next(slow);
+
+		citer_to_next(fast);
+		if (citer_equal(fast, end)) break;
+		citer_to_next(fast);
+	}
+	citer_assign(mid, slow);
+}
+
+static void __list_merge_sort(citer begin, citer end, pf_compare_object comp) {
+	citer_dos(mid, NULL);
+	citer_dos(pre_mid, NULL);
+	citer_dos(n_begin, NULL);
+
+	if (citer_equal(begin, end)) return;
+
+	__list_find_middle(begin, end, mid);
+	citer_assign(pre_mid, mid);
+	citer_to_prev(pre_mid);
+
+	__list_merge_sort(begin, pre_mid, comp);
+	__list_merge_sort(mid, end, comp);
+
+	while (!citer_equal(begin, pre_mid) || !citer_equal(mid, end)) {
+		
+	}
+}
+
+/*
+ * For array, we could easily divide the array into two, but we need to another O(n) space.
+ * For list, we could easily do the merge without O(n) space, but need O(n) time to divide the list.
+ */
+void merge_sort(citer begin, citer end, pf_compare_object comp) {
+	cattr attrib= citer_attrib(begin);
+	
+	dbg_assert(attrib == citer_attrib(end) && comp != NULL);
+
+	if (citer_check_attr(attrib, CITER_ATTR_LINK) {
+		__list_merge_sort(begin, end, comp);
+	}
+	else if (citer_check_attr(attrib, CITER_ATTR_CONT) {
+
+	}
+	else {
+		dbg_assert(false);
+	}
+	return;
+}
+
 bool find_first(citer begin, citer end, citer result, pf_find_accept accept) {
 	return false;
 }
