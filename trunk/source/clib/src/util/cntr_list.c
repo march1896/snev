@@ -74,18 +74,29 @@ typedef struct cntr_list_t {
 
 	int                         size;
 	unsigned int                flags;
-	oplink*                     begin;
-	oplink*                     end;
+	oplink*                     s_sent;  /* the start sentinel */
+	oplink*                     e_sent;    /* the end sentinel */
 } cntr_list;
 
 cntr cntr_create_as_list() {
 	cntr_list* pcl = (cntr_list*)halloc(sizeof(cntr_list));
+	oplink* s_sent, *e_sent;
+
+	s_sent = (oplink*)halloc(sizeof(oplink));
+	s_sent->object = NULL;
+	s_sent->prev = NULL;
+
+	e_sent = (oplink*)halloc(sizeof(oplink));
+	e_sent->object = NULL;
+	e_sent->prev = s_sent;
+	e_sent->next = NULL;
+	s_sent->next = e_sent;
 
 	pcl->__vt = &cntr_list_ops;
-
 	pcl->size = 0;
 	pcl->flags = 0;
-	pcl->begin = pcl->end = NULL;
+	pcl->s_sent = s_sent;
+	pcl->e_sent = e_sent;
 
 	return (cntr)pcl;
 }
@@ -107,10 +118,12 @@ static void cntr_list_destroy(cntr pcl) {
 static void cntr_list_clear(cntr cl) {
 	cntr_list* pcl = (cntr_list*)cl;
 
-	oplink* link = pcl->begin;
+	oplink* link = pcl->s_sent->next;
 	oplink* prev = NULL;
 
-	while (link != NULL) {
+	dbg_assert(link != NULL);
+
+	while (link != pcl->e_sent) {
 		prev = link;
 		link = link->next;
 
@@ -131,24 +144,36 @@ static void cntr_list_add(cntr cl, void* object) {
 static void* cntr_list_front(cntr cl) {
 	cntr_list* pcl = (cntr_list*)cl;
 
-	if (pcl->begin == NULL) {
-		dbg_assert(pcl->size == 0);
+	if (pcl->s_sent->next == pcl->e_sent) {
+		dbg_assert(pcl->size == 0 && pcl->e_sent->prev == pcl->s_sent);
 		return NULL;
 	}
 
-	return (pcl->begin)->object;
+	return (pcl->s_sent->next)->object;
 }
 
 static void* cntr_list_back (cntr cl) {
 	cntr_list* pcl = (cntr_list*)cl;
 
-	if (pcl->end == NULL) {
-		dbg_assert(pcl->size == 0);
-
+	if (pcl->s_sent->next == pcl->e_sent) {
+		dbg_assert(pcl->size == 0 && pcl->e_sent->prev == pcl->s_sent);
 		return NULL;
 	}
 
-	return (pcl->end)->object;
+	return (pcl->e_sent->prev)->object;
+}
+
+static inline void __link_insert(oplink* prev, oplink* cur, oplink* next) {
+	dbg_assert(prev->next == next && next->prev == prev);
+
+	cur->prev = prev;
+	cur->next = next;
+
+	prev->next = cur;
+	next->prev = cur;
+}
+
+static inline void __link_stitch(oplink* prev, oplink* next) {
 }
 
 static void  cntr_list_add_front(cntr cl, void* object) {
@@ -156,20 +181,10 @@ static void  cntr_list_add_front(cntr cl, void* object) {
 	oplink* link = (oplink*)halloc(sizeof(oplink));
 
 	link->object = object;
-	link->next = pcl->begin;
-	link->prev = NULL;
+	link->next = pcl->s_sent->next;
+	link->prev = pcl->s_sent;
 
-	if (pcl->begin == NULL) {
-		/* contains no element */
-		dbg_assert(pcl->begin == NULL && pcl->size == 0);
-
-		pcl->begin = pcl->end = link;
-	}
-	else {
-		pcl->begin->prev = link;
-
-		pcl->begin = link;
-	}
+	__link_insert(pcl->s_sent, link, pcl->s_sent->next);
 	
 	pcl->size ++;
 }
@@ -179,66 +194,49 @@ static void  cntr_list_add_back (cntr cl, void* object) {
 	oplink* link = (oplink*)halloc(sizeof(oplink));
 
 	link->object = object;
-	link->next = NULL;
-	link->prev = pcl->end;
+	link->next = pcl->e_sent;
+	link->prev = pcl->e_sent->prev;
 
-	if (pcl->end == NULL) {
-		/* contains no element */
-		dbg_assert(pcl->begin == NULL && pcl->size == 0);
-
-		pcl->begin = pcl->end = link;
-	}
-	else {
-		pcl->end->next = link;
-		pcl->end = link;
-	}
+	__link_insert(pcl->e_sent->prev, link, pcl->e_sent);
 
 	pcl->size ++;
 }
 
 static void* cntr_list_remove_front(cntr cl) {
 	cntr_list* pcl = (cntr_list*)cl;
-	oplink* link = pcl->begin;
-	void* object = link->object;
-	oplink* next = link->next;
 
-	dbg_assert(pcl->size > 0);
-	if (next) next->prev = NULL;
-	else {
-		/* has only one element */
-		dbg_assert(pcl->size == 1 && pcl->begin == pcl->end);
-		pcl->end = NULL;
+	if (pcl->s_sent->next != pcl->e_sent) {
+		oplink* link = pcl->s_sent->next;
+		void* obj = link->object;
+
+		dbg_assert(pcl->size > 0);
+		__link_stitch(link->prev, link->next);
+		pcl->size --;
+
+		hfree(link);
+
+		return obj;
 	}
 
-	pcl->begin = next;
-	hfree(link);
-
-	pcl->size --;
-
-	return object;
+	return NULL;
 }
 
 static void*  cntr_list_remove_back (cntr cl) {
 	cntr_list* pcl = (cntr_list*)cl;
-	oplink* link = pcl->end;
-	void* object = link->object;
 
-	oplink* prev = link->prev;
+	if (pcl->s_sent->next != pcl->e_sent) {
+		oplink* link = pcl->e_sent->prev;
+		void* obj = link->object;
 
-	dbg_assert(pcl->size > 0);
-	if (prev) prev->next = NULL;
-	else {
-		/* only one element */
-		dbg_assert(pcl->size == 1 && pcl->begin == pcl->end);
-		pcl->begin = NULL;
+		dbg_assert(pcl->size > 0);
+		__link_stitch(link->prev, link->next);
+		pcl->size --;
+
+		hfree(link);
+		return obj;
 	}
 
-	pcl->end = prev;
-	hfree(link);
-
-	pcl->size --;
-
-	return object;
+	return NULL;
 }
 
 /* iterator related operations */
@@ -279,15 +277,6 @@ static cattr oplink_attribute(citer itr) {
 	return CITER_ATTR_BASE | CITER_ATTR_LINK;
 }
 
-/*
-static int oplink_cntr_size(citer itr) {
-	citer_base* cur = (citer_base*)itr;
-	cntr* list = (cntr*)(cur->container);
-
-	dbg_assert(list);
-	return list->size;
-}
-*/
 static citer_base_vtable oplink_citer_operations = {
 	oplink_attribute,
 
@@ -302,7 +291,10 @@ static void  cntr_list_citer_begin(cntr cl, citer cur) {
 	cntr_list* pcl = (cntr_list*)cl;
 
 	itr->__vt = &oplink_citer_operations;
-	itr->connection = (void*)pcl->begin;
+	if (pcl->s_sent->next == pcl->e_sent) {
+		itr->connection = NULL;
+	}
+	else itr->connection = (void*)(pcl->s_sent->next);
 }
 
 static void  cntr_list_citer_end  (cntr cl, citer cur) {
@@ -310,16 +302,19 @@ static void  cntr_list_citer_end  (cntr cl, citer cur) {
 	cntr_list* pcl = (cntr_list*)cl;
 
 	itr->__vt = &oplink_citer_operations;
-	itr->connection = (void*)pcl->end;
+	if (pcl->s_sent->next == pcl->e_sent) {
+		itr->connection = NULL;
+	}
+	else itr->connection = (void*)(pcl->e_sent->prev);
 }
 
 static bool  cntr_list_find(cntr cl, void* object, citer itr) {
 	cntr_list* pcl = (cntr_list*)cl;
 	citer_base* ci = (citer_base*)itr;
 
-	oplink* link = pcl->begin;
+	oplink* link = pcl->s_sent->next;
 
-	while (link != NULL) {
+	while (link != pcl->e_sent) {
 		if (link->object == object) {
 			ci->connection = (void*)link;
 			ci->__vt = &oplink_citer_operations;
@@ -336,34 +331,26 @@ static bool  cntr_list_find(cntr cl, void* object, citer itr) {
 static void  cntr_list_remove(cntr cl, citer begin, citer end) {
 	cntr_list* pcl = (cntr_list*)cl;
 
-	oplink* link_begin = (oplink*)(((citer_base*)begin)->connection);
-	oplink* link_end = (oplink*)(((citer_base*)end)->connection);
-
-	oplink* link_prev = link_begin->prev;
-	oplink* link_next = link_end->next;
+	oplink* lb = (oplink*)(((citer_base*)begin)->connection);
+	oplink* le = (oplink*)(((citer_base*)end)->connection);
+	oplink* prev;
 
 	int count = 0;
 
-	if (link_prev == NULL) {
-		dbg_assert(pcl->begin == link_begin);
-		pcl->begin = link_next;
-	}
-	else {
-		link_prev->next = link_next;
-	}
+	dbg_assert(lb->prev != NULL && le->next != NULL);
 
-	if (link_next == NULL) {
-		dbg_assert(pcl->end == link_end);
-		pcl->end = link_prev;
-	}
-	else {
-		link_next->prev = link_prev;
-	}
+	__link_stitch(lb->prev, le->next);
 
 	count = 1;
-	while (link_begin != link_end) {
-		link_begin = link_begin->next;
+	while (lb != le) {
+		prev = lb;
+		lb = lb->next;
+
+		hfree(prev);
+
 		count ++;
 	}
+
+	hfree(le);
 	pcl->size -= count;
 }

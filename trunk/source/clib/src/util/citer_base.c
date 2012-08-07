@@ -39,9 +39,3 @@ inline void citer_set_ref(citer itr, void* n_ref) {
 	(((citer_base*)itr)->__vt)->__set_ref(itr, n_ref);
 };
 
-/*
-inline int citer_cntr_size(citer* itr) {
-	return (((citer_base*)itr)->ops)->__cntr_size(itri);
-}
-*/
-

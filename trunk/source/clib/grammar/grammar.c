@@ -1,8 +1,13 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 typedef struct {
 	void *a, *b;
 } S;
+
+typedef struct {
+	S *ps;
+} T;
 
 void test0() {
 	int x = 5;
@@ -12,6 +17,10 @@ void test0() {
 	S f = { NULL, NULL };
 	S temp = x == 5 ? e : f;
 	if (NULL == NULL) x = 7;
+
+	T* pt = (T*)malloc(sizeof(T));
+	pt->ps = &e;
+	pt->ps->a = (void*)&x;
 }
 
 void test_const(const int* x) {
