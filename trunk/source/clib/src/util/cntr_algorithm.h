@@ -14,12 +14,18 @@ typedef void (*pf_for_each_process)(citer itr);
 
 void citer_for_each(citer begin, citer end, pf_for_each_process proc);
 
+typedef void (*pf_for_each_process_v)(citer itr, void* param);
+
+void citer_for_each_v(citer begin, citer end, pf_for_each_process_v proc, void* param);
+
 /* sorting algorithm.  */
 typedef int (*pf_compare_object)(const void*, const void*);
 
 void quick_sort(citer begin, citer end, pf_compare_object comp);
 
 void bubble_sort(citer begin, citer end, pf_compare_object comp);
+
+void merge_sort(citer begin, citer end, pf_compare_object comp);
 
 /* cntr related start */
 bool cntr_equal(cntr first, cntr second);

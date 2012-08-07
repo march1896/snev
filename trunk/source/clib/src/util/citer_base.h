@@ -52,10 +52,13 @@
 
 #include <cominc.h>
 #include <oos_model.h>
+#include <cattr.h>
 
 typedef unknown citer;
 
 typedef unknown cntr;
+
+extern inline cattr    citer_attrib(citer itr);
 
 extern inline void     citer_to_next(citer itr);
 
