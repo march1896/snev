@@ -18,6 +18,8 @@ typedef void (*pf_for_each_process_v)(citer itr, void* param);
 
 void citer_for_each_v(citer begin, citer end, pf_for_each_process_v proc, void* param);
 
+
+
 /* sorting algorithm.  */
 typedef int (*pf_compare_object)(const void*, const void*);
 

@@ -10,5 +10,5 @@ inline int citer_dis(const citer from, const citer to) {
 inline void citer_move_n(citer from, int dis) {
 	dbg_assert(citer_check_attr(from, CITER_ATTR_BASE | CITER_ATTR_CONT));
 
-	return (((citer_cont*)from)->__vt)->__move_n(from, dis);
+	(((citer_cont*)from)->__vt)->__move_n(from, dis);
 }

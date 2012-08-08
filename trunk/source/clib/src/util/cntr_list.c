@@ -12,7 +12,7 @@ typedef struct open_link_t {
 
 typedef struct cntr_list_vtable_t {
 	/* from cntr_linear_vtable */
-	pf_cntr_attribute                __attrib;
+	pf_cntr_attribute           __attrib;
 
 	pf_cntr_base_destroy        __destroy;
 	pf_cntr_base_clear          __clear;
@@ -33,7 +33,7 @@ typedef struct cntr_list_vtable_t {
 
 } cntr_list_vtable;
 
-static cattr cntr_list_attribute(cntr cl);
+static cattr cntr_list_attribute  (cntr cl);
 static void  cntr_list_destroy    (cntr cl);
 static void  cntr_list_clear      (cntr cl);
 static int   cntr_list_size       (cntr cl);
@@ -70,7 +70,7 @@ static cntr_list_vtable cntr_list_ops = {
 };
 
 typedef struct cntr_list_t {
-	cntr_list_vtable*               __vt;
+	cntr_list_vtable*           __vt;
 
 	int                         size;
 	unsigned int                flags;
@@ -130,6 +130,11 @@ static void cntr_list_clear(cntr cl) {
 
 		hfree(prev);
 	}
+
+	pcl->s_sent->next = pcl->e_sent;
+	pcl->e_sent->prev = pcl->s_sent;
+
+	pcl->size = 0;
 }
 
 static int cntr_list_size(cntr cl) {
