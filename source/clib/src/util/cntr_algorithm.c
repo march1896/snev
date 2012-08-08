@@ -59,11 +59,27 @@ bool cntr_equal(cntr first, cntr second) {
 	return true;
 }
 
-void __partition(citer begin, citer end, citer out, pf_compare_object comp) {
+#include <time.h>
+#include <stdlib.h>
+static void __randomize(citer begin, citer end) {
+	if (citer_check_attr(begin, CITER_ATTR_CONT)) {
+		int dis = citer_dis(begin, end);
+		citer_dos(ran, begin);
+
+		int x = ((rand() % dis) + dis) % dis;
+
+		citer_move_n(ran, x);
+		citer_swap(ran, end);
+	}
+}
+
+static void __partition(citer begin, citer end, citer out, pf_compare_object comp) {
 	citer_dos(posed, begin);
 	citer_dos(fwd, begin);
 
 	dbg_assert(!citer_equal(begin, end));
+
+	__randomize(begin, end);
 
 	while (!citer_equal(fwd, end)) {
 		if (comp(citer_get_ref(fwd), citer_get_ref(end)) < 0) {
@@ -81,6 +97,9 @@ void __partition(citer begin, citer end, citer out, pf_compare_object comp) {
 
 void quick_sort(citer begin, citer end, pf_compare_object comp) {
 	citer_dos(mid, NULL);
+
+	unsigned int iseed = (unsigned int)time(NULL);
+	srand (iseed);
 
 	if (citer_equal(begin, end)) return;
 

@@ -56,7 +56,7 @@ if (SINGLE_LIB)
 
  	if (BUILD_TEST) 
 		INCLUDE_DIRECTORIES("../tests/")
-		FILE (GLOB_RECURSE C_TESTS_FILES "../tests/*.test.c")
+		FILE (GLOB_RECURSE C_TESTS_FILES "../tests/*.c")
 		ADD_EXECUTABLE (TestMain ${C_TESTS_FILES})
 		TARGET_LINK_LIBRARIES(TestMain ${LIB_NAME})
 
