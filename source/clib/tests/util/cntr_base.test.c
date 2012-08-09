@@ -52,6 +52,12 @@ static void add_find_remove_correctness_test(
 	cntr_destroy(c);
 }
 
+int z[clength];
+int z_id = 0;
+void assign_z(citer itr) {
+	z[z_id++] = (int)citer_get_ref(itr);
+}
+
 typedef cntr (*pf_set_create)(pf_compare_object);
 static void set_add_find_remove_correctness_test(
 	const char* cntr_name,
@@ -83,6 +89,12 @@ static void set_add_find_remove_correctness_test(
 			bool find = cntr_find(c, (void*)i, first);
 			dbg_assert(find == false);
 		}
+
+		cntr_citer_begin(c, first);
+		cntr_citer_end(c, second);
+		memset(z, 0, sizeof(z));
+		z_id = 0;
+		citer_for_each(first, second, assign_z);
 
 		/* test remove, remove first half elements */
 		for (i = 0; i < ul / 2; i ++) {
