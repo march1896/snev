@@ -3,47 +3,36 @@
 #include <stdio.h>
 #include <string.h>
 
-typedef cntr (*pf_cntr_create)();
-static void add_find_remove_correctness_test(
-	const char* cntr_name,
-	const char* data_order_name,
-	pf_cntr_create cntr_create,
-	int data_order,
-	int data_length
-	) {
+static void add_find_remove_correctness_test(test_cont_type ct, test_data_type dt, test_data_length dl) {
 	cntr c;
 	citer_dos(first, NULL);
 	citer_dos(second, NULL);
-	int i, ul;
+	int i, length, ulength;
 
-	printf("%s add/find/remove test with %s data\n", cntr_name, data_order_name);
+	printf("%s add/find/remove test with %s data\n", cntr_name(ct), data_order_name(dt));
 
-	if (strcmp(cntr_name, "bst") == 0) {
-		//c = cntr_create(cntr_int_compare);
-	}
-	else {
-		c = cntr_create();
-	}
-	ul = generate_data(data_order, data_length);
+	c = cntr_create(ct);
 
-	for (i = 0; i < data_length; i ++) cntr_add(c, (void*)x[i]);
+	generate_test_data(dt, dl, &length, &ulength);
+
+	for (i = 0; i < ulength; i ++) cntr_add(c, (void*)uniquedata[i]);
 
 	/* test find */
-	for (i = 0; i < data_length; i ++) {
-		bool find = cntr_find(c, (void*)x[i], first);
+	for (i = 0; i < length; i ++) {
+		bool find = cntr_find(c, (void*)rawdata[i], first);
 		dbg_assert(find);
 	}
 
-	for (i = data_length + 1; i < data_length + 50; i ++) {
+	for (i = length + 1; i < length + 50; i ++) {
 		bool find = cntr_find(c, (void*)i, first);
 		dbg_assert(find == false);
 	}
 
 	/* test remove, remove first half elements */
-	for (i = 0; i < data_length / 2; i ++) {
-		bool find = cntr_find(c, (void*)x[i], first);
+	for (i = 0; i < ulength / 2; i ++) {
+		bool find = cntr_find(c, (void*)uniquedata[i], first);
 		cntr_remove(c, first, first);
-		dbg_assert(cntr_size(c) == data_length - i - 1);
+		dbg_assert(cntr_size(c) == ulength - i - 1);
 	}
 
 	cntr_clear(c);
@@ -52,92 +41,80 @@ static void add_find_remove_correctness_test(
 	cntr_destroy(c);
 }
 
-int z[clength];
-int z_id = 0;
-void assign_z(citer itr) {
-	z[z_id++] = (int)citer_get_ref(itr);
-}
+static void add_find_remove_performance_test(test_cont_type ct, test_data_type dt, test_data_length dl) {
+	cntr c;
+	citer_dos(first, NULL);
+	citer_dos(second, NULL);
+	int rep, i, length, ulength;
+	clock_t start_c, end_c;
+	float find_used;
 
-typedef cntr (*pf_set_create)(pf_compare_object);
-static void set_add_find_remove_correctness_test(
-	const char* cntr_name,
-	const char* data_order_name,
-	pf_set_create cntr_create,
-	int data_order,
-	int data_length
-	) {
-		cntr c;
-		citer_dos(first, NULL);
-		citer_dos(second, NULL);
-		int i, ul;
+	printf("\n%s add/find/remove performance test with %s data\n", cntr_name(ct), data_order_name(dt));
 
-		printf("%s add/find/remove test with %s data\n", cntr_name, data_order_name);
+	c = cntr_create(ct);
 
-		c = cntr_create(cntr_int_compare);
+	generate_test_data(dt, dl, &length, &ulength);
 
-		ul = generate_data(data_order, data_length);
+	printf("add: ");
+	start_c = clock();	
+	for (i = 0; i < length; i ++) cntr_add(c, (void*)rawdata[i]);
+	end_c = clock();
+	printf("used %f\n", (float)(end_c - start_c)/CLOCKS_PER_SEC);
 
-		for (i = 0; i < data_length; i ++) cntr_add(c, (void*)x[i]);
-
-		/* test find */
-		for (i = 0; i < data_length; i ++) {
-			bool find = cntr_find(c, (void*)x[i], first);
+	printf("find: ");
+	start_c = clock();
+	for (rep = 0; rep < 20; rep ++) {
+		for (i = 0; i < length; i ++) {
+			bool find = cntr_find(c, (void*)rawdata[i], first);
 			dbg_assert(find);
 		}
+	}
+	end_c = clock();
+	printf("used %f\n", (float)(end_c - start_c)/CLOCKS_PER_SEC);
+	find_used = (float)(end_c - start_c)/CLOCKS_PER_SEC;
 
-		for (i = data_length + 1; i < data_length + 50; i ++) {
-			bool find = cntr_find(c, (void*)i, first);
-			dbg_assert(find == false);
-		}
 
-		cntr_citer_begin(c, first);
-		cntr_citer_end(c, second);
-		memset(z, 0, sizeof(z));
-		z_id = 0;
-		citer_for_each(first, second, assign_z);
+	printf("remove: ");
+	find_used = 0.0;
+	start_c = clock();
+	for (i = 0; i < ulength; i ++) {
+		bool find = cntr_find(c, (void*)uniquedata[i], first);
 
-		/* test remove, remove first half elements */
-		for (i = 0; i < ul / 2; i ++) {
-			bool find = cntr_find(c, (void*)y[i], first);
-			cntr_remove(c, first, first);
-			dbg_assert(cntr_size(c) == ul - i - 1);
-		}
+		cntr_remove(c, first, first);
+	}
+	end_c = clock();
+	printf("used %f\n", (float)(end_c - start_c)/CLOCKS_PER_SEC - find_used);
 
-		cntr_clear(c);
-		dbg_assert(cntr_size(c) == 0);
+	cntr_clear(c);
+	dbg_assert(cntr_size(c) == 0);
 
-		cntr_destroy(c);
+	cntr_destroy(c);
 }
 
 static void cntr_base_memory_test() {
 	
 }
 
-
-const char* data_order[] = {"increase", "decrease", "random" };
-const char* linear_name[] = {"list", "array"};
-pf_cntr_create linear_create[] = { cntr_create_as_list, cntr_create_as_array};
-const char* set_name[] = { "bst" };
-pf_set_create set_create[] = { cntr_create_as_bst };
-
 static void cntr_base_correctness_test() {
 	int i, j;
-	printf("add find remove test start\n");
-	for (i = 0; i < 2; i ++) {
-		for (j = 0; j < 3; j ++) {
-			add_find_remove_correctness_test(linear_name[i], data_order[j], linear_create[i], j, clength);
+	printf("add find remove correctness test start\n");
+	for (i = ec_list; i < ec_end; i ++) {
+		for (j = ed_increase; j < ed_end; j ++) {
+			add_find_remove_correctness_test(i, j, clength);
 		}
 	}
-	for (i = 0; i < 1; i ++) {
-		for (j = 0; j < 3; j ++) {
-			set_add_find_remove_correctness_test(set_name[i], data_order[j], set_create[i], j, clength);
-		}
-	}
-	printf("add find remove test end\n\n");
+	printf("add find remove correctness test end\n\n");
 }
 
 static void cntr_base_performance_test() {
-
+	int i, j;
+	printf("add find remove performance test start\n");
+	for (i = ec_list; i < ec_end; i ++) {
+		for (j = ed_increase; j < ed_end; j ++) {
+			add_find_remove_performance_test(i, j, plength);
+		}
+	}
+	printf("add find remove performance test end\n\n");
 }
 
 void cntr_base_test() {
