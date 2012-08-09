@@ -126,7 +126,7 @@ static void cntr_bst_add(cntr c, void* obj) {
 		bst_node *par = NULL;
 		/* find a proper place */
 		while (fwd != NULL) {
-			bool comp_res = pb->comp(obj, fwd->object);
+			int comp_res = pb->comp(obj, fwd->object);
 
 			dbg_assert(fwd->object);
 
@@ -136,8 +136,10 @@ static void cntr_bst_add(cntr c, void* obj) {
 
 			if (comp_res == 0) redup = true;
 		}
+		dbg_assert(fwd == NULL);
 
 		dbg_assert(par);
+		// TODO
 		if (!redup || (pb->flags & BST_MULTI_INS)) {
 			/* link the node into tree */
 			n_node->parent = par;
@@ -145,10 +147,12 @@ static void cntr_bst_add(cntr c, void* obj) {
 			if (pb->comp(obj, par->object) < 0) {
 				dbg_assert(par->left == NULL);
 				par->left = n_node;
+				n_node->parent = par;
 			}
 			else {
 				dbg_assert(par->right == NULL);
 				par->right = n_node;
+				n_node->parent = par;
 			}
 			pb->size ++;
 		}
@@ -328,7 +332,7 @@ static bool  cntr_bst_find(cntr c, void* object, citer itr) {
 	bst_node* fwd = pb->root;
 
 	while (fwd != NULL) {
-		bool comp_res = pb->comp(object, fwd->object);
+		int comp_res = pb->comp(object, fwd->object);
 
 		if (comp_res == 0) {
 			ci->__vt = &citer_bst_operations;
