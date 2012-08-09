@@ -11,7 +11,7 @@ static cntr c;
 
 static void judge(int length) {
 	for (i = 0; i < length; i ++) 
-		if (x[i] != z[i]) {
+		if (rawdata[i] != z[i]) {
 			printf("error!\n");
 			break;
 		}
@@ -39,7 +39,7 @@ static void sort_correctness_test(char* sort_name, char* cntr_name, char* data_o
 
 	c = cntr_create();
 
-	for (i = 0; i < data_length; i ++) cntr_add_back(c, (void*)x[i]);
+	for (i = 0; i < data_length; i ++) cntr_add_back(c, (void*)rawdata[i]);
 
 	cntr_citer_begin(c, begin);
 	cntr_citer_end(c, end);
@@ -47,7 +47,7 @@ static void sort_correctness_test(char* sort_name, char* cntr_name, char* data_o
 	the_sort(begin, end, cntr_int_compare);
 	i = 0;
 	citer_for_each(begin, end, assign_z);
-	qsort(x, data_length, sizeof(int), qsort_int_compare);
+	qsort(rawdata, data_length, sizeof(int), qsort_int_compare);
 
 	judge(data_length);
 
@@ -67,13 +67,13 @@ static void sort_performance_test(char* sort_name, char* cntr_name, char* data_o
 
 	generate_data(init_data_order, data_length);
 	c = cntr_create();
-	for (i = 0; i < data_length; i ++) cntr_add_back(c, (void*)x[i]);
+	for (i = 0; i < data_length; i ++) cntr_add_back(c, (void*)rawdata[i]);
 
 	cntr_citer_begin(c, begin);
 	cntr_citer_end(c, end);
 	start_c = clock();	
 	if (strcmp(sort_name, "default") == 0){
-		qsort(x, data_length, sizeof(int), qsort_int_compare);
+		qsort(rawdata, data_length, sizeof(int), qsort_int_compare);
 	}
 	else {
 		the_sort(begin, end, cntr_int_compare);
