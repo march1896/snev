@@ -208,30 +208,55 @@ static inline bool bst_isleaf(const bst_node* pn) {
 /* remove a single node from a bst */
 static void* bst_remove(cntr_bst* pb, bst_node* pn) {
 	void* ref_obj = pn->object;
-	bst_node* alter = NULL;
 
-	if (alter = bst_predesessor(pn, true)) {
-		pn->object = alter->object;
-		bst_remove(pb, alter);
-	}
-	else if (alter = bst_successor(pn, true)) {
-		pn->object = alter->object;
-		bst_remove(pb, alter);
-	}
-	else {
-		dbg_assert(bst_isleaf(pn));
-
-		if (pn == pb->root) {
-			dbg_assert(pb->size == 1);
-			pb->root = NULL;
-		}
+	if (pn->left == NULL && pn->right == NULL) {
+		if (pb->root == pn) pb->root = NULL;
 		else {
-			dbg_assert(pn->parent);
-			if (pn->parent->left == pn) pn->parent->left = NULL;
-			else pn->parent->right = NULL;
+			bst_node* par = pn->parent;
+			if (par->left == pn) par->left = NULL;
+			else par->right = NULL;
 		}
 		hfree(pn);
 		pb->size --;
+	}
+	else if (pn->left == NULL) {
+		if (pb->root == pn) {
+			dbg_assert(pn->parent == NULL);
+			pb->root = pn->right;
+			pn->right->parent = NULL;
+		}
+		else {
+			bst_node* par = pn->parent;
+			if (par->left == pn) par->left = pn->right;
+			else par->right = pn->right;
+
+			pn->right->parent = par;
+		}
+		
+		hfree(pn);
+		pb->size --;
+	}
+	else if (pn->right == NULL) {
+		if (pb->root == pn) {
+			dbg_assert(pn->parent == NULL);
+			pb->root = pn->left;
+			pn->left->parent = NULL;
+		}
+		else {
+			bst_node* par = pn->parent;
+			if (par->left == pn) par->left = pn->left;
+			else par->right = pn->left;
+
+			pn->left->parent = par;
+		}
+		
+		hfree(pn);
+		pb->size --;
+	}
+	else {
+		bst_node* alter = bst_predesessor(pn, true);
+		pn->object = alter->object;
+		bst_remove(pb, alter);
 	}
 
 	return ref_obj;
