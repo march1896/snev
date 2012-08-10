@@ -100,10 +100,10 @@ static void cntr_base_correctness_test() {
 	printf("add find remove correctness test start\n");
 	for (i = ec_list; i < ec_end; i ++) {
 		for (j = ed_increase; j < ed_end; j ++) {
-			add_find_remove_correctness_test(i, j, clength);
+			add_find_remove_correctness_test((test_cont_type)i, (test_data_type)j, el_correctness);
 		}
 	}
-	printf("add find remove correctness test end\n\n");
+	printf("add find remove correctness test end\n");
 }
 
 static void cntr_base_performance_test() {
@@ -111,10 +111,10 @@ static void cntr_base_performance_test() {
 	printf("add find remove performance test start\n");
 	for (i = ec_list; i < ec_end; i ++) {
 		for (j = ed_increase; j < ed_end; j ++) {
-			add_find_remove_performance_test(i, j, plength);
+			add_find_remove_performance_test((test_cont_type)i, (test_data_type)j, el_performance);
 		}
 	}
-	printf("add find remove performance test end\n\n");
+	printf("add find remove performance test end\n");
 }
 
 void cntr_base_test() {
