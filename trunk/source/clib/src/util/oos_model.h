@@ -20,12 +20,12 @@ typedef void* unknown;
  * Because our philosophy is to erase type information in oos, if we want to new a frequently 
  * used object on stack, we should use the following helpers.
  */
-typedef struct __struct_twopointer_long_variable_t {
+typedef struct __struct_twopointer_long_variable__ {
 	void* never_reference_me_X;
 	void* never_reference_me_Y;
 } __twopointer_long_variable;
 
-typedef struct __struct_fourpointer_long_variable_t {
+typedef struct __struct_fourpointer_long_variable__ {
 	void* never_reference_me_X;
 	void* never_reference_me_Y;
 	void* never_reference_me_Z;

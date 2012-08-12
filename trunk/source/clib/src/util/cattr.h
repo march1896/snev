@@ -12,7 +12,7 @@ typedef unsigned int cattr;
 #define CNTR_ATTR_LINEAR     (1<<1)
 #define CNTR_ATTR_ARRAY      (1<<2)
 #define CNTR_ATTR_LIST       (1<<3)
-
+#define CNTR_ATTR_TREE       (1<<4)
 
 #define CITER_ATTR_BASE      (1<<0)
 /* coutnuous */

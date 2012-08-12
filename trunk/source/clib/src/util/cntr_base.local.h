@@ -14,7 +14,7 @@ typedef bool (*pf_cntr_base_find)(cntr c, void* object, __out citer result);
 typedef void (*pf_cntr_base_citer_begin)(cntr c, citer itr);
 typedef void (*pf_cntr_base_citer_end)(cntr c, citer itr);
 
-typedef struct cntr_base_vtable_t {
+typedef struct __cntr_base_vtable {
 	pf_cntr_attribute             __attrib;
 
 	pf_cntr_base_destroy     __destroy;
@@ -27,7 +27,7 @@ typedef struct cntr_base_vtable_t {
 	pf_cntr_base_citer_end   __citer_end;
 } cntr_base_vtable;
 
-typedef struct cntr_common_body_t {
+typedef struct __cntr_common_body {
 	cntr_base_vtable*        __vt;
 	
 	/* ... */

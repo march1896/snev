@@ -118,7 +118,7 @@ cntr cntr_create(test_cont_type ct) {
 	case ec_array:
 		return cntr_create_as_array();
 	case ec_bst:
-		return cntr_create_as_bst(cntr_int_compare);
+		return cntr_create_as_bst_v(cntr_int_compare);
 	default:
 		return NULL;
 	}

@@ -10,7 +10,7 @@ typedef void    (*pf_citer_to_prev)(citer);
 typedef void*   (*pf_citer_get_ref)(citer);
 typedef void    (*pf_citer_set_ref)(citer, void*);
 
-typedef struct citer_base_vtable_t {
+typedef struct __citer_base_vtable {
 	pf_citer_attribute __attrib;
 
 	pf_citer_get_ref __get_ref;
@@ -23,7 +23,7 @@ typedef struct citer_base_vtable_t {
  * Instead of * typedef unknow citer * , I expose the details of iterator to let 
  * client to declare a citer on stack.
  */
-typedef struct citer_base_class_t {
+typedef struct __citer_base_class {
 	/* * pointer to specific iterator operations */
 	citer_base_vtable* __vt; 
 

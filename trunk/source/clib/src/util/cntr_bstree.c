@@ -2,17 +2,19 @@
 #include <citer_base.local.h>
 #include <cntr_base.h>
 #include <cntr_base.local.h>
+#include <cntr_tree.h>
 #include <cntr_algorithm.h>
+#include <cntr_factory.h>
 
-typedef struct bst_node_t {
-	struct bst_node_t* parent;
-	struct bst_node_t* left;
-	struct bst_node_t* right;
+typedef struct __bst_node {
+	struct __bst_node* parent;
+	struct __bst_node* left;
+	struct __bst_node* right;
 
 	void *object;
 } bst_node;
 
-typedef struct cntr_bst_vtable_t {
+typedef struct __cntr_bst_vtable {
 	/* from cntr_linear_vtable */
 	pf_cntr_attribute           __attrib;
 
@@ -48,25 +50,58 @@ static cntr_bst_vtable cntr_bst_ops = {
 	cntr_bst_citer_end  , /* citer_end   */
 };
 
-#define BST_MULTI_INS           (1 << 0)
-
-typedef struct cntr_bst_t {
+typedef struct __cntr_bst {
 	cntr_bst_vtable*            __vt;
 
 	int                         size;
 	unsigned int                flags;
 	bst_node*                   root;
 	pf_compare_object           comp;
+	pf_preremove_cb             prerm;
 } cntr_bst;
 
-cntr cntr_create_as_bst(pf_compare_object comp) {
-	cntr_bst* pb = (cntr_bst*)halloc(sizeof(cntr_bst));
-
+static void cntr_bst_init(cntr_bst* pb, pf_preremove_cb rm, pf_compare_object comp) {
 	pb->__vt = &cntr_bst_ops;
 	pb->size = 0;
 	pb->flags = 0;
 	pb->root = NULL;
 	pb->comp = comp;
+	pb->prerm = rm;
+}
+
+static inline bool __compare(const cntr_bst* pb, const void *lhs, const void *rhs) {
+	if (pb->comp) return pb->comp(lhs, rhs);
+	else return lhs < rhs; /* directly compare the address */
+}
+
+cntr cntr_create_as_bst() {
+	cntr_bst* pb = (cntr_bst*)halloc(sizeof(cntr_bst));
+
+	cntr_bst_init(pb, NULL, NULL);
+
+	return (cntr)pb;
+}
+
+cntr cntr_create_as_bst_r(pf_preremove_cb prerm) {
+	cntr_bst* pb = (cntr_bst*)halloc(sizeof(cntr_bst));
+
+	cntr_bst_init(pb, prerm, NULL);
+
+	return (cntr)pb;
+}
+
+cntr cntr_create_as_bst_v(pf_compare_object comp) {
+	cntr_bst* pb = (cntr_bst*)halloc(sizeof(cntr_bst));
+
+	cntr_bst_init(pb, NULL, comp);
+
+	return (cntr)pb;
+}
+
+cntr cntr_create_as_bst_rv(pf_preremove_cb prerm, pf_compare_object comp) {
+	cntr_bst* pb = (cntr_bst*)halloc(sizeof(cntr_bst));
+
+	cntr_bst_init(pb, prerm, comp);
 
 	return (cntr)pb;
 }
@@ -81,19 +116,21 @@ static void  cntr_bst_destroy(cntr c) {
 	hfree(c);
 }
 
-static void bst_clear_traverse(bst_node* pn) {
+static void bst_clear_traverse(bst_node* pn, pf_preremove_cb __remove) {
 	if (pn == NULL) return;
 
-	bst_clear_traverse(pn->left);
-	bst_clear_traverse(pn->right);
+	bst_clear_traverse(pn->left, __remove);
+	bst_clear_traverse(pn->right, __remove);
 
+	if (__remove)
+		__remove(pn->object);
 	hfree(pn);
 }
 
 static void  cntr_bst_clear(cntr c) {
 	cntr_bst* pb = (cntr_bst*)c;
 
-	bst_clear_traverse(pb->root);
+	bst_clear_traverse(pb->root, pb->prerm);
 
 	pb->root = NULL;
 	pb->size = 0;
@@ -126,7 +163,7 @@ static void cntr_bst_add(cntr c, void* obj) {
 		bst_node *par = NULL;
 		/* find a proper place */
 		while (fwd != NULL) {
-			int comp_res = pb->comp(obj, fwd->object);
+			int comp_res = __compare(pb, obj, fwd->object);
 
 			dbg_assert(fwd->object);
 
@@ -139,12 +176,12 @@ static void cntr_bst_add(cntr c, void* obj) {
 		dbg_assert(fwd == NULL);
 
 		dbg_assert(par);
-		// TODO
-		if (!redup || (pb->flags & BST_MULTI_INS)) {
+
+		if (!redup || (pb->flags & SET_MULTI_INS)) {
 			/* link the node into tree */
 			n_node->parent = par;
 
-			if (pb->comp(obj, par->object) < 0) {
+			if (__compare(pb, obj, par->object) < 0) {
 				dbg_assert(par->left == NULL);
 				par->left = n_node;
 				n_node->parent = par;
@@ -157,7 +194,16 @@ static void cntr_bst_add(cntr c, void* obj) {
 			pb->size ++;
 		}
 		else {
-			/* dont insert into tree, clean up */
+			/* reduplicated and single instance */
+			if (pb->flags & SET_EQUAL_REPLACE) {
+				void* old_obj = par->object;
+				par->object = obj;
+				if (pb->prerm) pb->prerm(old_obj);
+			}
+			else {
+				if (pb->prerm) pb->prerm(obj);
+			}
+
 			hfree(n_node);
 		}
 	}
@@ -315,14 +361,15 @@ void cntr_bst_remove_proc(citer itr, void* param) {
 	cntr_bst* pb = (cntr_bst*)param;
 	bst_node* pn = (bst_node*)((citer_base*)itr)->connection;
 
-	bst_remove(pb, pn);
+	void* obj = bst_remove(pb, pn);
+	if (pb->prerm) 
+		pb->prerm(obj);
 }
 
 static void  cntr_bst_remove(cntr c, citer begin, citer end) {
 	cntr_bst* pb = (cntr_bst*)c;
 	
 	citer_for_each_v(begin, end, cntr_bst_remove_proc, (void*)pb);
-	// TODO:
 }
 
 static bool  cntr_bst_find(cntr c, void* object, citer itr) {
@@ -332,7 +379,7 @@ static bool  cntr_bst_find(cntr c, void* object, citer itr) {
 	bst_node* fwd = pb->root;
 
 	while (fwd != NULL) {
-		int comp_res = pb->comp(object, fwd->object);
+		int comp_res = __compare(pb, object, fwd->object);
 
 		if (comp_res == 0) {
 			ci->__vt = &citer_bst_operations;

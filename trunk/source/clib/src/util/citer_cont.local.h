@@ -7,7 +7,7 @@ typedef int (*pf_citer_cont_dis)(const citer from, const citer to);
 
 typedef void (*pf_citer_cont_move_n)(citer itr, int n);
 
-typedef struct citer_cont_vtable_t {
+typedef struct __citer_cont_vtable {
 	/* from citer base */
 	pf_citer_attribute __attrib;
 
@@ -21,7 +21,7 @@ typedef struct citer_cont_vtable_t {
 	pf_citer_cont_move_n __move_n;
 } citer_cont_vtable;
 
-typedef struct citer_cont_body_t {
+typedef struct __citer_cont_body {
 	citer_cont_vtable*   __vt;
 
 	void*                connection;
