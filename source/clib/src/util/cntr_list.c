@@ -1,16 +1,17 @@
 #include <citer_base.h>
 #include <citer_base.local.h>
 
+#include <cntr_factory.h>
 #include <cntr_linear.local.h>
 
-typedef struct open_link_t {
-	struct open_link_t* prev;
-	struct open_link_t* next;
+typedef struct __open_link {
+	struct __open_link* prev;
+	struct __open_link* next;
 
 	void* object;
 } oplink;
 
-typedef struct cntr_list_vtable_t {
+typedef struct __cntr_list_vtable {
 	/* from cntr_linear_vtable */
 	pf_cntr_attribute           __attrib;
 
@@ -69,17 +70,18 @@ static cntr_list_vtable cntr_list_ops = {
 	cntr_list_remove_back , /* remove_back  */
 };
 
-typedef struct cntr_list_t {
+typedef struct __cntr_list {
 	cntr_list_vtable*           __vt;
 
 	int                         size;
 	unsigned int                flags;
 	oplink*                     s_sent;  /* the start sentinel */
 	oplink*                     e_sent;    /* the end sentinel */
+
+	pf_preremove_cb             prerm;  /* pre remove call back */
 } cntr_list;
 
-cntr cntr_create_as_list() {
-	cntr_list* pcl = (cntr_list*)halloc(sizeof(cntr_list));
+static void cntr_list_init(cntr_list* pcl) {
 	oplink* s_sent, *e_sent;
 
 	s_sent = (oplink*)halloc(sizeof(oplink));
@@ -89,7 +91,7 @@ cntr cntr_create_as_list() {
 	e_sent = (oplink*)halloc(sizeof(oplink));
 	e_sent->object = NULL;
 	e_sent->next = NULL;
-	
+
 	e_sent->prev = s_sent;
 	s_sent->next = e_sent;
 
@@ -98,6 +100,23 @@ cntr cntr_create_as_list() {
 	pcl->flags = 0;
 	pcl->s_sent = s_sent;
 	pcl->e_sent = e_sent;
+	pcl->prerm = NULL;
+}
+
+cntr cntr_create_as_list() {
+	cntr_list* pcl = (cntr_list*)halloc(sizeof(cntr_list));
+
+	cntr_list_init(pcl);
+
+	return (cntr)pcl;
+}
+
+cntr cntr_create_as_list_r(pf_preremove_cb pre_rm) {
+	cntr_list* pcl = (cntr_list*)halloc(sizeof(cntr_list));
+
+	cntr_list_init(pcl);
+
+	pcl->prerm = pre_rm;
 
 	return (cntr)pcl;
 }
@@ -127,6 +146,9 @@ static void cntr_list_clear(cntr cl) {
 	while (link != pcl->e_sent) {
 		prev = link;
 		link = link->next;
+
+		if (pcl->prerm) 
+			pcl->prerm(prev->object);
 
 		hfree(prev);
 	}
@@ -354,10 +376,16 @@ static void  cntr_list_remove(cntr cl, citer begin, citer end) {
 		prev = lb;
 		lb = lb->next;
 
+		if (pcl->prerm) 
+			pcl->prerm(prev->object);
+
 		hfree(prev);
 
 		count ++;
 	}
+
+	if (pcl->prerm) 
+		pcl->prerm(le->object);
 
 	hfree(le);
 	pcl->size -= count;

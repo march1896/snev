@@ -4,7 +4,7 @@
 
 typedef void (*pf_cntr_array_assign_capacity)(cntr pca, int n_size);
 
-typedef struct cntr_array_vtable_t {
+typedef struct __cntr_array_vtable {
 	/* from clinear */
 	pf_cntr_attribute                __attrib;
 
@@ -69,7 +69,7 @@ static cntr_array_vtable cntr_array_ops = {
 	cntr_array_assign_capacity /* assign capacity */
 };
 
-typedef struct cntr_array_t {
+typedef struct __cntr_array {
 	cntr_array_vtable*      __vt;
 
 	int                     size;
@@ -77,6 +77,8 @@ typedef struct cntr_array_t {
 	int                     expand_size;
 	unsigned                flags;
 	void**                  data;
+
+	pf_preremove_cb         prerm;
 } cntr_array;
 
 #define default_init_capacity 64
@@ -85,15 +87,36 @@ cntr cntr_create_as_array() {
 	return (cntr)cntr_create_as_array_v(default_init_capacity, default_expand_size);
 }
 
-cntr cntr_create_as_array_v(int init_capacity, int expand_size) {
-	cntr_array* pca = (cntr_array*)halloc(sizeof(cntr_array));
-
+static void cntr_array_init(cntr_array* pca, int init_capacity, int expand_size, pf_preremove_cb prm) {
 	pca->__vt = &cntr_array_ops; 
 	pca->size = 0;
 	pca->capacity = init_capacity;
 	pca->expand_size = expand_size;
 	pca->flags = 0;
+	pca->prerm = prm;
 	pca->data = (void**)halloc(init_capacity * sizeof(void*));
+}
+
+cntr cntr_create_as_array_v(int init_capacity, int expand_size) {
+	cntr_array* pca = (cntr_array*)halloc(sizeof(cntr_array));
+
+	cntr_array_init(pca, init_capacity, expand_size, NULL);
+
+	return (cntr)pca;
+}
+
+cntr cntr_create_as_array_r(pf_preremove_cb pre_rm) {
+	cntr_array* pca = (cntr_array*)halloc(sizeof(cntr_array));
+
+	cntr_array_init(pca, default_init_capacity, default_expand_size, pre_rm);
+
+	return (cntr)pca;
+}
+
+cntr cntr_create_as_array_rv(pf_preremove_cb pre_rm, int init_capacity, int expand_size) {
+	cntr_array* pca = (cntr_array*)halloc(sizeof(cntr_array));
+
+	cntr_array_init(pca, init_capacity, expand_size, pre_rm);
 
 	return (cntr)pca;
 }
@@ -112,6 +135,12 @@ static void  cntr_array_destroy    (cntr ca) {
 
 static void  cntr_array_clear      (cntr ca) {
 	cntr_array* pca = (cntr_array*)ca;
+
+	if (pca->prerm) {
+		int i = 0;
+		for (i = 0; i < pca->size; i ++)
+			pca->prerm(pca->data[i]);
+	}
 
 	pca->size = 0;
 }
@@ -290,6 +319,13 @@ static void  cntr_array_remove     (cntr ca, citer begin, citer end) {
 	int count = 0;
 
 	dbg_assert(ppb >= pca->data && ppe < pca->data + pca->size);
+
+	if (pca->prerm) {
+		void** addr = ppb;
+		for (; addr <= ppe; addr ++) {
+			pca->prerm(*addr);
+		}
+	}
 
 	count = ppe - ppb + 1;
 	memory_move((char*)(ppb), (char*)(ppe + 1), 

@@ -13,12 +13,13 @@ void test0() {
 	int x = 5;
 	int a = 3, b = 4;
 	int c = x == 5 ? a : b;
+	T* pt;
 	S e = { &a, &b };
 	S f = { NULL, NULL };
 	S temp = x == 5 ? e : f;
 	if (NULL == NULL) x = 7;
 
-	T* pt = (T*)malloc(sizeof(T));
+	pt = (T*)malloc(sizeof(T));
 	pt->ps = &e;
 	pt->ps->a = (void*)&x;
 }

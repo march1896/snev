@@ -10,7 +10,7 @@ typedef void (*pf_cntr_linear_add_back)(cntr c, void* obj);
 typedef void* (*pf_cntr_linear_remove_front)(cntr c);
 typedef void* (*pf_cntr_linear_remove_back)(cntr c);
 
-typedef struct cntr_linear_vtable_t {
+typedef struct __cntr_linear_vtable {
 	/* from cntr */
 	pf_cntr_attribute           __attrib;
 	pf_cntr_base_destroy        __destroy;
@@ -31,7 +31,7 @@ typedef struct cntr_linear_vtable_t {
 	pf_cntr_linear_remove_back  __remove_back;
 } cntr_linear_vtable;
 
-typedef struct cntr_linear_body_t {
+typedef struct __cntr_linear_body {
 	cntr_linear_vtable*     __vt;
 	
 	/* ... */
