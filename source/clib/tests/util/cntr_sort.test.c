@@ -88,7 +88,6 @@ pf_sort_name f_sort[] = { bubble_sort, quick_sort, merge_sort, bubble_sort };
 char c_cntr[][30] = { "list", "array" };
 pf_cntr_create f_create[] = { cntr_create_as_list, cntr_create_as_array };
 char c_order[][30] = { "increase", "decrease", "random" };
-int f_order[] = { 0, 2, 3 };
 
 void cntr_sort_test() {
 	int i, j, k;

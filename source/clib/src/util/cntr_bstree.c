@@ -69,7 +69,7 @@ static void cntr_bst_init(cntr_bst* pb, pf_preremove_cb rm, pf_compare_object co
 	pb->prerm = rm;
 }
 
-static inline bool __compare(const cntr_bst* pb, const void *lhs, const void *rhs) {
+static inline int __compare(const cntr_bst* pb, const void *lhs, const void *rhs) {
 	if (pb->comp) return pb->comp(lhs, rhs);
 	else return lhs < rhs; /* directly compare the address */
 }

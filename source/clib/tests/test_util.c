@@ -27,23 +27,23 @@ void destroy_data() {
  * return the sorted and unified data size.
  */
 static bool binary_search(int *buf, int size, int value);
-int generate_data(int type, int length) {
+int generate_data(test_data_type type, int length) {
 	int i;
-	if (type == 0) {
+	if (type == ed_increase) {
 		// increase
 		for (i = 0; i < length; i ++) {
 			rawdata[i] = uniquedata[i] = uniquesorteddata[i] = i + 1;
 		}
 		return length;
 	}
-	else if (type == 1) {
+	else if (type == ed_decrease) {
 		for (i = 0; i < length; i ++) {
 			rawdata[i] = uniquedata[i] = length - i;
 			uniquesorteddata[i] = i + 1;
 		}
 		return length;
 	}
-	else if (type == 2) {
+	else if (type == ed_random) {
 		int i, j, k, *helper;
 		for (i = 0; i < length; i ++) {
 			
@@ -110,7 +110,7 @@ int qsort_int_compare(const void* x, const void* y) {
 	return 0;
 }
 
-int generate_data(int type, int length);
+int generate_data(test_data_type type, int length);
 cntr cntr_create(test_cont_type ct) {
 	switch (ct) {
 	case ec_list:
