@@ -221,6 +221,39 @@ static void _rotate_right(rbt_node* n) {
 	}
 }
 
+static int __total_length;
+
+static void rbt_check_rec(rbt_node* n, int length, int pcolor) {
+	if (n == SENT) {
+		if (__total_length == -1) 
+			__total_length = length;
+		else 
+			dbg_assert(length == __total_length);
+
+		return;
+	}
+
+	if (n->color == BLACK) {
+		rbt_check_rec(n->left, length + 1, BLACK);
+		rbt_check_rec(n->right, length + 1, BLACK);
+	}
+	else {
+		dbg_assert(pcolor != RED);
+		rbt_check_rec(n->left, length, RED);
+		rbt_check_rec(n->right, length, RED);
+	}
+
+	return;
+}
+
+static void rbt_check(rbt_node* n) {
+	__total_length = -1;
+
+	dbg_assert(n == NULL || n->color == BLACK);
+	if (n != NULL) 
+		rbt_check_rec(n, 0, BLACK);
+}
+
 static void rbt_add_adjust(rbt_node* n) {
 	if (n->parent == NULL) {
 		// root node.
@@ -343,6 +376,9 @@ static void cntr_rbt_add(cntr c, void* obj) {
 	/* since after adjusting, tree root may change */
 	while (pb->root->parent != NULL) 
 		pb->root = pb->root->parent;
+
+	/* debug only */
+	/* rbt_check(pb->root); */
 }
 
 static inline rbt_node* rbt_predesessor(const rbt_node* pn, bool only_sub) {
@@ -409,9 +445,10 @@ static void rbt_remove_adjust(rbt_node* n) {
 				_rotate_left(n->parent);
 			else 
 				_rotate_right(n->parent);
-			return;
 		}
 
+		/* case 3 and 4 */
+		s = _sibling(n);
 		/* s->color == BLACK */
 		if (s->left->color == BLACK &&
 			s->right->color == BLACK) {
@@ -436,16 +473,15 @@ static void rbt_remove_adjust(rbt_node* n) {
 			s->color = RED;
 			s->left->color = BLACK;
 			_rotate_right(s);
-			return;
 		}
 		if (s->left->color == BLACK && n == n->parent->right) {
 			dbg_assert(s->right->color == RED);
 			s->color = RED;
 			s->right->color = BLACK;
 			_rotate_left(s);
-			return;
 		}
 
+		s = _sibling(n);
 		s->color = s->parent->color;
 		n->parent->color = BLACK;
 		if (n == n->parent->left) {
@@ -465,10 +501,6 @@ static void rbt_remove_one_child(rbt_node* n) {
 	if (n->parent) {
 		if (n == n->parent->left) n->parent->left = child;
 		else n->parent->right = child;
-	}
-
-	if (n->parent->color == RED && n->color == BLACK && _sibling(n) == SENT) {
-		dbg_assert(false);
 	}
 
 	dbg_assert(child != SENT || child->parent == NULL);
@@ -516,6 +548,9 @@ static void* rbt_remove(cntr_rbt* pb, rbt_node* pn) {
 
 	while (pb->root && pb->root->parent != NULL) 
 		pb->root = pb->root->parent;
+
+	/* debug only */
+	/* rbt_check(pb->root); */
 
 	pb->size --;
 	return ref_obj;
