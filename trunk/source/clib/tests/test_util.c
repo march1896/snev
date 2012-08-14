@@ -119,6 +119,8 @@ cntr cntr_create(test_cont_type ct) {
 		return cntr_create_as_array();
 	case ec_bst:
 		return cntr_create_as_bst_v(cntr_int_compare);
+	case ec_rbt:
+		return cntr_create_as_rbt_v(cntr_int_compare);
 	default:
 		return NULL;
 	}
@@ -131,7 +133,7 @@ void generate_test_data(test_data_type dt, test_data_length dl, int* length, int
 	*ulength = generate_data(dt, *length);
 }
 
-static const char* cntr_names[ec_end] = {"list", "array", "bst"};
+static const char* cntr_names[ec_end] = {"list", "array", "bst", "rbt"};
 const char* cntr_name(test_cont_type ct) {
 	return cntr_names[ct];
 }

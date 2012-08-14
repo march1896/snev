@@ -27,6 +27,7 @@ typedef enum test_cont_type_e {
 	ec_list = 0,
 	ec_array,
 	ec_bst,
+	ec_rbt,
 	ec_end
 } test_cont_type;
 
