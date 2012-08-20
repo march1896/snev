@@ -22,6 +22,6 @@ extern inline void     citer_set_ref(citer itr, void* nref);
 /*
  * define a citer on stack, assign the it as citer_as_init.
  */
-#define citer_dos(citer_name, citer_as_init) alloc_two_pointers_on_stack(citer_name, citer_as_init)
+#define citer_dos(citer_name, citer_as_init) alloc_four_pointers_on_stack(citer_name, citer_as_init)
 
 #endif /* _CITER_BASE_H_ */

@@ -22,9 +22,12 @@ typedef struct __citer_cont_vtable {
 } citer_cont_vtable;
 
 typedef struct __citer_cont_body {
-	citer_cont_vtable*   __vt;
+	citer_cont_vtable   *__vt;
 
-	void*                connection;
+	void                *connection;
+
+	void                *param_x;
+	void                *param_y;
 } citer_cont;
 
 #endif /* _CITER_CONT_LOCAL_H_ */

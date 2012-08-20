@@ -7,11 +7,11 @@ inline void _234_node_set_comp(pf_compare_function cpf) {
 }
 
 static bool __node_isleaf(struct _234_node *n) {
-	if (n->children[0] != NULL) {
+	if (n->children[0] == NULL) {
 		int d = 1;
 
 		for (; d <= n->dim; d ++) 
-			dbg_assert(d->children[d] != NULL);
+			dbg_assert(n->children[d] == NULL);
 
 		return true;
 	}
@@ -21,6 +21,7 @@ static bool __node_isleaf(struct _234_node *n) {
 static __node_init(struct _234_node *n, void *key) {
 	n->dim = 1;
 	n->keys[0] = key;
+	n->parent = NULL;
 
 	{
 		// TODO: debug purpose only, remove when stable.
@@ -32,22 +33,22 @@ static __node_init(struct _234_node *n, void *key) {
 
 /* c is NULL, or is the new created sibling RIGHT adjacent to the splitted node */
 static struct _234_node* __node_insert(struct _234_node *n, void *key, struct _234_node *c) {
+	int i;
+
 	dbg_assert(n->dim < 3);
 	dbg_assert((c == NULL && n->left == NULL) || /* if n is leaf, no child will be added */
 			(c != NULL && n->left != NULL)); /* if n is not leaf, exactly one child will be added */
 
 	// node is 2 node or 3 node
-	int i = 0;
-	for (; i < n->dim; i ++) {
+	for (i = 0; i < n->dim; i ++) {
 		if (comp(n->keys[i], key) > 0) {
 			int j = i;
-			for (; j < n->dim; j ++) 
-				n->keys[j+1] = n->key[j];
+			for (j = n->dim; j > i; j --) n->keys[j] = n->keys[j-1];
 			n->keys[i] = key;
-
-			for (j = i + 1; j <= n->dim; j ++) 
-				n->children[j+1] = n->children[j];
+			for (j = n->dim + 1; j > i; j --) n->children[j] = n->children[j-1];
 			n->children[i+1] = c;
+
+			if (c != NULL) c->parent = n;
 
 			break;
 		}
@@ -55,36 +56,39 @@ static struct _234_node* __node_insert(struct _234_node *n, void *key, struct _2
 	// insert back
 	if (i == n->dim) {
 		n->keys[n->dim] = key;
-		n->children[n->dim + 1] = key;
+		n->children[n->dim + 1] = c;
+		if (c != NULL) c->parent = n;
 	}
 
 	n->dim ++;
+	return n;
 }
 
 static struct _234_node* __add_adjust(struct _234_node *n) {
 	if (n->dim < 3) return n;
 
 	{
-		struct _234_node *s = (struct _234_node*)halloc(struct _234_node);
+		struct _234_node *s = (struct _234_node*)halloc(sizeof(struct _234_node));
 		struct _234_node *p = n->parent;
 		void *popup = n->second;
 
+		__node_init(s, n->third);
+
 		if (p == NULL) {
 			/* n is root node, make a new root node */
-			p = (struct _234_node*)halloc(struct _234_node);
+			p = (struct _234_node*)halloc(sizeof(struct _234_node));
 			__node_init(p, n->second);
 
 			p->left = n;
+			n->parent = p;
 			p->midleft = s;
+			s->parent = p;
 		}
 		else {
 			/* insert the middle element to the parent node */
 			__node_insert(p, popup, s);
 		}
 
-		__node_init(s, n->third);
-
-		s->parent = p;
 		s->left = n->midright;
 		if (n->midright) n->midright->parent = s;
 		s->midleft = n->right;
@@ -92,24 +96,12 @@ static struct _234_node* __add_adjust(struct _234_node *n) {
 
 		n->dim = 1;
 
+		// debug purpose only, TODO: remove after stable
+		n->midright = n->right = NULL;
+		n->second = n->third = NULL;
+
 		return p;
 	}
-}
-
-static struct _234_node* __node_sibling(struct _234_node *n, int side) {
-	if (n == NULL || n->parent == NULL) return NULL;
-
-	struct _234_node *p = n->parent;
-	int i;
-
-	for (i = 0; i <= p->dim; i ++) {
-		if (n == p->children[i]) {
-			if (side == 0) return i > 0 ? p->children[i-1] : NULL;
-			else return i <= p->dim ? p->children[i+1] : NULL;
-		}
-	}
-
-	dbg_assert(false);
 }
 
 static struct _234_node *__node_root(struct _234_node *n) {
@@ -142,6 +134,12 @@ struct _234_node *_234_node_find(struct _234_node *n, void *key, int *index) {
 struct _234_node* _234_node_add(struct _234_node *n, void *key) {
 	int i = 0;
 
+	if (n == NULL) {
+		n = (struct _234_node*)halloc(sizeof(struct _234_node));
+		__node_init(n, key);
+		return n;
+	}
+
 	n = __add_adjust(n);
 
 	if (__node_isleaf(n)) {
@@ -163,6 +161,36 @@ struct _234_node* _234_node_add(struct _234_node *n, void *key) {
 	return n;
 }
 
+static int __depth = -1;
+static void* __node_check(struct _234_node *n, int d, void *last_key) {
+	if (n == NULL) {
+		if (__depth == -1) __depth = d;
+
+		dbg_assert(d == __depth);
+		return last_key;
+	}
+	dbg_assert(n->dim >= 1 && n->dim <= 3);
+	{
+		int i;
+		for (i = 0; i < n->dim; i ++) {
+			
+			last_key = __node_check(n->children[i], d + 1, last_key);
+
+			dbg_assert(comp(last_key, n->keys[i]) <= 0);
+
+			last_key = n->keys[i];
+		}
+		last_key = __node_check(n->children[n->dim], d + 1, last_key);
+	}
+
+	return last_key;
+}
+
+void _234_node_check(struct _234_node *root) {
+	__depth = -1;
+
+	__node_check(root, 0, NULL);
+}
 
 static struct _234_node* __node_steal_sibling(struct _234_node *n);
 /* delete the idx'th element of n, return the root of the tree */
@@ -195,8 +223,8 @@ struct _234_node* _234_node_delete(struct _234_node *n, int idx) {
 		return __node_root(n);
 	}
 	else {
-		dbg_assert(idx < n->dim);
 		int i;
+		dbg_assert(idx < n->dim);
 
 		if (n->dim > 1) {
 			/* simplest case, leaf node contains more than one key, delete directly */
@@ -221,12 +249,21 @@ struct _234_node* _234_node_delete(struct _234_node *n, int idx) {
 					return __node_root(n);
 			}
 			else {
+				void *obj = n->keys[idx];
+				int i, n_idx = -1;
+
 				n = __node_steal_sibling(n);
 
 				dbg_assert(n->dim > 1);
 
 				/* try to delete n again */
-				return _234_node_delete(n);
+				for (i = 0; i < n->dim; i ++) 
+					if (n->keys[i] == obj) {
+						n_idx = i;
+						break;
+					}
+
+				return _234_node_delete(n, n_idx);
 			}
 		}
 	}
@@ -254,7 +291,7 @@ static struct _234_node* __node_steal_sibling(struct _234_node *n) {
 	 * if both n's sibling and p has only one element, recursively visit its parent */
 	for (i = 0 ; i <= p->dim; i ++) if (p->children[i] == n) break;
 
-	dbg_assert(n <= p->dim);
+	dbg_assert(i <= p->dim);
 
 	/* one of siblings has more than one elements, steal one of them */
 	if (i > 0 && p->children[i-1]->dim > 1) {
@@ -264,15 +301,14 @@ static struct _234_node* __node_steal_sibling(struct _234_node *n) {
 
 		/* insert the stealed node at the left most side of n */
 		/* in fact, since n->dim == 1, we could avoid of using loop */
-		for (j = 0; j < n->dim; j ++) n->keys[j+1] = n->keys[j];
-		for (j = 0; j <= n->dim; j ++) n->children[j+1] = n->keys[j];
+		for (j = n->dim; j > 0; j --) n->keys[j] = n->keys[j-1];
+		for (j = n->dim + 1; j > 0; j --) n->children[j] = n->children[j-1];
 
-		n->key[0] = p->keys[i-1];
+		n->keys[0] = p->keys[i-1];
 		p->keys[i-1] = s->keys[s->dim-1];
 
 		n->left = s->children[s->dim];
-		if (s->children[s->dim]) 
-			s->children[s->dim]->parent = n;
+		if (s->children[s->dim]) s->children[s->dim]->parent = n;
 
 		s->dim --;
 		n->dim ++;
@@ -289,9 +325,8 @@ static struct _234_node* __node_steal_sibling(struct _234_node *n) {
 		n->keys[n->dim] = p->keys[i];
 		p->keys[i] = s->keys[0];
 
-		n->midleft = s->left;
-		if (s->left)
-			s->left->parent = n;
+		n->midright = s->left;
+		if (s->left) s->left->parent = n;
 
 		for (j = 1; j < s->dim; j ++) s->keys[j-1] = s->keys[j];
 		for (j = 1; j <= s->dim; j ++) s->children[j-1] = s->children[j];
@@ -315,16 +350,15 @@ static struct _234_node* __node_steal_sibling(struct _234_node *n) {
 			s->second = p->keys[i-1];
 			s->third = n->first;
 
-			s->midright = n->first;
-			if (n->first) n->first->parent = s;
+			s->midright = n->left;
+			if (n->left) n->left->parent = s;
 			s->right = n->midleft;
 			if (n->midleft) n->midleft->parent = s;
 
 			for (j = i; j < p->dim; j ++) {
 				p->keys[j-1] = p->keys[j];
-				p->children[j-1] = p->children[j];
+				p->children[j] = p->children[j+1];
 			}
-			p->children[p->dim-1] = p->children[p->dim];
 			p->dim --;
 
 			s->dim = 3;
@@ -342,16 +376,15 @@ static struct _234_node* __node_steal_sibling(struct _234_node *n) {
 			n->second = p->keys[i];
 			n->third = s->first;
 
-			n->midright = s->first;
-			if (s->first) s->first->parent = n;
+			n->midright = s->left;
+			if (s->left) s->left->parent = n;
 			n->right = s->midleft;
 			if (s->midleft) s->midleft->parent = n;
 
 			for (j = i + 1; j < p->dim; j ++) {
 				p->keys[j-1] = p->keys[j];
-				p->children[j-1] = p->children[j];
+				p->children[j] = p->children[j+1];
 			}
-			p->children[p->dim-1] = p->children[p->dim];
 			p->dim --;
 
 			n->dim = 3;
@@ -383,20 +416,20 @@ static struct _234_node* __node_steal_sibling(struct _234_node *n) {
 				p->midright = r->left;
 				p->right = r->midleft;
 
-				l->left->parent = p;
-				l->midleft->parent = p;
-				r->left->parent = p;
-				r->midleft->parent = p;
+				if (l->left->parent) l->left->parent = p;
+				if (l->midleft->parent) l->midleft->parent = p;
+				if (r->left->parent) r->left->parent = p;
+				if (r->midleft->parent) r->midleft->parent = p;
+
+				hfree(l);
+				hfree(r);
 			}
 
-			hfree(l);
-			hfree(r);
-
+			p->dim = 3;
 			return p;
 		}
 		else {
 			struct _234_node *np = __node_steal_sibling(p);
-			int j;
 			dbg_assert(np && np->dim > 1);
 
 			return __node_steal_sibling(n);
@@ -406,4 +439,78 @@ static struct _234_node* __node_steal_sibling(struct _234_node *n) {
 
 	dbg_assert(false);
 	return NULL;
+}
+
+struct _234_node *_234_node_predecessor(struct _234_node *n, int index, int *n_index) {
+	dbg_assert(index < n->dim && index >= 0);
+
+	if (__node_isleaf(n)) {
+		if (index > 0) {
+			*n_index = index - 1;
+			return n;
+		}
+		else {
+			struct _234_node *p = n->parent;
+			struct _234_node *c = n;
+
+			while (p != NULL) {
+				int i;
+				for (i = p->dim; i > 0; i --)
+					if (p->children[i] == c)
+						break;
+
+				if (i != 0) {
+					*n_index = i - 1;
+					return p;
+				}
+
+				c = p;
+				p = p->parent;
+			}
+
+			return NULL;
+		}
+	}
+	else {
+		*n_index = n->children[index]->dim - 1;
+		return n->children[index];
+	}
+}
+
+struct _234_node *_234_node_successor(struct _234_node *n, int index, int *n_index) {
+	dbg_assert(index < n->dim && index >= 0);
+	if (__node_isleaf(n)) {
+		if (index < n->dim) {
+			*n_index = index + 1;
+			return n;
+		}
+		else {
+			/* currently at the last element of a leaf */
+			struct _234_node *p = n->parent;
+			struct _234_node *c = n;
+
+			while (p != NULL) {
+				int i = 0;
+				for (; i < p->dim; i ++)
+					if (p->children[i] == c)
+						break;
+
+				if (i != p->dim) {
+					*n_index = i;
+					return p;
+				}
+
+				/* c is the last children of p, recursive up */
+				c = p;
+				p = p->parent;
+			}
+
+			/* n is the last element in the tree */
+			return NULL;
+		}
+	}
+	else {
+		*n_index = 0;
+		return n->children[index+1];
+	}
 }
