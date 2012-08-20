@@ -29,7 +29,7 @@ static void add_find_remove_correctness_test(test_cont_type ct, test_data_type d
 	}
 
 	/* test remove, remove first half elements */
-	for (i = 0; i < ulength / 2; i ++) {
+	for (i = 0; i < ulength; i ++) {
 		bool find = cntr_find(c, (void*)uniquedata[i], first);
 		cntr_remove(c, first, first);
 		dbg_assert(cntr_size(c) == ulength - i - 1);
@@ -99,7 +99,7 @@ static void cntr_base_correctness_test() {
 	int i, j;
 	printf("add find remove correctness test start\n");
 	for (i = ec_234t; i < ec_end; i ++) {
-		for (j = ed_decrease; j < ed_end; j ++) {
+		for (j = ed_increase; j < ed_end; j ++) {
 			add_find_remove_correctness_test((test_cont_type)i, (test_data_type)j, el_correctness);
 		}
 	}
@@ -109,7 +109,7 @@ static void cntr_base_correctness_test() {
 static void cntr_base_performance_test() {
 	int i, j;
 	printf("add find remove performance test start\n");
-	for (i = ec_list; i < ec_end; i ++) {
+	for (i = ec_234t; i < ec_end; i ++) {
 		for (j = ed_increase; j < ed_end; j ++) {
 			add_find_remove_performance_test((test_cont_type)i, (test_data_type)j, el_performance);
 		}

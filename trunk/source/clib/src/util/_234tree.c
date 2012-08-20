@@ -198,29 +198,27 @@ struct _234_node* _234_node_delete(struct _234_node *n, int idx) {
 	dbg_assert(idx < n->dim);
 
 	if (!__node_isleaf(n)) {
-		/* find a subtitute leaf(predecessor) node key */
+		/* find a substitute leaf(predecessor) node key */
 		struct _234_node *fwd = n;
 
 		/* while fwd is not leaf node, find the predecessor */
 		while (fwd->left) {
 			int i = 0;
-			for (; i < fwd->dim; i ++) {
-				int compr = comp(fwd->keys[i], n->keys[idx]);
-
-				if (compr >= 0) {
-					fwd = fwd->children[i];
+			for (; i < fwd->dim; i ++)
+				if (comp(fwd->keys[i], n->keys[idx]) >= 0)
 					break;
-				}
-			}
-			if (i == fwd->dim) fwd = fwd->children[fwd->dim];
+
+			fwd = fwd->children[i];
 		}
 
 		dbg_assert(fwd && comp(fwd->keys[fwd->dim-1], n->keys[idx]) <= 0);
-		n->keys[idx] = fwd->keys[fwd->dim-1];
-
-		_234_node_delete(fwd, fwd->dim - 1);
-
-		return __node_root(n);
+		{
+			void *temp = n->keys[idx];
+			n->keys[idx] = fwd->keys[fwd->dim-1];
+			fwd->keys[fwd->dim-1] = temp;
+		}
+		
+		return _234_node_delete(fwd, fwd->dim - 1);
 	}
 	else {
 		int i;
@@ -416,10 +414,10 @@ static struct _234_node* __node_steal_sibling(struct _234_node *n) {
 				p->midright = r->left;
 				p->right = r->midleft;
 
-				if (l->left->parent) l->left->parent = p;
-				if (l->midleft->parent) l->midleft->parent = p;
-				if (r->left->parent) r->left->parent = p;
-				if (r->midleft->parent) r->midleft->parent = p;
+				if (l->left) l->left->parent = p;
+				if (l->midleft) l->midleft->parent = p;
+				if (r->left) r->left->parent = p;
+				if (r->midleft) r->midleft->parent = p;
 
 				hfree(l);
 				hfree(r);

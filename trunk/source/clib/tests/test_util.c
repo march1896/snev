@@ -8,7 +8,7 @@ int *rawdata, *uniquedata, *uniquesorteddata;
 
 void init_data() {
 	unsigned int iseed = (unsigned int)time(NULL);
-	srand (iseed);
+	srand (13);
 
 	rawdata = (int*)malloc(sizeof(int)*plength);
 	uniquedata = (int*)malloc(sizeof(int)*plength);
@@ -131,7 +131,7 @@ cntr cntr_create(test_cont_type ct) {
 }
 
 void generate_test_data(test_data_type dt, test_data_length dl, int* length, int* ulength) {
-	*length = dl == el_correctness ? clength : plength;
+	*length = dl == el_correctness ? 16 : plength;
 	*ulength = generate_data(dt, *length);
 }
 
