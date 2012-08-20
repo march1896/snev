@@ -36,4 +36,12 @@ cntr cntr_create_as_rbt_v(pf_compare_object comp);
 
 cntr cntr_create_as_rbt_rv(pf_preremove_cb prerm, pf_compare_object comp);
 
+cntr cntr_create_as_fbt();
+
+cntr cntr_create_as_fbt_r(pf_preremove_cb prerm);
+
+cntr cntr_create_as_fbt_v(pf_compare_object comp);
+
+cntr cntr_create_as_fbt_rv(pf_preremove_cb prerm, pf_compare_object comp);
+
 #endif /* _CNTR_FACTORY_H_ */

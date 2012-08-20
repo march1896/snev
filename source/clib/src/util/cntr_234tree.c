@@ -15,14 +15,6 @@
  * fbt(four node(most) tree)
  */
 
-typedef struct __fbt_node {
-	struct __fbt_node* parent;
-	struct __fbt_node* left;
-	struct __fbt_node* right;
-
-	void *object;
-} fbt_node;
-
 typedef struct __cntr_fbt_vtable {
 	/* from cntr_linear_vtable */
 	pf_cntr_attribute           __attrib;
@@ -81,11 +73,6 @@ static void cntr_fbt_init(cntr_fbt* pb, pf_preremove_cb rm, pf_compare_object co
 	pb->prerm = rm;
 }
 
-static inline int __compare(const cntr_fbt* pb, const void *lhs, const void *rhs) {
-	if (pb->comp) return pb->comp(lhs, rhs);
-	else return lhs < rhs; /* directly compare the address */
-}
-
 cntr cntr_create_as_fbt() {
 	cntr_fbt* pb = (cntr_fbt*)halloc(sizeof(cntr_fbt));
 
@@ -138,10 +125,12 @@ static void fbt_clear_traverse(fbt_node* pn, pf_preremove_cb __delete) {
 	}
 
 	if (__delete) {
+		int i = 0;
 		for (; i < pn->dim; i ++) {
 			__delete(pn->keys[i]);
 		}
 	}
+
 	hfree(pn);
 }
 
@@ -165,145 +154,60 @@ static void cntr_fbt_add(cntr c, void* obj) {
 
 	_234_node_set_comp(pb->comp);
 	pb->root = _234_node_add(pb->root, obj);
+
+	_234_node_check(pb->root);
 	pb->size ++;
-}
-
-static inline fbt_node* fbt_predesessor(const fbt_node* pn, bool only_sub) {
-	if (pn->left) {
-		fbt_node* fwd = pn->left;
-
-		while (fwd->right) fwd = fwd->right;
-		return fwd;
-	}
-	else if (!only_sub && pn->parent) {
-		const fbt_node *fwd = pn;
-
-		while (fwd->parent != NULL) {
-			if (fwd->parent->right == fwd) break;
-			fwd = fwd->parent;
-		}
-
-		return fwd->parent;
-	}
-	return NULL;
-}
-
-static inline fbt_node* fbt_successor(const fbt_node* pn, bool only_sub) {
-	if (pn->right) {
-		fbt_node* fwd = pn->right;
-
-		while (fwd->left) fwd = fwd->left;
-
-		return fwd;
-	}
-	else if (!only_sub && pn->parent) {
-		const fbt_node* fwd = pn;
-
-		while (fwd->parent != NULL) {
-			if (fwd->parent->left == fwd) break;
-			fwd = fwd->parent;
-		}
-
-		return fwd->parent;
-	}
-
-	return NULL;
-}
-
-/* remove a single node from a fbt */
-static void* fbt_remove(cntr_fbt* pb, fbt_node* pn, int index) {
-	void* ref_obj = pn->object;
-
-	if (pn->left == NULL && pn->right == NULL) {
-		if (pb->root == pn) pb->root = NULL;
-		else {
-			fbt_node* par = pn->parent;
-			if (par->left == pn) par->left = NULL;
-			else par->right = NULL;
-		}
-		hfree(pn);
-		pb->size --;
-	}
-	else if (pn->left == NULL) {
-		if (pb->root == pn) {
-			dbg_assert(pn->parent == NULL);
-			pb->root = pn->right;
-			pn->right->parent = NULL;
-		}
-		else {
-			fbt_node* par = pn->parent;
-			if (par->left == pn) par->left = pn->right;
-			else par->right = pn->right;
-
-			pn->right->parent = par;
-		}
-		
-		hfree(pn);
-		pb->size --;
-	}
-	else if (pn->right == NULL) {
-		if (pb->root == pn) {
-			dbg_assert(pn->parent == NULL);
-			pb->root = pn->left;
-			pn->left->parent = NULL;
-		}
-		else {
-			fbt_node* par = pn->parent;
-			if (par->left == pn) par->left = pn->left;
-			else par->right = pn->left;
-
-			pn->left->parent = par;
-		}
-		
-		hfree(pn);
-		pb->size --;
-	}
-	else {
-		fbt_node* alter = fbt_predesessor(pn, true);
-		pn->object = alter->object;
-		fbt_remove(pb, alter);
-	}
-
-	return ref_obj;
 }
 
 static void citer_fbt_to_prev(citer itr) {
 	citer_base* cur = (citer_base*)itr;
 	fbt_node* node = (fbt_node*)(cur->connection);
+	int index = (int)(cur->param_x);
 
-	dbg_assert(node);
-	cur->connection = fbt_predesessor(node, false);
+	dbg_assert(node && index < node->dim);
+	//dbg_assert(cur->__vt == &citer_fbt_vtable);
+
+	cur->connection = (void*)_234_node_predecessor(node, index, &index);
+	cur->param_x = (void*)index;
 }
 
 static void citer_fbt_to_next(citer itr) {
 	citer_base* cur = (citer_base*)itr;
 	fbt_node* node = (fbt_node*)(cur->connection);
+	int index = (int)(cur->param_x);
 
-	dbg_assert(node);
-	cur->connection = fbt_successor(node, false);
+	dbg_assert(node && index < node->dim);
+	//dbg_assert(cur->__vt == &citer_fbt_vtable);
+
+	cur->connection = (void*)_234_node_successor(node, index, &index);
+	cur->param_x = (void*)index;
 }
 
 static void* citer_fbt_get_ref(citer itr) {
 	citer_base* cur = (citer_base*)itr;
 	fbt_node* node = (fbt_node*)(cur->connection);
+	int index = (int)(cur->param_x);
 
-	dbg_assert(node);
-	return node->object;
+	dbg_assert(node && index < node->dim);
+
+	return node->keys[index];
 }
 
 static void citer_fbt_set_ref(citer itr, void* n_ref) {
 	citer_base* cur = (citer_base*)itr;
 	fbt_node* node = (fbt_node*)(cur->connection);
+	int index = (int)(cur->param_x);
 
-	dbg_assert(node);
-	node->object = n_ref;
+	dbg_assert(node && index < node->dim);
+
+	node->keys[index] = n_ref;
 }
 
 static cattr citer_fbt_attribute(citer itr) {
 	return CITER_ATTR_BASE | CITER_ATTR_LINK;
 }
 
-static citer_base_vtable citer_fbt_operations = {
+static citer_base_vtable citer_fbt_vtable = {
 	citer_fbt_attribute,
 
 	citer_fbt_get_ref,
@@ -315,8 +219,17 @@ static citer_base_vtable citer_fbt_operations = {
 void cntr_fbt_remove_proc(citer itr, void* param) {
 	cntr_fbt* pb = (cntr_fbt*)param;
 	fbt_node* pn = (fbt_node*)((citer_base*)itr)->connection;
+	int index = (int)((citer_base*)itr)->param_x;
+	void *obj;
 
-	void* obj = fbt_remove(pb, pn);
+	dbg_assert(index < pn->dim);
+	obj = pn->keys[index];
+
+	pb->root = _234_node_delete(pn, index);
+	pb->size --;
+
+	_234_node_check(pb->root);
+
 	if (pb->prerm) 
 		pb->prerm(obj);
 }
@@ -324,66 +237,54 @@ void cntr_fbt_remove_proc(citer itr, void* param) {
 static void  cntr_fbt_remove(cntr c, citer begin, citer end) {
 	cntr_fbt* pb = (cntr_fbt*)c;
 	
+	_234_node_set_comp(pb->comp);
 	citer_for_each_v(begin, end, cntr_fbt_remove_proc, (void*)pb);
 }
 
 static bool  cntr_fbt_find(cntr c, void* object, citer itr) {
 	cntr_fbt* pb = (cntr_fbt*)c;
 	citer_base* ci = (citer_base*)itr;
+	fbt_node* n = NULL;
+	
+	int index;
+	_234_node_set_comp(pb->comp);
+	n = _234_node_find(pb->root, object, &index);
 
-	fbt_node* fwd = pb->root;
+	ci->__vt = &citer_fbt_vtable;
+	ci->connection = (void*)n;
+	ci->param_x = (void*)index;
 
-	while (fwd != NULL) {
-		int comp_res = __compare(pb, object, fwd->object);
-
-		if (comp_res == 0) {
-			ci->__vt = &citer_fbt_operations;
-			ci->connection = fwd;
-			
-			return true;
-		}
-
-		if (comp_res < 0) fwd = fwd->left;
-		else fwd = fwd->right;
-	}
-
-	return false;
-}
-
-static fbt_node* fbt_minimum(fbt_node* root) {
-	if (root == NULL) return NULL;
-
-	while (root->left != NULL) {
-		root = root->left;
-	}
-
-	return root;
-}
-
-static fbt_node* fbt_maximum(fbt_node* root) {
-	if (root == NULL) return NULL;
-
-	while (root->right != NULL) {
-		root = root->right;
-	}
-
-	return root;
+	return n == NULL ? false : true;
 }
 
 static void  cntr_fbt_citer_begin(cntr c, citer itr) {
 	cntr_fbt* pb = (cntr_fbt*)c;
 	citer_base* ci = (citer_base*)itr;
+	fbt_node *n = pb->root;
 
-	ci->__vt = &citer_fbt_operations;
-	ci->connection = fbt_minimum(pb->root);
+	while (n) {
+		if (n->left == NULL) break;
+		n = n->left;
+	}
+
+	ci->__vt = &citer_fbt_vtable;
+	ci->connection = (void*)n;
+	ci->param_x = (void*)0;
 }
 
 static void  cntr_fbt_citer_end(cntr c, citer itr) {
 	cntr_fbt* pb = (cntr_fbt*)c;
 	citer_base* ci = (citer_base*)itr;
+	fbt_node *n = pb->root;
 
-	ci->__vt = &citer_fbt_operations;
-	ci->connection = fbt_maximum(pb->root);
+	while (n) {
+		if (n->right == NULL) break;
+		n = n->right;
+	}
+
+	ci->__vt = &citer_fbt_vtable;
+	ci->connection = (void*)n;
+	ci->param_x = n == NULL ? (void*)0 : (void*)(n->dim-1);
 }
 
 
