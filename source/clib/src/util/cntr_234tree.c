@@ -155,7 +155,7 @@ static void cntr_fbt_add(cntr c, void* obj) {
 	_234_node_set_comp(pb->comp);
 	pb->root = _234_node_add(pb->root, obj);
 
-	_234_node_check(pb->root);
+	/* _234_node_check(pb->root); */
 	pb->size ++;
 }
 
@@ -228,7 +228,7 @@ void cntr_fbt_remove_proc(citer itr, void* param) {
 	pb->root = _234_node_delete(pn, index);
 	pb->size --;
 
-	_234_node_check(pb->root);
+	/* _234_node_check(pb->root); */
 
 	if (pb->prerm) 
 		pb->prerm(obj);

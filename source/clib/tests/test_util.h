@@ -16,7 +16,7 @@ int qsort_int_compare(const void* x, const void* y);
 // correctness_data_length;
 #define clength 300
 // performance_data_length;
-#define plength 10000
+#define plength 100000
 extern int *rawdata, *uniquedata, *uniquesorteddata;
 
 void init_data();
