@@ -205,7 +205,8 @@ struct _234_node* _234_node_delete(struct _234_node *n, int idx) {
 		while (fwd->left) {
 			int i = 0;
 			for (; i < fwd->dim; i ++)
-				if (comp(fwd->keys[i], n->keys[idx]) >= 0)
+				if (comp(fwd->keys[i], n->keys[idx]) > 0 ||
+					(fwd == n && i == idx)) /* for multiple instances, find the 'absolute' predecessor */
 					break;
 
 			fwd = fwd->children[i];
@@ -213,9 +214,9 @@ struct _234_node* _234_node_delete(struct _234_node *n, int idx) {
 
 		dbg_assert(fwd && comp(fwd->keys[fwd->dim-1], n->keys[idx]) <= 0);
 		{
-			void *temp = n->keys[idx];
+			//void *temp = n->keys[idx];
 			n->keys[idx] = fwd->keys[fwd->dim-1];
-			fwd->keys[fwd->dim-1] = temp;
+			//fwd->keys[fwd->dim-1] = temp;
 		}
 		
 		return _234_node_delete(fwd, fwd->dim - 1);
