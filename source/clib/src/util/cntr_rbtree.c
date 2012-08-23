@@ -158,13 +158,13 @@ static int   cntr_rbt_size(cntr c) {
 	return pb->size;
 }
 
-rbt_node* _grandparent(const rbt_node* n) {
+static rbt_node* _grandparent(const rbt_node* n) {
 	if (n->parent) return n->parent->parent;
 
 	return NULL;
 }
 
-rbt_node* _uncle(const rbt_node* n) {
+static rbt_node* _uncle(const rbt_node* n) {
 	rbt_node* g = _grandparent(n);
 
 	if (g) {
@@ -175,7 +175,7 @@ rbt_node* _uncle(const rbt_node* n) {
 	return NULL;
 }
 
-rbt_node* _sibling(rbt_node* n) {
+static rbt_node* _sibling(rbt_node* n) {
 	dbg_assert(n->parent);
 	if (n == n->parent->left)
 		return n->parent->right;
