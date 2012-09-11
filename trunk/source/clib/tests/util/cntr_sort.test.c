@@ -100,7 +100,7 @@ void cntr_sort_test() {
 	printf("correctness test end\n\n");
 
 	printf("performance test start\n");
-	for (i = 0; i < 4; i ++) {
+	for (i = 1; i < 4; i ++) {
 		for (j = TC_LIST; j <= TC_ARRAY; j ++) {
 			for (k = TD_INCREASE; k < TD_END; k ++) {
 				sort_performance_test(c_sort[i], f_sort[i], (TC_TYPE)j, (TD_TYPE)k, TL_PERFORMANCE);

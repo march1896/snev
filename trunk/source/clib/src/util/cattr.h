@@ -15,7 +15,7 @@ typedef unsigned int cattr;
 #define CNTR_ATTR_TREE       (1<<4)
 
 #define CITER_ATTR_BASE      (1<<0)
-/* coutnuous */
+/* coutinuous */
 #define CITER_ATTR_CONT      (1<<1)
 #define CITER_ATTR_LINK      (1<<2)
 
