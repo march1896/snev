@@ -3,11 +3,16 @@
 #include <stdio.h>
 #include <string.h>
 
-static void add_find_remove_correctness_test(test_cont_type ct, test_data_type dt, test_data_length dl) {
+static void add_find_remove_correctness_test(TC_TYPE ct, TD_TYPE dt, TD_LENGTH dl) {
 	cntr c;
 	citer_dos(first, NULL);
 	citer_dos(second, NULL);
 	int i, length, ulength;
+
+	if (dt == TD_UNIQUE) {
+		if (ct >= TC_BST && ct <= TC_234T) 
+			return;
+	}
 
 	printf("%s add/find/remove test with %s data\n", cntr_name(ct), data_order_name(dt));
 
@@ -41,13 +46,18 @@ static void add_find_remove_correctness_test(test_cont_type ct, test_data_type d
 	cntr_destroy(c);
 }
 
-static void add_find_remove_performance_test(test_cont_type ct, test_data_type dt, test_data_length dl) {
+static void add_find_remove_performance_test(TC_TYPE ct, TD_TYPE dt, TD_LENGTH dl) {
 	cntr c;
 	citer_dos(first, NULL);
 	citer_dos(second, NULL);
 	int rep, i, length, ulength;
 	clock_t start_c, end_c;
 	float find_used;
+
+	if (dt == TD_UNIQUE) {
+		if (ct >= TC_BST && ct <= TC_234T) 
+			return;
+	}
 
 	printf("\n%s add/find/remove performance test with %s data\n", cntr_name(ct), data_order_name(dt));
 
@@ -98,9 +108,9 @@ static void cntr_base_memory_test() {
 static void cntr_base_correctness_test() {
 	int i, j;
 	printf("add find remove correctness test start\n");
-	for (i = ec_list; i < ec_end; i ++) {
-		for (j = ed_increase; j < ed_end; j ++) {
-			add_find_remove_correctness_test((test_cont_type)i, (test_data_type)j, el_correctness);
+	for (i = TC_LIST; i < TC_END; i ++) {
+		for (j = TD_INCREASE; j < TD_END; j ++) {
+			add_find_remove_correctness_test((TC_TYPE)i, (TD_TYPE)j, TL_CORRECTNESS);
 		}
 	}
 	printf("add find remove correctness test end\n");
@@ -109,9 +119,9 @@ static void cntr_base_correctness_test() {
 static void cntr_base_performance_test() {
 	int i, j;
 	printf("add find remove performance test start\n");
-	for (i = ec_rbt; i < ec_end; i ++) {
-		for (j = ed_increase; j < ed_end; j ++) {
-			add_find_remove_performance_test((test_cont_type)i, (test_data_type)j, el_performance);
+	for (i = TC_RBT; i < TC_END; i ++) {
+		for (j = TD_INCREASE; j < TD_END; j ++) {
+			add_find_remove_performance_test((TC_TYPE)i, (TD_TYPE)j, TL_PERFORMANCE);
 		}
 	}
 	printf("add find remove performance test end\n");

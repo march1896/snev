@@ -150,27 +150,35 @@ void bubble_sort(citer begin, citer end, pf_compare_object comp) {
 	return;
 }
 
-static void __list_find_middle(citer begin, citer end, citer mid) {
+static void __array_middle(citer begin, citer end, citer mid) {
+	int dis = citer_dis(begin, end);
+	int half = dis / 2;
+
+	citer_assign(mid, begin);
+
+	citer_move_n(mid, half);
+}
+
+static void __list_middle(citer begin, citer end, citer mid) {
+	citer_dos(fast, begin);
+	citer_dos(slow, begin);
+
+	while (!citer_equal(fast, end)) {
+		citer_to_next(slow);
+
+		citer_to_next(fast);
+		if (citer_equal(fast, end)) break;
+		citer_to_next(fast);
+	}
+	citer_assign(mid, slow);
+}
+
+static void citer_middle(citer begin, citer end, citer mid) {
 	if (!citer_check_attr(begin, CITER_ATTR_CONT)) {
-		citer_dos(fast, begin);
-		citer_dos(slow, begin);
-
-		while (!citer_equal(fast, end)) {
-			citer_to_next(slow);
-
-			citer_to_next(fast);
-			if (citer_equal(fast, end)) break;
-			citer_to_next(fast);
-		}
-		citer_assign(mid, slow);
+		__list_middle(begin, end, mid);
 	}
 	else {
-		int dis = citer_dis(begin, end);
-		int half = dis / 2;
-
-		citer_assign(mid, begin);
-
-		citer_move_n(mid, half);
+		__array_middle(begin, end, mid);
 	}
 }
 
@@ -194,7 +202,7 @@ void merge_sort(citer _begin, citer _end, pf_compare_object comp) {
 
 	if (citer_equal(begin, end)) return;
 
-	__list_find_middle(begin, end, mid);
+	citer_middle(begin, end, mid);
 	citer_assign(pre_mid, mid);
 	citer_to_prev(pre_mid);
 
@@ -258,6 +266,70 @@ void merge_sort(citer _begin, citer _end, pf_compare_object comp) {
 	return;
 }
 
+void reverse(citer begin, citer end) {
+	citer_dos(first, begin);
+	citer_dos(last, end);
+
+	while (!citer_equal(first, last)) {
+		citer_swap(first, last);
+
+		citer_to_next(first);
+		if (citer_equal(first, last)) break;
+		citer_to_prev(last);
+	}
+}
+
+bool prev_permutation(citer begin, citer end, pf_compare_object comp) {
+	citer_dos(bwd, end);
+	citer_dos(next, end);
+
+	while (!citer_equal(next, begin)) {
+		citer_to_prev(bwd);
+
+		if (comp(citer_get_ref(bwd), citer_get_ref(next)) < 0) {
+			citer_dos(sub, end);
+
+			while (comp(citer_get_ref(sub), citer_get_ref(bwd)) >= 0)
+				citer_to_prev(sub);
+
+			citer_swap(bwd, sub);
+
+			reverse(next, end);
+
+			return true;
+		}
+
+		citer_to_prev(next);
+	}
+
+	return false;
+}
+
+bool next_permutation(citer begin, citer end, pf_compare_object comp) {
+	citer_dos(bwd, end);
+	citer_dos(next, end);
+
+	while (!citer_equal(next, begin)) {
+		citer_to_prev(bwd);
+		if (comp(citer_get_ref(bwd), citer_get_ref(next)) > 0) {
+			citer_dos(sub, end);
+
+			/* maybe binary search */
+			while (comp(citer_get_ref(sub), citer_get_ref(bwd)) <= 0)
+				citer_to_prev(sub);
+
+			citer_swap(bwd, sub);
+
+			reverse(next, end);
+
+			return true;
+		}
+		citer_to_prev(next);
+	}
+
+	return false;
+}
+
 bool find_first(citer begin, citer end, citer result, pf_find_accept accept) {
 	return false;
 }
@@ -265,4 +337,30 @@ bool find_first(citer begin, citer end, citer result, pf_find_accept accept) {
 bool find_last(citer begin, citer end, citer result, pf_find_accept accept) {
 	return false;
 }
+
+/* 
+ * No clear way to compare the target object to the comtainer object
+ */
+/*
+citer binary_search(citer begin, citer end, citer result, void *target, pf_compare_object comp) {
+	if (!citer_check_attr(begin, CITER_ATTR_CONT)) 
+		return NULL;
+
+	{
+		citer_dos(first, begin);
+		citer_dos(last, end);
+		citer_dos(mid, NULL);
+
+		int comp_res = 0;
+
+		while (citer_dis(first, last) > 0) {
+			__array_middle(first, last, mid);
+
+			comp_res = comp(mid, target);
+
+			if (comp_res) return 
+		}
+	}
+}
+*/
 

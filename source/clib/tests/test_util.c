@@ -27,23 +27,30 @@ void destroy_data() {
  * return the sorted and unified data size.
  */
 static bool binary_search(int *buf, int size, int value);
-int generate_data(test_data_type type, int length) {
+int generate_data(TD_TYPE type, int length) {
 	int i;
-	if (type == ed_increase) {
+	if (type == TD_INCREASE) {
 		// increase
 		for (i = 0; i < length; i ++) {
 			rawdata[i] = uniquedata[i] = uniquesorteddata[i] = i + 1;
 		}
 		return length;
 	}
-	else if (type == ed_decrease) {
+	else if (type == TD_DECREASE) {
 		for (i = 0; i < length; i ++) {
 			rawdata[i] = uniquedata[i] = length - i;
 			uniquesorteddata[i] = i + 1;
 		}
 		return length;
 	}
-	else if (type == ed_random) {
+	else if (type == TD_UNIQUE) {
+		for (i = 0; i < length; i ++) {
+			rawdata[i] = uniquedata[i] = 1;
+			uniquesorteddata[i] = 1;
+		}
+		return length;
+	}
+	else if (type == TD_RANDOM) {
 		int i, j, k, *helper;
 		for (i = 0; i < length; i ++) {
 			
@@ -110,18 +117,18 @@ int qsort_int_compare(const void* x, const void* y) {
 	return 0;
 }
 
-int generate_data(test_data_type type, int length);
-cntr cntr_create(test_cont_type ct) {
+int generate_data(TD_TYPE type, int length);
+cntr cntr_create(TC_TYPE ct) {
 	switch (ct) {
-	case ec_list:
+	case TC_LIST:
 		return cntr_create_as_list();
-	case ec_array:
+	case TC_ARRAY:
 		return cntr_create_as_array();
-	case ec_bst:
+	case TC_BST:
 		return cntr_create_as_bst_v(cntr_int_compare);
-	case ec_rbt:
+	case TC_RBT:
 		return cntr_create_as_rbt_v(cntr_int_compare);
-	case ec_234t:
+	case TC_234T:
 		return cntr_create_as_fbt_v(cntr_int_compare);
 	default:
 		return NULL;
@@ -130,17 +137,17 @@ cntr cntr_create(test_cont_type ct) {
 	return NULL;
 }
 
-void generate_test_data(test_data_type dt, test_data_length dl, int* length, int* ulength) {
-	*length = dl == el_correctness ? clength : plength;
+void generate_test_data(TD_TYPE dt, TD_LENGTH dl, int* length, int* ulength) {
+	*length = dl == TL_CORRECTNESS ? clength : plength;
 	*ulength = generate_data(dt, *length);
 }
 
-static const char* cntr_names[ec_end] = {"list", "array", "bst", "rbt", "234t" };
-const char* cntr_name(test_cont_type ct) {
+static const char* cntr_names[TC_END] = {"list", "array", "bst", "rbt", "234t" };
+const char* cntr_name(TC_TYPE ct) {
 	return cntr_names[ct];
 }
 
-static const char* data_order_names[ed_end] = {"increase", "decrease", "random" };
-const char* data_order_name(test_data_type dt) {
+static const char* data_order_names[TD_END] = {"increase", "decrease", "random", "unique" };
+const char* data_order_name(TD_TYPE dt) {
 	return data_order_names[dt];
 }

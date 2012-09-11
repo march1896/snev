@@ -24,34 +24,35 @@ void init_data();
 void destroy_data();
 
 typedef enum test_cont_type_e {
-	ec_list = 0,
-	ec_array,
-	ec_bst,
-	ec_rbt,
-	ec_234t,
-	ec_end
-} test_cont_type;
+	TC_LIST = 0,
+	TC_ARRAY,
+	TC_BST,
+	TC_RBT,
+	TC_234T,
+	TC_END
+} TC_TYPE;
 
 typedef enum test_data_type_e {
-	ed_increase = 0,
-	ed_decrease,
-	ed_random,
-	ed_end
-} test_data_type;
+	TD_INCREASE = 0,
+	TD_DECREASE,
+	TD_UNIQUE,
+	TD_RANDOM,
+	TD_END
+} TD_TYPE;
 
 typedef enum test_data_length_e {
-	el_correctness = 0,
-	el_performance,
-	el_end
-} test_data_length;
+	TL_CORRECTNESS = 0,
+	TL_PERFORMANCE,
+	TL_END
+} TD_LENGTH;
 
-const char* cntr_name(test_cont_type ct);
+const char* cntr_name(TC_TYPE ct);
 
-const char* data_order_name(test_data_type dt);
+const char* data_order_name(TD_TYPE dt);
 
-void generate_test_data(test_data_type dt, test_data_length dl, int* length, int* ulength);
+void generate_test_data(TD_TYPE dt, TD_LENGTH dl, int* length, int* ulength);
 
-cntr cntr_create(test_cont_type ct);
+cntr cntr_create(TC_TYPE ct);
 
 
 #endif /* _TEST_UTIL_H_ */

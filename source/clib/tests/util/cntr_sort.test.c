@@ -24,9 +24,9 @@ static void assign_z(citer itr) {
 typedef void (*pf_sort_func)(citer begin, citer end, pf_compare_object comp);
 
 static void sort_correctness_test(const char* sort_name, pf_sort_func the_sort, 
-		test_cont_type ct,
-		test_data_type data_type, 
-		test_data_length data_length
+		TC_TYPE ct,
+		TD_TYPE data_type, 
+		TD_LENGTH data_length
 		) 
 {
 	citer_dos(begin, NULL);
@@ -54,9 +54,9 @@ static void sort_correctness_test(const char* sort_name, pf_sort_func the_sort,
 }
 
 static void sort_performance_test(char* sort_name, pf_sort_func the_sort,
-		test_cont_type ct,
-		test_data_type data_type, 
-		test_data_length data_length
+		TC_TYPE ct,
+		TD_TYPE data_type, 
+		TD_LENGTH data_length
 		) 
 {
 	clock_t start_c, end_c;
@@ -93,7 +93,7 @@ void cntr_sort_test() {
 	for (i = 0; i < 3; i ++) {
 		for (j = 0; j < 2; j ++) {
 			for (k = 0; k < 3; k ++) {
-				sort_correctness_test(c_sort[i], f_sort[i], (test_cont_type)j, (test_data_type)k, el_correctness);
+				sort_correctness_test(c_sort[i], f_sort[i], (TC_TYPE)j, (TD_TYPE)k, TL_CORRECTNESS);
 			}
 		}
 	}
@@ -101,9 +101,9 @@ void cntr_sort_test() {
 
 	printf("performance test start\n");
 	for (i = 0; i < 4; i ++) {
-		for (j = ec_list; j <= ec_array; j ++) {
-			for (k = ed_increase; k < ed_end; k ++) {
-				sort_performance_test(c_sort[i], f_sort[i], (test_cont_type)j, (test_data_type)k, el_performance);
+		for (j = TC_LIST; j <= TC_ARRAY; j ++) {
+			for (k = TD_INCREASE; k < TD_END; k ++) {
+				sort_performance_test(c_sort[i], f_sort[i], (TC_TYPE)j, (TD_TYPE)k, TL_PERFORMANCE);
 			}
 		}
 	}
