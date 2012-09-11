@@ -1,0 +1,116 @@
+#include <cntr.h>
+#include <test_util.h>
+#include <stdio.h>
+#include <string.h>
+
+/*
+static void add_find_remove_performance_test(TC_TYPE ct, TD_TYPE dt, TD_LENGTH dl) {
+	cntr c;
+	citer_dos(first, NULL);
+	citer_dos(second, NULL);
+	int rep, i, length, ulength;
+	clock_t start_c, end_c;
+	float find_used;
+
+	if (dt == TD_UNIQUE) {
+		if (ct >= TC_BST && ct <= TC_234T) 
+			return;
+	}
+
+	printf("\n%s add/find/remove performance test with %s data\n", cntr_name(ct), data_order_name(dt));
+
+	c = cntr_create(ct);
+
+	generate_test_data(dt, dl, &length, &ulength);
+
+	printf("add: ");
+	start_c = clock();	
+	for (i = 0; i < length; i ++) cntr_add(c, (void*)rawdata[i]);
+	end_c = clock();
+	printf("used %f\n", (float)(end_c - start_c)/CLOCKS_PER_SEC);
+
+	printf("find: ");
+	start_c = clock();
+	for (rep = 0; rep < 20; rep ++) {
+		for (i = 0; i < length; i ++) {
+			bool find = cntr_find(c, (void*)rawdata[i], first);
+			dbg_assert(find);
+		}
+	}
+	end_c = clock();
+	printf("used %f\n", (float)(end_c - start_c)/CLOCKS_PER_SEC);
+	find_used = (float)(end_c - start_c)/CLOCKS_PER_SEC;
+
+
+	printf("remove: ");
+	find_used = 0.0;
+	start_c = clock();
+	for (i = 0; i < ulength; i ++) {
+		bool find = cntr_find(c, (void*)uniquedata[i], first);
+
+		cntr_remove(c, first, first);
+	}
+	end_c = clock();
+	printf("used %f\n", (float)(end_c - start_c)/CLOCKS_PER_SEC - find_used);
+
+	cntr_clear(c);
+	dbg_assert(cntr_size(c) == 0);
+
+	cntr_destroy(c);
+}
+*/
+
+static void reverse_test(TC_TYPE ct, TD_TYPE dt, TD_LENGTH dl) {
+	cntr c, d;
+	citer_dos(first, NULL);
+	citer_dos(second, NULL);
+
+	citer_dos(aug, NULL);
+	int i, length, ulength;
+
+	printf("%s reverse function test with %s data\n", cntr_name(ct), data_order_name(dt));
+
+	c = cntr_create(ct);
+	d = cntr_create(ct);
+
+	generate_test_data(dt, dl, &length, &ulength);
+
+	for (i = 0; i < length; i ++) {
+		cntr_add(c, (void*)rawdata[i]);
+		cntr_add(d, (void*)rawdata[i]);
+	}
+
+	cntr_citer_begin(c, first);
+	cntr_citer_end(c, second);
+
+	reverse(first, second);
+
+	cntr_citer_begin(c, aug);
+	dbg_assert(citer_equal(first, aug));
+	cntr_citer_end(c, aug);
+	dbg_assert(citer_equal(second, aug));
+
+	cntr_citer_end(d, aug);
+	for (; !citer_equal(first, second); citer_to_next(first), citer_to_prev(aug)) {
+		dbg_assert(citer_get_ref(first) == citer_get_ref(aug));
+	}
+
+	cntr_destroy(c);
+	cntr_destroy(d);
+}
+
+static void reverse_correctness_test() {
+	int i, j;
+	printf("reverse correctness test start\n");
+	for (i = TC_LIST; i <= TC_ARRAY; i ++) {
+		for (j = TD_INCREASE; j < TD_END; j ++) {
+			reverse_test((TC_TYPE)i, (TD_TYPE)j, TL_CORRECTNESS);
+		}
+	}
+	printf("reverse correctness test end\n");
+}
+
+void algorithm_base_test() {
+	do_test("reverse correctness", reverse_correctness_test);
+}
+

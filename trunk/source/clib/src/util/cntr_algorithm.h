@@ -29,6 +29,13 @@ void bubble_sort(citer begin, citer end, pf_compare_object comp);
 
 void merge_sort(citer begin, citer end, pf_compare_object comp);
 
+/* common functions for linear container */
+void reverse(citer begin, citer end);
+
+bool prev_permutation(citer begin, citer end, pf_compare_object comp);
+
+bool next_permutation(citer begin, citer end, pf_compare_object comp);
+
 /* cntr related start */
 bool cntr_equal(cntr first, cntr second);
 

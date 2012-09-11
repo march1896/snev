@@ -191,13 +191,14 @@ struct tlink *tlink_insert(struct tlink *c, struct tlink *n) {
 }
 
 struct tlink *tlink_remove(struct tlink *r, struct tlink *n) {
-
+	return NULL;
 }
 
 struct tlink *tlink_search(struct tlink *r, struct tlink *n) {
+	return NULL;
 }
 
-struct void   tlink_init(struct tlink *n) {
+void tlink_init(struct tlink *n) {
 	dbg_assert(n != NULL);
 
 	n->left = NULL;
