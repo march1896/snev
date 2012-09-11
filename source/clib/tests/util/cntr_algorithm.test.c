@@ -99,6 +99,50 @@ static void reverse_test(TC_TYPE ct, TD_TYPE dt, TD_LENGTH dl) {
 	cntr_destroy(d);
 }
 
+static void print_element(citer itr) {
+	//printf("%d ", (int)citer_get_ref(itr));
+}
+#define PERMUTATION_LENGTH 5
+static void permutation_test(TC_TYPE ct) {
+	cntr c;
+	citer_dos(first, NULL);
+	citer_dos(last, NULL);
+
+	int i, count, ans;
+
+	printf("%s next permutation test\n", cntr_name(ct));
+
+	c = cntr_create(ct);
+
+	ans = 1;
+	for (i = 0; i < PERMUTATION_LENGTH; i ++) {
+		cntr_add(c, (void*)i);
+
+		ans *= (i + 1);
+	}
+
+	cntr_citer_begin(c, first);
+	cntr_citer_end(c, last);
+	count = 0;
+	do {
+		citer_for_each(first, last, print_element);
+		//printf("\n");
+		count ++;
+	} while (next_permutation(first, last, cntr_int_compare));
+	
+	dbg_assert(count == ans);
+
+	do {
+		citer_for_each(first, last, print_element);
+		//printf("\n");
+		count --;
+	} while (prev_permutation(first, last, cntr_int_compare));
+
+	dbg_assert(count == 0);
+
+	cntr_destroy(c);
+}
+
 static void reverse_correctness_test() {
 	int i, j;
 	printf("reverse correctness test start\n");
@@ -110,7 +154,18 @@ static void reverse_correctness_test() {
 	printf("reverse correctness test end\n");
 }
 
+static void prev_next_permutation_test() {
+	int i;
+	printf("permutation correctness test start\n");
+	for (i = TC_LIST; i <= TC_ARRAY; i ++) {
+		permutation_test((TC_TYPE)i);
+	}
+	printf("permutation correctness test end\n");
+}
+
 void algorithm_base_test() {
 	do_test("reverse correctness", reverse_correctness_test);
+
+	do_test("permutation correctness", prev_next_permutation_test);
 }
 

@@ -286,7 +286,7 @@ bool prev_permutation(citer begin, citer end, pf_compare_object comp) {
 	while (!citer_equal(next, begin)) {
 		citer_to_prev(bwd);
 
-		if (comp(citer_get_ref(bwd), citer_get_ref(next)) < 0) {
+		if (comp(citer_get_ref(bwd), citer_get_ref(next)) > 0) {
 			citer_dos(sub, end);
 
 			while (comp(citer_get_ref(sub), citer_get_ref(bwd)) >= 0)
@@ -311,7 +311,7 @@ bool next_permutation(citer begin, citer end, pf_compare_object comp) {
 
 	while (!citer_equal(next, begin)) {
 		citer_to_prev(bwd);
-		if (comp(citer_get_ref(bwd), citer_get_ref(next)) > 0) {
+		if (comp(citer_get_ref(bwd), citer_get_ref(next)) < 0) {
 			citer_dos(sub, end);
 
 			/* maybe binary search */

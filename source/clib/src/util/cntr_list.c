@@ -166,7 +166,7 @@ static int cntr_list_size(cntr cl) {
 }
 
 static void cntr_list_add(cntr cl, void* object) {
-	cntr_list_add_front(cl, object);
+	cntr_list_add_back(cl, object);
 }
 
 static void* cntr_list_front(cntr cl) {

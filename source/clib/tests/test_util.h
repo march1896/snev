@@ -16,7 +16,7 @@ int qsort_int_compare(const void* x, const void* y);
 // correctness_data_length;
 #define clength 300
 // performance_data_length;
-#define plength 100000
+#define plength 10000
 extern int *rawdata, *uniquedata, *uniquesorteddata;
 
 void init_data();
@@ -35,8 +35,8 @@ typedef enum test_cont_type_e {
 typedef enum test_data_type_e {
 	TD_INCREASE = 0,
 	TD_DECREASE,
-	TD_UNIQUE,
 	TD_RANDOM,
+	TD_UNIQUE,
 	TD_END
 } TD_TYPE;
 
