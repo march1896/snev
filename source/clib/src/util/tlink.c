@@ -124,14 +124,34 @@ void tlink_set_compare(pf_tlink_compare pc) {
 	_compare = pc;
 }
 
+struct tlink *_fix_up(struct tlink *n) {
+	if (_is_red(c->right) && _is_black(c->left))
+		c = _rotate_left(c);
+
+	if (_is_red(c->left)) {
+		if (c->left && _is_red(c->left->left))
+			c = _rotate_right(c);
+	}
+
+	if (_is_red(c->left) && _is_red(c->right))
+		_color_flip(c);
+}
+
 /*
  * When we deal with a 4-node in the search path, there is a top-down method, 
  * which will process any 4-node when travering down to leaf. And a down-top
  * method, which will process 4-node when needing. 
+ *
  * The advantage of the first method is one-pass and simpiler code.
  * The advantage of the second is it will not split 4-node when not necessary.
  *
  * Here we use the first method.
+ *
+ * For a recursive call(without a parent pointer, and no operations ops on a 
+ * node's parent), there are also top-down operations as well as down-top operation,
+ * top-down ops are posed before the recursive call, while down-top ops are posed 
+ * after the recursive call.
+ *
  */
 struct tlink *tlink_insert_rec(struct tlink *c, struct tlink *n) {
 	if (c == NULL) {
