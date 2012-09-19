@@ -30,7 +30,7 @@ inline struct block_c* block_com_make_sentinels(
 	block_com_invalidate(*sent_last);
 
 	pb = (struct block_c*)buff_start + 1;
-	block_com_init_addr_ab(pb, sent_first, sent_last, 0, 0);
+	block_com_init_addr(pb, *sent_first, *sent_last, 0);
 
 	return pb;
 }
@@ -72,6 +72,8 @@ inline void block_com_set_next_adj(struct block_c* pbc, struct block_c* next_adj
 	unsigned int size = (char*)next_adj - (char*)pbc;
 
 	block_com_set_size(pbc, size);
+
+	dbg_assert(block_com_next_adj(pbc) == next_adj);
 }
 
 inline void* block_com_data(struct block_c* pbc) {
@@ -99,6 +101,8 @@ inline struct block_c* block_com_split(struct block_c* pbc, unsigned int size, u
 
 		if (block_com_valid(next_adj))
 			block_com_set_prev_adj(next_adj, sb);
+
+		return (void*)sb;
 	}
 
 	/* not enough space to split */

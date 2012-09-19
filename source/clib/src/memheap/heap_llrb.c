@@ -1,5 +1,4 @@
-#include <heap_interface.h>
-
+#include <heap.h>
 #include <block_common.h>
 #include <llrb_link.h>
 
@@ -14,8 +13,6 @@ struct block {
 };
 
 struct heap {
-	struct heap_operations *__vt;
-
 	/* point to the single free list */
 	struct llrb_link *root; 
 
@@ -28,21 +25,6 @@ struct heap {
 	unsigned int 	flag;
 
 	unsigned int 	error;
-};
-
-
-static void  heap_destroy(heap_handle pheap);
-static void* heap_alloc(heap_handle pheap, int size, const char* file, size_t line);
-static void  heap_dealloc(heap_handle pheap, void *buff, const char* file, size_t line);
-static void* heap_realloc(heap_handle pheap, void *buff, int size, const char* file, size_t line);
-static void heap_dump(heap_handle pheap);
-
-static struct heap_operations __llrb_heap_ops = {
-	heap_destroy,
-	heap_alloc,
-	heap_dealloc,
-	heap_realloc,
-	heap_dump
 };
 
 static int block_comp(const struct llrb_link *l, const struct llrb_link *r) {
@@ -80,11 +62,11 @@ struct llrb_link *llrb_find(struct llrb_link *c, int size) {
 	return NULL;
 }
 
-heap_handle init_llrbheap(void *buff, int size) {
-	struct heap *pheap = buff;
+heap_handle heap_init(void *buff, int size) {
+	struct heap *pheap = (struct heap*)buff;
 
-	void *block_start = buff + sizeof(struct heap);
-	void *block_end = buff + size;
+	void *block_start = (char*)buff + sizeof(struct heap);
+	void *block_end = (char*)buff + size;
 
 	struct block_c *sent_first;
 	struct block_c *sent_last;
@@ -94,7 +76,6 @@ heap_handle init_llrbheap(void *buff, int size) {
 	init_block = block_com_make_sentinels(
 			block_start, block_end, &sent_first, &sent_last);
 
-	pheap->__vt = &__llrb_heap_ops;
 	pheap->root = NULL;
 	pheap->pbuff = buff;
 	pheap->size = size;
@@ -109,7 +90,8 @@ heap_handle init_llrbheap(void *buff, int size) {
 	return (heap_handle)pheap;
 }
 
-static void  heap_destroy(heap_handle pheap) {
+void  heap_destroy(heap_handle hhdl) {
+	struct heap *pheap = (struct heap*)hhdl;
 	/*
 	 * Nothing to do, since we does not allocated any memory.
 	 */
@@ -117,7 +99,7 @@ static void  heap_destroy(heap_handle pheap) {
 
 #define SPLIT_THRETHHOLD sizeof(struct block)
 
-static void* heap_alloc(heap_handle hhdl, int size, const char* file, size_t line) {
+void* heap_alloc(heap_handle hhdl, int size, const char* file, size_t line) {
 	struct heap *pheap = (struct heap*)hhdl;
 
 	struct llrb_link *prop = llrb_find(pheap->root, size);
@@ -143,7 +125,7 @@ static void* heap_alloc(heap_handle hhdl, int size, const char* file, size_t lin
 	return block_com_data(&pb->common);
 }
 
-static void  heap_dealloc(heap_handle hhdl, void *buff, const char* file, size_t line) {
+void  heap_dealloc(heap_handle hhdl, void *buff, const char* file, size_t line) {
 	struct heap *pheap = (struct heap*)hhdl;
 	struct block_c *pbc = block_com_from_data(buff);
 	struct block *pb = container_of(pbc, struct block, link);
@@ -163,7 +145,7 @@ static void  heap_dealloc(heap_handle hhdl, void *buff, const char* file, size_t
 			block_com_merge(prev, next);
 			pheap->root = llrb_insert(pheap->root, &b_prev->link, block_comp);
 
-			block_com_set_free(prev, false);
+			block_com_set_free(prev, true);
 		}
 		else {
 			struct block *b_prev = container_of(prev, struct block, common);
@@ -174,7 +156,7 @@ static void  heap_dealloc(heap_handle hhdl, void *buff, const char* file, size_t
 			block_com_merge(prev, pbc);
 			pheap->root = llrb_insert(pheap->root, &b_prev->link, block_comp);
 
-			block_com_set_free(prev, false);
+			block_com_set_free(prev, true);
 		}
 	}
 	else if (block_com_valid(next) && block_com_free(next)) {
@@ -186,19 +168,20 @@ static void  heap_dealloc(heap_handle hhdl, void *buff, const char* file, size_t
 		block_com_merge(pbc, next);
 		pheap->root = llrb_insert(pheap->root, &pb->link, block_comp);
 
-		block_com_set_free(pbc, false);
+		block_com_set_free(pbc, true);
 	}
 	else {
 		pheap->root = llrb_insert(pheap->root, &pb->link, block_comp);
 
-		block_com_set_free(pbc, false);
+		block_com_set_free(pbc, true);
 	}
 }
 
-static void* heap_realloc(heap_handle hhdl, void *buff, int size, const char* file, size_t line) {
+void* heap_realloc(heap_handle hhdl, void *buff, int size, const char* file, size_t line) {
 	/* TODO */
+	return NULL;
 }
 
-static void heap_dump(heap_handle hhdl) {
+void heap_dump(heap_handle hhdl) {
 	/* TODO */
 }
