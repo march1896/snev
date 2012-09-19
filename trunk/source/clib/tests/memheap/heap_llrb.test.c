@@ -1,4 +1,4 @@
-#include <heap_llrb.h>
+#include <heap.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
@@ -6,8 +6,18 @@
 #define N 500000
 static void *pointers[N];
 static void *buff;
+static heap_handle ph;
 
 static void _init_heap() {
+	buff = malloc(1 << 30);
+
+	ph = heap_init(buff, 1 << 30);
+}
+
+static void _deinit_heap() {
+	heap_destroy(ph);
+
+	free(buff);
 }
 
 static void _allocate_data(int n) {
@@ -16,105 +26,47 @@ static void _allocate_data(int n) {
 	srand (iseed);
 
 	for (i = 0; i < n; i ++) {
-		pdata[i] = (struct data*)malloc(sizeof(struct data));
+		int sz = rand() % (10 * 1024);
 
-		pdata[i]->key = rand() % N;
-		pdata[i]->value = 0;
+		pointers[i] = heap_alloc(ph, sz, __FILE__, __LINE__);
 	}
 }
 
-struct data {
-	int key;
-	int value;
-
-	struct llrb_link link;
-};
-
-struct data *pdata[N];
-
-static void _init_data(int n) {
-	int i;
-	unsigned int iseed = (unsigned int)time(NULL);
-
-	srand (iseed);
-
-	for (i = 0; i < n; i ++) {
-		pdata[i] = (struct data*)malloc(sizeof(struct data));
-
-		pdata[i]->key = rand() % N;
-		pdata[i]->value = 0;
-	}
-}
-
-static void _destroy_data(int n) {
+static void _dealloc_data(int n) {
 	int i;
 
 	for (i = 0; i < n; i ++) {
-		free(pdata[i]);
+		heap_dealloc(ph, pointers[i], __FILE__, __LINE__);
 	}
 }
 
-static struct llrb_link *root = NULL;
-
-int comp(const struct llrb_link *l, const struct llrb_link *r) {
-	struct data *pl, *pr;
-	pl = container_of(l, struct data, link);
-	pr = container_of(r, struct data, link);
-
-	if (pl->key < pr->key) return -1;
-	else if (pl->key == pr->key) return 0;
-	else return 1;
+void heap_correctness_test() {
+	int length = 2;
+	printf("llrb heap correctness test begin\n");
+	_init_heap();
+	_allocate_data(length);
+	_dealloc_data(length);
+	_deinit_heap();
+	printf("llrb heap correctness test end\n");
 }
 
-void insert_data(int n, bool check) {
-	int i;
-
-	for (i = 0; i < n; i ++) {
-		root = llrb_insert(root, &(pdata[i]->link), comp);
-		if (check)
-			llrb_debug_check(root, comp);
-	}
-}
-
-void remove_data(int n, bool check) {
-	int i;
-
-	for (i = 0; i < n; i ++) {
-		root = llrb_remove(root, &(pdata[i]->link), comp);
-		if (check)
-			llrb_debug_check(root, comp);
-	}
-}
-
-void llrb_link_correctness_test() {
-	int length = 1000;
-	printf("llrb link correctness test begin\n");
-	_init_data(length);
-	insert_data(length, true);
-	remove_data(length, true);
-	_destroy_data(length);
-	printf("llrb link correctness test end\n");
-}
-
-void llrb_link_performance_test() {
+void heap_performance_test() {
 	clock_t start_c, end_c;
 	int length = N;
 
-	printf("llrb link performance test begin\n");
-	_init_data(length);
+	printf("llrb heap performance test begin\n");
+	_init_heap();
 
 	start_c = clock();	
-	insert_data(length, false);
-	remove_data(length, false);
 	end_c = clock();
-	printf("insert/remove %d elements used %f\n", length, (float)(end_c - start_c)/CLOCKS_PER_SEC);
+	printf("allocate/deallocate %d elements used %f\n", length, (float)(end_c - start_c)/CLOCKS_PER_SEC);
 
-	_destroy_data(length);
+	_deinit_heap();
 	
-	printf("llrb link performance test end\n");
+	printf("llrb heap performance test end\n");
 }
 
-void llrb_link_test() {
-	llrb_link_correctness_test();
-	llrb_link_performance_test();
+void heap_test() {
+	heap_correctness_test();
+	heap_performance_test();
 }
