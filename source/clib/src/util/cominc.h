@@ -26,6 +26,8 @@ typedef int bool;
 
 #endif
 
+#define container_of(ptr, type, member) \
+	(type *)((char *)ptr - offsetof(type,member))
 
 #define halloc malloc
 #define hfree free

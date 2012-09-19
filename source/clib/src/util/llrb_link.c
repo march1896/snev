@@ -308,9 +308,21 @@ static void _debug_check(struct llrb_link *c, int depth) {
 		struct llrb_link *lc = c->left;
 		struct llrb_link *rc = c->right;
 		struct llrb_link *par = c->parent;
+		int cmpr = 0;
 
-		if (lc) dbg_assert(lc->parent == c);
-		if (rc) dbg_assert(rc->parent == c);
+		if (lc) {
+			dbg_assert(lc->parent == c);
+
+			cmpr = _compare(lc, c);
+			dbg_assert(cmpr == -1);
+		}
+		if (rc) {
+			dbg_assert(rc->parent == c);
+
+			cmpr = _compare(rc, c);
+			dbg_assert(cmpr == 1);
+		}
+
 		if (par) dbg_assert(par->left == c || par->right == c);
 
 		dbg_assert(!_is_red(rc));
@@ -323,8 +335,9 @@ static void _debug_check(struct llrb_link *c, int depth) {
 	}
 }
 
-void llrb_debug_check(struct llrb_link *root) {
-	black_depth = -1;
+void llrb_debug_check(struct llrb_link *root, pf_llrb_compare pc) {
+	llrb_set_compare(pc);
 
+	black_depth = -1;
 	_debug_check(root, 0);
 }

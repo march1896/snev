@@ -86,52 +86,80 @@
  * information that both allocated/infreelist blocks need. every custom block header
  * should contains this struct at the very beginning of it*/
 
-#define BLOCK_COM_EXTA_BIT 31
-#define BLOCK_COM_EXTB_BIT 30
+#define BLOCK_COM_EXT_BIT 31
 
-#define BLOCK_COM_EXTA_MASK (1 << BLOCK_COM_EXTA_BIT)
-#define BLOCK_COM_EXTB_MASK (1 << BLOCK_COM_EXTB_BIT)
+#define BLOCK_COM_EXT_MASK (1 << BLOCK_COM_EXT_BIT)
 
-#define BLOCK_COM_EXTRA_MASK (BLOCK_COM_EXTA_MASK | BLOCK_COM_EXTB_MASK)
+#define BLOCK_COM_SIZE_MASK (~BLOCK_COM_EXT_MASK)
 
-#define BLOCK_COM_SIZE_MASK (BLOCK_COM_EXTB_MASK - 1)
+struct block_c {
+	struct block_c *prev_adj; 
 
-struct block_com_h {
-	/* 
-	 * prev_adj points to the previous adjacent block, DON'T use it directly, use 
-	 * function block_com_prev_adj instead. 
-	 */
-	struct block_com_h* prev_adj; 
+	unsigned int info; 
 
-	/**
-	 * info contains 30 bits size information, and two extra bit information.
-	 * here we don't make any assumption of how the two extra bit information be used.
-	 * you may use the two bits to represent 4 different states, or use the combination
-	 * of 2 single bit. Typically, when we use linked list to manage free blocks, we 
-	 * use one extra bit to represent if the block is in the list.
-	 */
-	unsigned int 		info; 
+	/* TODO: we should add debug information here, with #ifdef/#endif macro */
 };
 
-typedef struct block_com_h block_c;
+extern inline bool block_com_valid(struct block_c* pbc);
 
-inline bool block_com_valid(block_c* pbc) {
-	if (pbc == NULL || pbc->prev_adj == NULL) {
-		dbg_assert(pbc->info == 0);
-		return false;
-	}
+extern inline void block_com_invalidate(struct block_c* pbc);
 
-	return true;
-}
+/**
+ * @brief get the extra alpha bit information
+ *
+ * @param pbc pointer of struct block_c
+ *
+ * @return true if extra alpha is set
+ */
+extern inline bool block_com_free(struct block_c* pbc);
 
-inline void block_com_invalidate(block_c* pbc) {
-	pbc->prev_adj = NULL;
-	pbc->info = 0;
-}
+/**
+ * @brief set the extra alpha bit
+ *
+ * @param pbc pointer of struct block_c
+ * @param is_free the new free state
+ */
+extern inline void block_com_set_free(struct block_c* pbc, bool is_free);
+
+/**
+ * @brief get the total block size, include block header
+ *
+ * @param pbc pointer of the block
+ *
+ * @return the block size
+ */
+extern inline unsigned int block_com_size(struct block_c* pbc);
+
+/**
+ * @brief get the maximum data size that the block can carry.
+ *
+ * @param pbc pointer of the block
+ *
+ * @return maximum data size
+ */
+extern inline unsigned int block_com_data_size(struct block_c* pbc);
+
+extern inline void block_com_set_size(struct block_c* pbc, unsigned int size);
+
+extern inline struct block_c* block_com_prev_adj(struct block_c* pbc);
+
+extern inline void block_com_set_prev_adj(struct block_c* pbc, struct block_c* prev_adj);
+
+extern inline struct block_c* block_com_next_adj(struct block_c* pbc);
+
+extern inline void block_com_set_next_adj(struct block_c* pbc, struct block_c* next_adj);
+
+extern inline void* block_com_data(struct block_c* pbc);
+
+extern inline struct block_c* block_com_from_data(void* addr);
+
+extern inline void block_com_init_addr(struct block_c* pbc, void* prev_adj, void* next_adj , bool ext);
+
+extern inline void block_com_init_size(struct block_c* pbc, void* prev_adj, unsigned int size, bool ext);
 
 /**
  * @brief block valid information are tested based on sentinel blocks, any heap 
- * using block_c should keep two sentinels for validation test. This function 
+ * using struct block_c should keep two sentinels for validation test. This function 
  * make two sentinels based on a buffer.
  *
  * @param buff_start start of the buffer
@@ -141,112 +169,7 @@ inline void block_com_invalidate(block_c* pbc) {
  *
  * @return firt valid block address in the buffer
  */
-inline void* block_com_make_sentinels(void* buff_start, void* buff_end, void** sent_first, void** sent_last) {
-	dbg_assert(buff_start && buff_end && buff_start < buff_end);
-
-	*sent_first = buff_start;
-	block_com_invalidate(*sent_first);
-
-	*sent_last = (void*)((block_c*)(buff_end) - 1);
-	block_com_invalidate(*sent_last);
-
-	return (void*)((block_c*)buff_start + 1);
-}
-
-/**
- * @brief get the extra alpha bit information
- *
- * @param pbc pointer of block_c
- *
- * @return true if extra alpha is set
- */
-inline bool block_com_exta(block_c* pbc) {
-	return (pbc->info & BLOCK_COM_EXTA_MASK) != 0;
-}
-
-/**
- * @brief set the extra alpha bit
- *
- * @param pbc pointer of block_c
- * @param exta the new free state
- */
-inline void block_com_set_exta(block_c* pbc, bool exta) {
-	if (exta) pbc->info |= BLOCK_COM_EXTA_MASK; 
-	else pbc->info &= ~BLOCK_COM_EXTA_MASK;
-}
-
-/**
- * @brief get the extra beta bit information
- *
- * @param pbc pointer of block_c
- *
- * @return true if extra beta is set
- */
-inline bool block_com_extb(block_c* pbc) {
-	return (pbc->info & BLOCK_COM_EXTB_MASK) != 0;
-}
-
-/**
- * @brief set the extra beta bit
- *
- * @param pbc pointer of block_c
- * @param extb the new free state
- */
-inline void block_com_set_extb(block_c* pbc, bool extb) {
-	if (extb) pbc->info |= BLOCK_COM_EXTB_MASK; 
-	else pbc->info &= ~BLOCK_COM_EXTB_MASK;
-}
-
-inline unsigned int block_com_extra(block_c* pbc) {
-	return pbc->info >> BLOCK_COM_EXTB_BIT;
-}
-
-inline void block_com_set_extra(block_c* pbc, unsigned int extra) {
-	dbg_assert(extra < 4);
-
-	pbc->info = (pbc->info & ~BLOCK_COM_EXTRA_MASK) | (extra << BLOCK_COM_EXTB_BIT);
-}
-
-inline unsigned int block_com_size(block_c* pbc) {
-	return pbc->info & BLOCK_COM_SIZE_MASK;
-}
-
-/*
- * return maximum data size the block can carry
- */
-inline unsigned int block_com_data_size(block_c* pbc) {
-	return block_com_size(pbc) - sizeof(pbc);
-}
-
-inline void block_com_set_size(block_c* pbc, unsigned int size) {
-	pbc->info = (pbc->info & ~BLOCK_COM_SIZE_MASK) | (size & BLOCK_COM_SIZE_MASK);
-}
-
-inline block_c* block_com_prev_adj(block_c* pbc) {
-	return pbc->prev_adj; 
-}
-
-inline void block_com_set_prev_adj(block_c* pbc, block_c* prev_adj) {
-	pbc->prev_adj = prev_adj;
-}
-
-inline block_c* block_com_next_adj(block_c* pbc) {
-	return (block_c*)((char*)pbc + block_com_size(pbc));
-}
-
-inline void block_com_set_next_adj(block_c* pbc, block_c* next_adj) {
-	unsigned int size = (char*)next_adj - (char*)pbc;
-
-	block_com_set_size(pbc, size);
-}
-
-inline void* block_com_data(block_c* pbc) {
-	return (void*)((char*)pbc + sizeof(block_c));
-}
-
-inline block_c* block_com_from_data(void* addr) {
-	return (block_c*)((char*)addr - sizeof(block_c));
-}
+extern inline struct block_c* block_com_make_sentinels(void* buff_start, void* buff_end, struct block_c **sent_first, struct block_c **sent_last);
 
 /**
  * @brief split a block into two
@@ -258,28 +181,7 @@ inline block_c* block_com_from_data(void* addr) {
  *
  * @return address of the second block after spliting, NULL if no need to split.
  */
-inline block_c* block_com_split(block_c* pbc, unsigned int size, unsigned int thh) {
-	//dbg_assert(block_com_data_size(pbc) >= size);
-
-	char* sb_addr = (char*)block_com_data(pbc) + size;
-	if (sb_addr + sizeof(block_c) + thh <= (char*)block_com_next_adj(pbc)) {
-		/* big enough, split */
-		block_c* sb = (block_c*)sb_addr;
-
-		block_c* next_adj = block_com_next_adj(pbc);
-
-		block_com_set_next_adj(pbc, sb);
-
-		block_com_set_prev_adj(sb, pbc);
-		block_com_set_next_adj(sb, next_adj);
-
-		if (block_com_valid(next_adj))
-			block_com_set_prev_adj(next_adj, sb);
-	}
-
-	/* not enough space to split */
-	return NULL;
-}
+extern inline struct block_c* block_com_split(struct block_c* pbc, unsigned int size, unsigned int thh);
 
 /**
  * @brief merge a list of block_com into one block, after merging, 
@@ -288,39 +190,6 @@ inline block_c* block_com_split(block_c* pbc, unsigned int size, unsigned int th
  * @param pstart start of the blocks to merge 
  * @param pend ene of blocks to merge
  */
-inline void block_com_merge(block_c* pstart, block_c* pend) {
-	block_c* next_pend = block_com_next_adj(pend);
-
-	block_com_set_next_adj(pstart, next_pend);
-	block_com_set_prev_adj(next_pend, pstart);
-
-	return;
-}
-
-inline void block_com_init_addr_ab(block_c* pbc, void* prev_adj, void* next_adj , bool exta, bool extb) {
-	block_com_set_prev_adj(pbc, prev_adj);
-	block_com_set_next_adj(pbc, next_adj);
-	block_com_set_exta(pbc, exta);
-	block_com_set_extb(pbc, extb);
-}
-
-inline void block_com_init_addr_extra(block_c* pbc, void* prev_adj, void* next_adj , unsigned int extra) {
-	block_com_set_prev_adj(pbc, prev_adj);
-	block_com_set_next_adj(pbc, next_adj);
-	block_com_set_extra(pbc, extra);
-}
-
-inline void block_com_init_size_ab(block_c* pbc, void* prev_adj, unsigned int size, bool exta, bool extb) {
-	block_com_set_prev_adj(pbc, prev_adj);
-	block_com_set_size(pbc, size);
-	block_com_set_exta(pbc, exta);
-	block_com_set_extb(pbc, extb);
-}
-
-inline void block_com_init_size_extra(block_c* pbc, void* prev_adj, unsigned int size, unsigned int extra) {
-	block_com_set_prev_adj(pbc, prev_adj);
-	block_com_set_size(pbc, size);
-	block_com_set_extra(pbc, extra);
-}
+extern inline void block_com_merge(struct block_c* pstart, struct block_c* pend);
 
 #endif 
