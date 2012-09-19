@@ -8,11 +8,11 @@
 
 struct block_dll_t {
 	/* common part of block */
-	block_c 			bc;		
+	struct block_c 		bc;		
 
 	/* members to maintain double linked list */
-	struct block_dll_t* prev_free;
-	struct block_dll_t* next_free;
+	struct block_dll_t *prev_free;
+	struct block_dll_t *next_free;
 };
 
 typedef struct block_dll_t block_dll;
