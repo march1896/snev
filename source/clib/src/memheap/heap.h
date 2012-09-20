@@ -42,6 +42,8 @@ void heap_dump_helper(int tot_alloc_number, int tot_alloc_size,
 
 extern heap_handle _global_llrb_heap;
 
+#ifdef _USING_LLRB_HEAP_
+
 #ifdef _MEM_DEBUG_
 
 #define halloc(size) \
@@ -55,6 +57,13 @@ extern heap_handle _global_llrb_heap;
 	heap_alloc(_global_llrb_heap, size)
 #define hfree(buff) \
 	heap_dealloc(_global_llrb_heap, buff)
+
+#endif
+
+#else 
+
+#define halloc malloc
+#define hfree free
 
 #endif
 
