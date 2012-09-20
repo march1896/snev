@@ -19,6 +19,8 @@ struct heap {
 	/* point to the start of the heap buffer. */
 	void*			pbuff; 
 
+	struct block_c  *pfirst;
+
 	/* total size of the heap, include heap header, block pool and all align gaps */
 	unsigned int 	size;
 
@@ -26,6 +28,8 @@ struct heap {
 
 	unsigned int 	error;
 };
+
+heap_handle _global_llrb_heap;
 
 static int block_comp(const struct llrb_link *l, const struct llrb_link *r) {
 	struct block *plb, *prb;
@@ -46,18 +50,25 @@ static int block_comp(const struct llrb_link *l, const struct llrb_link *r) {
  * block who can hold greater or equal than size.
  */
 struct llrb_link *llrb_find(struct llrb_link *c, int size) {
-	struct block *pb = container_of(c, struct block, link);
-	int sz = block_com_data_size(&pb->common);
-
+	struct block *pb;
+	int sz;
+	
 	if (c == NULL) 
 		return NULL;
+
+	pb = container_of(c, struct block, link);
+	sz = block_com_data_size(&pb->common);
 
 	if (sz < size) 
 		return llrb_find(c->right, size);
 	else if (c->left == NULL)
 		return c;
-	else 
-		return llrb_find(c->left, size);
+	else {
+		struct llrb_link *found = llrb_find(c->left, size);
+		if (found) 
+			return found;
+		else return c;
+	}
 
 	return NULL;
 }
@@ -78,6 +89,7 @@ heap_handle heap_init(void *buff, int size) {
 
 	pheap->root = NULL;
 	pheap->pbuff = buff;
+	pheap->pfirst = init_block;
 	pheap->size = size;
 	pheap->flag = 0;
 	pheap->error = 0;
@@ -99,20 +111,42 @@ void  heap_destroy(heap_handle hhdl) {
 
 #define SPLIT_THRETHHOLD sizeof(struct block)
 
-void* heap_alloc(heap_handle hhdl, int size, const char* file, size_t line) {
+#ifdef _MEM_DEBUG_
+void* heap_alloc_debug(heap_handle hhdl, int size, const char* file, int line) {
+	void *buff = heap_alloc(hhdl, size);
+
+	if (buff == NULL)
+		return NULL;
+
+	{
+		struct block_c *pbc = (struct block_c*)block_com_from_data(buff);
+
+		pbc->file = file;
+		pbc->line = line;
+	}
+
+	return buff;
+}
+#endif
+
+void* heap_alloc(heap_handle hhdl, int size) {
 	struct heap *pheap = (struct heap*)hhdl;
 
 	struct llrb_link *prop = llrb_find(pheap->root, size);
 	struct block *pb = container_of(prop, struct block, link);
 	struct block_c *rem = NULL;
 
-	if (prop == NULL) return NULL;
+	if (prop == NULL) {
+		dbg_assert(false);
+		return NULL;
+	}
 
 	/* Remove the block from free container */
 	pheap->root = llrb_remove(pheap->root, prop, block_comp);
 
 	/* When pb is deallocated, the data field should be used as llrb_link */
 	if (size < sizeof(struct llrb_link)) size = sizeof(struct llrb_link);
+
 	/* Split the block, add the remain block to free container */
 	rem = block_com_split(&pb->common, size, SPLIT_THRETHHOLD);
 	if (rem != NULL) {
@@ -127,7 +161,7 @@ void* heap_alloc(heap_handle hhdl, int size, const char* file, size_t line) {
 	return block_com_data(&pb->common);
 }
 
-void  heap_dealloc(heap_handle hhdl, void *buff, const char* file, size_t line) {
+void  heap_dealloc(heap_handle hhdl, void *buff) {
 	struct heap *pheap = (struct heap*)hhdl;
 	struct block_c *pbc = block_com_from_data(buff);
 	struct block *pb = container_of(pbc, struct block, common);
@@ -179,11 +213,38 @@ void  heap_dealloc(heap_handle hhdl, void *buff, const char* file, size_t line) 
 	}
 }
 
-void* heap_realloc(heap_handle hhdl, void *buff, int size, const char* file, size_t line) {
-	/* TODO */
-	return NULL;
+void heap_dump(heap_handle hhdl) {
 }
 
-void heap_dump(heap_handle hhdl) {
-	/* TODO */
+#ifdef _MEM_DEBUG_
+#include <stdio.h>
+void heap_debug_leak(heap_handle hhdl) {
+	struct heap *pheap = (struct heap*)hhdl;
+	struct block_c *pbc = pheap->pfirst;
+
+	while (block_com_valid(pbc)) {
+		if (!block_com_free(pbc)) {
+			printf("%s %d\n", pbc->file, pbc->line);
+		}
+		pbc = block_com_next_adj(pbc);
+	}
 }
+
+void heap_debug_global_leak() {
+	heap_debug_leak(_global_llrb_heap);
+}
+#endif 
+
+void heap_init_global(int size) {
+	void *buff = malloc(size);
+	_global_llrb_heap = heap_init(buff, size);
+}
+
+void heap_deinit_global() {
+	struct heap *pheap = (struct heap *)_global_llrb_heap;
+	void *buff = pheap->pbuff;
+	heap_destroy(_global_llrb_heap);
+	free(buff);
+}
+
+

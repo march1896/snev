@@ -198,9 +198,11 @@ void merge_sort(citer _begin, citer _end, pf_compare_object comp) {
 	citer_dos(end, _end);
 	citer_dos(mid, NULL);
 	citer_dos(pre_mid, NULL);
-	cntr helper = cntr_create_as_array();
+	cntr helper;
 
 	if (citer_equal(begin, end)) return;
+
+	helper = cntr_create_as_array();
 
 	citer_middle(begin, end, mid);
 	citer_assign(pre_mid, mid);

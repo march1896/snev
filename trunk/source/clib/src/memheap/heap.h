@@ -1,10 +1,9 @@
 #ifndef _HEAP_H_
 #define _HEAP_H_
 
-#include <cominc.h>
+#define _MEM_DEBUG_
 
 typedef void* heap_handle;
-
 /* init a heap on a buffer of a given size */
 heap_handle heap_init(void *buff, int size);
 
@@ -13,16 +12,18 @@ void heap_destroy(heap_handle pheap);
 
 /* alloc a buff from a heap, return the address of the allocated heap, 
  * NULL if allocate failed */
-void* heap_alloc(heap_handle pheap, int size, const char* file, size_t line);
+void* heap_alloc(heap_handle pheap, int size);
 
 /* dealloca a buff from a heap */
-void heap_dealloc(heap_handle pheap, void *buff, const char* file, size_t line);
-
-/*  reallocate the buff to given size */
-void* heap_realloc(heap_handle pheap, void *buff, int size, const char* file, size_t line);
+void heap_dealloc(heap_handle pheap, void *buff);
 
 /* dump debug information of the heap */
 void heap_dump(heap_handle pheap);
+
+#ifdef _MEM_DEBUG_
+void heap_debug_leak(heap_handle hhdl);
+void* heap_alloc_debug(heap_handle hhdl, int size, const char* file, int line);
+#endif
 
 /* typically, we need the following information 
  * 1, total allocated memory block number
@@ -38,4 +39,30 @@ void heap_dump(heap_handle pheap);
 void heap_dump_helper(int tot_alloc_number, int tot_alloc_size, 
 		int tot_free_number, int tot_free_size, int largest_free_size);
 
+
+extern heap_handle _global_llrb_heap;
+
+#ifdef _MEM_DEBUG_
+
+#define halloc(size) \
+	heap_alloc_debug(_global_llrb_heap, size, __FILE__, __LINE__)
+#define hfree(buff) \
+	heap_dealloc(_global_llrb_heap, buff)
+
+#else 
+
+#define halloc(size) \
+	heap_alloc(_global_llrb_heap, size)
+#define hfree(buff) \
+	heap_dealloc(_global_llrb_heap, buff)
+
+#endif
+
+void heap_init_global(int size);
+
+void heap_deinit_global();
+
+#ifdef _MEM_DEBUG_
+void heap_debug_global_leak();
+#endif
 #endif /* _HEAP_H_ */

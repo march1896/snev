@@ -82,6 +82,13 @@ static void sort_performance_test(char* sort_name, pf_sort_func the_sort,
 	cntr_destroy(c);
 }
 
+typedef enum _sort_type {
+	ST_BUBBLE,
+	ST_QUICK,
+	ST_MERGE,
+	ST_DEFAULT,
+	ST_END
+} SORT_TYPE;
 char c_sort[][30] = { "bubble", "quick", "merge", "default"};
 pf_sort_func f_sort[] = { bubble_sort, quick_sort, merge_sort, bubble_sort };
 char c_order[][30] = { "increase", "decrease", "random" };
@@ -90,9 +97,9 @@ void cntr_sort_test() {
 	int i, j, k;
 
 	printf("correctness test start\n");
-	for (i = 0; i < 3; i ++) {
-		for (j = 0; j < 2; j ++) {
-			for (k = 0; k < 3; k ++) {
+	for (i = ST_BUBBLE; i < ST_DEFAULT; i ++) {
+		for (j = 0; j <= TC_ARRAY; j ++) {
+			for (k = 0; k < TD_END; k ++) {
 				sort_correctness_test(c_sort[i], f_sort[i], (TC_TYPE)j, (TD_TYPE)k, TL_CORRECTNESS);
 			}
 		}
@@ -107,7 +114,6 @@ void cntr_sort_test() {
 			}
 		}
 	}
-	printf("performance test end\n\n");
-	
+	printf("performance test end\n\n");	
 }
 

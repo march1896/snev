@@ -28,15 +28,15 @@ static void _allocate_data(int n) {
 	for (i = 0; i < n; i ++) {
 		int sz = rand() % (10 * 1024);
 
-		pointers[i] = heap_alloc(ph, sz, __FILE__, __LINE__);
+		pointers[i] = heap_alloc_debug(ph, sz, __FILE__, __LINE__);
 	}
 }
 
 static void _dealloc_data(int n) {
 	int i;
 
-	for (i = 0; i < n; i ++) {
-		heap_dealloc(ph, pointers[i], __FILE__, __LINE__);
+	for (i = 0; i < n-1; i ++) {
+		heap_dealloc(ph, pointers[i]);
 	}
 }
 
@@ -46,6 +46,9 @@ void heap_correctness_test() {
 	_init_heap();
 	_allocate_data(length);
 	_dealloc_data(length);
+
+	heap_debug_leak(ph);
+	
 	_deinit_heap();
 	printf("llrb heap correctness test end\n");
 }
