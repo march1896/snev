@@ -129,9 +129,13 @@ static cattr cntr_list_attribute(cntr cl) {
 	return CNTR_ATTR_BASE | CNTR_ATTR_LINEAR | CNTR_ATTR_LIST;
 }
 
-static void cntr_list_destroy(cntr pcl) {
-	cntr_list_clear(pcl);
+static void cntr_list_destroy(cntr cl) {
+	cntr_list* pcl = (cntr_list*)cl;
 
+	cntr_list_clear(cl);
+
+	hfree(pcl->s_sent);
+	hfree(pcl->e_sent);
 	hfree(pcl);
 }
 

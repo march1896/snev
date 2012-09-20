@@ -2,6 +2,7 @@
 #define _BLOCK_COMMON_
 
 #include <cominc.h>
+#include <heap.h>
 
 /********************************************************************************
  * typical heap and block memory distribution, no matter how the free block are 
@@ -94,10 +95,12 @@
 
 struct block_c {
 	struct block_c *prev_adj; 
-
 	unsigned int info; 
 
-	/* TODO: we should add debug information here, with #ifdef/#endif macro */
+#ifdef _MEM_DEBUG_
+	const char *file;
+	unsigned line;
+#endif
 };
 
 extern inline bool block_com_valid(struct block_c* pbc);
