@@ -41,7 +41,7 @@ static void _dealloc_data(int n) {
 }
 
 void heap_correctness_test() {
-	int length = 2;
+	int length = 1000;
 	printf("llrb heap correctness test begin\n");
 	_init_heap();
 	_allocate_data(length);

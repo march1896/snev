@@ -111,6 +111,8 @@ void* heap_alloc(heap_handle hhdl, int size, const char* file, size_t line) {
 	/* Remove the block from free container */
 	pheap->root = llrb_remove(pheap->root, prop, block_comp);
 
+	/* When pb is deallocated, the data field should be used as llrb_link */
+	if (size < sizeof(struct llrb_link)) size = sizeof(struct llrb_link);
 	/* Split the block, add the remain block to free container */
 	rem = block_com_split(&pb->common, size, SPLIT_THRETHHOLD);
 	if (rem != NULL) {
@@ -128,7 +130,7 @@ void* heap_alloc(heap_handle hhdl, int size, const char* file, size_t line) {
 void  heap_dealloc(heap_handle hhdl, void *buff, const char* file, size_t line) {
 	struct heap *pheap = (struct heap*)hhdl;
 	struct block_c *pbc = block_com_from_data(buff);
-	struct block *pb = container_of(pbc, struct block, link);
+	struct block *pb = container_of(pbc, struct block, common);
 	struct block_c *prev = block_com_prev_adj(pbc);
 	struct block_c *next = block_com_next_adj(pbc);
 
