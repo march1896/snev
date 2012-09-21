@@ -1,6 +1,6 @@
 #include <list_link.h>
 
-static void _link(struct list_link *n, struct list_link *prev, struct list_link *next) {
+void list_link(struct list_link *n, struct list_link *prev, struct list_link *next) {
 	n->prev = prev;
 	n->next = next;
 
@@ -14,7 +14,7 @@ static void _link(struct list_link *n, struct list_link *prev, struct list_link 
 	}
 }
 
-static void _unlink(struct list_link *n) {
+void list_unnlink(struct list_link *n) {
 	struct list_link *prev = n->prev;
 	struct list_link *next = n->next;
 
@@ -27,7 +27,7 @@ static void _unlink(struct list_link *n) {
 }
 
 void list_insert_h(struct list_link **head, struct list_link *n_node) {
-	_link(n_node, NULL, *head);
+	list_link(n_node, NULL, *head);
 
 	*head = n_node;
 }
@@ -38,11 +38,11 @@ void list_remove_h(struct list_link **head, struct list_link *n_node) {
 		*head = n_node->next;
 	}
 
-	_unlink(n_node);
+	list_unnlink(n_node);
 }
 
 void list_insert_front_ht(struct list_link **head, struct list_link **tail, struct list_link *n_node) {
-	_link(n_node, NULL, *head);
+	list_link(n_node, NULL, *head);
 		
 	*head = n_node;
 	if (*tail == NULL) 
@@ -50,7 +50,7 @@ void list_insert_front_ht(struct list_link **head, struct list_link **tail, stru
 }
 
 void list_insert_back_ht(struct list_link **head, struct list_link **tail, struct list_link *n_node) {
-	_link(n_node, *tail, NULL);
+	list_link(n_node, *tail, NULL);
 
 	*tail = n_node;
 
@@ -69,5 +69,5 @@ void list_remove_ht(struct list_link **head, struct list_link **tail, struct lis
 		*tail = n_node->prev;
 	}
 
-	_unlink(n_node);
+	list_unnlink(n_node);
 }
