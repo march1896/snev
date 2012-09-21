@@ -1,4 +1,7 @@
-inline int mlog2(unsigned int x) {
+#include <cominc.h>
+#include <bit_math.h>
+
+inline int mlog2(int x) {
 	int bit = 0;
 	if (x & 0xFFFF0000) {
 		x = x >> 16;

@@ -2,7 +2,7 @@
 #define _BLOCK_COMMON_
 
 #include <cominc.h>
-#include <heap.h>
+#include <heap_def.h>
 
 /********************************************************************************
  * typical heap and block memory distribution, no matter how the free block are 

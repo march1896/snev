@@ -73,7 +73,7 @@ struct llrb_link *llrb_find(struct llrb_link *c, int size) {
 	return NULL;
 }
 
-heap_handle heap_init(void *buff, int size) {
+heap_handle theap_init(void *buff, int size) {
 	struct heap *pheap = (struct heap*)buff;
 
 	void *block_start = (char*)buff + sizeof(struct heap);
@@ -102,7 +102,7 @@ heap_handle heap_init(void *buff, int size) {
 	return (heap_handle)pheap;
 }
 
-void  heap_destroy(heap_handle hhdl) {
+void  theap_destroy(heap_handle hhdl) {
 	struct heap *pheap = (struct heap*)hhdl;
 	/*
 	 * Nothing to do, since we does not allocated any memory.
@@ -111,25 +111,7 @@ void  heap_destroy(heap_handle hhdl) {
 
 #define SPLIT_THRETHHOLD sizeof(struct block)
 
-#ifdef _MEM_DEBUG_
-void* heap_alloc_debug(heap_handle hhdl, int size, const char* file, int line) {
-	void *buff = heap_alloc(hhdl, size);
-
-	if (buff == NULL)
-		return NULL;
-
-	{
-		struct block_c *pbc = (struct block_c*)block_com_from_data(buff);
-
-		pbc->file = file;
-		pbc->line = line;
-	}
-
-	return buff;
-}
-#endif
-
-void* heap_alloc(heap_handle hhdl, int size) {
+void* theap_alloc(heap_handle hhdl, int size) {
 	struct heap *pheap = (struct heap*)hhdl;
 
 	struct llrb_link *prop = llrb_find(pheap->root, size);
@@ -161,7 +143,25 @@ void* heap_alloc(heap_handle hhdl, int size) {
 	return block_com_data(&pb->common);
 }
 
-void  heap_dealloc(heap_handle hhdl, void *buff) {
+#ifdef _MEM_DEBUG_
+void* theap_alloc_debug(heap_handle hhdl, int size, const char* file, int line) {
+	void *buff = theap_alloc(hhdl, size);
+
+	if (buff == NULL)
+		return NULL;
+
+	{
+		struct block_c *pbc = (struct block_c*)block_com_from_data(buff);
+
+		pbc->file = file;
+		pbc->line = line;
+	}
+
+	return buff;
+}
+#endif
+
+void  theap_dealloc(heap_handle hhdl, void *buff) {
 	struct heap *pheap = (struct heap*)hhdl;
 	struct block_c *pbc = block_com_from_data(buff);
 	struct block *pb = container_of(pbc, struct block, common);
@@ -213,12 +213,12 @@ void  heap_dealloc(heap_handle hhdl, void *buff) {
 	}
 }
 
-void heap_dump(heap_handle hhdl) {
+void theap_dump(heap_handle hhdl) {
 }
 
 #ifdef _MEM_DEBUG_
 #include <stdio.h>
-void heap_debug_leak(heap_handle hhdl) {
+void theap_debug_leak(heap_handle hhdl) {
 	struct heap *pheap = (struct heap*)hhdl;
 	struct block_c *pbc = pheap->pfirst;
 
@@ -230,21 +230,19 @@ void heap_debug_leak(heap_handle hhdl) {
 	}
 }
 
-void heap_debug_global_leak() {
-	heap_debug_leak(_global_llrb_heap);
+void theap_debug_global_leak() {
+	theap_debug_leak(_global_llrb_heap);
 }
 #endif 
 
-void heap_init_global(int size) {
+void theap_init_global(int size) {
 	void *buff = malloc(size);
-	_global_llrb_heap = heap_init(buff, size);
+	_global_llrb_heap = theap_init(buff, size);
 }
 
-void heap_deinit_global() {
+void theap_deinit_global() {
 	struct heap *pheap = (struct heap *)_global_llrb_heap;
 	void *buff = pheap->pbuff;
-	heap_destroy(_global_llrb_heap);
+	theap_destroy(_global_llrb_heap);
 	free(buff);
 }
-
-

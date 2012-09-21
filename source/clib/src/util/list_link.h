@@ -8,6 +8,11 @@ struct list_link {
 	struct list_link *next;
 };
 
+void list_link(struct list_link *n, struct list_link *prev, struct list_link *next);
+
+void list_unnlink(struct list_link *n);
+
+
 void list_insert_h(struct list_link **head, struct list_link *n_node);
 
 void list_remove_h(struct list_link **head, struct list_link *n_node);

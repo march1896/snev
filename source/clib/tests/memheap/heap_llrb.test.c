@@ -1,4 +1,4 @@
-#include <heap.h>
+#include <heap_llrb.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
@@ -11,11 +11,11 @@ static heap_handle ph;
 static void _init_heap() {
 	buff = malloc(1 << 30);
 
-	ph = heap_init(buff, 1 << 30);
+	ph = theap_init(buff, 1 << 30);
 }
 
 static void _deinit_heap() {
-	heap_destroy(ph);
+	theap_destroy(ph);
 
 	free(buff);
 }
@@ -28,7 +28,7 @@ static void _allocate_data(int n) {
 	for (i = 0; i < n; i ++) {
 		int sz = rand() % (10 * 1024);
 
-		pointers[i] = heap_alloc_debug(ph, sz, __FILE__, __LINE__);
+		pointers[i] = theap_alloc_debug(ph, sz, __FILE__, __LINE__);
 	}
 }
 
@@ -36,7 +36,7 @@ static void _dealloc_data(int n) {
 	int i;
 
 	for (i = 0; i < n-1; i ++) {
-		heap_dealloc(ph, pointers[i]);
+		theap_dealloc(ph, pointers[i]);
 	}
 }
 
@@ -47,7 +47,7 @@ void heap_correctness_test() {
 	_allocate_data(length);
 	_dealloc_data(length);
 
-	heap_debug_leak(ph);
+	theap_debug_leak(ph);
 	
 	_deinit_heap();
 	printf("llrb heap correctness test end\n");
