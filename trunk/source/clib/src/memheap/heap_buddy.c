@@ -7,7 +7,7 @@
 #include <block_link.h>
 #include <bit_math.h>
 
-struct block {
+struct block_buddy {
 	/* common part of block */
 	struct block_c 		common;		
 
@@ -16,7 +16,7 @@ struct block {
 };
 
 #define BN 32
-struct heap {
+struct heap_buddy {
 	/* point to the single free list */
 	struct list_link *buddy[BN]; 
 
@@ -34,21 +34,21 @@ struct heap {
 };
 
 int block_data_size_from_blick(struct list_link *link) {
-	struct block *pb = container_of(link, struct block, link);
+	struct block_buddy *pb = container_of(link, struct block_buddy, link);
 
 	return block_com_data_size(&pb->common);
 }
 
 heap_handle bheap_init(void *buff, int size) {
-	struct heap *pheap = (struct heap*)buff;
+	struct heap_buddy *pheap = (struct heap_buddy*)buff;
 
-	void *block_start = (char*)buff + sizeof(struct heap);
+	void *block_start = (char*)buff + sizeof(struct heap_buddy);
 	void *block_end = (char*)buff + size;
 
 	struct block_c *sent_first;
 	struct block_c *sent_last;
 	struct block_c *init_block;
-	struct block *ib;
+	struct block_buddy *ib;
 	int i, sz;
 
 	init_block = block_com_make_sentinels(
@@ -63,7 +63,7 @@ heap_handle bheap_init(void *buff, int size) {
 	pheap->error = 0;
 
 	block_com_set_free(init_block, true);
-	ib = container_of(init_block, struct block, common);
+	ib = container_of(init_block, struct block_buddy, common);
 
 	sz = block_com_data_size(init_block);
 	blink_push(&pheap->buddy[mlog2(sz)], &ib->link);
@@ -72,13 +72,13 @@ heap_handle bheap_init(void *buff, int size) {
 }
 
 void  bheap_destroy(heap_handle hhdl) {
-	struct heap *pheap = (struct heap*)hhdl;
+	struct heap_buddy *pheap = (struct heap_buddy*)hhdl;
 	/*
 	 * Nothing to do, since we does not allocated any memory.
 	 */
 }
 
-#define SPLIT_THRETHHOLD sizeof(struct block)
+#define SPLIT_THRETHHOLD sizeof(struct block_buddy)
 
 #ifdef _MEM_DEBUG_
 void* bheap_alloc_debug(heap_handle hhdl, int size, const char* file, int line) {
@@ -101,9 +101,9 @@ void* bheap_alloc_debug(heap_handle hhdl, int size, const char* file, int line) 
 void* bheap_alloc(heap_handle hhdl, int size) {
 	int bit;
 
-	struct heap *pheap = (struct heap*)hhdl;
+	struct heap_buddy *pheap = (struct heap_buddy*)hhdl;
 	struct list_link *prop = NULL;
-	struct block *pb = NULL;
+	struct block_buddy *pb = NULL;
 
 	for (bit = mlog2(size); bit < 32; bit ++) {
 		prop = blink_find(pheap->buddy[bit], size);
@@ -120,16 +120,17 @@ void* bheap_alloc(heap_handle hhdl, int size) {
 	blink_pop(&pheap->buddy[bit], prop);
 
 	{
-		struct block *pb = container_of(prop, struct block, link);
+		struct block_buddy *pb = container_of(prop, struct block_buddy, link);
 		struct block_c *rem = NULL;
 
 		/* When pb is deallocated, the data field should be used as list_link */
-		if (size < sizeof(struct list_link)) size = sizeof(struct list_link);
+		if (size < sizeof(struct list_link)) 
+			size = sizeof(struct list_link);
 
 		/* Split the block, add the remain block to free container */
 		rem = block_com_split(&pb->common, size, SPLIT_THRETHHOLD);
 		if (rem != NULL) {
-			struct block *rem_block = container_of(rem, struct block, common);
+			struct block_buddy *rem_block = container_of(rem, struct block_buddy, common);
 
 			block_com_set_free(rem, true);
 
@@ -143,63 +144,63 @@ void* bheap_alloc(heap_handle hhdl, int size) {
 }
 
 void  bheap_dealloc(heap_handle hhdl, void *buff) {
-	struct heap *pheap = (struct heap*)hhdl;
+	struct heap_buddy *pheap = (struct heap_buddy*)hhdl;
 	struct block_c *pbc = block_com_from_data(buff);
-	struct block *pb = container_of(pbc, struct block, common);
+	struct block_buddy *pb = container_of(pbc, struct block_buddy, common);
 	struct block_c *prev = block_com_prev_adj(pbc);
 	struct block_c *next = block_com_next_adj(pbc);
 	int bit;
 
 	if (block_com_valid(prev) && block_com_free(prev)) {
 		if (block_com_valid(next) && block_com_free(next)) {
-			struct block *b_prev = container_of(prev, struct block, common);
-			struct block *b_next = container_of(next, struct block, common);
+			struct block_buddy *b_prev = container_of(prev, struct block_buddy, common);
+			struct block_buddy *b_next = container_of(next, struct block_buddy, common);
 			dbg_assert((void*)b_prev == (void*)prev);
 			dbg_assert((void*)b_next == (void*)next);
 
-			bit = block_com_data_size(prev);
+			bit = mlog2(block_com_data_size(prev));
 			blink_pop(&pheap->buddy[bit], &b_prev->link);
-			bit = block_com_data_size(next);
+			bit = mlog2(block_com_data_size(next));
 			blink_pop(&pheap->buddy[bit], &b_next->link);
 
 			block_com_merge(prev, next);
 
-			bit = block_com_data_size(prev);
+			bit = mlog2(block_com_data_size(prev));
 			blink_push(&pheap->buddy[bit], &b_prev->link);
 
 			block_com_set_free(prev, true);
 		}
 		else {
-			struct block *b_prev = container_of(prev, struct block, common);
+			struct block_buddy *b_prev = container_of(prev, struct block_buddy, common);
 			dbg_assert((void*)b_prev == (void*)prev);
 
-			bit = block_com_data_size(prev);
+			bit = mlog2(block_com_data_size(prev));
 			blink_pop(&pheap->buddy[bit], &b_prev->link);
 
 			block_com_merge(prev, pbc);
 
-			bit = block_com_data_size(prev);
+			bit = mlog2(block_com_data_size(prev));
 			blink_push(&pheap->buddy[bit], &b_prev->link);
 
 			block_com_set_free(prev, true);
 		}
 	}
 	else if (block_com_valid(next) && block_com_free(next)) {
-		struct block *b_next = container_of(next, struct block, common);
+		struct block_buddy *b_next = container_of(next, struct block_buddy, common);
 		dbg_assert((void*)b_next == (void*)next);
 
-		bit = block_com_data_size(next);
+		bit = mlog2(block_com_data_size(next));
 		blink_pop(&pheap->buddy[bit], &b_next->link);
 
 		block_com_merge(pbc, next);
 
-		bit = block_com_data_size(pbc);
+		bit = mlog2(block_com_data_size(pbc));
 		blink_push(&pheap->buddy[bit], &pb->link);
 
 		block_com_set_free(pbc, true);
 	}
 	else {
-		bit = block_com_data_size(pbc);
+		bit = mlog2(block_com_data_size(pbc));
 		blink_push(&pheap->buddy[bit], &pb->link);
 
 		block_com_set_free(pbc, true);
@@ -212,7 +213,7 @@ void bheap_dump(heap_handle hhdl) {
 #ifdef _MEM_DEBUG_
 #include <stdio.h>
 void bheap_debug_leak(heap_handle hhdl) {
-	struct heap *pheap = (struct heap*)hhdl;
+	struct heap_buddy *pheap = (struct heap_buddy*)hhdl;
 	struct block_c *pbc = pheap->pfirst;
 
 	while (block_com_valid(pbc)) {
@@ -236,7 +237,7 @@ void bheap_init_global(int size) {
 }
 
 void bheap_deinit_global() {
-	struct heap *pheap = (struct heap *)_global_buddy_heap;
+	struct heap_buddy *pheap = (struct heap_buddy *)_global_buddy_heap;
 	void *buff = pheap->pbuff;
 	bheap_destroy(_global_buddy_heap);
 	free(buff);

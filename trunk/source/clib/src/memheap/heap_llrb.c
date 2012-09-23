@@ -6,13 +6,13 @@
  * This file implements a heap by using llrb as the freelist container
  */
 
-struct block {
+struct block_llrb {
 	struct block_c 	 common;
 
 	struct llrb_link link;
 };
 
-struct heap {
+struct heap_llrb {
 	/* point to the single free list */
 	struct llrb_link *root; 
 
@@ -32,10 +32,10 @@ struct heap {
 heap_handle _global_llrb_heap;
 
 static int block_comp(const struct llrb_link *l, const struct llrb_link *r) {
-	struct block *plb, *prb;
+	struct block_llrb *plb, *prb;
 	unsigned lsz, rsz;
-	plb = container_of(l, struct block, link);
-	prb = container_of(r, struct block, link);
+	plb = container_of(l, struct block_llrb, link);
+	prb = container_of(r, struct block_llrb, link);
 
 	lsz = block_com_size(&plb->common);
 	rsz = block_com_size(&prb->common);
@@ -50,13 +50,13 @@ static int block_comp(const struct llrb_link *l, const struct llrb_link *r) {
  * block who can hold greater or equal than size.
  */
 struct llrb_link *llrb_find(struct llrb_link *c, int size) {
-	struct block *pb;
+	struct block_llrb *pb;
 	int sz;
 	
 	if (c == NULL) 
 		return NULL;
 
-	pb = container_of(c, struct block, link);
+	pb = container_of(c, struct block_llrb, link);
 	sz = block_com_data_size(&pb->common);
 
 	if (sz < size) 
@@ -74,15 +74,15 @@ struct llrb_link *llrb_find(struct llrb_link *c, int size) {
 }
 
 heap_handle theap_init(void *buff, int size) {
-	struct heap *pheap = (struct heap*)buff;
+	struct heap_llrb *pheap = (struct heap_llrb*)buff;
 
-	void *block_start = (char*)buff + sizeof(struct heap);
+	void *block_start = (char*)buff + sizeof(struct heap_llrb);
 	void *block_end = (char*)buff + size;
 
 	struct block_c *sent_first;
 	struct block_c *sent_last;
 	struct block_c *init_block;
-	struct block *ib;
+	struct block_llrb *ib;
 
 	init_block = block_com_make_sentinels(
 			block_start, block_end, &sent_first, &sent_last);
@@ -96,26 +96,26 @@ heap_handle theap_init(void *buff, int size) {
 
 	block_com_set_free(init_block, true);
 
-	ib = container_of(init_block, struct block, common);
+	ib = container_of(init_block, struct block_llrb, common);
 	pheap->root = llrb_insert(pheap->root, &ib->link, block_comp);
 
 	return (heap_handle)pheap;
 }
 
 void  theap_destroy(heap_handle hhdl) {
-	struct heap *pheap = (struct heap*)hhdl;
+	struct heap_llrb *pheap = (struct heap_llrb*)hhdl;
 	/*
 	 * Nothing to do, since we does not allocated any memory.
 	 */
 }
 
-#define SPLIT_THRETHHOLD sizeof(struct block)
+#define SPLIT_THRETHHOLD sizeof(struct block_llrb)
 
 void* theap_alloc(heap_handle hhdl, int size) {
-	struct heap *pheap = (struct heap*)hhdl;
+	struct heap_llrb *pheap = (struct heap_llrb*)hhdl;
 
 	struct llrb_link *prop = llrb_find(pheap->root, size);
-	struct block *pb = container_of(prop, struct block, link);
+	struct block_llrb *pb = container_of(prop, struct block_llrb, link);
 	struct block_c *rem = NULL;
 
 	if (prop == NULL) {
@@ -132,7 +132,7 @@ void* theap_alloc(heap_handle hhdl, int size) {
 	/* Split the block, add the remain block to free container */
 	rem = block_com_split(&pb->common, size, SPLIT_THRETHHOLD);
 	if (rem != NULL) {
-		struct block *rem_block = container_of(rem, struct block, common);
+		struct block_llrb *rem_block = container_of(rem, struct block_llrb, common);
 
 		block_com_set_free(rem, true);
 
@@ -162,16 +162,16 @@ void* theap_alloc_debug(heap_handle hhdl, int size, const char* file, int line) 
 #endif
 
 void  theap_dealloc(heap_handle hhdl, void *buff) {
-	struct heap *pheap = (struct heap*)hhdl;
+	struct heap_llrb *pheap = (struct heap_llrb*)hhdl;
 	struct block_c *pbc = block_com_from_data(buff);
-	struct block *pb = container_of(pbc, struct block, common);
+	struct block_llrb *pb = container_of(pbc, struct block_llrb, common);
 	struct block_c *prev = block_com_prev_adj(pbc);
 	struct block_c *next = block_com_next_adj(pbc);
 
 	if (block_com_valid(prev) && block_com_free(prev)) {
 		if (block_com_valid(next) && block_com_free(next)) {
-			struct block *b_prev = container_of(prev, struct block, common);
-			struct block *b_next = container_of(next, struct block, common);
+			struct block_llrb *b_prev = container_of(prev, struct block_llrb, common);
+			struct block_llrb *b_next = container_of(next, struct block_llrb, common);
 			dbg_assert((void*)b_prev == (void*)prev);
 			dbg_assert((void*)b_next == (void*)next);
 
@@ -184,7 +184,7 @@ void  theap_dealloc(heap_handle hhdl, void *buff) {
 			block_com_set_free(prev, true);
 		}
 		else {
-			struct block *b_prev = container_of(prev, struct block, common);
+			struct block_llrb *b_prev = container_of(prev, struct block_llrb, common);
 			dbg_assert((void*)b_prev == (void*)prev);
 
 			pheap->root = llrb_remove(pheap->root, &b_prev->link, block_comp);
@@ -196,7 +196,7 @@ void  theap_dealloc(heap_handle hhdl, void *buff) {
 		}
 	}
 	else if (block_com_valid(next) && block_com_free(next)) {
-		struct block *b_next = container_of(next, struct block, common);
+		struct block_llrb *b_next = container_of(next, struct block_llrb, common);
 		dbg_assert((void*)b_next == (void*)next);
 
 		pheap->root = llrb_remove(pheap->root, &b_next->link, block_comp);
@@ -219,7 +219,7 @@ void theap_dump(heap_handle hhdl) {
 #ifdef _MEM_DEBUG_
 #include <stdio.h>
 void theap_debug_leak(heap_handle hhdl) {
-	struct heap *pheap = (struct heap*)hhdl;
+	struct heap_llrb *pheap = (struct heap_llrb*)hhdl;
 	struct block_c *pbc = pheap->pfirst;
 
 	while (block_com_valid(pbc)) {
@@ -241,7 +241,7 @@ void theap_init_global(int size) {
 }
 
 void theap_deinit_global() {
-	struct heap *pheap = (struct heap *)_global_llrb_heap;
+	struct heap_llrb *pheap = (struct heap_llrb *)_global_llrb_heap;
 	void *buff = pheap->pbuff;
 	theap_destroy(_global_llrb_heap);
 	free(buff);
