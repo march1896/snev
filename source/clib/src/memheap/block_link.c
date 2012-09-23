@@ -42,6 +42,7 @@ void   blink_inc_push (struct list_link **pphead, struct list_link *pbd) {
 	}
 
 	list_link(pbd, prev, next);
+	if (prev == NULL) *pphead = pbd;
 	return;
 }
 
