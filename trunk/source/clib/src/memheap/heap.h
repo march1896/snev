@@ -37,6 +37,9 @@ extern heap_handle _global_buddy_heap;
 #define hfree free
 #define heap_init_global(sz)
 #define heap_deinit_global()
+#ifdef _MEM_DEBUG_
+#define heap_debug_global_leak()
+#endif
 
 #endif
 

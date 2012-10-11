@@ -4,8 +4,8 @@ cmake_minimum_required (VERSION 2.6)
 project (TJCLIB)
 
 # The version number.
-set (NONAME_VERSION_MAJOR 1)
-set (NONAME_VERSION_MINOR 0)
+set (NONAME_VERSION_MAJOR 0)
+set (NONAME_VERSION_MINOR 1)
 
 # should we use our own math functions
 option(SINGLE_LIB 
@@ -16,10 +16,10 @@ option(BUILD_TEST
 
 # configure a header file to pass some of the CMake settings
 # to the source code
-# configure_file (
-# "${PROJECT_SOURCE_DIR}/cmake_config.h.in"
-#"${PROJECT_BINARY_DIR}/TutorialConfig.h"
-#)
+configure_file (
+"${PROJECT_SOURCE_DIR}/cmake_config.h.in"
+"${PROJECT_BINARY_DIR}/cmake_config.h"
+)
 
 # the name of the lib, this is the output of the project
 set(LIB_NAME TJCLIB)
@@ -69,8 +69,10 @@ if (SINGLE_LIB)
 
 elseif (SINGLE_LIB)
 
-	add_subdirectory(memheap)
 	add_subdirectory(util)
+	add_subdirectory(memheap)
+	add_subdirectory(cntr)
+
 
 endif (SINGLE_LIB)
 

@@ -19,6 +19,8 @@ struct llrb_link *llrb_insert(struct llrb_link *r, struct llrb_link *n, pf_llrb_
 
 struct llrb_link *llrb_remove(struct llrb_link *r, struct llrb_link *n, pf_llrb_compare pc);
 
+void llrb_swap_link(struct llrb_link **pa, struct llrb_link **pb);
+
 void llrb_debug_check(struct llrb_link *root, pf_llrb_compare pc);
 
 #endif /* _LLRB_LINK_H_ */

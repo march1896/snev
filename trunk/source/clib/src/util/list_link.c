@@ -14,7 +14,7 @@ void list_link(struct list_link *n, struct list_link *prev, struct list_link *ne
 	}
 }
 
-void list_unnlink(struct list_link *n) {
+void list_unlink(struct list_link *n) {
 	struct list_link *prev = n->prev;
 	struct list_link *next = n->next;
 
@@ -38,7 +38,7 @@ void list_remove_h(struct list_link **head, struct list_link *n_node) {
 		*head = n_node->next;
 	}
 
-	list_unnlink(n_node);
+	list_unlink(n_node);
 }
 
 void list_insert_front_ht(struct list_link **head, struct list_link **tail, struct list_link *n_node) {
@@ -69,5 +69,5 @@ void list_remove_ht(struct list_link **head, struct list_link **tail, struct lis
 		*tail = n_node->prev;
 	}
 
-	list_unnlink(n_node);
+	list_unlink(n_node);
 }

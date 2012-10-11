@@ -14,9 +14,9 @@ int cntr_int_compare(const void* x, const void* y);
 int qsort_int_compare(const void* x, const void* y);
 
 // correctness_data_length;
-#define clength 300
+#define CORRECTNESS_LENGTH 300
 // performance_data_length;
-#define plength 10000
+#define PERFORMANCE_LENGTH 500000
 extern int *rawdata, *uniquedata, *uniquesorteddata;
 
 void init_data();
