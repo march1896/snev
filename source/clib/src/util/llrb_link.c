@@ -72,7 +72,84 @@ static void llrb_init(struct llrb_link *n) {
 	n->color = RED;
 }
 
+void llrb_swap_link(struct llrb_link **pa, struct llrb_link **pb) {
+	struct llrb_link *a = *pa;
+	struct llrb_link *b = *pb;
+	if (a->parent == b) {
+		llrb_swap_link(pb, pa);
+		return;
+	}
+	else if (b->parent == a) {
+		struct llrb_link *br = b->right;
+		struct llrb_link *bl = b->left;
+		struct llrb_link *ap = a->parent;
+		struct llrb_link *bs = (b == a->left) ? a->right : a->left;
+		int b_color = b->color;
 
+		b->parent = ap;
+		if (a->left == b) {
+			b->left = a;
+			b->right = bs;
+		}
+		else {
+			dbg_assert(a->right == b);
+			b->right = a;
+			b->left = bs;
+		}
+		b->color = a->color;
+
+		a->left = bl;
+		a->right = br;
+		a->parent = b;
+		a->color = b_color;
+
+		if (ap) {
+			if (ap->left == a) ap->left = b;
+			else ap->right = b;
+		}
+		if (bs) bs->parent = b;
+
+		if (bl) bl->parent = a;
+		if (br) br->parent = a;
+	}
+	else {
+		struct llrb_link *ap = a->parent;
+		struct llrb_link *al = a->left;
+		struct llrb_link *ar = a->right;
+
+		struct llrb_link *bp = b->parent;
+		struct llrb_link *bl = b->left;
+		struct llrb_link *br = b->right;
+
+		struct llrb_link temp = *a;
+		*a = *b;
+		*b = temp;
+
+		if (al) al->parent = b;
+		if (ar) ar->parent = b;
+
+		if (bl) bl->parent = a;
+		if (br) br->parent = a;
+
+		if (ap) {
+			if (ap->left == a) ap->left = b;
+			else ap->right = b;
+		}
+
+		if (bp) {
+			if (bp->left == b) bp->left = a;
+			else bp->right = a;
+		}
+	}
+	dbg_assert(b != NULL && a != NULL);
+	*pa = b;
+	*pb = a;
+}
+
+/*
+ * For llrb 23tree, the successor must be a leaf, that is, it can not have a right child,
+ * this is determined by the left-leaning property
+ */
 static struct llrb_link *_swap_link(struct llrb_link *anc, struct llrb_link *des) {
 	if (des->parent != anc) {
 		/* swap c and its successor */
@@ -263,6 +340,7 @@ struct llrb_link *_delete(struct llrb_link *c, struct llrb_link *n) {
 				dbg_assert(suc->right == NULL);
 
 				c = _swap_link(c, suc);
+				//llrb_swap_link(&c, &suc);
 			}
 			c->right = _delete_min(c->right);
 		}

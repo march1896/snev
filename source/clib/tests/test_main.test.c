@@ -13,6 +13,12 @@ extern void algorithm_base_test();
 
 extern void llrb_link_test();
 
+static void debug_global_leak() {
+#ifdef _MEM_DEBUG_
+	heap_debug_global_leak();
+#endif
+}
+
 void run_all_test() {
 	do_test("heap test", heap_test);
 
@@ -20,11 +26,11 @@ void run_all_test() {
 	//do_test("llrb link", llrb_link_test);
 
 	do_test("algorithm test", algorithm_base_test);
-	heap_debug_global_leak();
+	debug_global_leak();
 	do_test("cntr linear ALL", cntr_base_test);
-	heap_debug_global_leak();
+	debug_global_leak();
 	do_test("sort algorithm", cntr_sort_test);
-	heap_debug_global_leak();
+	debug_global_leak();
 	heap_deinit_global();
 }
 

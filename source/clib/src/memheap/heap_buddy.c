@@ -210,6 +210,7 @@ void  bheap_dealloc(heap_handle hhdl, void *buff) {
 void bheap_dump(heap_handle hhdl) {
 }
 
+heap_handle _global_buddy_heap;
 #ifdef _MEM_DEBUG_
 #include <stdio.h>
 void bheap_debug_leak(heap_handle hhdl) {
@@ -223,8 +224,6 @@ void bheap_debug_leak(heap_handle hhdl) {
 		pbc = block_com_next_adj(pbc);
 	}
 }
-
-heap_handle _global_buddy_heap;
 
 void bheap_debug_global_leak() {
 	bheap_debug_leak(_global_buddy_heap);

@@ -10,9 +10,9 @@ void init_data() {
 	unsigned int iseed = (unsigned int)time(NULL);
 	srand (iseed);
 
-	rawdata = (int*)malloc(sizeof(int)*plength);
-	uniquedata = (int*)malloc(sizeof(int)*plength);
-	uniquesorteddata = (int*)malloc(sizeof(int)*plength);
+	rawdata = (int*)malloc(sizeof(int)*PERFORMANCE_LENGTH);
+	uniquedata = (int*)malloc(sizeof(int)*PERFORMANCE_LENGTH);
+	uniquesorteddata = (int*)malloc(sizeof(int)*PERFORMANCE_LENGTH);
 }
 
 void destroy_data() {
@@ -138,7 +138,7 @@ cntr cntr_create(TC_TYPE ct) {
 }
 
 void generate_test_data(TD_TYPE dt, TD_LENGTH dl, int* length, int* ulength) {
-	*length = dl == TL_CORRECTNESS ? clength : plength;
+	*length = dl == TL_CORRECTNESS ? CORRECTNESS_LENGTH : PERFORMANCE_LENGTH;
 	*ulength = generate_data(dt, *length);
 }
 
