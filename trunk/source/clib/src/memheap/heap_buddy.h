@@ -6,6 +6,8 @@
 /* init a heap on a buffer of a given size */
 heap_handle bheap_init(void *buff, int size);
 
+//heap_handle bheap_init(pf_mem_increase cb_inc, pf_mem_decrease cn_dec);
+
 /* deinit a heap on a given buffer */
 void bheap_destroy(heap_handle pheap);
 

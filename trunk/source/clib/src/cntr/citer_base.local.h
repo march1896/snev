@@ -30,6 +30,7 @@ typedef struct __citer_base_class {
 	/* * pointer to the data structure that connected objects in a container */
 	void*              connection;  
 
+	/* TODO: show we know the container */
 	void*              param_x;
 
 	void*              param_y;

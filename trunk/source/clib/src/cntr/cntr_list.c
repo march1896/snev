@@ -4,12 +4,13 @@
 #include <cntr_factory.h>
 #include <cntr_linear.local.h>
 
+#include <util/list_link.h>
+
 typedef struct __open_link {
-	struct __open_link* prev;
-	struct __open_link* next;
+	struct list_link link;
 
 	void* object;
-} oplink;
+} object_link;
 
 typedef struct __cntr_list_vtable {
 	/* from cntr_linear_vtable */
@@ -75,31 +76,17 @@ typedef struct __cntr_list {
 
 	int                         size;
 	unsigned int                flags;
-	oplink*                     s_sent;  /* the start sentinel */
-	oplink*                     e_sent;    /* the end sentinel */
+
+	struct list_link            sent; /* sentinel */
 
 	pf_preremove_cb             prerm;  /* pre remove call back */
 } cntr_list;
 
 static void cntr_list_init(cntr_list* pcl) {
-	oplink* s_sent, *e_sent;
-
-	s_sent = (oplink*)halloc(sizeof(oplink));
-	s_sent->object = NULL;
-	s_sent->prev = NULL;
-
-	e_sent = (oplink*)halloc(sizeof(oplink));
-	e_sent->object = NULL;
-	e_sent->next = NULL;
-
-	e_sent->prev = s_sent;
-	s_sent->next = e_sent;
-
 	pcl->__vt = &cntr_list_ops;
 	pcl->size = 0;
 	pcl->flags = 0;
-	pcl->s_sent = s_sent;
-	pcl->e_sent = e_sent;
+	list_init(&pcl->sent);
 	pcl->prerm = NULL;
 }
 
@@ -134,31 +121,32 @@ static void cntr_list_destroy(cntr cl) {
 
 	cntr_list_clear(cl);
 
-	hfree(pcl->s_sent);
-	hfree(pcl->e_sent);
 	hfree(pcl);
 }
 
 static void cntr_list_clear(cntr cl) {
 	cntr_list* pcl = (cntr_list*)cl;
 
-	oplink* link = pcl->s_sent->next;
-	oplink* prev = NULL;
+	struct list_link* sent = &pcl->sent;
+	struct list_link* next = sent->next;
+	
+	object_link* obj_link = NULL;
 
-	dbg_assert(link != NULL);
+	dbg_assert(sent != NULL);
 
-	while (link != pcl->e_sent) {
-		prev = link;
-		link = link->next;
+	while (next != sent) {
+		obj_link = container_of(next, object_link, link);
 
+		/* first delete the object memory */
+		next = next->next;
 		if (pcl->prerm) 
-			pcl->prerm(prev->object);
-
-		hfree(prev);
+			pcl->prerm(obj_link->object);
+		/* second delete the link itself */
+		hfree(obj_link);
 	}
-
-	pcl->s_sent->next = pcl->e_sent;
-	pcl->e_sent->prev = pcl->s_sent;
+	
+	/* init the sentinel again, since we do not unlink the deleted nodes */
+	list_init(sent);
 
 	pcl->size = 0;
 }
@@ -175,63 +163,46 @@ static void cntr_list_add(cntr cl, void* object) {
 
 static void* cntr_list_front(cntr cl) {
 	cntr_list* pcl = (cntr_list*)cl;
+	object_link* obj_link = NULL;
 
-	if (pcl->s_sent->next == pcl->e_sent) {
-		dbg_assert(pcl->size == 0 && pcl->e_sent->prev == pcl->s_sent);
+	if (pcl->size == 0) {
+		dbg_assert(list_empty(&pcl->sent));
 		return NULL;
 	}
-
-	return (pcl->s_sent->next)->object;
+	
+	obj_link = container_of(pcl->sent.next, object_link, link);
+	return obj_link->object;
 }
 
 static void* cntr_list_back (cntr cl) {
 	cntr_list* pcl = (cntr_list*)cl;
+	object_link* obj_link = NULL;
 
-	if (pcl->s_sent->next == pcl->e_sent) {
-		dbg_assert(pcl->size == 0 && pcl->e_sent->prev == pcl->s_sent);
+	if (pcl->size == 0) {
+		dbg_assert(list_empty(&pcl->sent));
 		return NULL;
 	}
 
-	return (pcl->e_sent->prev)->object;
-}
-
-static inline void __link_insert(oplink* prev, oplink* cur, oplink* next) {
-	dbg_assert(prev->next == next && next->prev == prev);
-
-	cur->prev = prev;
-	cur->next = next;
-
-	prev->next = cur;
-	next->prev = cur;
-}
-
-static inline void __link_stitch(oplink* prev, oplink* next) {
-	prev->next = next;
-	next->prev = prev;
+	obj_link = container_of(pcl->sent.prev, object_link, link);
+	return obj_link->object;
 }
 
 static void  cntr_list_add_front(cntr cl, void* object) {
 	cntr_list* pcl = (cntr_list*)cl;
-	oplink* link = (oplink*)halloc(sizeof(oplink));
+	object_link* obj_link = (object_link*)halloc(sizeof(object_link));
 
-	link->object = object;
-	link->next = pcl->s_sent->next;
-	link->prev = pcl->s_sent;
-
-	__link_insert(pcl->s_sent, link, pcl->s_sent->next);
+	obj_link->object = object;
+	list_insert_front(&pcl->sent, &obj_link->link);
 	
 	pcl->size ++;
 }
 
 static void  cntr_list_add_back (cntr cl, void* object) {
 	cntr_list* pcl = (cntr_list*)cl;
-	oplink* link = (oplink*)halloc(sizeof(oplink));
+	object_link* obj_link = (object_link*)halloc(sizeof(object_link));
 
-	link->object = object;
-	link->next = pcl->e_sent;
-	link->prev = pcl->e_sent->prev;
-
-	__link_insert(pcl->e_sent->prev, link, pcl->e_sent);
+	obj_link->object = object;
+	list_insert_back(&pcl->sent, &obj_link->link);
 
 	pcl->size ++;
 }
@@ -239,18 +210,26 @@ static void  cntr_list_add_back (cntr cl, void* object) {
 static void* cntr_list_remove_front(cntr cl) {
 	cntr_list* pcl = (cntr_list*)cl;
 
-	if (pcl->s_sent->next != pcl->e_sent) {
-		oplink* link = pcl->s_sent->next;
-		void* obj = link->object;
+	if (pcl->size > 0) {
+		struct list_link* node = NULL;
+		object_link* obj_link  = NULL;
+		void* object           = NULL;
 
-		dbg_assert(pcl->size > 0);
-		__link_stitch(link->prev, link->next);
+		dbg_assert(!list_empty(&pcl->sent));
+
+		node = pcl->sent.next;
+		obj_link = container_of(node, object_link, link);
+
+		list_unlink(node);
+		object = obj_link->object;
+		hfree(obj_link);
+
 		pcl->size --;
 
-		hfree(link);
-
-		return obj;
+		return object;
 	}
+
+	dbg_assert(list_empty(&pcl->sent));
 
 	return NULL;
 }
@@ -258,26 +237,36 @@ static void* cntr_list_remove_front(cntr cl) {
 static void*  cntr_list_remove_back (cntr cl) {
 	cntr_list* pcl = (cntr_list*)cl;
 
-	if (pcl->s_sent->next != pcl->e_sent) {
-		oplink* link = pcl->e_sent->prev;
-		void* obj = link->object;
+	if (pcl->size > 0) {
+		struct list_link* node = NULL;
+		object_link* obj_link  = NULL;
+		void* object           = NULL;
 
-		dbg_assert(pcl->size > 0);
-		__link_stitch(link->prev, link->next);
+		dbg_assert(!list_empty(&pcl->sent));
+
+		node = pcl->sent.prev;
+		obj_link = container_of(node, object_link, link);
+
+		list_unlink(node);
+		object = obj_link->object;
+		hfree(obj_link);
+
 		pcl->size --;
 
-		hfree(link);
-		return obj;
+		return object;
 	}
+
+	dbg_assert(list_empty(&pcl->sent));
 
 	return NULL;
 }
 
 /* iterator related operations */
 
+/* TODO: should we care about the validity of the iterator, or just leave it to the client, i++, i-- */
 static void oplink_to_prev(citer itr) {
 	citer_base* cur = (citer_base*)itr;
-	oplink* link_cur = (oplink*)(cur->connection);
+	struct list_link* link_cur = (struct list_link*)(cur->connection);
 
 	dbg_assert(link_cur);
 	cur->connection = link_cur->prev;
@@ -285,7 +274,7 @@ static void oplink_to_prev(citer itr) {
 
 static void oplink_to_next(citer itr) {
 	citer_base* cur = (citer_base*)itr;
-	oplink* link_cur = (oplink*)(cur->connection);
+	struct list_link* link_cur = (struct list_link*)(cur->connection);
 
 	dbg_assert(link_cur);
 	cur->connection = link_cur->next;
@@ -293,18 +282,20 @@ static void oplink_to_next(citer itr) {
 
 static void* oplink_get_ref(citer itr) {
 	citer_base* cur = (citer_base*)itr;
-	oplink* link_cur = (oplink*)(cur->connection);
+	struct list_link* link_cur = (struct list_link*)(cur->connection);
+	object_link* obj_link = container_of(link_cur, object_link, link);
 
-	dbg_assert(link_cur);
-	return link_cur->object;
+	dbg_assert(obj_link);
+	return obj_link->object;
 }
 
 static void oplink_set_ref(citer itr, void* n_ref) {
 	citer_base* cur = (citer_base*)itr;
-	oplink* link_cur = (oplink*)(cur->connection);
+	struct list_link* link_cur = (struct list_link*)(cur->connection);
+	object_link* obj_link = container_of(link_cur, object_link, link);
 
-	dbg_assert(link_cur);
-	link_cur->object = n_ref;
+	dbg_assert(obj_link);
+	obj_link->object = n_ref;
 }
 
 static cattr oplink_attribute(citer itr) {
@@ -325,10 +316,12 @@ static void  cntr_list_citer_begin(cntr cl, citer cur) {
 	cntr_list* pcl = (cntr_list*)cl;
 
 	itr->__vt = &oplink_citer_operations;
-	if (pcl->s_sent->next == pcl->e_sent) {
+	if (list_empty(&pcl->sent)) {
 		itr->connection = NULL;
 	}
-	else itr->connection = (void*)(pcl->s_sent->next);
+	else {
+		itr->connection = (void*)((&pcl->sent)->next);
+	}
 }
 
 static void  cntr_list_citer_end  (cntr cl, citer cur) {
@@ -336,25 +329,29 @@ static void  cntr_list_citer_end  (cntr cl, citer cur) {
 	cntr_list* pcl = (cntr_list*)cl;
 
 	itr->__vt = &oplink_citer_operations;
-	if (pcl->s_sent->next == pcl->e_sent) {
+	if (list_empty(&pcl->sent)) {
 		itr->connection = NULL;
 	}
-	else itr->connection = (void*)(pcl->e_sent->prev);
+	else {
+		itr->connection = (void*)((&pcl->sent)->prev);
+	}
 }
 
 static bool  cntr_list_find(cntr cl, void* object, citer itr) {
 	cntr_list* pcl = (cntr_list*)cl;
 	citer_base* ci = (citer_base*)itr;
 
-	oplink* link = pcl->s_sent->next;
+	struct list_link* node = (&pcl->sent)->next;
+	object_link* obj_link  = NULL;
 
-	while (link != pcl->e_sent) {
-		if (link->object == object) {
-			ci->connection = (void*)link;
+	while (node != &pcl->sent) {
+		obj_link = container_of(node, object_link, link);
+		if (obj_link->object == object) {
+			ci->connection = (void*)node;
 			ci->__vt = &oplink_citer_operations;
 			return true;
 		}
-		link = link->next;
+		node = node->next;
 	}
 
 	ci->__vt = NULL;
@@ -365,32 +362,34 @@ static bool  cntr_list_find(cntr cl, void* object, citer itr) {
 static void  cntr_list_remove(cntr cl, citer begin, citer end) {
 	cntr_list* pcl = (cntr_list*)cl;
 
-	oplink* lb = (oplink*)(((citer_base*)begin)->connection);
-	oplink* le = (oplink*)(((citer_base*)end)->connection);
-	oplink* prev;
+	struct list_link* lb = (struct list_link*)(((citer_base*)begin)->connection);
+	struct list_link* le = (struct list_link*)(((citer_base*)end)->connection);
+	object_link* obj_link = NULL;
 
 	int count = 0;
 
-	dbg_assert(lb->prev != NULL && le->next != NULL);
+	dbg_assert(lb != &pcl->sent && le != &pcl->sent);
 
-	__link_stitch(lb->prev, le->next);
+	lb->prev->next = le->next;
+	le->next->prev = lb->prev;
 
-	count = 1;
 	while (lb != le) {
-		prev = lb;
+		obj_link = container_of(lb, object_link, link);
 		lb = lb->next;
 
-		if (pcl->prerm) 
-			pcl->prerm(prev->object);
-
-		hfree(prev);
+		if (pcl->prerm != NULL) 
+			pcl->prerm(obj_link->object);
+		hfree(obj_link);
 
 		count ++;
-	}
+	};
 
-	if (pcl->prerm) 
-		pcl->prerm(le->object);
-
-	hfree(le);
+	/* delete the last element */
+	obj_link = container_of(lb, object_link, link);
+	if (pcl->prerm != NULL) 
+		pcl->prerm(obj_link->object);
+	hfree(obj_link);
+	count ++;
+	
 	pcl->size -= count;
 }

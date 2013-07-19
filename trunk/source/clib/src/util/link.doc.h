@@ -19,11 +19,11 @@
  * * The list is closed, it constructs a loop
  * * The list is open
  *
- * From the ording of elements aspect, list can be divided into two types
+ * From the ordering of elements aspect, list can be divided into two types
  * * Elements in list are ordered.
  * * Elements in list are random placed.
  *
- * From operations aspeck, here are three basic operations for list.
+ * From operations aspect, here are three basic operations for list.
  * * search/find/exist find a certain object in a list, or find an object that 
  *   satisfy some constraints. this operation can be extend to find a set of 
  *   objects.
@@ -52,7 +52,7 @@
  *   LEAVE LIFETIME MANAGEMENT for LIST ELEMENTS TO YOU.
  * * For the link pointers(prev/next), we should hide details. The link pointers 
  *   should be transparent to clients. In other words, for open links, the container  
- *   should maintain(allocate/deallocate) link pointers' memory itself. For embeded 
+ *   should maintain(allocate/deallocate) link pointers' memory itself. For embedded 
  *   links the pointers' memory are allocated when the object is ready, since we do not 
  *   touch the memory management of elements, we also do not need to (allocate/deallocate)
  *   the memory for list pointers.
@@ -61,7 +61,7 @@
  *
  * About whether or not expose iterator.
  * First, what is an iterator, iterator is absolutely not a parent(unique name) or elements
- * strored in all kinds of containers, it is a design pattern. from wikipedia, iterator 
+ * stored in all kinds of containers, it is a design pattern. from wikipedia, iterator 
  * design patter is defined as:
  *   "iterator pattern is a design pattern in which an iterator is used to traverse a 
  *   container and access the container's elements. The iterator pattern decouples 
@@ -83,7 +83,7 @@
  *     void* itr; // pointer to the iterator
  *     iterator_operations iop;
  *   }
- * In other words, we should manully implement virtual functions before we using iterator  
+ * In other words, we should manually implement virtual functions before we using iterator  
  * design pattern.
  *
  ***********************************************************************************
@@ -91,10 +91,10 @@
  * Conclusion:
  * * For open link list, since it is a object-oriented container like structure, we could 
  *   provide iterators. But iterator has nothing relate to link headers, they different 
- *   concepts. And for method on open list, we provided opertions that from container, like
+ *   concepts. And for method on open list, we provided operations that from container, like
  *   find/add/remove, and other generic algorithm will be provided by iterator.
- * * For embeded link list, since we have expose the detail of link to the objects, and what 
- *   we do is to link thing together, if structure using embeded links, it only means they can 
+ * * For embedded link list, since we have expose the detail of link to the objects, and what 
+ *   we do is to link thing together, if structure using embedded links, it only means they can 
  *   be connected. 
  *
  */
