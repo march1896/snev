@@ -14,13 +14,6 @@ option(SINGLE_LIB
 option(BUILD_TEST
 	"build test projects" ON)
 
-# configure a header file to pass some of the CMake settings
-# to the source code
-configure_file (
-"${PROJECT_SOURCE_DIR}/cmake_config.h.in"
-"${PROJECT_BINARY_DIR}/cmake_config.h"
-)
-
 # the name of the lib, this is the output of the project
 set(LIB_NAME TJCLIB)
 set(PROJECT_INSTALL_DIR ${PROJECT_SOURCE_DIR}/../bin)
