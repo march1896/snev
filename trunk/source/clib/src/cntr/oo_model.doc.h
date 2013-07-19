@@ -2,7 +2,7 @@
 #define _OBJECT_ORIENTED_MODEL_
 /*
  * This is a document file, no *.c file should include this file, but all demo code could be 
- * compiled and run. It demostrates a object-oriented coding pattern in C language.
+ * compiled and run. It demonstrates a object-oriented coding pattern in C language.
  *
  * Before designing, for simplicity, we make following assumptions.
  * 1, clients know nothing about classes, they only works with interface, and factories.
@@ -10,30 +10,30 @@
  * 3, when using interface method, we can not apply it directly on class, we must cast the class 
  *    into proper interface.
  *
- * For polymorphism, interface method did nothing itself but only call the correct callback(virtual
- *    funtion) that is defined in the sub class. To bind the interface function and virtual funtion 
- *    together, they must have the same name, concrete sub-class fuctions could have different name,
- *    and the name is not visible from others, but the callback funtion pointer should be the same name
+ * For polymorphisms, interface method did nothing itself but only call the correct callback(virtual
+ *    function) that is defined in the sub class. To bind the interface function and virtual function 
+ *    together, they must have the same name, concrete sub-class functions could have different name,
+ *    and the name is not visible from others, but the callback function pointer should be the same name
  *    with interface method.
  * The first and third rules together ensures that when calling interface method, the callback set
  *    (virtual function table) is determined and unique(exactly the callbacks of the casted interface,
  *    there is no virtual pointer combination problem when make interface calls).
  *
  * From implementation aspect of view, when we got a pointer that is casted to an interface, we should 
- *    know the offset of the virtual funtions, since we know the type of the interface.
+ *    know the offset of the virtual functions, since we know the type of the interface.
  * A problem is that when casting a sub class to an interface, we should get a pointer to the structure
  *    if the interface's virtual table, the sub class's information is totally missed, then when we want
- *    to cast this interface into another, we should call the right cast fucntion, but since the sub-class
+ *    to cast this interface into another, we should call the right cast function, but since the sub-class
  *    information is missed, we could not find the cast_virtual_function by name.
  * Solution is put __this and __cast in relative fixed position to each interface and class, so we could 
  *    use the relative offset to call the virtual function.
  *
  * A complete object-orient model in C.
  */
-/* befor everything */
+/* before everything */
 // erase any type information of class, this is unknown
 typedef void* unknown;
-// unique_id decribes run-time(compile) information, since no oo in c, so compile time info in also 
+// unique_id describes run-time(compile) information, since no oo in c, so compile time info in also 
 // described by it.
 typedef int unique_id;
 // since compile will can not cast to father from child(change to the right virtual pointer), we should 
@@ -45,7 +45,7 @@ typedef struct unknown_interface_vtable_structure_t {
 	 * static cast is implemented by compiler in OO language, it just compute the offset of parent body.
 	 *   in C, we should provide it ourself, by provide the virtual function, we can always call the right
 	 *   function of the concrete class, that class should handle all casting cases.
-	 * dynamic cast is also supported by compiler, since it knowns class hierachy, the compiler should provide
+	 * dynamic cast is also supported by compiler, since it knowns class hierarchy, the compiler should provide
 	 *   an implicate cast method if a father class can cast into sub class. For a child class we can easy 
 	 *   know which parent class it can cast to, so by virtual call to child class' cast function, we should
 	 *   know all kinds of class the current object can cast to.
@@ -101,7 +101,7 @@ typedef struct unknown_class_body_t {
 	unknown_class_vtable*    __vt;
 
 	/*
-	 * interface body that this class inherite
+	 * interface body that this class inherit
 	 */
 	unknown_interface_body   __pib;
 
@@ -176,7 +176,7 @@ typedef struct unknown_class_body_t {
 
 /* 
  * Since we have no access right related keywords in C, for clear, the following 
- * comment will be add in front of each declaration and definiation. 
+ * comment will be add in front of each declaration and definition. 
  */
 
 #define __public 
@@ -243,7 +243,7 @@ typedef unknown bird;
 __public int bird_int = 2;
 
 // functionality implements 
-// vitual table declaration.
+// virtual table declaration.
 __protected typedef struct {
 	pf_cast                   __cast;
 } bird_class_vtable;
@@ -389,14 +389,14 @@ __protected typedef struct swallow_local_t {
 __protected void swallow_local_fly(unknown body)    { printf("swallow fly\n"); }
 __protected void swallow_local_breath(unknown body) { printf("swallow breath\n"); }
 /*
- * directly inherite parent virtual function need a little work since compile will not find 
- * the correct parent memebers.
+ * directly inherit parent virtual function need a little work since compile will not find 
+ * the correct parent members.
  */
 __protected void swallow_local_eat(unknown body)    { 
 	swallow_body* pb = (swallow_body*)body;
 
 	/*
-	 * when sub class want to directly use parent's virtual funtion, it can not 
+	 * when sub class want to directly use parent's virtual function, it can not 
 	 * directly set parent's local function in its own virtual table, because when parent
 	 * virtual is called, it take parameter __this as it self, so here we should add an 
 	 * wrapper on it.
@@ -607,16 +607,16 @@ int __run_test() {
 	fly(unk);
 
 	casted = __cast(swa, magpie_int);
-	printf("swallow cast to magpie : %s\n", casted == NULL ? "fasle" : "true");
+	printf("swallow cast to magpie : %s\n", casted == NULL ? "false" : "true");
 
 	casted = __cast(mag, magpie_int);
-	printf("magpie cast to magpie : %s\n", casted == NULL ? "fasle" : "true");
+	printf("magpie cast to magpie : %s\n", casted == NULL ? "false" : "true");
 
 	casted = __cast(mag, bird_int);
-	printf("magpie cast to bird : %s\n", casted == NULL ? "fasle" : "true");
+	printf("magpie cast to bird : %s\n", casted == NULL ? "false" : "true");
 
 	casted = __cast(bd, magpie_int);
-	printf("bird cast to magpie : %s\n", casted == NULL ? "fasle" : "true");
+	printf("bird cast to magpie : %s\n", casted == NULL ? "false" : "true");
 	return 0;
 }
 
