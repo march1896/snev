@@ -18,7 +18,7 @@ struct block_buddy {
 #define BN 32
 struct heap_buddy {
 	/* point to the single free list */
-	struct list_link *buddy[BN]; 
+	struct list_link buddy[BN]; 
 
 	/* point to the start of the heap buffer. */
 	void*			pbuff; 
@@ -54,8 +54,8 @@ heap_handle bheap_init(void *buff, int size) {
 	init_block = block_com_make_sentinels(
 			block_start, block_end, &sent_first, &sent_last);
 
-	for (i = 0; i < BN; i ++)
-		pheap->buddy[i] = NULL;
+	for (i = 0; i < BN; i ++) 
+		list_init(&pheap->buddy[i]);
 	pheap->pbuff = buff;
 	pheap->pfirst = init_block;
 	pheap->size = size;
@@ -106,7 +106,7 @@ void* bheap_alloc(heap_handle hhdl, int size) {
 	struct block_buddy *pb = NULL;
 
 	for (bit = mlog2(size); bit < 32; bit ++) {
-		prop = blink_find(pheap->buddy[bit], size);
+		prop = blink_find(&pheap->buddy[bit], size);
 
 		if (prop != NULL)
 			break;

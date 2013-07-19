@@ -15,7 +15,7 @@ typedef void (*pf_cntr_base_citer_begin)(cntr c, citer itr);
 typedef void (*pf_cntr_base_citer_end)(cntr c, citer itr);
 
 typedef struct __cntr_base_vtable {
-	pf_cntr_attribute             __attrib;
+	pf_cntr_attribute        __attrib;
 
 	pf_cntr_base_destroy     __destroy;
 	pf_cntr_base_clear       __clear;

@@ -3,6 +3,12 @@
 
 #include <heap_def.h>
 
+/* TODO:
+   1, the heap does not support alignment, alignment is important in SIMD.
+   2, the heap can only allocate a huge block of memory from system memory, but can not increasingly.
+      this is easy to fix, since we could more than one block of memory could be easily linked into a free list or tree.
+*/
+
 #ifdef _USING_GLOBAL_LLRB_HEAP_
 #include <heap_llrb.h>
 extern heap_handle _global_llrb_heap;

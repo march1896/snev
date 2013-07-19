@@ -6,7 +6,7 @@ typedef void (*pf_cntr_array_assign_capacity)(cntr pca, int n_size);
 
 typedef struct __cntr_array_vtable {
 	/* from clinear */
-	pf_cntr_attribute                __attrib;
+	pf_cntr_attribute           __attrib;
 
 	pf_cntr_base_destroy        __destroy;
 	pf_cntr_base_clear          __clear;
@@ -28,7 +28,7 @@ typedef struct __cntr_array_vtable {
 	pf_cntr_array_assign_capacity __assign_capacity;
 } cntr_array_vtable;
 
-static cattr cntr_array_attribute(cntr ca);
+static cattr cntr_array_attribute  (cntr ca);
 static void  cntr_array_destroy    (cntr ca);
 static void  cntr_array_clear      (cntr ca);
 static int   cntr_array_size       (cntr ca);
