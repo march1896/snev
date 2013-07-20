@@ -15,7 +15,7 @@ typedef struct __bst_node {
 } bst_node;
 
 typedef struct __cntr_bst_vtable {
-	/* from cntr_linear_vtable */
+	/* from cntr_base_vtable */
 	pf_cntr_attribute           __attrib;
 
 	pf_cntr_base_destroy        __destroy;
