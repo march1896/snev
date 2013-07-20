@@ -16,7 +16,7 @@
  */
 
 typedef struct __cntr_fbt_vtable {
-	/* from cntr_linear_vtable */
+	/* from cntr_base */
 	pf_cntr_attribute           __attrib;
 
 	pf_cntr_base_destroy        __destroy;

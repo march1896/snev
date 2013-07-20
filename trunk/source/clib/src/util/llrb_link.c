@@ -217,9 +217,11 @@ static struct llrb_link *_swap_link(struct llrb_link *anc, struct llrb_link *des
  * use a <key, address> pair as the real key stored in the tree.
  */
 static int _compare(const struct llrb_link *l, const struct llrb_link *r) {
+	/* first compare the key */
 	int cmpr = _key_comp(l, r);
 	if (cmpr != 0) return cmpr;
 
+	/* if the key is the same, compare the link address */
 	if (l < r) 
 		return -1;
 	else if (l == r) 
@@ -418,4 +420,69 @@ void llrb_debug_check(struct llrb_link *root, pf_llrb_compare pc) {
 
 	black_depth = -1;
 	_debug_check(root, 0);
+}
+
+struct llrb_link* llrb_min(struct llrb_link* root) {
+	if (root == NULL) return NULL;
+
+	while (root->left != NULL) {
+		root = root->left;
+	}
+
+	return root;
+}
+
+struct llrb_link* llrb_max(struct llrb_link* root) {
+	if (root == NULL) return NULL;
+
+	while (root->right != NULL) {
+		root = root->right;
+	}
+
+	return root;
+}
+
+struct llrb_link* llrb_predesessor(const struct llrb_link* link, bool only_sub) {
+	if (link->left != NULL) {
+		/* find the max element in the left sub tree */
+		struct llrb_link* fwd = link->left;
+
+		while (fwd->right != NULL) fwd = fwd->right;
+		return fwd;
+	}
+	else if (!only_sub && link->parent) {
+		struct llrb_link* fwd = link;
+
+		while (fwd->parent != NULL) {
+			if (fwd->parent->right == fwd) break;
+			fwd = fwd->parent;
+		}
+
+		return fwd->parent;
+	}
+
+	return NULL;
+}
+
+struct llrb_link* llrb_successor(const struct llrb_link* link, bool only_sub) {
+	if (link->right != NULL) {
+		/* find the minimun element in the right sub tree */
+		struct llrb_link* fwd = link->right;
+
+		while (fwd->left != NULL) fwd = fwd->left;
+
+		return fwd;
+	}
+	else if (!only_sub && link->parent) {
+		struct llrb_link* fwd = link;
+
+		while (fwd->parent != NULL) {
+			if (fwd->parent->left == fwd) break;
+			fwd = fwd->parent;
+		}
+
+		return fwd->parent;
+	}
+
+	return NULL;
 }

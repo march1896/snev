@@ -11,7 +11,7 @@ typedef void* (*pf_cntr_linear_remove_front)(cntr c);
 typedef void* (*pf_cntr_linear_remove_back)(cntr c);
 
 typedef struct __cntr_linear_vtable {
-	/* from cntr */
+	/* from cntr base */
 	pf_cntr_attribute           __attrib;
 	pf_cntr_base_destroy        __destroy;
 	pf_cntr_base_clear          __clear;
