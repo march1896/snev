@@ -28,9 +28,9 @@ struct llrb_link* llrb_min(struct llrb_link* root);
 
 struct llrb_link* llrb_max(struct llrb_link* root);
 
-struct llrb_link* llrb_predesessor(const struct llrb_link* link, bool only_sub);
+struct llrb_link* llrb_predesessor(struct llrb_link* link, bool only_sub);
 
-struct llrb_link* llrb_successor  (const struct llrb_link* link, bool only_sub);
+struct llrb_link* llrb_successor  (struct llrb_link* link, bool only_sub);
 
 #endif /* _LLRB_LINK_H_ */
 

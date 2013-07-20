@@ -44,4 +44,12 @@ cntr cntr_create_as_fbt_v(pf_compare_object comp);
 
 cntr cntr_create_as_fbt_rv(pf_preremove_cb prerm, pf_compare_object comp);
 
+cntr cntr_create_as_llrb();
+
+cntr cntr_create_as_llrb_r(pf_preremove_cb);
+
+cntr cntr_create_as_llrb_v(pf_compare_object);
+
+cntr cntr_create_as_llrb_rv(pf_preremove_cb, pf_compare_object);
+
 #endif /* _CNTR_FACTORY_H_ */

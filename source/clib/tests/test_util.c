@@ -130,6 +130,8 @@ cntr cntr_create(TC_TYPE ct) {
 		return cntr_create_as_rbt_v(cntr_int_compare);
 	case TC_234T:
 		return cntr_create_as_fbt_v(cntr_int_compare);
+	case TC_LLRBTREE:
+		return cntr_create_as_llrb_v(cntr_int_compare);
 	default:
 		return NULL;
 	}
@@ -142,7 +144,7 @@ void generate_test_data(TD_TYPE dt, TD_LENGTH dl, int* length, int* ulength) {
 	*ulength = generate_data(dt, *length);
 }
 
-static const char* cntr_names[TC_END] = {"list", "array", "bst", "rbt", "234t" };
+static const char* cntr_names[TC_END] = {"list", "array", "bst", "rbt", "234t", "llrb_tree" };
 const char* cntr_name(TC_TYPE ct) {
 	return cntr_names[ct];
 }

@@ -170,6 +170,7 @@ static void cntr_llrb_add(cntr c, void* obj) {
 	/* TODO, really bad idea to use a static member */
 	static_comp_func = pb->comp;
 	pb->root = llrb_insert(pb->root, &obj_link->link, llrb_compare_cb);
+	//llrb_debug_check(pb->root, llrb_compare_cb);
 	static_comp_func = NULL;
 
 	pb->size ++;

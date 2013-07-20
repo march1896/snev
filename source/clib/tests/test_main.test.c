@@ -20,7 +20,7 @@ static void debug_global_leak() {
 }
 
 void run_all_test() {
-	do_test("heap test", heap_test);
+	//do_test("heap test", heap_test);
 
 	heap_init_global(1024 * 1024 * 1024);
 	//do_test("llrb link", llrb_link_test);
