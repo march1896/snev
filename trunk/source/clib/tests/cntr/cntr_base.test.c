@@ -67,7 +67,9 @@ static void add_find_remove_performance_test(TC_TYPE ct, TD_TYPE dt, TD_LENGTH d
 
 	printf("add: ");
 	start_c = clock();	
-	for (i = 0; i < length; i ++) cntr_add(c, (void*)rawdata[i]);
+	for (i = 0; i < length; i ++) {
+		cntr_add(c, (void*)rawdata[i]);
+	}
 	end_c = clock();
 	printf("used %f\n", (float)(end_c - start_c)/CLOCKS_PER_SEC);
 

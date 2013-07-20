@@ -29,6 +29,7 @@ typedef enum test_cont_type_e {
 	TC_BST,
 	TC_RBT,
 	TC_234T,
+	TC_LLRBTREE,
 	TC_END
 } TC_TYPE;
 

@@ -43,9 +43,11 @@ static struct _234_node* __node_insert(struct _234_node *n, void *key, struct _2
 	for (i = 0; i < n->dim; i ++) {
 		if (comp(n->keys[i], key) > 0) {
 			int j = i;
-			for (j = n->dim; j > i; j --) n->keys[j] = n->keys[j-1];
+			for (j = n->dim; j > i; j --) 
+				n->keys[j] = n->keys[j-1];
 			n->keys[i] = key;
-			for (j = n->dim + 1; j > i; j --) n->children[j] = n->children[j-1];
+			for (j = n->dim + 1; j > i; j --) 
+				n->children[j] = n->children[j-1];
 			n->children[i+1] = c;
 
 			if (c != NULL) c->parent = n;
