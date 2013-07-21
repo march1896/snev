@@ -6,35 +6,6 @@
 
 #include <util/list_link.h>
 
-typedef struct __open_link {
-	struct list_link link;
-
-	void* object;
-} object_link;
-
-typedef struct __cntr_list_vtable {
-	/* from cntr_linear_vtable */
-	pf_cntr_attribute           __attrib;
-
-	pf_cntr_base_destroy        __destroy;
-	pf_cntr_base_clear          __clear;
-	pf_cntr_base_size           __size;
-	pf_cntr_base_add            __add;
-	pf_cntr_base_remove         __remove;
-	pf_cntr_base_find           __find;
-	pf_cntr_base_citer_begin    __citer_begin;
-	pf_cntr_base_citer_end      __citer_end;
-
-	/* clinear specific */
-	pf_cntr_linear_front        __front;
-	pf_cntr_linear_back         __back;
-	pf_cntr_linear_add_front    __add_front;
-	pf_cntr_linear_add_back     __add_back;
-	pf_cntr_linear_remove_front __remove_front;
-	pf_cntr_linear_remove_back  __remove_back;
-
-} cntr_list_vtable;
-
 static cattr cntr_list_attribute  (cntr cl);
 static void  cntr_list_destroy    (cntr cl);
 static void  cntr_list_clear      (cntr cl);
@@ -52,58 +23,92 @@ static void  cntr_list_add_back   (cntr cl, void* object);
 static void* cntr_list_remove_front(cntr cl);
 static void* cntr_list_remove_back (cntr cl);
 
-static cntr_list_vtable cntr_list_ops = {
-	cntr_list_attribute, /* __attrib */
-	cntr_list_destroy, /* destroy */
-	cntr_list_clear, /* clean */
-	cntr_list_size, /* size */
-	cntr_list_add, /* add */
+static struct cntr_base_interface cntr_list_vtable = {
+	cntr_list_attribute,     /* __attrib */
+	cntr_list_destroy,       /* destroy */
+	cntr_list_clear,         /* clean */
+	cntr_list_size,          /* size */
+	cntr_list_add,           /* add */
 	cntr_list_remove,
 	cntr_list_find,
-	cntr_list_citer_begin, /* citer_begin */
-	cntr_list_citer_end  , /* citer_end   */
+	cntr_list_citer_begin,   /* citer_begin */
+	cntr_list_citer_end  ,   /* citer_end   */
+};
 
-	cntr_list_front, /* front */
-	cntr_list_back , /* back  */
-	cntr_list_add_front, /* add_front */
-	cntr_list_add_back , /* add_back  */
-	cntr_list_remove_front, /* remove_front */
-	cntr_list_remove_back , /* remove_back  */
+static struct cntr_linear_interface cntr_linear_vtable = {
+	cntr_list_front,         /* front */
+	cntr_list_back ,         /* back  */
+	cntr_list_add_front,     /* add_front */
+	cntr_list_add_back ,     /* add_back  */
+	cntr_list_remove_front,  /* remove_front */
+	cntr_list_remove_back ,  /* remove_back  */
 };
 
 typedef struct __cntr_list {
-	cntr_list_vtable*           __vt;
+	/* start with pf_cast, so I am an object */
+	pf_cast                       __cast;
+	
+	struct cntr_base_interface*   __base_intf;
+	struct cntr_linear_interface* __linear_intf;
 
-	int                         size;
-	unsigned int                flags;
+	pf_cntr_inner_alloc           __alloc;
+	pf_cntr_inner_dealloc         __dealloc;
+	pf_cntr_inner_dealloc         __obj_dealloc;  /* pre remove call back */
 
-	struct list_link            sent; /* sentinel */
+	int                           size;
+	unsigned int                  flags;
 
-	pf_preremove_cb             prerm;  /* pre remove call back */
+	struct list_link              sent; /* sentinel */
 } cntr_list;
 
-static void cntr_list_init(cntr_list* pcl) {
-	pcl->__vt = &cntr_list_ops;
-	pcl->size = 0;
-	pcl->flags = 0;
-	list_init(&pcl->sent);
-	pcl->prerm = NULL;
+typedef struct __open_link {
+	struct list_link link;
+
+	void*            object;
+} object_link;
+
+static unknown cntr_list_cast(unknown x, unique_id intf_id) {
+	cntr_list* c = (cntr_list*)x;
+	switch (intf_id) {
+	case OBJECT_ME:
+		return x;
+	case CNTR_BASE_INTERFACE:
+		return c->__base_intf;
+	case CNTR_LINEAR_INTERFACE:
+		return c->__linear_intf;
+	default:
+		return NULL;
+	}
+
+	return NULL;
 }
 
 cntr cntr_create_as_list() {
-	cntr_list* pcl = (cntr_list*)halloc(sizeof(cntr_list));
-
-	cntr_list_init(pcl);
-
-	return (cntr)pcl;
+	return cntr_create_as_list_v(NULL, NULL, NULL);
 }
 
-cntr cntr_create_as_list_r(pf_preremove_cb pre_rm) {
-	cntr_list* pcl = (cntr_list*)halloc(sizeof(cntr_list));
+cntr cntr_create_as_list_v(pf_cntr_inner_dealloc obj_dealloc, pf_cntr_inner_alloc alloc, pf_cntr_inner_dealloc dealloc) {
+	cntr_list* pcl = NULL;
 
-	cntr_list_init(pcl);
+	if (alloc) {
+		dbg_assert(dealloc != NULL);
 
-	pcl->prerm = pre_rm;
+		pcl = (cntr_list*)alloc(sizeof(cntr_list));
+	}
+	else {
+		pcl = (cntr_list*)halloc(sizeof(cntr_list));
+	}
+
+	pcl->__cast        = cntr_list_cast;
+	pcl->__base_intf   = &cntr_list_vtable;
+	pcl->__linear_intf = &cntr_linear_vtable;
+	pcl->flags         = 0;
+	pcl->size          = 0;
+	list_init(&pcl->sent);
+
+	pcl->__alloc       = alloc;
+	pcl->__dealloc     = dealloc;
+	pcl->__obj_dealloc = obj_dealloc;
 
 	return (cntr)pcl;
 }
@@ -121,7 +126,8 @@ static void cntr_list_destroy(cntr cl) {
 
 	cntr_list_clear(cl);
 
-	hfree(pcl);
+	/* destroy myself */
+	pcl->__dealloc(pcl);
 }
 
 static void cntr_list_clear(cntr cl) {
@@ -139,10 +145,10 @@ static void cntr_list_clear(cntr cl) {
 
 		/* first delete the object memory */
 		next = next->next;
-		if (pcl->prerm) 
-			pcl->prerm(obj_link->object);
+		if (pcl->__obj_dealloc) 
+			pcl->__obj_dealloc(obj_link->object);
 		/* second delete the link itself */
-		hfree(obj_link);
+		pcl->__dealloc(obj_link);
 	}
 	
 	/* init the sentinel again, since we do not unlink the deleted nodes */
@@ -189,7 +195,7 @@ static void* cntr_list_back (cntr cl) {
 
 static void  cntr_list_add_front(cntr cl, void* object) {
 	cntr_list* pcl = (cntr_list*)cl;
-	object_link* obj_link = (object_link*)halloc(sizeof(object_link));
+	object_link* obj_link = (object_link*)pcl->__alloc(sizeof(object_link));
 
 	obj_link->object = object;
 	list_insert_front(&pcl->sent, &obj_link->link);
@@ -199,7 +205,7 @@ static void  cntr_list_add_front(cntr cl, void* object) {
 
 static void  cntr_list_add_back (cntr cl, void* object) {
 	cntr_list* pcl = (cntr_list*)cl;
-	object_link* obj_link = (object_link*)halloc(sizeof(object_link));
+	object_link* obj_link = (object_link*)pcl->__alloc(sizeof(object_link));
 
 	obj_link->object = object;
 	list_insert_back(&pcl->sent, &obj_link->link);
@@ -222,7 +228,7 @@ static void* cntr_list_remove_front(cntr cl) {
 
 		list_unlink(node);
 		object = obj_link->object;
-		hfree(obj_link);
+		pcl->__dealloc(obj_link);
 
 		pcl->size --;
 
@@ -249,7 +255,7 @@ static void*  cntr_list_remove_back (cntr cl) {
 
 		list_unlink(node);
 		object = obj_link->object;
-		hfree(obj_link);
+		pcl->__dealloc(obj_link);
 
 		pcl->size --;
 
@@ -377,18 +383,18 @@ static void  cntr_list_remove(cntr cl, citer begin, citer end) {
 		obj_link = container_of(lb, object_link, link);
 		lb = lb->next;
 
-		if (pcl->prerm != NULL) 
-			pcl->prerm(obj_link->object);
-		hfree(obj_link);
+		if (pcl->__obj_dealloc != NULL) 
+			pcl->__obj_dealloc(obj_link->object);
+		pcl->__dealloc(obj_link);
 
 		count ++;
 	};
 
 	/* delete the last element */
 	obj_link = container_of(lb, object_link, link);
-	if (pcl->prerm != NULL) 
-		pcl->prerm(obj_link->object);
-	hfree(obj_link);
+	if (pcl->__obj_dealloc != NULL) 
+		pcl->__obj_dealloc(obj_link->object);
+	pcl->__dealloc(obj_link);
 	count ++;
 	
 	pcl->size -= count;
