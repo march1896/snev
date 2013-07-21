@@ -1,0 +1,38 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TJCLIB", "TJCLIB.vcxproj", "{F064679C-4F52-49EA-A070-0ED4F2C0CF83}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestMain", "TestMain.vcxproj", "{6B948779-F5A3-44A4-B7C3-8D42E3E3A930}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F064679C-4F52-49EA-A070-0ED4F2C0CF83} = {F064679C-4F52-49EA-A070-0ED4F2C0CF83}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		MinSizeRel|Win32 = MinSizeRel|Win32
+		Release|Win32 = Release|Win32
+		RelWithDebInfo|Win32 = RelWithDebInfo|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F064679C-4F52-49EA-A070-0ED4F2C0CF83}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F064679C-4F52-49EA-A070-0ED4F2C0CF83}.Debug|Win32.Build.0 = Debug|Win32
+		{F064679C-4F52-49EA-A070-0ED4F2C0CF83}.MinSizeRel|Win32.ActiveCfg = MinSizeRel|Win32
+		{F064679C-4F52-49EA-A070-0ED4F2C0CF83}.MinSizeRel|Win32.Build.0 = MinSizeRel|Win32
+		{F064679C-4F52-49EA-A070-0ED4F2C0CF83}.Release|Win32.ActiveCfg = Release|Win32
+		{F064679C-4F52-49EA-A070-0ED4F2C0CF83}.Release|Win32.Build.0 = Release|Win32
+		{F064679C-4F52-49EA-A070-0ED4F2C0CF83}.RelWithDebInfo|Win32.ActiveCfg = RelWithDebInfo|Win32
+		{F064679C-4F52-49EA-A070-0ED4F2C0CF83}.RelWithDebInfo|Win32.Build.0 = RelWithDebInfo|Win32
+		{6B948779-F5A3-44A4-B7C3-8D42E3E3A930}.Debug|Win32.ActiveCfg = Debug|Win32
+		{6B948779-F5A3-44A4-B7C3-8D42E3E3A930}.Debug|Win32.Build.0 = Debug|Win32
+		{6B948779-F5A3-44A4-B7C3-8D42E3E3A930}.MinSizeRel|Win32.ActiveCfg = MinSizeRel|Win32
+		{6B948779-F5A3-44A4-B7C3-8D42E3E3A930}.MinSizeRel|Win32.Build.0 = MinSizeRel|Win32
+		{6B948779-F5A3-44A4-B7C3-8D42E3E3A930}.Release|Win32.ActiveCfg = Release|Win32
+		{6B948779-F5A3-44A4-B7C3-8D42E3E3A930}.Release|Win32.Build.0 = Release|Win32
+		{6B948779-F5A3-44A4-B7C3-8D42E3E3A930}.RelWithDebInfo|Win32.ActiveCfg = RelWithDebInfo|Win32
+		{6B948779-F5A3-44A4-B7C3-8D42E3E3A930}.RelWithDebInfo|Win32.Build.0 = RelWithDebInfo|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

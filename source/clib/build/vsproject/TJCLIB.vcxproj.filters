@@ -1,0 +1,213 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\..\src\cntr\citer_base.c">
+      <Filter>Source Files\cntr</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cntr\citer_cont.c">
+      <Filter>Source Files\cntr</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cntr\cntr_234tree.c">
+      <Filter>Source Files\cntr</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cntr\cntr_algorithm.c">
+      <Filter>Source Files\cntr</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cntr\cntr_array.c">
+      <Filter>Source Files\cntr</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cntr\cntr_base.c">
+      <Filter>Source Files\cntr</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cntr\cntr_bstree.c">
+      <Filter>Source Files\cntr</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cntr\cntr_linear.c">
+      <Filter>Source Files\cntr</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cntr\cntr_list.c">
+      <Filter>Source Files\cntr</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cntr\cntr_llrb.c">
+      <Filter>Source Files\cntr</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cntr\cntr_rbtree.c">
+      <Filter>Source Files\cntr</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cntr\_234tree.c">
+      <Filter>Source Files\cntr</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\util\bit_math.c">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\memheap\block_common.c">
+      <Filter>Source Files\heap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\memheap\block_link.c">
+      <Filter>Source Files\heap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\memheap\heap_buddy.c">
+      <Filter>Source Files\heap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\memheap\heap_sys.c">
+      <Filter>Source Files\heap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\memheap\heap_llrb.c">
+      <Filter>Source Files\heap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\util\list_link.c">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\util\llrb_link.c">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cntr\oos_model.c">
+      <Filter>Source Files\cntr</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\regex\dfa.c">
+      <Filter>Source Files\regex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\regex\fatable.c">
+      <Filter>Source Files\regex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\regex\nfa.c">
+      <Filter>Source Files\regex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\regex\nfastack.c">
+      <Filter>Source Files\regex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\regex\node.c">
+      <Filter>Source Files\regex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\regex\prog.c">
+      <Filter>Source Files\regex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\regex\regc.c">
+      <Filter>Source Files\regex</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4A183075-02A6-4578-988C-434CB6F73E28}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\util">
+      <UniqueIdentifier>{21a55835-1eb3-4e92-8376-7913db8d54ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\cntr">
+      <UniqueIdentifier>{c470f9be-73ef-435c-a63d-2d83c36b3583}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\regex">
+      <UniqueIdentifier>{01bb233f-0b11-4b81-99bc-d94a7f06e4c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\heap">
+      <UniqueIdentifier>{ad1e1824-3f67-4597-9455-85f3927d0274}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\cntr\_234tree.h">
+      <Filter>Source Files\cntr</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cntr\cattr.h">
+      <Filter>Source Files\cntr</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cntr\citer_base.h">
+      <Filter>Source Files\cntr</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cntr\citer_base.local.h">
+      <Filter>Source Files\cntr</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cntr\citer_cont.h">
+      <Filter>Source Files\cntr</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cntr\citer_cont.local.h">
+      <Filter>Source Files\cntr</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cntr\cntr.h">
+      <Filter>Source Files\cntr</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cntr\cntr_algorithm.h">
+      <Filter>Source Files\cntr</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cntr\cntr_base.h">
+      <Filter>Source Files\cntr</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cntr\cntr_base.local.h">
+      <Filter>Source Files\cntr</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cntr\cntr_factory.h">
+      <Filter>Source Files\cntr</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cntr\cntr_linear.h">
+      <Filter>Source Files\cntr</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cntr\cntr_linear.local.h">
+      <Filter>Source Files\cntr</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cntr\cntr_tree.h">
+      <Filter>Source Files\cntr</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cntr\oo_model.doc.h">
+      <Filter>Source Files\cntr</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cntr\oos_model.doc.h">
+      <Filter>Source Files\cntr</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cntr\oos_model.h">
+      <Filter>Source Files\cntr</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\memheap\block_common.h">
+      <Filter>Source Files\heap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\memheap\block_link.h">
+      <Filter>Source Files\heap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\memheap\heap.h">
+      <Filter>Source Files\heap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\memheap\heap_buddy.h">
+      <Filter>Source Files\heap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\memheap\heap_def.h">
+      <Filter>Source Files\heap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\memheap\heap_llrb.h">
+      <Filter>Source Files\heap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\memheap\heap_sys.h">
+      <Filter>Source Files\heap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\memheap\mem_common.h">
+      <Filter>Source Files\heap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\regex\fa.h">
+      <Filter>Source Files\regex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\regex\fatable.h">
+      <Filter>Source Files\regex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\regex\nfastack.h">
+      <Filter>Source Files\regex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\regex\prog.h">
+      <Filter>Source Files\regex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\regex\regc.h">
+      <Filter>Source Files\regex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\util\bit_math.h">
+      <Filter>Source Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\util\cominc.h">
+      <Filter>Source Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\util\link.doc.h">
+      <Filter>Source Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\util\list_link.h">
+      <Filter>Source Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\util\llrb_link.h">
+      <Filter>Source Files\util</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
