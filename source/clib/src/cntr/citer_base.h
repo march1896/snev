@@ -2,7 +2,7 @@
 #define _CITER_BASE_H_
 
 #include <cominc.h>
-#include <oos_model.h>
+#include <oo_model.h>
 #include <cattr.h>
 
 typedef unknown citer;
@@ -18,6 +18,9 @@ extern inline void     citer_to_prev(citer itr);
 extern inline void*    citer_get_ref(citer itr);
 
 extern inline void     citer_set_ref(citer itr, void* nref);
+
+#define __default_alloc   halloc
+#define __default_dealloc hfree
 
 /*
  * define a citer on stack, assign the it as citer_as_init.
