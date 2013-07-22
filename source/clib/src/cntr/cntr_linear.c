@@ -2,44 +2,44 @@
 #include <cntr_linear.local.h>
 
 void* cntr_front(cntr c) {
-	struct cntr_linear_interface* intf = 
-		(struct cntr_linear_interface*)__cast(c, CNTR_LINEAR_INTERFACE);
+	cntr_linear_body* cl = (cntr_linear_body*)c;
 
-	return intf->__front(c);
+	dbg_assert(cntr_check_attr(c, CNTR_ATTR_BASE | CNTR_ATTR_LINEAR));
+	return (void*)(cl->__vt)->__front(c);
 }
 
 void* cntr_back(cntr c) {
-	struct cntr_linear_interface* intf = 
-		(struct cntr_linear_interface*)__cast(c, CNTR_LINEAR_INTERFACE);
+	cntr_linear_body* cl = (cntr_linear_body*)c;
 
-	return intf->__back(c);
+	dbg_assert(cntr_check_attr(c, CNTR_ATTR_BASE | CNTR_ATTR_LINEAR));
+	return (void*)(cl->__vt)->__back(c);
 }
 
 void cntr_add_front(cntr c, void* obj) {
-	struct cntr_linear_interface* intf = 
-		(struct cntr_linear_interface*)__cast(c, CNTR_LINEAR_INTERFACE);
+	cntr_linear_body* cl = (cntr_linear_body*)c;
 
-	return intf->__add_front(c, obj);
+	dbg_assert(cntr_check_attr(c, CNTR_ATTR_BASE | CNTR_ATTR_LINEAR));
+	(cl->__vt)->__add_front(c, obj);
 }
 
 void cntr_add_back(cntr c, void* obj) {
-	struct cntr_linear_interface* intf = 
-		(struct cntr_linear_interface*)__cast(c, CNTR_LINEAR_INTERFACE);
+	cntr_linear_body* cl = (cntr_linear_body*)c;
 
-	return intf->__add_back(c, obj);
+	dbg_assert(cntr_check_attr(c, CNTR_ATTR_BASE | CNTR_ATTR_LINEAR));
+	(cl->__vt)->__add_back(c, obj);
 }
 
 void* cntr_remove_front(cntr c) {
-	struct cntr_linear_interface* intf = 
-		(struct cntr_linear_interface*)__cast(c, CNTR_LINEAR_INTERFACE);
+	cntr_linear_body* cl = (cntr_linear_body*)c;
 
-	return intf->__remove_front(c);
+	dbg_assert(cntr_check_attr(c, CNTR_ATTR_BASE | CNTR_ATTR_LINEAR));
+	return (void*)(cl->__vt)->__remove_front(c);
 }
 
 void* cntr_remove_back(cntr c) {
-	struct cntr_linear_interface* intf = 
-		(struct cntr_linear_interface*)__cast(c, CNTR_LINEAR_INTERFACE);
+	cntr_linear_body* cl = (cntr_linear_body*)c;
 
-	return intf->__remove_back(c);
+	dbg_assert(cntr_check_attr(c, CNTR_ATTR_BASE | CNTR_ATTR_LINEAR));
+	return (void*)(cl->__vt)->__remove_back(c);
 }
 

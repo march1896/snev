@@ -85,6 +85,21 @@
     <ClCompile Include="..\..\src\regex\regc.c">
       <Filter>Source Files\regex</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\cntr2\inf_citer.c">
+      <Filter>Source Files\cntr2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cntr2\inf_cntr_base.c">
+      <Filter>Source Files\cntr2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cntr2\inf_cntr_linear.c">
+      <Filter>Source Files\cntr2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cntr2\obj_citer.c">
+      <Filter>Source Files\cntr2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cntr2\obj_cntr.c">
+      <Filter>Source Files\cntr2</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
@@ -101,6 +116,9 @@
     </Filter>
     <Filter Include="Source Files\heap">
       <UniqueIdentifier>{ad1e1824-3f67-4597-9455-85f3927d0274}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\cntr2">
+      <UniqueIdentifier>{9595d002-0e2d-4fcb-ab1c-bd9400b4b157}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -208,6 +226,30 @@
     </ClInclude>
     <ClInclude Include="..\..\src\util\llrb_link.h">
       <Filter>Source Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cntr\oo_model.h">
+      <Filter>Source Files\cntr</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cntr2\cntr_def.h">
+      <Filter>Source Files\cntr2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cntr2\inf_citer.h">
+      <Filter>Source Files\cntr2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cntr2\inf_cntr_base.h">
+      <Filter>Source Files\cntr2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cntr2\inf_cntr_linear.h">
+      <Filter>Source Files\cntr2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cntr2\obj_citer.h">
+      <Filter>Source Files\cntr2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cntr2\obj_cntr.h">
+      <Filter>Source Files\cntr2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cntr2\oo_model.h">
+      <Filter>Source Files\cntr2</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

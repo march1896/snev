@@ -28,6 +28,6 @@ struct citer_t {
 	void*                     param_z;
 };
 
-extern inline void     citer_init(citer itr, 
+//extern inline void     citer_init(citer itr, 
 
 #endif /* _OBJECT_CITER_H_ */

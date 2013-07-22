@@ -22,7 +22,6 @@ struct heap_buddy {
 
 	/* point to the start of the heap buffer. */
 	void*			pbuff; 
-	cntr            mem_list;
 
 	struct block_c  *pfirst;
 
@@ -39,48 +38,6 @@ int block_data_size_from_blick(struct list_link *link) {
 
 	return block_com_data_size(&pb->common);
 }
-
-static inline void* memory_alloc(int size) {
-	return malloc(size);
-}
-static inline void memory_dealloc(void* buff) {
-	return free(buff);
-}
-
-/* TODO: this should move to a common .h file */
-#define MINIMUM_EXPAND_SIZE (4 * 1024 * 1024)
-heap_handle bheap_create(int expand_size) {
-	struct heap_buddy *pheap = (struct heap_buddy*)buff;
-
-	void *block_start = (char*)buff + sizeof(struct heap_buddy);
-	void *block_end = (char*)buff + size;
-
-	struct block_c *sent_first;
-	struct block_c *sent_last;
-	struct block_c *init_block;
-	struct block_buddy *ib;
-	int i, sz;
-
-	init_block = block_com_make_sentinels(
-			block_start, block_end, &sent_first, &sent_last);
-
-	for (i = 0; i < BN; i ++) 
-		list_init(&pheap->buddy[i]);
-	pheap->pbuff = buff;
-	pheap->pfirst = init_block;
-	pheap->size = size;
-	pheap->flag = 0;
-	pheap->error = 0;
-
-	block_com_set_free(init_block, true);
-	ib = container_of(init_block, struct block_buddy, common);
-
-	sz = block_com_data_size(init_block);
-	blink_push(&pheap->buddy[mlog2(sz)], &ib->link);
-
-	return (heap_handle)pheap;
-}
-
 
 heap_handle bheap_init(void *buff, int size) {
 	struct heap_buddy *pheap = (struct heap_buddy*)buff;

@@ -30,18 +30,6 @@
  *
  * A complete object-orient model in C.
  */
-
-/*
- * In fact this model does more than C++'s object model in the following example.
- * class A;
- * class B;
- * class X : public A, B;
- * X* x = new X();
- * A* a = (A*)x; // cast a object to interface, compiler will do some offset job.
- * B* b = (A*)a; // cast from another interface, compiler will only complains
- * but in this model, the problem is resolved, of course increase the complicity.
- */
-
 /* before everything */
 // erase any type information of class, this is unknown
 typedef void* unknown;

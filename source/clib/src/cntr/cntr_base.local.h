@@ -1,23 +1,22 @@
 #ifndef _CNTR_BASE_LOCAL_H_
 #define _CNTR_BASE_LOCAL_H_
 
-typedef cattr (*pf_cntr_attribute)      (cntr c);
-typedef void (*pf_cntr_base_destroy)    (cntr c);
-typedef void (*pf_cntr_base_clear)      (cntr c);
-typedef int  (*pf_cntr_base_size)       (cntr c);
-typedef void (*pf_cntr_base_add)        (cntr c, void* object);
-typedef void (*pf_cntr_base_remove)     (cntr c, citer begin, citer end);
-typedef bool (*pf_cntr_base_find)       (cntr c, void* object, __out citer result);
+#include <cattr.h>
+
+typedef cattr (*pf_cntr_attribute)(cntr c);
+
+typedef void (*pf_cntr_base_destroy)(cntr c);
+typedef void (*pf_cntr_base_clear)(cntr c);
+typedef int  (*pf_cntr_base_size)(cntr c);
+typedef void (*pf_cntr_base_add)(cntr c, void* object);
+typedef void (*pf_cntr_base_remove)(cntr c, citer begin, citer end);
+typedef bool (*pf_cntr_base_find)(cntr c, void* object, __out citer result);
 typedef void (*pf_cntr_base_citer_begin)(cntr c, citer itr);
-typedef void (*pf_cntr_base_citer_end)  (cntr c, citer itr);
+typedef void (*pf_cntr_base_citer_end)(cntr c, citer itr);
 
-
-/* TODO: change the number */
-#define CNTR_BASE_INTERFACE 0X00000001
-#define CNTR_BASE_OFFSET 0
-struct cntr_base_interface  {
-	/* public */
+typedef struct __cntr_base_vtable {
 	pf_cntr_attribute        __attrib;
+
 	pf_cntr_base_destroy     __destroy;
 	pf_cntr_base_clear       __clear;
 	pf_cntr_base_size        __size;
@@ -26,16 +25,14 @@ struct cntr_base_interface  {
 	pf_cntr_base_find        __find;
 	pf_cntr_base_citer_begin __citer_begin;
 	pf_cntr_base_citer_end   __citer_end;
-};
+} cntr_base_vtable;
 
-/* 
- * we have to add allocate/deallocate callback to let the container control
- * the internal memory usage, such as the link's memory.
- * they do not belong to the interfaces, since they vary from object to object.
- * this could be made as an interface, should we ? TODO: ohh.
- */
-typedef void* (*pf_cntr_inner_alloc  ) (int size);
-typedef void  (*pf_cntr_inner_dealloc) (void* buff);
+typedef struct __cntr_common_body {
+	cntr_base_vtable*        __vt;
+	
+	/* ... */
+} cntr_common_body;
+
 /*
  * helper functions.
  */

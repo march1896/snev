@@ -1,7 +1,8 @@
 #ifndef _CNTR_BASE_INTERFACE_H_
 #define _CNTR_BASE_INTERFACE_H_
 
-struct base_interface; /* from oo_model.h */
+#include <oo_model.h>
+#include <cntr_def.h>
 
 /* the interface functions which support, used by clients */
 

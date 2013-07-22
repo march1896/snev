@@ -29,7 +29,7 @@ static struct inf_cntr_base_vtable cntr_base_vtable = {
 	cntr_list_find,
 	cntr_list_citer_begin,   /* citer_begin */
 	cntr_list_citer_end  ,   /* citer_end   */
-}
+};
 
 static struct inf_cntr_linear_vtable cntr_linear_vtable = {
 	cntr_list_front,         /* front */
@@ -41,14 +41,14 @@ static struct inf_cntr_linear_vtable cntr_linear_vtable = {
 };
 
 typedef struct __cntr_list {
-	address                       __address
+	address                       __address;
 	pf_cast                       __cast;
 	
 	struct base_interface         __iftable[2];
 
-	pf_cntr_inner_alloc           __alloc;
-	pf_cntr_inner_dealloc         __dealloc;
-	pf_cntr_inner_dealloc         __obj_dispose;  /* pre remove call back */
+	pf_alloc                      __alloc;
+	pf_dealloc                    __dealloc;
+	pf_dispose                    __obj_dispose;  /* pre remove call back */
 
 	int                           size;
 	unsigned int                  flags;
@@ -79,11 +79,7 @@ static unknown cntr_list_cast(unknown x, unique_id intf_id) {
 	return NULL;
 }
 
-cntr cntr_create_as_list() {
-	return cntr_create_as_list_v(NULL, NULL, NULL);
-}
-
-cntr cntr_create_as_list_v(pf_cntr_inner_dealloc obj_dealloc, pf_cntr_inner_alloc alloc, pf_cntr_inner_dealloc dealloc) {
+cntr cntr_create_as_list_v(pf_dealloc obj_dispose, pf_alloc alloc, pf_dispose dealloc) {
 	cntr_list* pcl = NULL;
 
 	if (alloc) {
@@ -99,10 +95,10 @@ cntr cntr_create_as_list_v(pf_cntr_inner_dealloc obj_dealloc, pf_cntr_inner_allo
 	pcl->__cast        = cntr_list_cast;
 	
 	/* set the interfaces */
-	pcl->__iftable[CNTR_BASE_INTERFACE_OFFSET].__offset   = CNTR_BASE_INTERFACE_OFFSET;
-	pcl->__iftable[CNTR_BASE_INTERFACE_OFFSET].__vtable   = &cntr_list_vtable;
-	pcl->__iftable[CNTR_LINEAR_INTERFACE_OFFSET].__offset = CNTR_LINEAR_INTERFACE_OFFSET;
-	pcl->__iftable[CNTR_LINEAR_INTERFACE_OFFSET].__vtable = &CNTR_linear_vtable;
+	pcl->__iftable[CNTR_BASE_INTERFACE_OFFSET].__offset   = (address)CNTR_BASE_INTERFACE_OFFSET;
+	pcl->__iftable[CNTR_BASE_INTERFACE_OFFSET].__vtable   = &cntr_base_vtable;
+	pcl->__iftable[CNTR_LINEAR_INTERFACE_OFFSET].__offset = (address)CNTR_LINEAR_INTERFACE_OFFSET;
+	pcl->__iftable[CNTR_LINEAR_INTERFACE_OFFSET].__vtable = &cntr_linear_vtable;
 
 	pcl->flags         = 0;
 	pcl->size          = 0;
@@ -110,9 +106,13 @@ cntr cntr_create_as_list_v(pf_cntr_inner_dealloc obj_dealloc, pf_cntr_inner_allo
 
 	pcl->__alloc       = alloc;
 	pcl->__dealloc     = dealloc;
-	pcl->__obj_dispose = obj_dealloc;
+	pcl->__obj_dispose = obj_dispose;
 
 	return (cntr)pcl;
+}
+
+cntr cntr_create_as_list() {
+	return cntr_create_as_list_v(NULL, NULL, NULL);
 }
 
 /******************************************************************************************************
