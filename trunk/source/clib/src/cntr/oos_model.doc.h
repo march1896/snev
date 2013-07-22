@@ -3,13 +3,13 @@
 
 /*
  * This is a document file, no *.c file should include this file, but all demo code could be 
- * compiled and run. It demostrates a simplicified object-oriented model in C.
+ * compiled and run. It demonstrates a simplified object-oriented model in C.
  */
 
 /*
- * To simplicify the oo model, we could make the following assumptions.
+ * To simplicity the oo model, we could make the following assumptions.
  * * All inherit relationship is single inherit, plus that client always code towards interface, so we 
- *   don't need cast anymore, since when we got an interfce, it can not cast to anything, but dynamic test
+ *   don't need cast anymore, since when we got an interface, it can not cast to anything, but dynamic test
  *   is needed. Considering the following class derivation system, in both JAVA and C++, we should take care
  *   about dynamic cast IA to CY, IA to IC, but in OOS model, we have a single inherited tree, and only leaves 
  *   are concrete classes, that means all kinds of cast from bottom to up will be fine, each type in the bottom
@@ -53,7 +53,7 @@ typedef struct unknown_oos_extend_interface_vtable_t {
 
 typedef struct unknown_oos_class_body_t {
 	/* 
-	 * use the first data memeber as virtual table, so we should directly convert the class body into an 
+	 * use the first data member as virtual table, so we should directly convert the class body into an 
 	 * interface table.
 	 */
 	unknown_oos_extend_interface* __vt;
@@ -64,7 +64,7 @@ typedef struct unknown_oos_class_body_t {
 
 unknown unknown_oos_factory_create(unique_id uid);
 /*
- * Sample codes for simplicified object-oriented model.
+ * Sample codes for simplified object-oriented model.
  */
 
 #define __public
