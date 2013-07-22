@@ -78,7 +78,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <AdditionalOptions> /Zm1000 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>../../src/.;../../src/memheap;../../src/util;../../src/cntr;../../src/regex;../../src/../tests;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../src/.;../../src/memheap;../../src/util;../../src/cntr;../../src/regex;../../src/cntr2;../../src/../tests;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <CompileAs>CompileAsC</CompileAs>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -203,6 +203,11 @@
     </Midl>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\cntr2\inf_citer.c" />
+    <ClCompile Include="..\..\src\cntr2\inf_cntr_base.c" />
+    <ClCompile Include="..\..\src\cntr2\inf_cntr_linear.c" />
+    <ClCompile Include="..\..\src\cntr2\obj_citer.c" />
+    <ClCompile Include="..\..\src\cntr2\obj_cntr.c" />
     <ClCompile Include="..\..\src\memheap\block_common.c" />
     <ClCompile Include="..\..\src\memheap\block_link.c" />
     <ClCompile Include="..\..\src\memheap\heap_buddy.c" />
@@ -233,6 +238,13 @@
     <ClCompile Include="..\..\src\regex\regc.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\src\cntr2\cntr_def.h" />
+    <ClInclude Include="..\..\src\cntr2\inf_citer.h" />
+    <ClInclude Include="..\..\src\cntr2\inf_cntr_base.h" />
+    <ClInclude Include="..\..\src\cntr2\inf_cntr_linear.h" />
+    <ClInclude Include="..\..\src\cntr2\obj_citer.h" />
+    <ClInclude Include="..\..\src\cntr2\obj_cntr.h" />
+    <ClInclude Include="..\..\src\cntr2\oo_model.h" />
     <ClInclude Include="..\..\src\cntr\cattr.h" />
     <ClInclude Include="..\..\src\cntr\citer_base.h" />
     <ClInclude Include="..\..\src\cntr\citer_base.local.h" />
@@ -249,6 +261,7 @@
     <ClInclude Include="..\..\src\cntr\oos_model.doc.h" />
     <ClInclude Include="..\..\src\cntr\oos_model.h" />
     <ClInclude Include="..\..\src\cntr\oo_model.doc.h" />
+    <ClInclude Include="..\..\src\cntr\oo_model.h" />
     <ClInclude Include="..\..\src\cntr\_234tree.h" />
     <ClInclude Include="..\..\src\memheap\block_common.h" />
     <ClInclude Include="..\..\src\memheap\block_link.h" />

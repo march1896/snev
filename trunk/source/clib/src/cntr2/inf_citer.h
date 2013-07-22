@@ -36,7 +36,7 @@ struct inf_citer_base_vtable {
 extern inline int      inf_citer_cont_dis   (const struct base_interface* from, const struct base_interface* to);
 extern inline void     inf_citer_cont_move_n(struct base_interface* inf, int dis);
 
-extern inline int      inf_citer_cont_dis_o   (const struct base_interface* , unknown objfrom, const struct base_interface* to);
+extern inline int      inf_citer_cont_dis_o   (const struct base_interface* from, const struct base_interface* to, unknown obj_from, unknown obj_to);
 extern inline void     inf_citer_cont_move_n_o(struct base_interface* inf, unknown obj, int dis);
 
 typedef       int      (*pf_citer_cont_dis)   (const citer from, const citer to);

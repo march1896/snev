@@ -39,8 +39,9 @@ struct object {
 #define __address_of(x) x
 #define __MAX_NUM_INTERFACE_PER_OBJECT 10
 
-inline struct object* __object_from_interface(struct base_interface* inf) {
-	struct base_interface* inf0 = inf - (unsigned int)inf->__offset;
+inline struct object* __object_from_interface(const struct base_interface* inf) {
+	/* TODO: remove the const_cast */
+	struct base_interface* inf0 = (struct base_interface*)inf - (unsigned int)inf->__offset;
 	struct object* obj = container_of(inf0, struct object, __iftable[0]);
 
 	return obj;
@@ -58,7 +59,7 @@ inline bool __is_object(unknown x) {
 
 inline bool __is_interface(unknown x) {
 	struct base_interface* inf = (struct base_interface*)x;
-	dbg_assert(inf->__offset <= __MAX_NUM_INTERFACE_PER_OBJECT);
+	dbg_assert((int)(inf->__offset) <= __MAX_NUM_INTERFACE_PER_OBJECT);
 
 	{
 		struct object* obj = __object_from_interface(inf);

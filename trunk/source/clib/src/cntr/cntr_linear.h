@@ -7,9 +7,9 @@ void* cntr_front(cntr c);
 
 void* cntr_back(cntr c);
 
-void  cntr_add_front(cntr c, void* obj);
+void cntr_add_front(cntr c, void* obj);
 
-void  cntr_add_back(cntr c, void* obj);
+void cntr_add_back(cntr c, void* obj);
 
 void* cntr_remove_front(cntr c);
 

@@ -1,7 +1,9 @@
 #ifndef _INTERFACE_CNTR_LINEAR_H_
 #define _INTERFACE_CNTR_LINEAR_H_
 
-struct base_interface; /* from oo_model.h */
+//struct base_interface; /* from oo_model.h */
+#include <oo_model.h>
+#include <cntr_def.h>
 
 extern inline void* inf_cntr_linear_front       (struct base_interface* inf);
 
