@@ -14,6 +14,7 @@ typedef void (*pf_cntr_base_citer_end)  (cntr c, citer itr);
 
 /* TODO: change the number */
 #define CNTR_BASE_INTERFACE 0X00000001
+#define CNTR_BASE_OFFSET 0
 struct cntr_base_interface  {
 	/* public */
 	pf_cntr_attribute        __attrib;
