@@ -203,9 +203,15 @@
     </Midl>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\cntr2\clist.c" />
+    <ClCompile Include="..\..\src\cntr2\cntr_list.c" />
+    <ClCompile Include="..\..\src\cntr2\iitr.c" />
     <ClCompile Include="..\..\src\cntr2\inf_citer.c" />
     <ClCompile Include="..\..\src\cntr2\inf_cntr_base.c" />
     <ClCompile Include="..\..\src\cntr2\inf_cntr_linear.c" />
+    <ClCompile Include="..\..\src\cntr2\iqueue.c" />
+    <ClCompile Include="..\..\src\cntr2\iset.c" />
+    <ClCompile Include="..\..\src\cntr2\istack.c" />
     <ClCompile Include="..\..\src\cntr2\obj_citer.c" />
     <ClCompile Include="..\..\src\cntr2\obj_cntr.c" />
     <ClCompile Include="..\..\src\memheap\block_common.c" />
@@ -239,9 +245,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\cntr2\cntr_def.h" />
+    <ClInclude Include="..\..\src\cntr2\cntr_list.h" />
+    <ClInclude Include="..\..\src\cntr2\iitr.h" />
     <ClInclude Include="..\..\src\cntr2\inf_citer.h" />
     <ClInclude Include="..\..\src\cntr2\inf_cntr_base.h" />
     <ClInclude Include="..\..\src\cntr2\inf_cntr_linear.h" />
+    <ClInclude Include="..\..\src\cntr2\iqueue.h" />
+    <ClInclude Include="..\..\src\cntr2\iset.h" />
+    <ClInclude Include="..\..\src\cntr2\istack.h" />
     <ClInclude Include="..\..\src\cntr2\obj_citer.h" />
     <ClInclude Include="..\..\src\cntr2\obj_cntr.h" />
     <ClInclude Include="..\..\src\cntr2\oo_model.h" />
