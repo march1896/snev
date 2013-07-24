@@ -3,6 +3,7 @@
 
 /* the interface functions which support, used by clients */
 #include <oo_model.h>
+#include <idef.h>
 
 extern inline void istack_destroy         (iobject* iq);
 extern inline void istack_clear           (iobject* iq);
@@ -24,9 +25,6 @@ typedef void*    (*pf_istack_pop)         (object* c);
 typedef object*  (*pf_istack_itr_begin)   (object* c);
 typedef object*  (*pf_istack_itr_end)     (object* c);
 
-
-/* TODO: change the number */
-#define ISTACK_ID 0X00000102
 struct istack_vtable {
 	/* public */
 	pf_istack_destroy     __destroy;

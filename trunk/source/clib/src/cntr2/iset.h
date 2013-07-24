@@ -3,6 +3,7 @@
 
 /* the interface functions which support, used by clients */
 #include <oo_model.h>
+#include <idef.h>
 
 extern inline void iset_destroy         (iobject* iq);
 extern inline void iset_clear           (iobject* iq);
@@ -26,9 +27,6 @@ typedef void*    (*pf_iset_remove)      (object* c, iobject* itr);
 typedef object*  (*pf_iset_itr_begin)   (object* c);
 typedef object*  (*pf_iset_itr_end)     (object* c);
 
-
-/* TODO: change the number */
-#define ISET_ID 0X00000103
 struct iset_vtable {
 	/* public */
 	pf_iset_destroy     __destroy;

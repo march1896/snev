@@ -3,6 +3,7 @@
 
 /* the interface functions which support, used by clients */
 #include <oo_model.h>
+#include <idef.h>
 
 /* forward iterator interface */
 extern inline void ifitr_destroy         (iobject* iitr);
@@ -19,7 +20,6 @@ typedef void     (*pf_ifitr_to_next)     (object* citr);
 typedef void*    (*pf_ifitr_get_ref)     (object* citr);
 typedef void     (*pf_ifitr_set_ref)     (object* citr, void* object);
 
-#define IFITR_ID 0X00000110
 struct ifitr_vtable {
 	/* public */
 	pf_ifitr_destroy     __destroy;
@@ -46,7 +46,6 @@ typedef void     (*pf_ibitr_to_next)     (object* citr);
 typedef void*    (*pf_ibitr_get_ref)     (object* citr);
 typedef void     (*pf_ibitr_set_ref)     (object* citr, void* object);
 
-#define IBITR_ID 0X00000111
 struct ibitr_vtable {
 	/* public */
 	pf_ibitr_destroy     __destroy;
@@ -78,7 +77,6 @@ typedef void     (*pf_iritr_set_ref)     (object* citr, void* object);
 typedef void*    (*pf_iritr_advance)     (object* citr, int length);
 typedef int      (*pf_iritr_distance)    (object* citr_from, object* citr_to);
 
-#define IRITR_ID 0X00000112
 struct iritr_vtable {
 	/* public */
 	pf_iritr_destroy     __destroy;
