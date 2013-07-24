@@ -3,6 +3,7 @@
 
 /* the interface functions which support, used by clients */
 #include <oo_model.h>
+#include <idef.h>
 
 extern inline void ilist_destroy         (iobject* iq);
 extern inline void ilist_clear           (iobject* iq);
@@ -37,8 +38,6 @@ typedef void*    (*pf_ilist_remove)       (object* iq, iobject* itr);
 typedef void     (*pf_ilist_insert_before)(object* iq, iobject* itr, void* n_ref);
 typedef void     (*pf_ilist_insert_after) (object* iq, iobject* itr, void* n_ref);
 
-/* TODO: change the number */
-#define ILIST_ID 0X00000105
 struct ilist_vtable {
 	/* public */
 	pf_ilist_destroy        __destroy;

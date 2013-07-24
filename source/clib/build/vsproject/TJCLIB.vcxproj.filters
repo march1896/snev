@@ -100,10 +100,10 @@
     <ClCompile Include="..\..\src\cntr2\ilist.c">
       <Filter>Source Files\cntr2</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cntr2\dlist_ref.c">
+    <ClCompile Include="..\..\src\cntr2\odlist.c">
       <Filter>Source Files\cntr2</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cntr2\olist.c">
+    <ClCompile Include="..\..\src\cntr2\rdlist.c">
       <Filter>Source Files\cntr2</Filter>
     </ClCompile>
   </ItemGroup>
@@ -254,7 +254,10 @@
     <ClInclude Include="..\..\src\cntr2\ilist.h">
       <Filter>Source Files\cntr2</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\cntr2\dlist_ref.h">
+    <ClInclude Include="..\..\src\cntr2\ifactory.h">
+      <Filter>Source Files\cntr2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cntr2\rdlist.h">
       <Filter>Source Files\cntr2</Filter>
     </ClInclude>
   </ItemGroup>

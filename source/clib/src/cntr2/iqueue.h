@@ -3,6 +3,7 @@
 
 /* the interface functions which support, used by clients */
 #include <oo_model.h>
+#include <idef.h>
 
 extern inline void iqueue_destroy         (iobject* iq);
 extern inline void iqueue_clear           (iobject* iq);
@@ -24,9 +25,6 @@ typedef void*    (*pf_iqueue_pop)         (object* c);
 typedef object*  (*pf_iqueue_itr_begin)   (object* c);
 typedef object*  (*pf_iqueue_itr_end)     (object* c);
 
-
-/* TODO: change the number */
-#define IQUEUE_ID 0X00000101
 struct iqueue_vtable {
 	/* public */
 	pf_iqueue_destroy     __destroy;
