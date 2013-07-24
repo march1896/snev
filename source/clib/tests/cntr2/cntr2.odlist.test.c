@@ -1,136 +1,132 @@
-#include <cntr.h>
 #include <test_util.h>
 #include <stdio.h>
 #include <string.h>
 
-static void add_find_remove_correctness_test(TC_TYPE ct, TD_TYPE dt, TD_LENGTH dl) {
-	cntr c;
-	citer_dos(first, NULL);
-	citer_dos(second, NULL);
-	int i, length, ulength;
+#include <iqueue.h>
+#include <istack.h>
+#include <iitr.h>
+#include <ifactory.h>
 
-	if (dt == TD_UNIQUE) {
-		if (ct >= TC_BST && ct <= TC_234T) 
-			return;
+static void __odlist_print(struct base_interface* iq) {
+	/* TODO: for stack we should use istack_itr_begin instead of iqueue_itr_begin */
+	/* which is causing the crash */
+	iobject* begin = as_bitr(iqueue_itr_begin(iq));
+	iobject* end   = as_bitr(iqueue_itr_end(iq));
+
+	while (!ibitr_equals(begin, end)) {
+		printf("%d ", (int)ibitr_get_ref(begin));
+		ibitr_to_next(begin);
 	}
 
-	printf("%s add/find/remove test with %s data\n", cntr_name(ct), data_order_name(dt));
+	printf("%d ", (int)ibitr_get_ref(begin));
+	printf("\n");
 
-	c = cntr_create(ct);
-
-	generate_test_data(dt, dl, &length, &ulength);
-
-	for (i = 0; i < ulength; i ++) cntr_add(c, (void*)uniquedata[i]);
-
-	/* test find */
-	for (i = 0; i < length; i ++) {
-		bool find = cntr_find(c, (void*)rawdata[i], first);
-		dbg_assert(find);
-	}
-
-	for (i = length + 1; i < length + 50; i ++) {
-		bool find = cntr_find(c, (void*)i, first);
-		dbg_assert(find == false);
-	}
-
-	/* test remove, remove first half elements */
-	for (i = 0; i < ulength; i ++) {
-		bool find = cntr_find(c, (void*)uniquedata[i], first);
-		cntr_remove(c, first, first);
-		dbg_assert(cntr_size(c) == ulength - i - 1);
-	}
-
-	cntr_clear(c);
-	dbg_assert(cntr_size(c) == 0);
-
-	cntr_destroy(c);
+	ibitr_destroy(begin);
+	ibitr_destroy(end);
 }
 
-static void add_find_remove_performance_test(TC_TYPE ct, TD_TYPE dt, TD_LENGTH dl) {
-	cntr c;
-	citer_dos(first, NULL);
-	citer_dos(second, NULL);
-	int rep, i, length, ulength;
-	clock_t start_c, end_c;
-	float find_used;
+static void __queue_correct() {
+	struct base_interface* iq = as_queue(create_dblinked_list());
 
-	if (dt == TD_UNIQUE) {
-		if (ct >= TC_BST && ct <= TC_234T) 
-			return;
+	int a[10], i, ref;
+	for (i = 0; i < 10; i ++) {
+		a[i] = i;
 	}
 
-	printf("\n%s add/find/remove performance test with %s data\n", cntr_name(ct), data_order_name(dt));
+	iqueue_push(iq, (void*)a[0]); /* { 0 } */
+	__odlist_print(iq);
+	iqueue_push(iq, (void*)a[1]); /* { 0, 1 } */
+	__odlist_print(iq);
+	iqueue_push(iq, (void*)a[2]); /* { 0, 1, 2 } */
+	__odlist_print(iq);
+	iqueue_push(iq, (void*)a[3]); /* { 0, 1, 2, 3 } */
+	__odlist_print(iq);
+	iqueue_push(iq, (void*)a[4]); /* { 0, 1, 2, 3, 4 } */
+	__odlist_print(iq);
+	iqueue_push(iq, (void*)a[5]); /* { 0, 1, 2, 3, 4, 5} */
+	__odlist_print(iq);
 
-	c = cntr_create(ct);
+	dbg_assert(iqueue_size(iq) == 6);
 
-	generate_test_data(dt, dl, &length, &ulength);
+	ref = (int)iqueue_pop(iq); /* { 1, 2, 3, 4, 5} */
+	__odlist_print(iq);
+	dbg_assert(ref == 0);
+	ref = (int)iqueue_pop(iq); /* { 2, 3, 4, 5 } */
+	__odlist_print(iq);
+	dbg_assert(ref == 1);
+	ref = (int)iqueue_pop(iq); /* { 3, 4, 5 } */
+	__odlist_print(iq);
+	dbg_assert(ref == 2);
+	ref = (int)iqueue_pop(iq); /* { 4, 5 } */
+	__odlist_print(iq);
+	dbg_assert(ref == 3);
+	ref = (int)iqueue_pop(iq); /* { 5 } */
+	__odlist_print(iq);
+	dbg_assert(ref == 4);
 
-	printf("add: ");
-	start_c = clock();	
-	for (i = 0; i < length; i ++) {
-		cntr_add(c, (void*)rawdata[i]);
-	}
-	end_c = clock();
-	printf("used %f\n", (float)(end_c - start_c)/CLOCKS_PER_SEC);
+	dbg_assert(iqueue_size(iq) == 1);
 
-	printf("find: ");
-	start_c = clock();
-	for (rep = 0; rep < 20; rep ++) {
-		for (i = 0; i < length; i ++) {
-			bool find = cntr_find(c, (void*)rawdata[i], first);
-			dbg_assert(find);
-		}
-	}
-	end_c = clock();
-	printf("used %f\n", (float)(end_c - start_c)/CLOCKS_PER_SEC);
-	find_used = (float)(end_c - start_c)/CLOCKS_PER_SEC;
-
-
-	printf("remove: ");
-	find_used = 0.0;
-	start_c = clock();
-	for (i = 0; i < ulength; i ++) {
-		bool find = cntr_find(c, (void*)uniquedata[i], first);
-
-		cntr_remove(c, first, first);
-	}
-	end_c = clock();
-	printf("used %f\n", (float)(end_c - start_c)/CLOCKS_PER_SEC - find_used);
-
-	cntr_clear(c);
-	dbg_assert(cntr_size(c) == 0);
-
-	cntr_destroy(c);
+	iqueue_destroy(iq);
 }
 
-static void cntr_base_memory_test() {
-	
+static void __stack_correct() {
+	struct base_interface* iq = as_stack(create_dblinked_list());
+
+	int a[10], i, ref;
+	for (i = 0; i < 10; i ++) {
+		a[i] = i;
+	}
+
+	istack_push(iq, (void*)a[0]); /* { 0 } */
+	__odlist_print(iq);
+	istack_push(iq, (void*)a[1]); /* { 0, 1 } */
+	__odlist_print(iq);
+	istack_push(iq, (void*)a[2]); /* { 0, 1, 2 } */
+	__odlist_print(iq);
+	istack_push(iq, (void*)a[3]); /* { 0, 1, 2, 3 } */
+	__odlist_print(iq);
+	istack_push(iq, (void*)a[4]); /* { 0, 1, 2, 3, 4 } */
+	__odlist_print(iq);
+	istack_push(iq, (void*)a[5]); /* { 0, 1, 2, 3, 4, 5} */
+	__odlist_print(iq);
+
+	dbg_assert(istack_size(iq) == 6);
+
+	ref = (int)istack_pop(iq); /* { 0, 1, 2, 3, 4} */
+	__odlist_print(iq);
+	dbg_assert(ref == 5);
+	ref = (int)istack_pop(iq); /* { 0, 1, 2, 3 } */
+	__odlist_print(iq);
+	dbg_assert(ref == 4);
+	ref = (int)istack_pop(iq); /* { 0, 1, 2 } */
+	__odlist_print(iq);
+	dbg_assert(ref == 2);
+	ref = (int)istack_pop(iq); /* { 0, 1 } */
+	__odlist_print(iq);
+	dbg_assert(ref == 2);
+	ref = (int)istack_pop(iq); /* { 0 } */
+	__odlist_print(iq);
+	dbg_assert(ref == 1);
+
+	dbg_assert(istack_size(iq) == 1);
+
+	istack_destroy(iq);
 }
 
-static void cntr_base_correctness_test() {
-	int i, j;
+static void __correctness_test() {
 	printf("add find remove correctness test start\n");
-	for (i = TC_LIST; i < TC_END; i ++) {
-		for (j = TD_INCREASE; j < TD_END; j ++) {
-			add_find_remove_correctness_test((TC_TYPE)i, (TD_TYPE)j, TL_CORRECTNESS);
-		}
-	}
+	__queue_correct();
+	__stack_correct();
 	printf("add find remove correctness test end\n");
 }
 
-static void cntr_base_performance_test() {
-	int i, j;
+static void __performance_test() {
 	printf("add find remove performance test start\n");
-	for (i = TC_RBT; i < TC_END; i ++) {
-		for (j = TD_INCREASE; j < TD_END; j ++) {
-			add_find_remove_performance_test((TC_TYPE)i, (TD_TYPE)j, TL_PERFORMANCE);
-		}
-	}
 	printf("add find remove performance test end\n");
 }
 
-void cntr_base_test() {
-	do_test("cntr cntr_base correctness", cntr_base_correctness_test);
+void cntr2_odlist_test() {
+	do_test("cntr cntr_base correctness", __correctness_test);
 
-	do_test("cntr cntr_base performance", cntr_base_performance_test);
+	do_test("cntr cntr_base performance", __performance_test);
 }

@@ -116,7 +116,7 @@ typedef struct o_dlist_itr {
 
 	struct base_interface         __iftable[e_i_count];
 
-	/* the iterator will never alloc memory, when aquire an iterator, the container will 
+	/* the iterator will never alloc memory, when acquire an iterator, the container will 
 	 * alloc the memory, but we should know how to delete this memory */
 	pf_dealloc                    __dealloc;
 
@@ -287,8 +287,8 @@ static object* o_dlist_create_v(pf_alloc alloc, pf_dealloc dealloc, pf_copy copy
 
 	r_dlist_init(&olist->__cntr, __alloc, __dealloc);
 
-	olist->__alloc = alloc;
-	olist->__dealloc = dealloc;
+	olist->__alloc = __alloc;
+	olist->__dealloc = __dealloc;
 
 	olist->__copy  = copy;
 	olist->__dispose = dispose;
@@ -347,7 +347,7 @@ static void o_dlist_itr_com_init(struct o_dlist_itr* itr, struct o_dlist* list) 
 	itr->__iftable[e_forward].__offset = (address)e_forward;
 	itr->__iftable[e_forward].__vtable = (unknown)&__ifitr_vtable;
 	itr->__iftable[e_bidir].__offset   = (address)e_bidir;
-	itr->__iftable[e_bidir].__vtable   = (unknown)&__ifitr_vtable;
+	itr->__iftable[e_bidir].__vtable   = (unknown)&__ibitr_vtable;
 
 	itr->__dealloc = list->__dealloc;
 	/* itr->__current = NULL; */
@@ -363,6 +363,9 @@ static object* o_dlist_itr_begin(object* o) {
 	o_dlist_itr_com_init(n_itr, olist);
 
 	n_itr->__current = &(r_dlist_first(&olist->__cntr)->link);
+	if (n_itr->__current == n_itr->__sentinel) {
+		n_itr->__current = NULL;
+	}
 
 	return (object*)n_itr;
 }
@@ -375,6 +378,9 @@ static object* o_dlist_itr_end(object* o) {
 	o_dlist_itr_com_init(n_itr, olist);
 
 	n_itr->__current = &(r_dlist_last(&olist->__cntr)->link);
+	if (n_itr->__current == n_itr->__sentinel) {
+		n_itr->__current = NULL;
+	}
 
 	return (object*)n_itr;
 }

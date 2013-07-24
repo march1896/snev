@@ -86,7 +86,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <AdditionalOptions> /Zm1000 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>../../src/.;../../src/memheap;../../src/util;../../src/cntr;../../src/regex;../../src/../tests;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../src/.;../../src/memheap;../../src/util;../../src/cntr;../../src/cntr2;../../src/regex;../../tests;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <CompileAs>CompileAsC</CompileAs>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -273,6 +273,7 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\tests\cntr2\cntr2.odlist.test.c" />
     <ClCompile Include="..\..\tests\cntr\cntr_algorithm.test.c" />
     <ClCompile Include="..\..\tests\cntr\cntr_base.test.c" />
     <ClCompile Include="..\..\tests\cntr\cntr_linear.test.c" />
