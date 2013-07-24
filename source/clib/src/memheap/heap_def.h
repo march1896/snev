@@ -9,9 +9,6 @@ typedef void* (*pf_mem_increase)(int size);
 
 typedef void (*pf_mem_decrease)(void* buff);
 
-typedef void* (*pf_alloc)(int size);
-typedef void (*pf_dealloc)(void* buff);
-
 #define _USING_GLOBAL_LLRB_HEAP_
 //#define _USING_GLOBAL_BUDDY_HEAP_
 

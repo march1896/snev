@@ -1,12 +1,23 @@
 #include <iitr.h>
 
-/* forward interator interface */
+/* forward iterator interface */
 inline void ifitr_destroy(iobject* iitr) {
 	object* citr = (object*)__object_from_interface(iitr);
 
 	dbg_assert(__cast(citr, IFITR_ID) == iitr);
 
 	(((struct ifitr_vtable*)(iitr->__vtable)))->__destroy(citr);
+}
+
+inline bool ifitr_equals(iobject* ia, iobject* ib) {
+	object* ca = (object*)__object_from_interface(ia);
+	object* cb = (object*)__object_from_interface(ib);
+
+	dbg_assert(__cast(ca, IFITR_ID) == ia);
+	dbg_assert(__cast(cb, IFITR_ID) == ib);
+	dbg_assert(ia->__vtable == ib->__vtable);
+
+	return (((struct ifitr_vtable*)(ia->__vtable)))->__equals(ca, cb);
 }
 
 inline void ifitr_to_next(iobject* iitr) {
@@ -39,6 +50,17 @@ inline void ibitr_destroy(iobject* iitr) {
 
 	dbg_assert(__cast(citr, IBITR_ID) == iitr);
 	((struct ibitr_vtable*)(iitr->__vtable))->__destroy(citr);
+}
+
+inline bool ibitr_equals(iobject* ia, iobject* ib) {
+	object* ca = (object*)__object_from_interface(ia);
+	object* cb = (object*)__object_from_interface(ib);
+
+	dbg_assert(__cast(ca, IBITR_ID) == ia);
+	dbg_assert(__cast(cb, IBITR_ID) == ib);
+	dbg_assert(ia->__vtable == ib->__vtable);
+
+	return (((struct ifitr_vtable*)(ia->__vtable)))->__equals(ca, cb);
 }
 
 inline void ibitr_to_prev(iobject* iitr) {
@@ -75,6 +97,17 @@ inline void iritr_destroy(iobject* iitr) {
 
 	dbg_assert(__cast(citr, IRITR_ID) == iitr);
 	((struct iritr_vtable*)(iitr->__vtable))->__destroy(citr);
+}
+
+inline bool iritr_equals(iobject* ia, iobject* ib) {
+	object* ca = (object*)__object_from_interface(ia);
+	object* cb = (object*)__object_from_interface(ib);
+
+	dbg_assert(__cast(ca, IRITR_ID) == ia);
+	dbg_assert(__cast(cb, IRITR_ID) == ib);
+	dbg_assert(ia->__vtable == ib->__vtable);
+
+	return (((struct ifitr_vtable*)(ia->__vtable)))->__equals(ca, cb);
 }
 
 inline void iritr_to_prev(iobject* iitr) {

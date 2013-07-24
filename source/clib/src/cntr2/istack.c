@@ -35,14 +35,14 @@ inline void* istack_pop(iobject* iq) {
 	return ((struct istack_vtable*)(iq->__vtable))->__pop(o);
 }
 
-inline iobject* istack_itr_begin(iobject* iq) {
+inline object* istack_itr_begin(iobject* iq) {
 	object* o = __object_from_interface(iq);
 	dbg_assert(__cast(o, ISTACK_ID) == iq);
 
 	return ((struct istack_vtable*)(iq->__vtable))->__itr_begin(o);
 }
 
-inline iobject* istack_itr_end(iobject* iq) {
+inline object* istack_itr_end(iobject* iq) {
 	object* o = __object_from_interface(iq);
 	dbg_assert(__cast(o, ISTACK_ID) == iq);
 

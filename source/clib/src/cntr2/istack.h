@@ -10,9 +10,9 @@ extern inline int  istack_size            (iobject* iq);
 extern inline void istack_push            (iobject* iq, void* ref);
 extern inline void* istack_pop            (iobject* iq);
 
-/* return a iterator, maybe foward/bidirectional/randomaccessed. */
-extern inline iobject* istack_itr_begin   (iobject* iq);
-extern inline iobject* istack_itr_end     (iobject* iq);
+/* return a iterator, maybe forward/bidirectional/random accessed. */
+extern inline object* istack_itr_begin    (iobject* iq);
+extern inline object* istack_itr_end      (iobject* iq);
 
 /* below is only useful for the container implementer */
 /* the virtual functions that each container should implement */
@@ -21,8 +21,8 @@ typedef void     (*pf_istack_clear)       (object* c);
 typedef int      (*pf_istack_size)        (object* c);
 typedef void     (*pf_istack_push)        (object* c, void* object);
 typedef void*    (*pf_istack_pop)         (object* c);
-typedef iobject* (*pf_istack_itr_begin)   (object* c);
-typedef iobject* (*pf_istack_itr_end)     (object* c);
+typedef object*  (*pf_istack_itr_begin)   (object* c);
+typedef object*  (*pf_istack_itr_end)     (object* c);
 
 
 /* TODO: change the number */

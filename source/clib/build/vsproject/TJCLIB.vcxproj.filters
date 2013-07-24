@@ -85,21 +85,6 @@
     <ClCompile Include="..\..\src\regex\regc.c">
       <Filter>Source Files\regex</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cntr2\inf_citer.c">
-      <Filter>Source Files\cntr2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cntr2\inf_cntr_base.c">
-      <Filter>Source Files\cntr2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cntr2\inf_cntr_linear.c">
-      <Filter>Source Files\cntr2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cntr2\obj_citer.c">
-      <Filter>Source Files\cntr2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cntr2\obj_cntr.c">
-      <Filter>Source Files\cntr2</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cntr2\iqueue.c">
       <Filter>Source Files\cntr2</Filter>
     </ClCompile>
@@ -112,10 +97,13 @@
     <ClCompile Include="..\..\src\cntr2\iitr.c">
       <Filter>Source Files\cntr2</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cntr2\clist.c">
+    <ClCompile Include="..\..\src\cntr2\ilist.c">
       <Filter>Source Files\cntr2</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cntr2\cntr_list.c">
+    <ClCompile Include="..\..\src\cntr2\dlist_ref.c">
+      <Filter>Source Files\cntr2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cntr2\olist.c">
       <Filter>Source Files\cntr2</Filter>
     </ClCompile>
   </ItemGroup>
@@ -248,24 +236,6 @@
     <ClInclude Include="..\..\src\cntr\oo_model.h">
       <Filter>Source Files\cntr</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\cntr2\cntr_def.h">
-      <Filter>Source Files\cntr2</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\cntr2\inf_citer.h">
-      <Filter>Source Files\cntr2</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\cntr2\inf_cntr_base.h">
-      <Filter>Source Files\cntr2</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\cntr2\inf_cntr_linear.h">
-      <Filter>Source Files\cntr2</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\cntr2\obj_citer.h">
-      <Filter>Source Files\cntr2</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\cntr2\obj_cntr.h">
-      <Filter>Source Files\cntr2</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\cntr2\oo_model.h">
       <Filter>Source Files\cntr2</Filter>
     </ClInclude>
@@ -281,7 +251,10 @@
     <ClInclude Include="..\..\src\cntr2\iitr.h">
       <Filter>Source Files\cntr2</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\cntr2\cntr_list.h">
+    <ClInclude Include="..\..\src\cntr2\ilist.h">
+      <Filter>Source Files\cntr2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cntr2\dlist_ref.h">
       <Filter>Source Files\cntr2</Filter>
     </ClInclude>
   </ItemGroup>

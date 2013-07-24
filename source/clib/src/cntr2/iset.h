@@ -8,12 +8,12 @@ extern inline void iset_destroy         (iobject* iq);
 extern inline void iset_clear           (iobject* iq);
 extern inline int  iset_size            (iobject* iq);
 extern inline void iset_insert          (iobject* iq, void* ref);
-extern inline iobject* iset_find        (iobject* iq, void* ref);
+extern inline object* iset_find         (iobject* iq, void* ref);
 extern inline void iset_remove          (iobject* iq, iobject* itr);
 
 /* return a iterator, maybe foward/bidirectional/randomaccessed. */
-extern inline iobject* iset_itr_begin   (iobject* iq);
-extern inline iobject* iset_itr_end     (iobject* iq);
+extern inline object* iset_itr_begin    (iobject* iq);
+extern inline object* iset_itr_end      (iobject* iq);
 
 /* below is only useful for the container implementer */
 /* the virtual functions that each container should implement */
@@ -21,10 +21,10 @@ typedef void     (*pf_iset_destroy)     (object* c);
 typedef void     (*pf_iset_clear)       (object* c);
 typedef int      (*pf_iset_size)        (object* c);
 typedef void     (*pf_iset_insert)      (object* c, void* ref);
-typedef iobject* (*pf_iset_find)        (object* c, void* ref);
+typedef object*  (*pf_iset_find)        (object* c, void* ref);
 typedef void*    (*pf_iset_remove)      (object* c, iobject* itr);
-typedef iobject* (*pf_iset_itr_begin)   (object* c);
-typedef iobject* (*pf_iset_itr_end)     (object* c);
+typedef object*  (*pf_iset_itr_begin)   (object* c);
+typedef object*  (*pf_iset_itr_end)     (object* c);
 
 
 /* TODO: change the number */

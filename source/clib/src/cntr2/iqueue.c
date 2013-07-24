@@ -35,14 +35,14 @@ inline void* iqueue_pop(iobject* iq) {
 	return ((struct iqueue_vtable*)(iq->__vtable))->__pop(o);
 }
 
-inline iobject* iqueue_itr_begin(iobject* iq) {
+inline object* iqueue_itr_begin(iobject* iq) {
 	object* o = __object_from_interface(iq);
 	dbg_assert(__cast(o, IQUEUE_ID) == iq);
 
 	return ((struct iqueue_vtable*)(iq->__vtable))->__itr_begin(o);
 }
 
-inline iobject* iqueue_itr_end(iobject* iq) {
+inline object* iqueue_itr_end(iobject* iq) {
 	object* o = __object_from_interface(iq);
 	dbg_assert(__cast(o, IQUEUE_ID) == iq);
 
