@@ -4,7 +4,7 @@
 /* the interface functions which support, used by clients */
 #include <oo_model.h>
 
-/* forward interator interface */
+/* forward iterator interface */
 extern inline void ifitr_destroy         (iobject* iitr);
 extern inline void ifitr_to_next         (iobject* iitr);
 extern inline void* ifitr_get_ref        (iobject* iitr);

@@ -24,18 +24,18 @@ struct cntr_list {
 /* TODO: move this to somewhere */
 typedef void (*pf_obj_dispose)(void* buff);
 
-inline void              cntr_list_init       (struct cntr_list* cl, pf_alloc __alloc, pf_dealloc __dealloc);
-inline void              cntr_list_clear      (struct cntr_list* cl, pf_obj_dispose __dispose);
-inline int               cntr_list_size       (struct cntr_list* cl);
-inline void              cntr_list_add        (struct cntr_list* cl, void* object);
-inline struct list_node* cntr_list_find       (struct cntr_list* cl, void* object);
-inline struct list_node* cntr_list_first      (struct cntr_list* cl);
-inline struct list_node* cntr_list_last       (struct cntr_list* cl);
-inline void*             cntr_list_front      (struct cntr_list* cl);
-inline void*             cntr_list_back       (struct cntr_list* cl);
-inline void              cntr_list_add_front  (struct cntr_list* cl, void* object);
-inline void              cntr_list_add_back   (struct cntr_list* cl, void* object);
-inline void*             cntr_list_remove_front(struct cntr_list* cl);
-inline void*             cntr_list_remove_back(struct cntr_list* cl);
+extern inline void              cntr_list_init       (struct cntr_list* cl, pf_alloc __alloc, pf_dealloc __dealloc);
+extern inline void              cntr_list_clear      (struct cntr_list* cl, pf_obj_dispose __dispose);
+extern inline int               cntr_list_size       (struct cntr_list* cl);
+extern inline void              cntr_list_add        (struct cntr_list* cl, void* object);
+extern inline struct list_node* cntr_list_find       (struct cntr_list* cl, void* object);
+extern inline struct list_node* cntr_list_first      (struct cntr_list* cl);
+extern inline struct list_node* cntr_list_last       (struct cntr_list* cl);
+extern inline void*             cntr_list_front      (struct cntr_list* cl);
+extern inline void*             cntr_list_back       (struct cntr_list* cl);
+extern inline void              cntr_list_add_front  (struct cntr_list* cl, void* object);
+extern inline void              cntr_list_add_back   (struct cntr_list* cl, void* object);
+extern inline void*             cntr_list_remove_front(struct cntr_list* cl);
+extern inline void*             cntr_list_remove_back(struct cntr_list* cl);
 
 #endif /* _CNTR_LIST_REF_H_ */

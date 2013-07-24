@@ -7,46 +7,6 @@
 
 #include <cntr_list.h>
 
-typedef unknown cntr;
-typedef unknown citer;
-
-static object* cntr_list_create   ();
-static void  cntr_list_destroy    (cntr cl);
-static void  cntr_list_clear      (cntr cl);
-static int   cntr_list_size       (cntr cl);
-static void  cntr_list_add        (cntr cl, void* object);
-static void  cntr_list_remove     (cntr cl, citer begin, citer end);
-static bool  cntr_list_find       (cntr cl, void* object, citer itr);
-static void  cntr_list_citer_begin(cntr cl, citer itr);
-static void  cntr_list_citer_end  (cntr cl, citer itr);
-
-static void* cntr_list_front      (cntr cl);
-static void* cntr_list_back       (cntr cl);
-static void  cntr_list_add_front  (cntr cl, void* object);
-static void  cntr_list_add_back   (cntr cl, void* object);
-static void* cntr_list_remove_front(cntr cl);
-static void* cntr_list_remove_back (cntr cl);
-
-static struct inf_cntr_base_vtable cntr_base_vtable = {
-	cntr_list_destroy,       /* destroy */
-	cntr_list_clear,         /* clean */
-	cntr_list_size,          /* size */
-	cntr_list_add,           /* add */
-	cntr_list_remove,
-	cntr_list_find,
-	cntr_list_citer_begin,   /* citer_begin */
-	cntr_list_citer_end  ,   /* citer_end   */
-};
-
-static struct inf_cntr_linear_vtable cntr_linear_vtable = {
-	cntr_list_front,         /* front */
-	cntr_list_back ,         /* back  */
-	cntr_list_add_front,     /* add_front */
-	cntr_list_add_back ,     /* add_back  */
-	cntr_list_remove_front,  /* remove_front */
-	cntr_list_remove_back ,  /* remove_back  */
-};
-
 enum list_interfaces {
 	e_list,
 	e_queue,
@@ -119,6 +79,44 @@ static unknown cntr_list_itr_cast(unknown x, unique_id inf_id) {
 
 	return NULL;
 }
+
+static object* cntr_list_create   ();
+static void  cntr_list_destroy    (cntr cl);
+static void  cntr_list_clear      (cntr cl);
+static int   cntr_list_size       (cntr cl);
+static void  cntr_list_add        (cntr cl, void* object);
+static void  cntr_list_remove     (cntr cl, citer begin, citer end);
+static bool  cntr_list_find       (cntr cl, void* object, citer itr);
+static void  cntr_list_citer_begin(cntr cl, citer itr);
+static void  cntr_list_citer_end  (cntr cl, citer itr);
+
+static void* cntr_list_front      (cntr cl);
+static void* cntr_list_back       (cntr cl);
+static void  cntr_list_add_front  (cntr cl, void* object);
+static void  cntr_list_add_back   (cntr cl, void* object);
+static void* cntr_list_remove_front(cntr cl);
+static void* cntr_list_remove_back (cntr cl);
+
+static struct inf_cntr_base_vtable cntr_base_vtable = {
+	cntr_list_destroy,       /* destroy */
+	cntr_list_clear,         /* clean */
+	cntr_list_size,          /* size */
+	cntr_list_add,           /* add */
+	cntr_list_remove,
+	cntr_list_find,
+	cntr_list_citer_begin,   /* citer_begin */
+	cntr_list_citer_end  ,   /* citer_end   */
+};
+
+static struct inf_cntr_linear_vtable cntr_linear_vtable = {
+	cntr_list_front,         /* front */
+	cntr_list_back ,         /* back  */
+	cntr_list_add_front,     /* add_front */
+	cntr_list_add_back ,     /* add_back  */
+	cntr_list_remove_front,  /* remove_front */
+	cntr_list_remove_back ,  /* remove_back  */
+};
+
 
 cntr cntr_create_as_list_v(pf_dealloc obj_dispose, pf_alloc alloc, pf_dispose dealloc) {
 	cntr_list* pcl = NULL;
