@@ -5,9 +5,6 @@
 #include <cominc.h>
 #include <oo_model.h>
 
-typedef unknown citer;
-typedef unknown cntr;
-
 #define __default_alloc   halloc
 #define __default_dealloc hfree
 
@@ -15,5 +12,14 @@ typedef unknown cntr;
 typedef void* (*pf_alloc  ) (int size);
 typedef void  (*pf_dealloc) (void* buff);
 typedef void  (*pf_dispose) (void* buff);
+typedef void* (*pf_copy   ) (void* buff);
+
+inline void* sys_alloc(int size) {
+	return halloc(size);
+}
+
+inline void sys_dealloc(void* buff) {
+	hfree(buff);
+}
 
 #endif /* _CNTR_DEF_H_ */
