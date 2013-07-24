@@ -78,7 +78,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <AdditionalOptions> /Zm1000 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>../../src/.;../../src/memheap;../../src/util;../../src/cntr;../../src/regex;../../src/cntr2;../../src/../tests;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../src/.;../../src/memheap;../../src/util;../../src/cntr;../../src/regex;../../src/cntr2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <CompileAs>CompileAsC</CompileAs>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -243,6 +243,7 @@
     <ClInclude Include="..\..\src\cntr2\ifactory.h" />
     <ClInclude Include="..\..\src\cntr2\iitr.h" />
     <ClInclude Include="..\..\src\cntr2\ilist.h" />
+    <ClInclude Include="..\..\src\cntr2\imemmgr.h" />
     <ClInclude Include="..\..\src\cntr2\iqueue.h" />
     <ClInclude Include="..\..\src\cntr2\iset.h" />
     <ClInclude Include="..\..\src\cntr2\istack.h" />
