@@ -335,7 +335,7 @@ static void o_dlist_itr_com_init(struct o_dlist_itr* itr, struct o_dlist* list) 
 static object* o_dlist_itr_begin(object* o) {
 	struct o_dlist* olist = (struct o_dlist*)o;
 	struct o_dlist_itr* n_itr = 
-		(struct o_dlist_itr*)olist->__alloc(sizeof(struct o_dlist_itr));
+		(struct o_dlist_itr*)(olist->__alloc(sizeof(struct o_dlist_itr)));
 
 	o_dlist_itr_com_init(n_itr, olist);
 
