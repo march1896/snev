@@ -7,9 +7,10 @@
 #include <iitr.h>
 #include <ifactory.h>
 
-static void __odlist_print(struct base_interface* iq) {
-	/* TODO: for stack we should use istack_itr_begin instead of iqueue_itr_begin */
-	/* which is causing the crash */
+static void __odlist_print(struct base_interface* ic) {
+	/* TODO: use the algorithm for_each method */
+	struct base_interface* iq = as_queue(ic);
+
 	iobject* begin = as_bitr(iqueue_itr_begin(iq));
 	iobject* end   = as_bitr(iqueue_itr_end(iq));
 
@@ -100,7 +101,7 @@ static void __stack_correct() {
 	dbg_assert(ref == 4);
 	ref = (int)istack_pop(iq); /* { 0, 1, 2 } */
 	__odlist_print(iq);
-	dbg_assert(ref == 2);
+	dbg_assert(ref == 3);
 	ref = (int)istack_pop(iq); /* { 0, 1 } */
 	__odlist_print(iq);
 	dbg_assert(ref == 2);
