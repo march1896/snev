@@ -106,6 +106,9 @@
     <ClCompile Include="..\..\src\cntr2\rdlist.c">
       <Filter>Source Files\cntr2</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\cntr2\ialgo.c">
+      <Filter>Source Files\cntr2</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
@@ -261,6 +264,12 @@
       <Filter>Source Files\cntr2</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\cntr2\imemmgr.h">
+      <Filter>Source Files\cntr2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cntr2\idef.h">
+      <Filter>Source Files\cntr2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cntr2\ialgo.h">
       <Filter>Source Files\cntr2</Filter>
     </ClInclude>
   </ItemGroup>

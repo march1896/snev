@@ -31,6 +31,14 @@ inline void citer_assign(citer to, citer from) {
 	lhs->__vt = rhs->__vt;
 }
 
+/*
+ * TODO: [error prone] there seems to be a big problem for this function.
+ * the range represented by (begin, end) is [begin, end] (inclusive),
+ * not the same as STL, in STL, (begin, end) represents [begin, end)
+ * so what would happen when apply for_each on an empty container.
+ *
+ * what the is the begin/end for an empty container.
+ */
 void citer_for_each(citer begin, citer end, pf_for_each_process proc) {
 	citer_dos(itr, begin);
 
@@ -268,7 +276,7 @@ void merge_sort(citer _begin, citer _end, pf_compare_object comp) {
 	return;
 }
 
-void reverse(citer begin, citer end) {
+void citer_reverse(citer begin, citer end) {
 	citer_dos(first, begin);
 	citer_dos(last, end);
 
@@ -281,7 +289,7 @@ void reverse(citer begin, citer end) {
 	}
 }
 
-bool prev_permutation(citer begin, citer end, pf_compare_object comp) {
+bool citer_prev_permutation(citer begin, citer end, pf_compare_object comp) {
 	citer_dos(bwd, end);
 	citer_dos(next, end);
 
@@ -296,7 +304,7 @@ bool prev_permutation(citer begin, citer end, pf_compare_object comp) {
 
 			citer_swap(bwd, sub);
 
-			reverse(next, end);
+			citer_reverse(next, end);
 
 			return true;
 		}
@@ -307,7 +315,7 @@ bool prev_permutation(citer begin, citer end, pf_compare_object comp) {
 	return false;
 }
 
-bool next_permutation(citer begin, citer end, pf_compare_object comp) {
+bool citer_next_permutation(citer begin, citer end, pf_compare_object comp) {
 	citer_dos(bwd, end);
 	citer_dos(next, end);
 
@@ -322,7 +330,7 @@ bool next_permutation(citer begin, citer end, pf_compare_object comp) {
 
 			citer_swap(bwd, sub);
 
-			reverse(next, end);
+			citer_reverse(next, end);
 
 			return true;
 		}

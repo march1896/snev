@@ -203,6 +203,7 @@
     </Midl>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\cntr2\ialgo.c" />
     <ClCompile Include="..\..\src\cntr2\iitr.c" />
     <ClCompile Include="..\..\src\cntr2\ilist.c" />
     <ClCompile Include="..\..\src\cntr2\iqueue.c" />
@@ -240,6 +241,8 @@
     <ClCompile Include="..\..\src\regex\regc.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\src\cntr2\ialgo.h" />
+    <ClInclude Include="..\..\src\cntr2\idef.h" />
     <ClInclude Include="..\..\src\cntr2\ifactory.h" />
     <ClInclude Include="..\..\src\cntr2\iitr.h" />
     <ClInclude Include="..\..\src\cntr2\ilist.h" />
