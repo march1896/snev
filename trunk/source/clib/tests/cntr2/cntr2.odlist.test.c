@@ -13,15 +13,15 @@ static void __ref_print(void* __ref) {
 	printf("%d ", (int)__ref);
 }
 static void __odlist_print(struct base_interface* ic) {
-	struct base_interface* iq = as_queue(ic);
-	iterator begin = iqueue_itr_begin(iq);
-	iterator end   = iqueue_itr_end(iq);
-
-	foreach(begin, end, __ref_print);
-
-	printf("\n");
-	itr_destroy(begin);
-	itr_destroy(end);
+// 	struct base_interface* iq = as_queue(ic);
+// 	iterator begin = iqueue_itr_begin(iq);
+// 	iterator end   = iqueue_itr_end(iq);
+// 
+// 	foreach(begin, end, __ref_print);
+// 
+// 	printf("\n");
+// 	itr_destroy(begin);
+// 	itr_destroy(end);
 }
 
 static void __list_correct() {
@@ -68,53 +68,60 @@ static void __list_correct() {
 	
 	dbg_assert(ilist_size(list) == 6);
 
+	__ref = (int)ilist_remove_front(list); /* { 3, 1, 0, 2, 4 } */
+	dbg_assert(__ref == 5);
+	__ref = (int)ilist_remove_front(list); /* { 1, 0, 2, 4 } */
+	dbg_assert(__ref == 3);
+
+	__odlist_print(list);
+
 	ilist_destroy(list);
 }
 
 
 static void __queue_correct() {
-	struct base_interface* iq = as_queue(create_dblinked_list());
+	iqueue queue = as_queue(create_dblinked_list());
 
 	int a[10], i, __ref;
 	for (i = 0; i < 10; i ++) {
 		a[i] = i;
 	}
 
-	__odlist_print(iq);
-	iqueue_push(iq, (void*)a[0]); /* { 0 } */
-	__odlist_print(iq);
-	iqueue_push(iq, (void*)a[1]); /* { 0, 1 } */
-	__odlist_print(iq);
-	iqueue_push(iq, (void*)a[2]); /* { 0, 1, 2 } */
-	__odlist_print(iq);
-	iqueue_push(iq, (void*)a[3]); /* { 0, 1, 2, 3 } */
-	__odlist_print(iq);
-	iqueue_push(iq, (void*)a[4]); /* { 0, 1, 2, 3, 4 } */
-	__odlist_print(iq);
-	iqueue_push(iq, (void*)a[5]); /* { 0, 1, 2, 3, 4, 5} */
-	__odlist_print(iq);
+	__odlist_print(queue);
+	iqueue_push(queue, (void*)a[0]); /* { 0 } */
+	__odlist_print(queue);
+ 	iqueue_push(queue, (void*)a[1]); /* { 0, 1 } */
+ 	__odlist_print(queue);
+	iqueue_push(queue, (void*)a[2]); /* { 0, 1, 2 } */
+	__odlist_print(queue);
+	iqueue_push(queue, (void*)a[3]); /* { 0, 1, 2, 3 } */
+	__odlist_print(queue);
+	iqueue_push(queue, (void*)a[4]); /* { 0, 1, 2, 3, 4 } */
+	__odlist_print(queue);
+	iqueue_push(queue, (void*)a[5]); /* { 0, 1, 2, 3, 4, 5} */
+	__odlist_print(queue);
 
-	dbg_assert(iqueue_size(iq) == 6);
+	dbg_assert(iqueue_size(queue) == 6);
 
-	__ref = (int)iqueue_pop(iq); /* { 1, 2, 3, 4, 5} */
-	__odlist_print(iq);
+	__ref = (int)iqueue_pop(queue); /* { 1, 2, 3, 4, 5} */
+	__odlist_print(queue);
 	dbg_assert(__ref == 0);
-	__ref = (int)iqueue_pop(iq); /* { 2, 3, 4, 5 } */
-	__odlist_print(iq);
+	__ref = (int)iqueue_pop(queue); /* { 2, 3, 4, 5 } */
+	__odlist_print(queue);
 	dbg_assert(__ref == 1);
-	__ref = (int)iqueue_pop(iq); /* { 3, 4, 5 } */
-	__odlist_print(iq);
+	__ref = (int)iqueue_pop(queue); /* { 3, 4, 5 } */
+	__odlist_print(queue);
 	dbg_assert(__ref == 2);
-	__ref = (int)iqueue_pop(iq); /* { 4, 5 } */
-	__odlist_print(iq);
+	__ref = (int)iqueue_pop(queue); /* { 4, 5 } */
+	__odlist_print(queue);
 	dbg_assert(__ref == 3);
-	__ref = (int)iqueue_pop(iq); /* { 5 } */
-	__odlist_print(iq);
+	__ref = (int)iqueue_pop(queue); /* { 5 } */
+	__odlist_print(queue);
 	dbg_assert(__ref == 4);
 
-	dbg_assert(iqueue_size(iq) == 1);
+	dbg_assert(iqueue_size(queue) == 1);
 
-	iqueue_destroy(iq);
+	//iqueue_destroy(queue);
 }
 
 static void __stack_correct() {
