@@ -11,9 +11,6 @@ void foreach(itrfwd begin, itrfwd end, pf_ref_process cb) {
 	dbg_assert(is_itrfwd(begin));
 	dbg_assert(is_itrfwd(end));
 
-	/* if a common iterator has passed in, assuming it at least has a forward interface */
-	dbg_assert(begin != NULL && end != NULL);
-
 	while (!itr_equals(begin, end)) {
 		cb(itr_get_ref(begin));
 		itr_to_next(begin);
@@ -43,7 +40,14 @@ void sort_r(itrrac begin, itrrac end, pf_ref_compare comp) {
 	dbg_assert(is_itrrac(end));
 }
 
-/* TODO: should we consider single-linked-list, only forward iterators? */
+static void itr_swap_ref(iterator itr_a, iterator itr_b) {
+	void* ref_a = itr_get_ref(itr_a);
+	void* ref_b = itr_get_ref(itr_b);
+
+	itr_set_ref(itr_a, ref_b);
+	itr_set_ref(itr_b, ref_a);
+}
+
 void reverse_b(itrbid begin, itrbid end) {
 	dbg_assert(is_itrbid(begin));
 	dbg_assert(is_itrbid(end));
@@ -54,11 +58,7 @@ void reverse_b(itrbid begin, itrbid end) {
 
 	itr_to_prev(end);
 	while (!itr_equals(begin, end)) {
-		void* b_ref = itr_get_ref(begin);
-		void* e_ref = itr_get_ref(end);
-		
-		itr_set_ref(begin, e_ref);
-		itr_set_ref(end, b_ref);
+		itr_swap_ref(begin, end);
 
 		itr_to_next(begin);
 

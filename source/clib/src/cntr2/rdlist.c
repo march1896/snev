@@ -159,9 +159,11 @@ inline void r_dlist_add_back(struct r_dlist* cl, void* object) {
 
 inline void* r_dlist_remove_front(struct r_dlist* cl) {
 	if (cl->size > 0) {
-		struct list_link* link = cl->sent.next;
+		struct list_link* link    = cl->sent.next;
 		struct r_dlist_node* node = container_of(link, struct r_dlist_node, link);
-		void*  object_ref      = node->reference;
+		void*  object_ref         = node->reference;
+
+		dbg_assert(link != &cl->sent);
 
 		list_unlink(link);
 		cl->dealloc(node);
@@ -181,9 +183,9 @@ inline void* r_dlist_remove_front(struct r_dlist* cl) {
 
 inline void* r_dlist_remove_back(struct r_dlist* cl) {
 	if (cl->size > 0) {
-		struct list_link* link = cl->sent.prev;
+		struct list_link* link    = cl->sent.prev;
 		struct r_dlist_node* node = container_of(link, struct r_dlist_node, link);
-		void*  object_ref      = node->reference;
+		void*  object_ref         = node->reference;
 
 		list_unlink(link);
 		cl->dealloc(node);

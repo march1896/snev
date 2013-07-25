@@ -5,15 +5,16 @@
 #include <oo_model.h>
 #include <idef.h>
 
-extern inline void itr_destroy         (object* itr);
-extern inline bool itr_equals          (object* ia, object* ib);
-extern inline void* itr_get_ref        (object* itr);
-extern inline void itr_set_ref         (object* itr, void* ref);
-extern inline void itr_to_prev         (object* itr);
-extern inline void itr_to_next         (object* itr);
-extern inline void itr_advance         (object* itr, int length);
-extern inline int  itr_distance        (object* from, object* to);
+extern inline void itr_destroy         (iterator itr);
+extern inline bool itr_equals          (iterator ia, iterator ib);
+extern inline void* itr_get_ref        (iterator itr);
+extern inline void itr_set_ref         (iterator itr, void* ref);
+extern inline void itr_to_prev         (iterator itr);
+extern inline void itr_to_next         (iterator itr);
+extern inline void itr_advance         (iterator itr, int length);
+extern inline int  itr_distance        (iterator from, iterator to);
 
+/* TODO: should we implement the below functions */
 extern inline void iitr_destroy         (iobject* iitr);
 extern inline bool iitr_equals          (iobject* ia, iobject* ib);
 extern inline void* iitr_get_ref        (iobject* iitr);
