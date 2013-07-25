@@ -83,7 +83,7 @@ static void reverse_test(TC_TYPE ct, TD_TYPE dt, TD_LENGTH dl) {
 	cntr_citer_begin(c, first);
 	cntr_citer_end(c, second);
 
-	reverse(first, second);
+	citer_reverse(first, second);
 
 	cntr_citer_begin(c, aug);
 	dbg_assert(citer_equal(first, aug));
@@ -100,7 +100,7 @@ static void reverse_test(TC_TYPE ct, TD_TYPE dt, TD_LENGTH dl) {
 }
 
 static void print_element(citer itr) {
-	//printf("%d ", (int)citer_get_ref(itr));
+	printf("%d ", (int)citer_get_ref(itr));
 }
 #define PERMUTATION_LENGTH 5
 static void permutation_test(TC_TYPE ct) {
@@ -126,21 +126,43 @@ static void permutation_test(TC_TYPE ct) {
 	count = 0;
 	do {
 		citer_for_each(first, last, print_element);
-		//printf("\n");
+		printf("\n");
 		count ++;
-	} while (next_permutation(first, last, cntr_int_compare));
+	} while (citer_next_permutation(first, last, cntr_int_compare));
 	
 	dbg_assert(count == ans);
 
 	do {
 		citer_for_each(first, last, print_element);
-		//printf("\n");
+		printf("\n");
 		count --;
-	} while (prev_permutation(first, last, cntr_int_compare));
+	} while (citer_prev_permutation(first, last, cntr_int_compare));
 
 	dbg_assert(count == 0);
 
 	cntr_destroy(c);
+}
+
+static void for_each_test(TC_TYPE ct) {
+	cntr c;
+	citer_dos(first, NULL);
+	citer_dos(last, NULL);
+
+	printf("%s for_each test\n", cntr_name(ct));
+
+	c = cntr_create(ct);
+	// for an empty container, the begin, end iterator is not well defined,
+	// so the for_each function will not handle the situation well.
+	cntr_citer_begin(c, first);
+	cntr_citer_end(c, last);
+
+	// will we crash here ?
+	// [BUG, BUG]
+	//citer_for_each(first, last, print_element);
+
+	cntr_destroy(c);
+
+	return;
 }
 
 static void reverse_correctness_test() {
@@ -163,9 +185,20 @@ static void prev_next_permutation_test() {
 	printf("permutation correctness test end\n");
 }
 
+static void for_each_tests() {
+	int i;
+	printf("for each correctness test start\n");
+	for (i = TC_LIST; i <= TC_ARRAY; i ++) {
+		for_each_test((TC_TYPE)i);
+	}
+	printf("for each correctness test end\n");
+}
+
 void algorithm_base_test() {
 	do_test("reverse correctness", reverse_correctness_test);
 
 	do_test("permutation correctness", prev_next_permutation_test);
+
+	do_test("for each correctness", for_each_tests);
 }
 

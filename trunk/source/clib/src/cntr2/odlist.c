@@ -96,32 +96,25 @@ static struct iset_vtable __iset_vtable = {
 	o_dlist_destroy,          /* __destroy */
 	o_dlist_clear,            /* __clear */
 	o_dlist_size,             /* __size */
-	o_dlist_add_back,           /* __insert */
+	o_dlist_add_back,         /* __insert */
 	o_dlist_itr_find,         /* __itr_find */
 	o_dlist_remove,           /* __remove */
 	o_dlist_itr_begin,        /* __itr_begin */
 	o_dlist_itr_end           /* __itr_end */
 };
 
-enum iter_interfaces {
-	e_forward,
-	e_bidir,
-	/* e_randacc, */
-	e_i_count
-};
-
 typedef struct o_dlist_itr {
 	address                       __offset;
 	pf_cast                       __cast;
 
-	struct base_interface         __iftable[e_i_count];
+	/* there is always one interface to implement, since the interface is inherited */
+	struct base_interface         __iftable[1];
 
 	/* the iterator will never alloc memory, when acquire an iterator, the container will 
 	 * alloc the memory, but we should know how to delete this memory */
 	pf_dealloc                    __dealloc;
 
 	struct list_link*             __current;
-	struct list_link*             __sentinel;
 };
 
 
@@ -130,10 +123,10 @@ static unknown o_dlist_cast(unknown x, unique_id intf_id);
 
 static void o_dlist_itr_destroy(object* citr);
 static bool o_dlist_itr_equals(object* a, object* b);
-static void o_dlist_itr_to_prev(object* citr);
-static void o_dlist_itr_to_next(object* citr);
 static void* o_dlist_itr_get_ref(object* citr);
 static void o_dlist_itr_set_ref(object* citr, void* n_ref);
+static void o_dlist_itr_to_next(object* citr);
+static void o_dlist_itr_to_prev(object* citr);
 
 static void o_dlist_itr_destroy(object* citr) {
 	struct o_dlist_itr* itr = (struct o_dlist_itr*)citr;
@@ -155,32 +148,6 @@ static bool o_dlist_itr_equals(object* a, object* b) {
 	dbg_assert(itr_b->__cast == o_dlist_itr_cast);
 
 	return itr_a->__current == itr_b->__current;
-}
-
-static void o_dlist_itr_to_prev(object* citr) {
-	struct o_dlist_itr* itr = (struct o_dlist_itr*)citr;
-
-	dbg_assert(itr->__cast == o_dlist_itr_cast);
-	dbg_assert(itr->__current != NULL);
-
-	itr->__current = itr->__current->prev;
-
-	if (itr->__current == itr->__sentinel) {
-		itr->__current = NULL;
-	}
-}
-
-static void o_dlist_itr_to_next(object* citr) {
-	struct o_dlist_itr* itr = (struct o_dlist_itr*)citr;
-
-	dbg_assert(itr->__cast == o_dlist_itr_cast);
-	dbg_assert(itr->__current != NULL);
-
-	itr->__current = itr->__current->next;
-
-	if (itr->__current == itr->__sentinel) {
-		itr->__current = NULL;
-	}
 }
 
 static void* o_dlist_itr_get_ref(object* citr) {
@@ -205,21 +172,31 @@ static void o_dlist_itr_set_ref(object* citr, void* n_ref) {
 	node->reference = n_ref;
 }
 
-static struct ifitr_vtable __ifitr_vtable = {
-	o_dlist_itr_destroy,      /* __destroy */
-	o_dlist_itr_equals,       /* __equals  */
-	o_dlist_itr_to_next,      /* __to_next */
-	o_dlist_itr_get_ref,      /* __get_ref */
-	o_dlist_itr_set_ref       /* __set_ref */
-};
+static void o_dlist_itr_to_next(object* citr) {
+	struct o_dlist_itr* itr = (struct o_dlist_itr*)citr;
 
-static struct ibitr_vtable __ibitr_vtable = {
+	dbg_assert(itr->__cast == o_dlist_itr_cast);
+	dbg_assert(itr->__current != NULL);
+
+	itr->__current = itr->__current->next;
+}
+
+static void o_dlist_itr_to_prev(object* citr) {
+	struct o_dlist_itr* itr = (struct o_dlist_itr*)citr;
+
+	dbg_assert(itr->__cast == o_dlist_itr_cast);
+	dbg_assert(itr->__current != NULL);
+
+	itr->__current = itr->__current->prev;
+}
+
+static struct itr_bidirectional_vtable __itr_vtable = {
 	o_dlist_itr_destroy,      /* __destroy */
 	o_dlist_itr_equals,       /* __equals  */
-	o_dlist_itr_to_prev,      /* __to_prev */
-	o_dlist_itr_to_next,      /* __to_next */
 	o_dlist_itr_get_ref,      /* __get_ref */
-	o_dlist_itr_set_ref       /* __set_ref */
+	o_dlist_itr_set_ref,      /* __set_ref */
+	o_dlist_itr_to_next,      /* __to_next */
+	o_dlist_itr_to_prev       /* __to_prev */
 };
 
 static unknown o_dlist_cast(unknown x, unique_id intf_id) {
@@ -249,10 +226,14 @@ static unknown o_dlist_itr_cast(unknown x, unique_id inf_id) {
 	dbg_assert(__is_object(itr));
 
 	switch (inf_id) {
-	case IFITR_ID:
-		return (unknown)&itr->__iftable[e_forward];
-	case IBITR_ID:
-		return (unknown)&itr->__iftable[e_bidir];
+	case ITR_BAS_ID:
+	case ITR_REF_ID:
+	case ITR_ACC_ID:
+	case ITR_FWD_ID:
+	case ITR_BID_ID:
+		return (unknown)&itr->__iftable[0];
+	case ITR_RAC_ID:
+		return NULL;
 	default:
 		return NULL;
 	}
@@ -344,15 +325,11 @@ static void o_dlist_itr_com_init(struct o_dlist_itr* itr, struct o_dlist* list) 
 	itr->__offset = itr;
 	itr->__cast   = o_dlist_itr_cast;
 
-	itr->__iftable[e_forward].__offset = (address)e_forward;
-	itr->__iftable[e_forward].__vtable = (unknown)&__ifitr_vtable;
-	itr->__iftable[e_bidir].__offset   = (address)e_bidir;
-	itr->__iftable[e_bidir].__vtable   = (unknown)&__ibitr_vtable;
+	itr->__iftable[0].__offset = (address)0;
+	itr->__iftable[0].__vtable = (unknown)&__itr_vtable;
 
 	itr->__dealloc = list->__dealloc;
 	/* itr->__current = NULL; */
-
-	itr->__sentinel = &list->__cntr.sent;
 }
 
 static object* o_dlist_itr_begin(object* o) {
@@ -362,10 +339,9 @@ static object* o_dlist_itr_begin(object* o) {
 
 	o_dlist_itr_com_init(n_itr, olist);
 
-	n_itr->__current = &(r_dlist_first(&olist->__cntr)->link);
-	if (n_itr->__current == n_itr->__sentinel) {
-		n_itr->__current = NULL;
-	}
+	//n_itr->__current = &(r_dlist_first(&olist->__cntr)->link);
+	/* if the list is empty, we just return the sentinel node */
+	n_itr->__current = (olist->__cntr).sent.next;
 
 	return (object*)n_itr;
 }
@@ -377,10 +353,9 @@ static object* o_dlist_itr_end(object* o) {
 
 	o_dlist_itr_com_init(n_itr, olist);
 
-	n_itr->__current = &(r_dlist_last(&olist->__cntr)->link);
-	if (n_itr->__current == n_itr->__sentinel) {
-		n_itr->__current = NULL;
-	}
+	/* the end iterator is the sentinel node, since 
+	 * (begin, end) represents [begin, end) */
+	n_itr->__current = &olist->__cntr.sent;
 
 	return (object*)n_itr;
 }
@@ -389,10 +364,16 @@ static object* o_dlist_itr_find(object* o, void* ref) {
 	struct o_dlist* olist = (struct o_dlist*)o;
 	struct o_dlist_itr* n_itr = 
 		(struct o_dlist_itr*)olist->__alloc(sizeof(struct o_dlist_itr));
+	struct r_dlist_node* node = r_dlist_find(&olist->__cntr, ref);
 
 	o_dlist_itr_com_init(n_itr, olist);
 
-	n_itr->__current = &(r_dlist_find(&olist->__cntr, ref)->link);
+	if (node != NULL) {
+		n_itr->__current = &(node->link);
+	}
+	else {
+		n_itr->__current = &olist->__cntr.sent;
+	}
 
 	return (object*)n_itr;
 }

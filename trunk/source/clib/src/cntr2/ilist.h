@@ -19,6 +19,22 @@ extern inline void ilist_insert_after    (iobject* iq, iobject* itr, void* n_ref
 /* return a iterator, maybe forward/bidirectional/random accessed. */
 extern inline object* ilist_itr_begin    (iobject* iq);
 extern inline object* ilist_itr_end      (iobject* iq);
+
+/* 
+ * TODO: if the target is not in the list, should we return NULL or
+ * the sentinel end of the container? 
+ * in the algorithm find(iterator begin, iterator end, void* ref)
+ * it makes more sense to return an iterator equals end.
+ * but here if we return the end, in the following program, we may 
+ * further more 
+ * 1,acquire the end, 
+ * 2,do the comparison, 
+ * 3,then delete two iterators.
+ * instead, if we return NULL, we should always write like,
+ *   itr = as_ifitr(ilist_itr_find(list, obj));
+ *   ...
+ *   if (itr != NULL) ifitr_destroy(itr); // which is error prone.
+ */
 extern inline object* ilist_itr_find     (iobject* iq, void* __ref);
 
 /* below is only useful for the container implementer */
