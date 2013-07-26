@@ -23,9 +23,8 @@ typedef void (*pf_heap_walk_v)(heap_handle h, pf_mem_process allocated_cb, pf_me
 typedef void (*pf_heap_init)  (heap_handle h, pf_alloc mem_increase, pf_alloc_v mem_increase_v, pf_dealloc mem_decrease, heap_handle parent);
 typedef void (*pf_heap_deinit)(heap_handle h);
 
-typedef heap_handle (*pf_heap_spawn  )(heap_handle parent, pf_alloc   parent_alloc,   pf_dealloc parent_dealloc);
-typedef heap_handle (*pf_heap_spawn_v)(heap_handle parent, pf_alloc_v parent_alloc_v, pf_dealloc parent_dealloc);
-typedef void        (*pf_heap_join   )(heap_handle child);
+typedef heap_handle (*pf_heap_spawn)(heap_handle parent, pf_alloc parent_alloc, pf_alloc_v parent_alloc_v, pf_dealloc parent_dealloc);
+typedef void        (*pf_heap_join )(heap_handle child);
 */
 
 void* wheap_alloc   (heap_handle h, int size);
@@ -41,8 +40,8 @@ void  wheap_init_v  (heap_handle h, pf_alloc_v mem_increase_v, pf_dealloc mem_de
 
 void  wheap_deinit  (heap_handle h);
 
-heap_handle wheap_spawn  (heap_handle parent, pf_alloc   parent_alloc,   pf_dealloc parent_dealloc);
-heap_handle wheap_spawn_v(heap_handle parent, pf_alloc_v parent_alloc_v, pf_dealloc parent_dealloc);
-void        wheap_join   (heap_handle child);
+heap_handle 
+      wheap_spawn(heap_handle parent, pf_alloc parent_alloc, pf_alloc_v parent_alloc_v, pf_dealloc parent_dealloc);
+void  wheap_join   (heap_handle child);
 
 #endif /* _HEAP_WRAPPED_SYSTEM_H_*/

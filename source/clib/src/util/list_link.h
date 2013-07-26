@@ -8,6 +8,7 @@ struct list_link {
 	struct list_link *next;
 };
 
+/* TODO: change list_link to list_link_push and list_unlink to list_link_pop */
 extern inline void list_link(struct list_link *n, struct list_link *prev, struct list_link *next);
 
 extern inline void list_unlink(struct list_link *n);

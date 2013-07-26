@@ -47,10 +47,30 @@ void  wheap_walk(heap_handle h, pf_mem_process allocated_cb, pf_mem_process free
 void  wheap_walk_v(heap_handle h, pf_mem_process allocated_cb, pf_mem_process freed_cb, void* param) {
 }
 
-heap_handle wheap_spawn(heap_handle parent, pf_alloc mem_increase, pf_dealloc mem_decrease);
-void  wheap_join(heap_handle child);
+heap_handle wheap_spawn(heap_handle parent, pf_alloc parent_alloc, pf_alloc_v parent_alloc_v, pf_dealloc parent_dealloc) {
+	struct heap_wrapped* n_heap = NULL;
+	/* we prefer to use verbosed alloc since this will give parent heap more information */
+	if (pf_alloc_v != NULL) {
+		n_heap = (struct heap_wrapped*)pf_alloc_v(parent, sizeof(struct heap_wrapped), __FILE__, __LINE__);
+	}
+	else {
+		dbg_assert(parent_alloc != NULL);
+		n_heap = (struct heap_wrapped*)pf_alloc(parent, sizeof(struct heap_wrapped));
+	}
+	wheap_init(n_heap, parent_alloc, parent_alloc_v, parent_dealloc, parent);
 
-void wheap_init(heap_handle h, pf_alloc mem_increase, pf_alloc_v mem_increase_v, pf_dealloc mem_decrease, heap_handle parent) {
+	return (heap_handle)n_heap;
+}
+void  wheap_join(heap_handle child) {
+	struct heap_wrapped* heap = (struct heap_wrapped*)child;
+	pf_dealloc parent_dealloc = heap->__grow_dealloc;
+	wheap_deinit(child);
+
+	dbg_assert(parent_dealloc != NULL);
+	parent_dealloc(heap);
+}
+
+void wheap_init(heap_handle h, pf_alloc parent_alloc, pf_alloc_v parent_alloc_v, pf_dealloc parent_dealloc, heap_handle parent) {
 	struct heap_wrapped* heap = (struct heap_wrapped*)h;
 
 	heap->parent         = parent;
