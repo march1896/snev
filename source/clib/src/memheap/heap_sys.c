@@ -2,46 +2,43 @@
 
 #include <stdlib.h>
 
-heap_handle sysheap_init(void *buff, int size) {
-	UNUSED(buff);
-	UNUSED(size);
-}
-
-void  sysheap_destroy(heap_handle hhdl) {
-	UNUSED(hhdl);
-}
-
-void* sysheap_alloc(heap_handle hhdl, int size) {
-	UNUSED(hhdl);
-	return malloc(size);
-}
-
-#ifdef _MEM_DEBUG_
-void* sysheap_alloc_debug(heap_handle hhdl, int size, const char* file, int line) {
-	/* TODO: we could add debug infomation simplely in front of the allocated memory */
-	UNUSED(hhdl);
-	UNUSED(file);
-	UNUSED(line);
+void* sheap_alloc(heap_handle h, int size) {
+	unused(h);
 
 	return malloc(size);
 }
-#endif
 
-void  sysheap_dealloc(heap_handle hhdl, void *buff) {
-	UNUSED(hhdl);
+void* sheap_alloc_v(heap_handle h, int size, const char* file ,int line) {
+	unused(h);
+	unused(file);
+	unused(line);
+
+	return malloc(size);
+}
+
+void sheap_dealloc(heap_handle h, void* buff) {
+	/* we can not handle the system heap, the only way to use it is globally */
+	unused(h);
+
 	free(buff);
 }
 
-void sysheap_dump(heap_handle hhdl) {
-	/* TODO: not supported yet */
-	UNUSED(hhdl);
+void sheap_walk(heap_handle h, pf_mem_process allocated_cb, pf_mem_process freed_cb) {
+	/* this method is not supported by the system heap */
+	unused(h);
+	unused(allocated_cb);
+	unused(freed_cb);
+
+	dbg_assert(false);
 }
 
-#ifdef _MEM_DEBUG_
-void sysheap_debug_leak(heap_handle hhdl) {
-	/* TODO: not supported yet */
-	UNUSED(hhdl);
-}
+void sheap_walk_v(heap_handle h, pf_mem_process allocated_cb, pf_mem_process freed_cb, void* param) {
+	/* this method is not supported by the system heap */
+	unused(h);
+	unused(allocated_cb);
+	unused(freed_cb);
+	unused(param);
 
-#endif 
+	dbg_assert(false);
+}
 

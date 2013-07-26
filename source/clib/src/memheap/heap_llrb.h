@@ -13,7 +13,7 @@ void theap_destroy(heap_handle pheap);
  * NULL if allocate failed */
 void* theap_alloc(heap_handle pheap, int size);
 
-/* dealloca a buff from a heap */
+/* dealloc a buff from a heap */
 void theap_dealloc(heap_handle pheap, void *buff);
 
 /* dump debug information of the heap */
@@ -29,5 +29,8 @@ void theap_init_global(int size);
 void theap_deinit_global();
 
 void theap_debug_global_leak();
+
+extern heap_handle theap_global_handle;
+
 
 #endif /* _HEAP_LLRB_H_ */

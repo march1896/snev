@@ -23,10 +23,10 @@ inline struct block_c* block_com_make_sentinels(
 	struct block_c *pb;
 	dbg_assert(buff_start && buff_end && buff_start < buff_end);
 
-	*sent_first = buff_start;
+	*sent_first = (struct block_c*)buff_start;
 	block_com_invalidate(*sent_first);
 
-	*sent_last = (void*)((struct block_c*)(buff_end) - 1);
+	*sent_last = ((struct block_c*)(buff_end) - 1);
 	block_com_invalidate(*sent_last);
 
 	pb = (struct block_c*)buff_start + 1;
@@ -102,7 +102,7 @@ inline struct block_c* block_com_split(struct block_c* pbc, unsigned int size, u
 		if (block_com_valid(next_adj))
 			block_com_set_prev_adj(next_adj, sb);
 
-		return (void*)sb;
+		return sb;
 	}
 
 	/* not enough space to split */
@@ -121,13 +121,13 @@ inline void block_com_merge(struct block_c* pstart, struct block_c* pend) {
 }
 
 inline void block_com_init_addr(struct block_c* pbc, void* prev_adj, void* next_adj , bool is_free) {
-	block_com_set_prev_adj(pbc, prev_adj);
-	block_com_set_next_adj(pbc, next_adj);
+	block_com_set_prev_adj(pbc, (struct block_c*)prev_adj);
+	block_com_set_next_adj(pbc, (struct block_c*)next_adj);
 	block_com_set_free(pbc, is_free);
 }
 
 inline void block_com_init_size(struct block_c* pbc, void* prev_adj, unsigned int size, bool is_free) {
-	block_com_set_prev_adj(pbc, prev_adj);
+	block_com_set_prev_adj(pbc, (struct block_c*)prev_adj);
 	block_com_set_size(pbc, size);
 	block_com_set_free(pbc, is_free);
 }
