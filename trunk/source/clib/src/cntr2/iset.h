@@ -9,6 +9,8 @@ extern inline void iset_destroy         (iobject* iq);
 extern inline void iset_clear           (iobject* iq);
 extern inline int  iset_size            (iobject* iq);
 extern inline void iset_insert          (iobject* iq, void* ref);
+/* TODO: make some documentation on this topic */
+/* currently the find will return the end iterator of the container instead of NULL */
 extern inline object* iset_find         (iobject* iq, void* ref);
 extern inline void iset_remove          (iobject* iq, iobject* itr);
 
@@ -21,8 +23,8 @@ extern inline object* iset_itr_end      (iobject* iq);
 typedef void     (*pf_iset_destroy)     (object* c);
 typedef void     (*pf_iset_clear)       (object* c);
 typedef int      (*pf_iset_size)        (object* c);
-typedef void     (*pf_iset_insert)      (object* c, void* ref);
-typedef object*  (*pf_iset_find)        (object* c, void* ref);
+typedef void     (*pf_iset_insert)      (object* c, void* __ref);
+typedef object*  (*pf_iset_find)        (object* c, void* __ref);
 typedef void*    (*pf_iset_remove)      (object* c, iobject* itr);
 typedef object*  (*pf_iset_itr_begin)   (object* c);
 typedef object*  (*pf_iset_itr_end)     (object* c);

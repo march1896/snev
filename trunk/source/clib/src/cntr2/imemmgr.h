@@ -5,9 +5,6 @@
 #include <cominc.h>
 #include <oo_model.h>
 
-#define __default_alloc   halloc
-#define __default_dealloc hfree
-
 /* TODO: move these definitions to a proper place */
 typedef void* (*pf_alloc  ) (int size);
 typedef void  (*pf_dealloc) (void* buff);

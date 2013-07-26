@@ -12,8 +12,8 @@ struct r_dlist_node {
 
 struct r_dlist {
 	/* alloc/dealloc manages the inner memory use of list_node*/
-	pf_alloc             alloc;
-	pf_dealloc           dealloc;
+	pf_alloc             __alloc;
+	pf_dealloc           __dealloc;
 
 	int                  size;
 	struct list_link     sent; /* sentinel */

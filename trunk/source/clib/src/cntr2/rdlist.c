@@ -6,8 +6,8 @@ inline void r_dlist_init(struct r_dlist* cl, pf_alloc __alloc, pf_dealloc __deal
 	dbg_assert(__alloc   != NULL);
 	dbg_assert(__dealloc != NULL);
 
-	cl->alloc     = __alloc;
-	cl->dealloc   = __dealloc;
+	cl->__alloc     = __alloc;
+	cl->__dealloc   = __dealloc;
 	cl->size      = 0;
 
 	list_init(&cl->sent);
@@ -29,7 +29,7 @@ inline void r_dlist_clear(struct r_dlist* cl, pf_dispose __dispose) {
 		if (__dispose) 
 			__dispose(node->reference);
 		/* second delete the link itself */
-		cl->dealloc(node);
+		cl->__dealloc(node);
 	}
 	
 	/* init the sentinel again, since we do not unlink the deleted nodes */
@@ -92,7 +92,7 @@ inline void* r_dlist_remove(struct r_dlist* cl, struct r_dlist_node* node) {
 	void* obj_ref = node->reference;
 
 	list_unlink(&node->link);
-	cl->dealloc(node);
+	cl->__dealloc(node);
 
 	cl->size --;
 
@@ -100,7 +100,7 @@ inline void* r_dlist_remove(struct r_dlist* cl, struct r_dlist_node* node) {
 }
 
 inline void r_dlist_insert_before(struct r_dlist* cl, struct r_dlist_node* node, void* n_ref) {
-	struct r_dlist_node* n_node = (struct r_dlist_node*)cl->alloc(sizeof(struct r_dlist_node));
+	struct r_dlist_node* n_node = (struct r_dlist_node*)cl->__alloc(sizeof(struct r_dlist_node));
 
 	n_node->reference = n_ref;
 	list_link(&n_node->link, (&node->link)->prev, &node->link);
@@ -109,7 +109,7 @@ inline void r_dlist_insert_before(struct r_dlist* cl, struct r_dlist_node* node,
 }
 
 inline void r_dlist_insert_after(struct r_dlist* cl, struct r_dlist_node* node, void* n_ref) {
-	struct r_dlist_node* n_node = (struct r_dlist_node*)cl->alloc(sizeof(struct r_dlist_node));
+	struct r_dlist_node* n_node = (struct r_dlist_node*)cl->__alloc(sizeof(struct r_dlist_node));
 
 	n_node->reference = n_ref;
 	list_link(&n_node->link, (&node->link), (&node->link)->next);
@@ -140,7 +140,7 @@ inline void* r_dlist_back(struct r_dlist* cl) {
 }
 
 inline void r_dlist_add_front(struct r_dlist* cl, void* object) {
-	struct r_dlist_node* n_node = (struct r_dlist_node*)cl->alloc(sizeof(struct r_dlist_node));
+	struct r_dlist_node* n_node = (struct r_dlist_node*)cl->__alloc(sizeof(struct r_dlist_node));
 
 	n_node->reference = object;
 	list_insert_front(&cl->sent, &n_node->link);
@@ -149,7 +149,7 @@ inline void r_dlist_add_front(struct r_dlist* cl, void* object) {
 }
 
 inline void r_dlist_add_back(struct r_dlist* cl, void* object) {
-	struct r_dlist_node* n_node = (struct r_dlist_node*)cl->alloc(sizeof(struct r_dlist_node));
+	struct r_dlist_node* n_node = (struct r_dlist_node*)cl->__alloc(sizeof(struct r_dlist_node));
 
 	n_node->reference = object;
 	list_insert_back(&cl->sent, &n_node->link);
@@ -166,7 +166,7 @@ inline void* r_dlist_remove_front(struct r_dlist* cl) {
 		dbg_assert(link != &cl->sent);
 
 		list_unlink(link);
-		cl->dealloc(node);
+		cl->__dealloc(node);
 
 		cl->size --;
 
@@ -188,7 +188,7 @@ inline void* r_dlist_remove_back(struct r_dlist* cl) {
 		void*  object_ref         = node->reference;
 
 		list_unlink(link);
-		cl->dealloc(node);
+		cl->__dealloc(node);
 
 		cl->size --;
 

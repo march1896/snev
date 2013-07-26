@@ -23,6 +23,7 @@
 typedef iobject* iqueue;
 typedef iobject* istack;
 typedef iobject* ilist;
+typedef iobject* iset;
 
 typedef object* container;
 typedef object* iterator;

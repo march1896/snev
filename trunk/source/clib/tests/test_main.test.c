@@ -27,13 +27,13 @@ void run_all_test() {
 	//do_test("llrb link", llrb_link_test);
 	do_test("cntr2 test", cntr2_odlist_test);
 	debug_global_leak();
-	do_test("algorithm test", algorithm_base_test);
-	debug_global_leak();
-	do_test("cntr linear ALL", cntr_base_test);
-	debug_global_leak();
-	do_test("sort algorithm", cntr_sort_test);
-	debug_global_leak();
-	heap_deinit_global();
+// 	do_test("algorithm test", algorithm_base_test);
+// 	debug_global_leak();
+// 	do_test("cntr linear ALL", cntr_base_test);
+// 	debug_global_leak();
+// 	do_test("sort algorithm", cntr_sort_test);
+// 	debug_global_leak();
+// 	heap_deinit_global();
 }
 
 void main() {

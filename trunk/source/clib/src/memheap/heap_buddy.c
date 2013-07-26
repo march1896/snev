@@ -80,23 +80,23 @@ void  bheap_destroy(heap_handle hhdl) {
 
 #define SPLIT_THRETHHOLD sizeof(struct block_buddy)
 
-#ifdef _MEM_DEBUG_
-void* bheap_alloc_debug(heap_handle hhdl, int size, const char* file, int line) {
+void* bheap_alloc_v(heap_handle hhdl, int size, const char* file, int line) {
 	void *buff = bheap_alloc(hhdl, size);
 
-	if (buff == NULL)
-		return NULL;
+	dbg_assert(buff != NULL);
 
+	#ifdef _MEM_DEBUG_
 	{
 		struct block_c *pbc = (struct block_c*)block_com_from_data(buff);
 
 		pbc->file = file;
 		pbc->line = line;
 	}
+	#endif
 
 	return buff;
 }
-#endif
+
 
 void* bheap_alloc(heap_handle hhdl, int size) {
 	int bit;

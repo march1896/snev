@@ -3,25 +3,40 @@
 
 #include <heap_def.h>
 
-/* init a heap on a buffer of a given size */
-heap_handle sysheap_init(void *buff, int size);
+/* Implement the following interface one by one */
+/*
+typedef void* (*pf_alloc)     (heap_handle h, int size);
+typedef void* (*pf_alloc_v)   (heap_handle h, int size, const char* file, int line);
 
-/* deinit a heap on a given buffer */
-void sysheap_destroy(heap_handle pheap);
+typedef void (*pf_dealloc)    (heap_handle h, void* buff);
 
-/* alloc a buff from a heap, return the address of the allocated heap, 
- * NULL if allocate failed */
-void* sysheap_alloc(heap_handle pheap, int size);
+typedef void (*pf_mem_process)(void* mem);
+typedef void (*pf_heap_walk)  (heap_handle h, pf_mem_process allocated_cb, pf_mem_process freed_cb);
+typedef void (*pf_heap_walk_v)(heap_handle h, pf_mem_process allocated_cb, pf_mem_process freed_cb, void* param);
 
-/* dealloca a buff from a heap */
-void sysheap_dealloc(heap_handle pheap, void *buff);
+typedef void (*pf_heap_init)  (heap_handle h, pf_alloc mem_increase, pf_alloc_v mem_increase_v, pf_dealloc mem_decrease, heap_handle parent);
+typedef void (*pf_heap_deinit)(heap_handle h);
 
-/* dump debug information of the heap */
-void sysheap_dump(heap_handle pheap);
+typedef heap_handle (*pf_heap_spawn  )(heap_handle parent, pf_alloc   parent_alloc,   pf_dealloc parent_dealloc);
+typedef heap_handle (*pf_heap_spawn_v)(heap_handle parent, pf_alloc_v parent_alloc_v, pf_dealloc parent_dealloc);
+typedef void        (*pf_heap_join   )(heap_handle child);
+*/
+
+void* sheap_alloc   (heap_handle h, int size);
+void* sheap_alloc_v (heap_handle h, int size, const char* file ,int line);
+
+void  sheap_dealloc (heap_handle h, void* buff);
+
+void  sheap_walk    (heap_handle h, pf_mem_process allocated_cb, pf_mem_process freed_cb);
+void  sheap_walk_v  (heap_handle h, pf_mem_process allocated_cb, pf_mem_process freed_cb, void* param);
+
+/* 
+ * we can not spawn a system heap, system heap is the parent of all heaps we spawn.
+ * 
+ * also, system heap does not have init/deinit method.
+ */
 
 #ifdef _MEM_DEBUG_
-void sysheap_debug_leak(heap_handle hhdl);
-void* sysheap_alloc_debug(heap_handle hhdl, int size, const char* file, int line);
 #endif
 
 #endif /* _HEAP_SYSTEM_H_ */

@@ -40,7 +40,7 @@ typedef struct base_object {
 #define __address_of(x) x
 #define __MAX_NUM_INTERFACE_PER_OBJECT 10
 
-inline struct base_object* __object_from_interface(const struct base_interface* inf) {
+force_inline struct base_object* __object_from_interface(const struct base_interface* inf) {
 	/* TODO: remove the const_cast */
 	struct base_interface* inf0 = (struct base_interface*)inf - (unsigned int)inf->__offset;
 	struct base_object* obj = container_of(inf0, struct base_object, __iftable[0]);
@@ -48,7 +48,7 @@ inline struct base_object* __object_from_interface(const struct base_interface* 
 	return obj;
 }
 
-inline bool __is_object(unknown x) {
+force_inline bool __is_object(unknown x) {
 	struct base_object* obj = (struct base_object*)x;
 	if (obj->__offset == __address_of(x)) {
 		//dbg_assert(obj->__cast(x, OBJECT_ME) == x);
@@ -58,7 +58,7 @@ inline bool __is_object(unknown x) {
 	return false;
 }
 
-inline bool __is_interface(unknown x) {
+force_inline bool __is_interface(unknown x) {
 	struct base_interface* inf = (struct base_interface*)x;
 	dbg_assert((int)(inf->__offset) <= __MAX_NUM_INTERFACE_PER_OBJECT);
 
@@ -78,7 +78,7 @@ inline bool __is_interface(unknown x) {
  * from interface to interface(not common in c++), from object to object(which will return NULL since we 
  * have only one layer of inherit, that is object inherit from interfaces.
  */
-inline unknown __cast(unknown x, unique_id id) {
+force_inline unknown __cast(unknown x, unique_id id) {
 	if (__is_object(x)) {
 		struct base_object* obj = ((struct base_object*)x);
 		return obj->__cast(obj, id);
@@ -93,7 +93,7 @@ inline unknown __cast(unknown x, unique_id id) {
 }
 
 /* cast a object to one of its interfaces if you know the offset of the interface in the object */
-inline struct base_interface* __fast_cast(unknown x, int ifoffset) {
+force_inline struct base_interface* __fast_cast(unknown x, int ifoffset) {
 	struct base_object* obj = ((struct base_object*)x);
 
 	dbg_assert(__is_object(obj));
