@@ -5,9 +5,6 @@
 #include <cominc.h>
 #include <oo_model.h>
 
-/* TODO: move these definitions to a proper place */
-typedef void* (*pf_alloc  ) (int size);
-typedef void  (*pf_dealloc) (void* buff);
 typedef void  (*pf_dispose) (void* buff);
 typedef void* (*pf_copy   ) (void* buff);
 

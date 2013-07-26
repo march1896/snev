@@ -42,7 +42,7 @@ inline int r_dlist_size(struct r_dlist* cl) {
 	return cl->size;
 }
 
-inline void cntr_list_add(struct r_dlist* cl, void* object) {
+inline void r_dlist_add(struct r_dlist* cl, void* object) {
 	r_dlist_add_back(cl, object);
 }
 
