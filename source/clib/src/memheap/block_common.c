@@ -49,7 +49,7 @@ inline unsigned int block_com_size(struct block_c* pbc) {
 }
 
 inline unsigned int block_com_data_size(struct block_c* pbc) {
-	return block_com_size(pbc) - sizeof(pbc);
+	return block_com_size(pbc) - sizeof(struct block_c);
 }
 
 inline void block_com_set_size(struct block_c* pbc, unsigned int size) {
