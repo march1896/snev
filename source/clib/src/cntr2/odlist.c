@@ -21,7 +21,7 @@ typedef struct o_dlist {
 	
 	struct base_interface         __iftable[e_l_count];
 
-	struct r_dlist              __cntr;
+	struct r_dlist                __cntr;
 
 	/* methods to manage the inner memory use by the container */
 	pf_alloc                      __alloc;
