@@ -14,12 +14,8 @@ typedef void (*pf_mem_process)(void* mem);
 typedef void (*pf_heap_walk)  (heap_handle h, pf_mem_process allocated_cb, pf_mem_process freed_cb);
 typedef void (*pf_heap_walk_v)(heap_handle h, pf_mem_process allocated_cb, pf_mem_process freed_cb, void* param);
 
-typedef void (*pf_heap_init)  (heap_handle h, pf_alloc mem_increase, pf_alloc_v mem_increase_v, pf_dealloc mem_decrease, heap_handle parent);
-typedef void (*pf_heap_deinit)(heap_handle h);
-
-typedef heap_handle (*pf_heap_spawn  )(heap_handle parent, pf_alloc   parent_alloc,   pf_dealloc parent_dealloc);
-typedef heap_handle (*pf_heap_spawn_v)(heap_handle parent, pf_alloc_v parent_alloc_v, pf_dealloc parent_dealloc);
-typedef void        (*pf_heap_join   )(heap_handle child);
+typedef heap_handle (*pf_heap_spawn)(heap_handle parent, pf_alloc parent_alloc, pf_alloc_v parent_alloc_v, pf_dealloc parent_dealloc);
+typedef void        (*pf_heap_join )(heap_handle child);
 */
 
 void* sheap_alloc   (heap_handle h, int size);
@@ -32,8 +28,6 @@ void  sheap_walk_v  (heap_handle h, pf_mem_process allocated_cb, pf_mem_process 
 
 /* 
  * we can not spawn a system heap, system heap is the parent of all heaps we spawn.
- * 
- * also, system heap does not have init/deinit method.
  */
 
 #ifdef _MEM_DEBUG_
