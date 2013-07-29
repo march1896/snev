@@ -51,3 +51,25 @@ inline void list_remove(struct list_link* sent, struct list_link *node) {
 
 	list_unlink(node);
 }
+
+typedef void (*pf_list_link_process)  (struct list_link* each);
+typedef void (*pf_list_link_process_v)(struct list_link* each, void* param);
+inline void list_foreach(struct list_link* sent, pf_list_link_process process) {
+	struct list_link* next = sent->next;
+
+	while (next != sent) {
+		process(next);
+
+		next = next->next;
+	}
+}
+
+void list_foreach_v(struct list_link* sent, pf_list_link_process_v process_v, void* param) {
+	struct list_link* next = sent->next;
+
+	while (next != sent) {
+		process_v(next, param);
+
+		next = next->next;
+	}
+}
