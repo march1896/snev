@@ -39,7 +39,7 @@
  *       it should know the preivous/next block address to do the merge work).
  *
  * when the block is not allocated, it is in the free list, we should know:
- *    1, the size of the block. (in order to deside if it's allocatable)
+ *    1, the size of the block. (in order to deside if it's allocatable by a given size)
  *    2, the previous/next free block. (to maintain the free list)
  *    3, the next adjacent block,(it is a little hard to understand this 
  *       rule, consider the current block is in free list, and the prev/next 
@@ -93,18 +93,70 @@
 
 #define BLOCK_COM_SIZE_MASK (~BLOCK_COM_EXT_MASK)
 
-struct block_c {
-	struct block_c *prev_adj; 
-	unsigned int info; 
-
-#ifdef _MEM_DEBUG_
-	const char *file;
-	unsigned line;
-#endif
+/* 
+ * struct block_c is the minimum length of block header for allocated blocks
+ *
+ * a concrete memory management algorithm should maintain its own links to manage
+ * memory into a 'freelist'.
+ */
+struct block_c_clean {
+	struct block_c*       prev_adj; 
+	unsigned int          info; 
 };
 
+struct block_c_debug {
+	unsigned int          header;
+
+	struct block_c_debug* prev_adj;
+	unsigned int          info;
+
+	const char*           file;
+	unsigned              line;
+
+	unsigned int          footer;
+};
+
+#ifdef _MEM_DEBUG_
+
+extern inline void block_c_debug_check(struct block_c_debug* pbc);
+extern inline void block_c_debug_init(struct block_c_debug* pbc);
+extern inline void block_c_debug_deinit(struct block_c_debug* pbc);
+
+extern inline void block_c_debug_set_fileline(struct block_c_debug* pbc, const char* file, int line);
+extern inline char* block_c_debug_get_fileline(struct block_c_debug* pbc, int* line);
+
+#define block_c block_c_debug
+
+/* by using these macros, control the efficiency explictely. */
+#define block_com_debug_check(x)  block_c_debug_check(x)
+#define block_com_debug_init(x)   block_c_debug_init(x)
+#define block_com_debug_deinit(x) block_c_debug_deinit(x)
+#define block_com_debug_set_fileline(c, f, l) block_c_debug_set_fileline(c, f, l)
+#define block_com_debug_get_fileline(c, e);   block_c_debug_set_fileline(c, f, l)
+
+#else 
+
+extern inline char* block_c_clean_get_fileline(struct block_c_clean* pbc, int* line);
+
+/* by using these macros, control the efficiency explictely. */
+#define block_c block_c_clean
+#define block_com_debug_check(x)
+#define block_com_debug_init(x)
+#define block_com_debug_deinit(x)
+#define block_com_debug_set_fileline(c, f, l)
+#define block_com_debug_get_fileline(c, e);   block_c_clean_set_fileline(c, f, l)
+
+#endif
+
+/* 
+ * Check if a block is valid block, valid means it's in the allocated list
+ * or in the free list, not include the sentinel blocks.
+ */
 extern inline bool block_com_valid(struct block_c* pbc);
 
+/*
+ * Make a block invalide, typically for sentinel blocks.
+ */
 extern inline void block_com_invalidate(struct block_c* pbc);
 
 /**

@@ -2,6 +2,7 @@
 #define _HEAP_WRAPPED_SYSTEM_H_
 
 #include <heap_def.h>
+#include <util/list_link.h>
 
 /* 
  * This is just a wrap of the system heap, which saves the allocated block in a linked list,
@@ -10,38 +11,33 @@
  */
 
 /* Implement the following interface one by one */
-/*
-typedef void* (*pf_alloc)     (heap_handle h, int size);
-typedef void* (*pf_alloc_v)   (heap_handle h, int size, const char* file, int line);
+/* the below interface should be implemented, from heap_def.h
+typedef void* (*pf_alloc_c)   (void* pheap, int size);
+typedef void* (*pf_alloc_v)   (void* pheap, int size, const char* file, int line);
 
-typedef void (*pf_dealloc)    (heap_handle h, void* buff);
+typedef bool (*pf_dealloc_c)  (void* pheap, void* buff);
+typedef bool (*pf_dealloc_v)  (void* pheap, void* buff, const char* file, int line);
 
-typedef void (*pf_mem_process)(void* mem);
-typedef void (*pf_heap_walk)  (heap_handle h, pf_mem_process allocated_cb, pf_mem_process freed_cb);
-typedef void (*pf_heap_walk_v)(heap_handle h, pf_mem_process allocated_cb, pf_mem_process freed_cb, void* param);
-
-typedef void (*pf_heap_init)  (heap_handle h, pf_alloc mem_increase, pf_alloc_v mem_increase_v, pf_dealloc mem_decrease, heap_handle parent);
-typedef void (*pf_heap_deinit)(heap_handle h);
-
-typedef heap_handle (*pf_heap_spawn)(heap_handle parent, pf_alloc parent_alloc, pf_alloc_v parent_alloc_v, pf_dealloc parent_dealloc);
-typedef void        (*pf_heap_join )(heap_handle child);
+typedef void (*pf_mem_process)  (void* mem);
+typedef void (*pf_mem_process_v)(void* mem, void* param);
+typedef void (*pf_mem_walk)   (void* pheap, pf_mem_process allocated_cb, pf_mem_process freed_cb);
+typedef void (*pf_mem_walk_v) (void* pheap, pf_mem_process_v allocated_cb, pf_mem_process_v freed_cb, void* param);
 */
 
-void* wheap_alloc   (heap_handle h, int size);
-void* wheap_alloc_v (heap_handle h, int size, const char* file ,int line);
+struct heap_wrap {
+	struct list_link allocated;
+};
 
-void  wheap_dealloc (heap_handle h, void* buff);
+void  heap_wrap_init    (struct heap_wrap* h, pf_alloc __alloc, pf_dealloc __dealloc);
+void  heap_wrap_deinit  (struct heap_wrap* h);
 
-void  wheap_walk    (heap_handle h, pf_mem_process allocated_cb, pf_mem_process freed_cb);
-void  wheap_walk_v  (heap_handle h, pf_mem_process allocated_cb, pf_mem_process freed_cb, void* param);
+void* heap_wrap_alloc   (struct heap_wrap* h, int size);
+void* heap_wrap_alloc_v (struct heap_wrap* h, int size, const char* file ,int line);
 
-void  wheap_init    (heap_handle h, pf_alloc mem_increase, pf_dealloc mem_decrease, heap_handle parent);
-void  wheap_init_v  (heap_handle h, pf_alloc_v mem_increase_v, pf_dealloc mem_decrease, heap_handle parent);
+bool  heap_wrap_dealloc (struct heap_wrap* h, void* buff);
+bool  heap_wrap_dealloc_v(struct heap_wrap* h, void* buff, const char* file, int line);
 
-void  wheap_deinit  (heap_handle h);
-
-heap_handle 
-      wheap_spawn(heap_handle parent, pf_alloc parent_alloc, pf_alloc_v parent_alloc_v, pf_dealloc parent_dealloc);
-void  wheap_join   (heap_handle child);
+void  heap_wrap_walk    (struct heap_wrap* h, pf_mem_process allocated_cb, pf_mem_process freed_cb);
+void  heap_wrap_walk_v  (struct heap_wrap* h, pf_mem_process allocated_cb, pf_mem_process freed_cb, void* param);
 
 #endif /* _HEAP_WRAPPED_SYSTEM_H_*/

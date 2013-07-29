@@ -1,64 +1,68 @@
 #ifndef _HEAP_LLRB_H_
 #define _HEAP_LLRB_H_
 
+#include <heap_def.h>
+#include <util/llrb_link.h>
+#include <util/math.h>
+
 /*
  * This module implements a heap by using llrb as the free list container
  */
 struct heap_llrb_block {
-	struct block_c 	 common;
+	struct block_c 	   common;
 
-	struct llrb_link link;
+	struct llrb_link   link;
 };
 
 struct heap_llrb {
+	void*              __parent;
 	/* the inner alloc/dealloc callback to manage the inner usage of this heap */
-	pf_alloc        __alloc;
-	pf_dealloc      __dealloc;
+	pf_alloc           __alloc;
+	pf_dealloc         __dealloc;
 
 	/* point to the single free list */
-	struct llrb_link *root; 
+	struct llrb_link*  llrb_root; 
 
-	/* point to the start of the heap buffer. */
-	/* TODO: we should change the pbuff to r_dlist like list, so we could 
-	 * increase and decrease the memory dynamically */
-	void*			pbuff; 
+	/* this list holds a list of memory which is used by this heap */
+	struct list_link   memlist;
 
-	struct block_c  *pfirst;
-
-	/* total size of the heap, include heap header, block pool and all align gaps */
-	unsigned int 	size;
-
-	unsigned int 	flag;
-
-	unsigned int 	error;
+	unsigned int       split_threthhold;
+	unsigned int       expand_size;
 };
 
 
-void theap_init(heap_llrb* pheap, pf_alloc __alloc, pf_dealloc __dealloc);
+/* the below interface should be implemented, from heap_def.h
+typedef void* (*pf_alloc_c)   (void* pheap, int size);
+typedef void* (*pf_alloc_v)   (void* pheap, int size, const char* file, int line);
 
-/* deinit a heap on a given buffer */
-void theap_destroy(struct heap_llrb* pheap);
+typedef bool (*pf_dealloc_c)  (void* pheap, void* buff);
+typedef bool (*pf_dealloc_v)  (void* pheap, void* buff, const char* file, int line);
 
-/* alloc a buff from a heap, return the address of the allocated heap, 
- * NULL if allocate failed */
-void* theap_alloc(struct heap_llrb* pheap, int size);
+typedef void (*pf_mem_process)  (void* mem);
+typedef void (*pf_mem_process_v)(void* mem, void* param);
+typedef void (*pf_mem_walk)   (void* pheap, pf_mem_process allocated_cb, pf_mem_process freed_cb);
+typedef void (*pf_mem_walk_v) (void* pheap, pf_mem_process_v allocated_cb, pf_mem_process_v freed_cb, void* param);
+*/
 
-/* dealloc a buff from a heap */
-void theap_dealloc(struct heap_llrb* pheap, void *buff);
+void heap_llrb_init     (struct heap_llrb* pheap, void* parent, pf_alloc __alloc, pf_dealloc __dealloc);
+void heap_llrb_init_v   (struct heap_llrb* pheap, void* parent, pf_alloc __alloc, pf_dealloc __dealloc, int __split_threadhold, int __expand_size);
 
-/* dump debug information of the heap */
-void theap_dump(struct heap_llrb* pheap);
+void heap_llrb_destroy  (struct heap_llrb* pheap);
 
-#ifdef _MEM_DEBUG_
-void theap_debug_leak(struct heap_llrb* hhdl);
-void* theap_alloc_debug(struct heap_llrb* hhdl, int size, const char* file, int line);
-#endif
+void* heap_llrb_alloc   (struct heap_llrb* pheap, int size);
+void* heap_llrb_alloc_v (struct heap_llrb* pheap, int size, const char* file, int line);
 
-void theap_init_global(int size);
+/* 
+ * give back a buff to the heap.
+ * return true if the buff is successfully deallocateed or buff is NULL
+ * return false if the buff is previous deallocated.
+ */
+bool heap_llrb_dealloc  (struct heap_llrb* pheap, void* buff);
+bool heap_llrb_dealloc_v(struct heap_llrb* pheap, void* buff, const char* file, int line);
 
-void theap_deinit_global();
-
-void theap_debug_global_leak();
-
+/* TODO: 
+void heap_llrb_walk     (struct heap_llrb* pheap, pf_mem_process allocated_cb, pf_mem_process freed_cb);
+void heap_llrb_walk_v   (struct heap_llrb* pheap, pf_mem_process_v allocated_cb, pf_mem_process_v freed_cb, void* param);
+*/
 
 #endif /* _HEAP_LLRB_H_ */

@@ -5,32 +5,27 @@
 
 /* Implement the following interface one by one */
 /*
-typedef void* (*pf_alloc)     (heap_handle h, int size);
-typedef void* (*pf_alloc_v)   (heap_handle h, int size, const char* file, int line);
+typedef void* (*pf_alloc_c)   (void* pheap, int size);
+typedef void* (*pf_alloc_v)   (void* pheap, int size, const char* file, int line);
 
-typedef void (*pf_dealloc)    (heap_handle h, void* buff);
+typedef bool (*pf_dealloc_c)  (void* pheap, void* buff);
+typedef bool (*pf_dealloc_v)  (void* pheap, void* buff, const char* file, int line);
 
-typedef void (*pf_mem_process)(void* mem);
-typedef void (*pf_heap_walk)  (heap_handle h, pf_mem_process allocated_cb, pf_mem_process freed_cb);
-typedef void (*pf_heap_walk_v)(heap_handle h, pf_mem_process allocated_cb, pf_mem_process freed_cb, void* param);
-
-typedef heap_handle (*pf_heap_spawn)(heap_handle parent, pf_alloc parent_alloc, pf_alloc_v parent_alloc_v, pf_dealloc parent_dealloc);
-typedef void        (*pf_heap_join )(heap_handle child);
+typedef void (*pf_mem_process)  (void* mem);
+typedef void (*pf_mem_process_v)(void* mem, void* param);
+typedef void (*pf_mem_walk)   (void* pheap, pf_mem_process allocated_cb, pf_mem_process freed_cb);
+typedef void (*pf_mem_walk_v) (void* pheap, pf_mem_process_v allocated_cb, pf_mem_process_v freed_cb, void* param);
 */
 
-void* sheap_alloc   (heap_handle h, int size);
-void* sheap_alloc_v (heap_handle h, int size, const char* file ,int line);
+typedef void* heap_system;
 
-void  sheap_dealloc (heap_handle h, void* buff);
+void* sheap_alloc   (heap_system h, int size);
+void* sheap_alloc_v (heap_system h, int size, const char* file ,int line);
 
-void  sheap_walk    (heap_handle h, pf_mem_process allocated_cb, pf_mem_process freed_cb);
-void  sheap_walk_v  (heap_handle h, pf_mem_process allocated_cb, pf_mem_process freed_cb, void* param);
+bool  sheap_dealloc (heap_system h, void* buff);
+bool  sheap_dealloc (heap_system h, void* buff, const char* file, int line);
 
-/* 
- * we can not spawn a system heap, system heap is the parent of all heaps we spawn.
- */
-
-#ifdef _MEM_DEBUG_
-#endif
+void  sheap_walk    (heap_system h, pf_mem_process allocated_cb, pf_mem_process freed_cb);
+void  sheap_walk_v  (heap_system h, pf_mem_process_v allocated_cb, pf_mem_process_v freed_cb, void* param);
 
 #endif /* _HEAP_SYSTEM_H_ */

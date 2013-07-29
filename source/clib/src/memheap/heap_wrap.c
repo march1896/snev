@@ -1,4 +1,26 @@
-#include <heap.h>
+#include <heap_wrap.h>
+
+void heap_wrap_init(struct heap_wrap* h) {
+	list_init(&h->allocated);
+}
+
+void heap_wrap_deinit(struct heap_wrap* h) {
+	/* should we free all memory in the allocated list */
+	list_foreach_v();
+}
+
+void* heap_wrap_alloc(struct heap_wrap* h, int size) {
+	struct block_c* 
+}
+
+void* heap_wrap_alloc_v(struct heap_wrap* h, int size, const char* file ,int line) {
+}
+
+bool  heap_wrap_dealloc (struct heap_wrap* h, void* buff) {
+}
+
+bool  heap_wrap_dealloc_v(struct heap_wrap* h, void* buff, const char* file, int line) {
+}
 
 struct block_header {
 	struct list_link    link;
@@ -15,20 +37,6 @@ struct block_footer {
 };
 #ifdef _MEM_DEBUG_
 #endif
-
-/* should the verbosed alloc binded with _MEM_DEBUG_ ? 
- * temporarily my answer is no */
-
-struct heap_wrapped {
-	heap_handle      parent;
-	pf_alloc         __grow_alloc;
-	/* if the verbosed alloc function is given, we prefer to use it */
-	pf_alloc_v       __grow_alloc_v;
-	pf_dealloc       __grow_dealloc;
-
-	struct list_link allocated;
-	struct list_list memories;
-};
 
 void* wheap_alloc(heap_handle h, int size) {
 
@@ -63,7 +71,7 @@ heap_handle wheap_spawn(heap_handle parent, pf_alloc parent_alloc, pf_alloc_v pa
 }
 void  wheap_join(heap_handle child) {
 	struct heap_wrapped* heap = (struct heap_wrapped*)child;
-	pf_dealloc parent_dealloc = heap->__grow_dealloc;
+	pf_dealloc parent_dealloc = heap->__dealloc;
 	wheap_deinit(child);
 
 	dbg_assert(parent_dealloc != NULL);
@@ -73,10 +81,9 @@ void  wheap_join(heap_handle child) {
 void wheap_init(heap_handle h, pf_alloc parent_alloc, pf_alloc_v parent_alloc_v, pf_dealloc parent_dealloc, heap_handle parent) {
 	struct heap_wrapped* heap = (struct heap_wrapped*)h;
 
-	heap->parent         = parent;
-	heap->__grow_alloc   = mem_increase;
-	heap->__grow_alloc_v = mem_increase_v;
-	heap->__grow_dealloc = mem_decrease;
+	heap->parent    = parent;
+	heap->__alloc   = mem_increase;
+	heap->__dealloc = mem_decrease;
 
 	link_init(&heap->allocated);
 	link_init(&heap->memories);
