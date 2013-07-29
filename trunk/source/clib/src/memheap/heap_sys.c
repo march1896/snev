@@ -1,12 +1,15 @@
+#include <cominc.h>
+#include <heap_def.h>
+
 #include <stdlib.h>
 
-void* sheap_alloc(heap_system h, int size) {
+void* heap_sysd_alloc_c(void* h, int size) {
 	unused(h);
 
 	return malloc(size);
 }
 
-void* sheap_alloc_v(heap_system h, int size, const char* file ,int line) {
+void* heap_sysd_alloc_v(void* h, int size, const char* file ,int line) {
 	unused(h);
 	unused(file);
 	unused(line);
@@ -14,7 +17,7 @@ void* sheap_alloc_v(heap_system h, int size, const char* file ,int line) {
 	return malloc(size);
 }
 
-bool sheap_dealloc(heap_system h, void* buff) {
+bool heap_sysd_dealloc_c(void* h, void* buff) {
 	/* we can not handle the system heap, the only way to use it is globally */
 	unused(h);
 
@@ -23,15 +26,17 @@ bool sheap_dealloc(heap_system h, void* buff) {
 	return true;
 }
 
-bool sheap_dealloc(heap_system h, void* buff, const char* file, int line) {
+bool heap_sysd_dealloc_v(void* h, void* buff, const char* file, int line) {
 	unused(h);
 	unused(file);
 	unused(line);
 
+	free(buff);
+
 	return true;
 }
 
-void sheap_walk(heap_system h, pf_mem_process allocated_cb, pf_mem_process freed_cb) {
+void heap_sysd_walk(void* h, pf_mem_process allocated_cb, pf_mem_process freed_cb) {
 	/* this method is not supported by the system heap */
 	unused(h);
 	unused(allocated_cb);
@@ -40,7 +45,7 @@ void sheap_walk(heap_system h, pf_mem_process allocated_cb, pf_mem_process freed
 	dbg_assert(false);
 }
 
-void sheap_walk_v(heap_system h, pf_mem_process allocated_cb, pf_mem_process freed_cb, void* param) {
+void heap_sysd_walk_v(void* h, pf_mem_process allocated_cb, pf_mem_process freed_cb, void* param) {
 	/* this method is not supported by the system heap */
 	unused(h);
 	unused(allocated_cb);
