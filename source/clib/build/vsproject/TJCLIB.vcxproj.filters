@@ -41,19 +41,19 @@
       <Filter>Source Files\util</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\memheap\block_common.c">
-      <Filter>Source Files\heap</Filter>
+      <Filter>Source Files\memheap</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\memheap\block_link.c">
-      <Filter>Source Files\heap</Filter>
+      <Filter>Source Files\memheap</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\memheap\heap_buddy.c">
-      <Filter>Source Files\heap</Filter>
+      <Filter>Source Files\memheap</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\memheap\heap_sys.c">
-      <Filter>Source Files\heap</Filter>
+      <Filter>Source Files\memheap</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\memheap\heap_llrb.c">
-      <Filter>Source Files\heap</Filter>
+      <Filter>Source Files\memheap</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\util\list_link.c">
       <Filter>Source Files\util</Filter>
@@ -100,13 +100,13 @@
     <ClCompile Include="..\..\src\cntr2\ilist.c">
       <Filter>Source Files\cntr2</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\cntr2\ialgo.c">
+      <Filter>Source Files\cntr2</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\cntr2\odlist.c">
       <Filter>Source Files\cntr2</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\cntr2\rdlist.c">
-      <Filter>Source Files\cntr2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\cntr2\ialgo.c">
       <Filter>Source Files\cntr2</Filter>
     </ClCompile>
   </ItemGroup>
@@ -123,11 +123,11 @@
     <Filter Include="Source Files\regex">
       <UniqueIdentifier>{01bb233f-0b11-4b81-99bc-d94a7f06e4c6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\heap">
-      <UniqueIdentifier>{ad1e1824-3f67-4597-9455-85f3927d0274}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\cntr2">
       <UniqueIdentifier>{9595d002-0e2d-4fcb-ab1c-bd9400b4b157}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\memheap">
+      <UniqueIdentifier>{ad1e1824-3f67-4597-9455-85f3927d0274}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -183,28 +183,25 @@
       <Filter>Source Files\cntr</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\memheap\block_common.h">
-      <Filter>Source Files\heap</Filter>
+      <Filter>Source Files\memheap</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\memheap\block_link.h">
-      <Filter>Source Files\heap</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\memheap\heap.h">
-      <Filter>Source Files\heap</Filter>
+      <Filter>Source Files\memheap</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\memheap\heap_buddy.h">
-      <Filter>Source Files\heap</Filter>
+      <Filter>Source Files\memheap</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\memheap\heap_def.h">
-      <Filter>Source Files\heap</Filter>
+      <Filter>Source Files\memheap</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\memheap\heap_llrb.h">
-      <Filter>Source Files\heap</Filter>
+      <Filter>Source Files\memheap</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\memheap\heap_sys.h">
-      <Filter>Source Files\heap</Filter>
+      <Filter>Source Files\memheap</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\memheap\mem_common.h">
-      <Filter>Source Files\heap</Filter>
+      <Filter>Source Files\memheap</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\regex\fa.h">
       <Filter>Source Files\regex</Filter>
@@ -258,9 +255,6 @@
       <Filter>Source Files\cntr2</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\cntr2\ifactory.h">
-      <Filter>Source Files\cntr2</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\cntr2\rdlist.h">
       <Filter>Source Files\cntr2</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\cntr2\imemmgr.h">

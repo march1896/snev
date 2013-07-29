@@ -109,16 +109,20 @@ inline void* block_com_data(struct block_c* pbc) {
 }
 
 inline struct block_c* block_com_from_data(void* addr) {
+	struct block_c* pbc = (struct block_c*)((char*)addr - sizeof(struct block_c));
+
 	block_com_debug_check(pbc);
 
-	return (struct block_c*)((char*)addr - sizeof(struct block_c));
+	return pbc;
 }
 
 inline struct block_c* block_com_split(struct block_c* pbc, unsigned int size, unsigned int thh) {
 	//dbg_assert(block_com_data_size(pbc) >= size);
-	block_com_debug_check(pbc);
 
 	char* sb_addr = (char*)block_com_data(pbc) + size;
+
+	block_com_debug_check(pbc);
+
 	if (sb_addr + sizeof(struct block_c) + thh <= (char*)block_com_next_adj(pbc)) {
 		/* big enough, split */
 		struct block_c* sb = (struct block_c*)sb_addr;
@@ -201,14 +205,14 @@ inline void block_c_debug_set_fileline(struct block_c_debug* pbc, const char* fi
 	pbc->file = file;
 	pbc->line = line;
 }
-inline char* block_c_debug_get_fileline(struct block_c_debug* pbc, int* line) {
+inline const char* block_c_debug_get_fileline(struct block_c_debug* pbc, int* line) {
 	*line = pbc->line;
 	return pbc->file;
 }
 
 #else
 
-static char* no_file_info = "no file info! please use _MEM_DEBUG_ to compile.\n"
+static char* no_file_info = "no file info! please use _MEM_DEBUG_ to compile.\n";
 inline char* block_c_clean_get_fileline(struct block_c_clean* pbc, int* line) {
 	*line = 0;
 	return no_file_info;

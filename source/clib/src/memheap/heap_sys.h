@@ -1,7 +1,7 @@
-#ifndef _HEAP_SYSTEM_H_
-#define _HEAP_SYSTEM_H_
+#ifndef _HEAP_SYSTEM_DEFAULT_H_
+#define _HEAP_SYSTEM_DEFAULT_H_
 
-#include <heap_def.h>
+#include <memheap/heap_def.h>
 
 /* Implement the following interface one by one */
 /*
@@ -17,15 +17,21 @@ typedef void (*pf_mem_walk)   (void* pheap, pf_mem_process allocated_cb, pf_mem_
 typedef void (*pf_mem_walk_v) (void* pheap, pf_mem_process_v allocated_cb, pf_mem_process_v freed_cb, void* param);
 */
 
-typedef void* heap_system;
+void* heap_sysd_alloc_c  (void* h, int size);
+void* heap_sysd_alloc_v  (void* h, int size, const char* file ,int line);
 
-void* sheap_alloc   (heap_system h, int size);
-void* sheap_alloc_v (heap_system h, int size, const char* file ,int line);
+bool  heap_sysd_dealloc_c(void* h, void* buff);
+bool  heap_sysd_dealloc_v(void* h, void* buff, const char* file, int line);
 
-bool  sheap_dealloc (heap_system h, void* buff);
-bool  sheap_dealloc (heap_system h, void* buff, const char* file, int line);
+// void  heap_sysd_walk     (void* h, pf_mem_process allocated_cb, pf_mem_process freed_cb);
+// void  heap_sysd_walk_v   (void* h, pf_mem_process_v allocated_cb, pf_mem_process_v freed_cb, void* param);
 
-void  sheap_walk    (heap_system h, pf_mem_process allocated_cb, pf_mem_process freed_cb);
-void  sheap_walk_v  (heap_system h, pf_mem_process_v allocated_cb, pf_mem_process_v freed_cb, void* param);
+#ifdef _VERBOSE_ALLOC_DEALLOC_
+#define heap_sysd_alloc   heap_sysd_alloc_v
+#define heap_sysd_dealloc heap_sysd_dealloc_v
+#else 
+#define heap_sysd_alloc   heap_sysd_alloc_c
+#define heap_sysd_dealloc heap_sysd_dealloc_c
+#endif
 
-#endif /* _HEAP_SYSTEM_H_ */
+#endif /* _HEAP_SYSTEM_DEFAULT_H_ */

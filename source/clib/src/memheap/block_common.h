@@ -1,7 +1,6 @@
 #ifndef _BLOCK_COMMON_
 #define _BLOCK_COMMON_
 
-#include <cominc.h>
 #include <heap_def.h>
 
 /********************************************************************************
@@ -36,10 +35,10 @@
  *
  * when the block is allocated, it is not in the free list, we should know:
  *    1, the previous/next adjacent block. (when it is given back to the heap
- *       it should know the preivous/next block address to do the merge work).
+ *       it should know the prevIous/next block address to do the merge work).
  *
  * when the block is not allocated, it is in the free list, we should know:
- *    1, the size of the block. (in order to deside if it's allocatable by a given size)
+ *    1, the size of the block. (in order to decide if it's allocatable by a given size)
  *    2, the previous/next free block. (to maintain the free list)
  *    3, the next adjacent block,(it is a little hard to understand this 
  *       rule, consider the current block is in free list, and the prev/next 
@@ -53,8 +52,8 @@
  *       certainly know the next adjacent block.
  *    4, the previous adjacent block( this is the hardest part to understand, I
  *       was unsuccessfully design the data structure, because I thought this member
- *       is not useful for in_freelist blocks. Indeed, when maintianing the free list,
- *       prev_adj is not need to known. But when we allocate a free block from freelist,
+ *       is not useful for in_freelist blocks. Indeed, when maintaining the free list,
+ *       prev_adj is not need to known. But when we allocate a free block from free list,
  *       the block comes to allocated immediately, in other words, we must know the 
  *       prev_adj/next_adj immediately. I spent a lot of time to define data structure 
  *       and algorithm based on the absent of prev_adj for in_freelist block, until 
@@ -84,7 +83,7 @@
  */
 
 /* This file defines the common part of block header, it keeps the minimum common 
- * information that both allocated/infreelist blocks need. every custom block header
+ * information that both allocated/in_free_list blocks need. every custom block header
  * should contains this struct at the very beginning of it*/
 
 #define BLOCK_COM_EXT_BIT 31
@@ -97,10 +96,11 @@
  * struct block_c is the minimum length of block header for allocated blocks
  *
  * a concrete memory management algorithm should maintain its own links to manage
- * memory into a 'freelist'.
+ * memory into a 'free list'.
  */
+
 struct block_c_clean {
-	struct block_c*       prev_adj; 
+	struct block_c_clean* prev_adj; 
 	unsigned int          info; 
 };
 
@@ -117,37 +117,37 @@ struct block_c_debug {
 };
 
 #ifdef _MEM_DEBUG_
-
 extern inline void block_c_debug_check(struct block_c_debug* pbc);
 extern inline void block_c_debug_init(struct block_c_debug* pbc);
 extern inline void block_c_debug_deinit(struct block_c_debug* pbc);
 
 extern inline void block_c_debug_set_fileline(struct block_c_debug* pbc, const char* file, int line);
-extern inline char* block_c_debug_get_fileline(struct block_c_debug* pbc, int* line);
+extern inline const char* block_c_debug_get_fileline(struct block_c_debug* pbc, int* line);
 
 #define block_c block_c_debug
 
-/* by using these macros, control the efficiency explictely. */
+/* by using these macros, control the efficiency explicitly. */
 #define block_com_debug_check(x)  block_c_debug_check(x)
 #define block_com_debug_init(x)   block_c_debug_init(x)
 #define block_com_debug_deinit(x) block_c_debug_deinit(x)
 #define block_com_debug_set_fileline(c, f, l) block_c_debug_set_fileline(c, f, l)
-#define block_com_debug_get_fileline(c, e);   block_c_debug_set_fileline(c, f, l)
+#define block_com_debug_get_fileline(c, e);   block_c_debug_set_fileline(c, e)
 
-#else 
+#else
+extern inline const char* block_c_clean_get_fileline(struct block_c_clean* pbc, int* line);
+inline void block_c_clean_donothing(void* x) {}
+inline void block_c_clean_donothingv(void* x, void* y, void* z) {}
 
-extern inline char* block_c_clean_get_fileline(struct block_c_clean* pbc, int* line);
-
-/* by using these macros, control the efficiency explictely. */
+/* by using these macros, control the efficiency explicitly. */
 #define block_c block_c_clean
-#define block_com_debug_check(x)
-#define block_com_debug_init(x)
-#define block_com_debug_deinit(x)
-#define block_com_debug_set_fileline(c, f, l)
-#define block_com_debug_get_fileline(c, e);   block_c_clean_set_fileline(c, f, l)
+
+#define block_com_debug_check(x) block_c_clean_donothing(x)
+#define block_com_debug_init(x)  block_c_clean_donothing(x)
+#define block_com_debug_deinit(x) block_c_clean_donothing(x)
+#define block_com_debug_set_fileline(c, f, l) block_c_clean_donothingv(x)
+#define block_com_debug_get_fileline(c, e);   block_c_clean_set_fileline(c, e)
 
 #endif
-
 /* 
  * Check if a block is valid block, valid means it's in the allocated list
  * or in the free list, not include the sentinel blocks.
@@ -234,7 +234,7 @@ extern inline struct block_c* block_com_make_sentinels(void* buff_start, void* b
  * @param thh the minimum threadhold that the second block's data size should be,
  *        if the second block's data is less than it, this block should not be splited.
  *
- * @return address of the second block after spliting, NULL if no need to split.
+ * @return address of the second block after splitting, NULL if no need to split.
  */
 extern inline struct block_c* block_com_split(struct block_c* pbc, unsigned int size, unsigned int thh);
 
@@ -243,7 +243,7 @@ extern inline struct block_c* block_com_split(struct block_c* pbc, unsigned int 
  *   the start block will be the merged block.
  *
  * @param pstart start of the blocks to merge 
- * @param pend ene of blocks to merge
+ * @param pend end of blocks to merge
  */
 extern inline void block_com_merge(struct block_c* pstart, struct block_c* pend);
 

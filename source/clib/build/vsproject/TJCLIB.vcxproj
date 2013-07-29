@@ -251,7 +251,6 @@
     <ClInclude Include="..\..\src\cntr2\iset.h" />
     <ClInclude Include="..\..\src\cntr2\istack.h" />
     <ClInclude Include="..\..\src\cntr2\oo_model.h" />
-    <ClInclude Include="..\..\src\cntr2\rdlist.h" />
     <ClInclude Include="..\..\src\cntr\cattr.h" />
     <ClInclude Include="..\..\src\cntr\citer_base.h" />
     <ClInclude Include="..\..\src\cntr\citer_base.local.h" />
@@ -272,7 +271,6 @@
     <ClInclude Include="..\..\src\cntr\_234tree.h" />
     <ClInclude Include="..\..\src\memheap\block_common.h" />
     <ClInclude Include="..\..\src\memheap\block_link.h" />
-    <ClInclude Include="..\..\src\memheap\heap.h" />
     <ClInclude Include="..\..\src\memheap\heap_buddy.h" />
     <ClInclude Include="..\..\src\memheap\heap_def.h" />
     <ClInclude Include="..\..\src\memheap\heap_llrb.h" />

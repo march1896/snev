@@ -1,4 +1,5 @@
-#include <memheap/block_common.h>
+#include <heap_llrb.h>
+#include <util/math.h>
 
 static int block_comp(const struct llrb_link *l, const struct llrb_link *r) {
 	struct heap_llrb_block *plb, *prb;
@@ -76,28 +77,29 @@ static void heap_llrb_expand_memory(struct heap_llrb* pheap, int expand_size) {
 		n_mem_node->bc_first      = init_block;
 		n_mem_node->bc_front_sent = sent_first;
 		n_mem_node->bc_end_sent   = sent_last;
+
+		block_com_set_free(init_block, true);
 	}
 	
 	/* link the new memory into memory list */
-	list_insert_back(&pheap->memlist, &mem_list_node->link);
+	list_insert_back(&pheap->memlist, &n_mem_node->link);
 
 	/* insert the new block into the heap */
 	{
 		struct heap_llrb_block *n_block = NULL;
-		block_com_set_free(init_block, true);
 		n_block = container_of(n_mem_node->bc_first, struct heap_llrb_block, common);
 
-		pheap->root = llrb_insert(pheap->root, &n_block->link, block_comp);
+		pheap->llrb_root = llrb_insert(pheap->llrb_root, &n_block->link, block_comp);
 	}
 }
 
-void heap_llrb_init(struct heap_llrb* pheap, void* parent, pf_alloc __alloc, dealloc __dealloc) {
+void heap_llrb_init(struct heap_llrb* pheap, void* parent, pf_alloc __alloc, pf_dealloc __dealloc) {
 	heap_llrb_init_v(pheap, parent, __alloc, __dealloc, 
 			sizeof(struct heap_llrb_block),
 			HEAP_MINIMUM_EXPAND_SIZE);
 }
 
-void heap_llrb_init_v(struct heap_llrb* pheap, void* parent, pf_alloc __alloc, pf_dealloc __dealloc, int __split_threshold, int __expand_size) {
+void heap_llrb_init_v(struct heap_llrb* pheap, void* __parent, pf_alloc __alloc, pf_dealloc __dealloc, int __split_threshold, int __expand_size) {
 	pheap->__parent  = __parent;
 	pheap->__alloc   = __alloc;
 	pheap->__dealloc = __dealloc;
@@ -123,16 +125,17 @@ static void mem_list_node_dispose(struct list_link* link, void* param) {
 	dealloc(pheap->__dealloc, pheap->__parent, mem_node);
 }
 
-void heap_llrb_destroy(struct heap_llrb* pheap) {
+void heap_llrb_deinit(struct heap_llrb* pheap) {
 	/* clear the memory hold by this heap */
-	list_foreach_v(&pheap->memlist, (void*)pheap);
+	list_foreach_v(&pheap->memlist, mem_list_node_dispose, (void*)pheap);
 }
 
 #define SPLIT_THRETHHOLD sizeof(struct heap_llrb_block)
 
 static void* heap_llrb_alloc_try(struct heap_llrb* pheap, int size) {
-	struct llrb_link* alink = llrb_link_findbysize(pheap->root, size);
+	struct llrb_link* alink = llrb_link_findbysize(pheap->llrb_root, size);
 	struct heap_llrb_block* pb = container_of(alink, struct heap_llrb_block, link);
+	struct block_c* rem = NULL;
 	
 	if (alink == NULL) {
 		/* we dont have enough space for this size */
@@ -140,7 +143,7 @@ static void* heap_llrb_alloc_try(struct heap_llrb* pheap, int size) {
 	}
 
 	/* Remove the block from free container */
-	pheap->root = llrb_remove(pheap->root, prop, block_comp);
+	pheap->llrb_root = llrb_remove(pheap->llrb_root, alink, block_comp);
 
 	/* When pb is deallocated, the data field should be used as llrb_link */
 	if (size < sizeof(struct llrb_link)) size = sizeof(struct llrb_link);
@@ -152,14 +155,14 @@ static void* heap_llrb_alloc_try(struct heap_llrb* pheap, int size) {
 
 		block_com_set_free(rem, true);
 
-		pheap->root = llrb_insert(pheap->root, &rem_block->link, block_comp);
+		pheap->llrb_root = llrb_insert(pheap->llrb_root, &rem_block->link, block_comp);
 	}
 
 	block_com_set_free(&pb->common, false);
 	return block_com_data(&pb->common);
 }
 
-void* heap_llrb_alloc(struct heap_llrb* pheap, int size) {
+void* heap_llrb_alloc_c(struct heap_llrb* pheap, int size) {
 	void* mem = heap_llrb_alloc_try(pheap, size);
 
 	if (mem == NULL) {
@@ -181,7 +184,7 @@ void* heap_llrb_alloc(struct heap_llrb* pheap, int size) {
 }
 
 void* heap_llrb_alloc_v(struct heap_llrb* pheap, int size, const char* file, int line) {
-	void* buff = heap_llrb_alloc(pheap, size);
+	void* buff = heap_llrb_alloc_c(pheap, size);
 
 	if (buff == NULL)
 		return NULL;
@@ -189,13 +192,13 @@ void* heap_llrb_alloc_v(struct heap_llrb* pheap, int size, const char* file, int
 	{
 		struct block_c *pbc = (struct block_c*)block_com_from_data(buff);
 
-		block_com_debug_set_fileline(file, line);
+		block_com_debug_set_fileline(pbc, file, line);
 	}
 
 	return buff;
 }
 
-bool heap_llrb_dealloc(struct heap_llrb* pheap, void *buff) {
+bool heap_llrb_dealloc_c(struct heap_llrb* pheap, void *buff) {
 	struct block_c *pbc = block_com_from_data(buff);
 	struct heap_llrb_block *pb = container_of(pbc, struct heap_llrb_block, common);
 	struct block_c *prev = block_com_prev_adj(pbc);
@@ -223,11 +226,11 @@ bool heap_llrb_dealloc(struct heap_llrb* pheap, void *buff) {
 			dbg_assert((void*)b_prev == (void*)prev);
 			dbg_assert((void*)b_next == (void*)next);
 
-			pheap->root = llrb_remove(pheap->root, &b_prev->link, block_comp);
-			pheap->root = llrb_remove(pheap->root, &b_next->link, block_comp);
+			pheap->llrb_root = llrb_remove(pheap->llrb_root, &b_prev->link, block_comp);
+			pheap->llrb_root = llrb_remove(pheap->llrb_root, &b_next->link, block_comp);
 
 			block_com_merge(prev, next);
-			pheap->root = llrb_insert(pheap->root, &b_prev->link, block_comp);
+			pheap->llrb_root = llrb_insert(pheap->llrb_root, &b_prev->link, block_comp);
 
 			block_com_set_free(prev, true);
 		}
@@ -236,10 +239,10 @@ bool heap_llrb_dealloc(struct heap_llrb* pheap, void *buff) {
 			struct heap_llrb_block *b_prev = container_of(prev, struct heap_llrb_block, common);
 			dbg_assert((void*)b_prev == (void*)prev);
 
-			pheap->root = llrb_remove(pheap->root, &b_prev->link, block_comp);
+			pheap->llrb_root = llrb_remove(pheap->llrb_root, &b_prev->link, block_comp);
 
 			block_com_merge(prev, pbc);
-			pheap->root = llrb_insert(pheap->root, &b_prev->link, block_comp);
+			pheap->llrb_root = llrb_insert(pheap->llrb_root, &b_prev->link, block_comp);
 
 			block_com_set_free(prev, true);
 		}
@@ -249,16 +252,16 @@ bool heap_llrb_dealloc(struct heap_llrb* pheap, void *buff) {
 		struct heap_llrb_block *b_next = container_of(next, struct heap_llrb_block, common);
 		dbg_assert((void*)b_next == (void*)next);
 
-		pheap->root = llrb_remove(pheap->root, &b_next->link, block_comp);
+		pheap->llrb_root = llrb_remove(pheap->llrb_root, &b_next->link, block_comp);
 
 		block_com_merge(pbc, next);
-		pheap->root = llrb_insert(pheap->root, &pb->link, block_comp);
+		pheap->llrb_root = llrb_insert(pheap->llrb_root, &pb->link, block_comp);
 
 		block_com_set_free(pbc, true);
 	}
 	else {
 		/* no need to merge */
-		pheap->root = llrb_insert(pheap->root, &pb->link, block_comp);
+		pheap->llrb_root = llrb_insert(pheap->llrb_root, &pb->link, block_comp);
 
 		block_com_set_free(pbc, true);
 	}
@@ -267,7 +270,7 @@ bool heap_llrb_dealloc(struct heap_llrb* pheap, void *buff) {
 }
 
 bool heap_llrb_dealloc_v(struct heap_llrb* pheap, void *buff, const char* file, int line) {
-	bool res = heap_llrb_dealloc(pheap, buff);
+	bool res = heap_llrb_dealloc_c(pheap, buff);
 	struct block_c *pbc = (struct block_c*)block_com_from_data(buff);
 
 	if (buff == NULL) {
@@ -289,7 +292,7 @@ bool heap_llrb_dealloc_v(struct heap_llrb* pheap, void *buff, const char* file, 
 		/* TODO: handle the message */
 	}
 
-	block_com_debug_set_fileline(file, line);
+	block_com_debug_set_fileline(pbc, file, line);
 
 	return res;
 }

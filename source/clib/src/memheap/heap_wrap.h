@@ -1,7 +1,7 @@
 #ifndef _HEAP_WRAPPED_SYSTEM_H_
 #define _HEAP_WRAPPED_SYSTEM_H_
 
-#include <heap_def.h>
+#include <memheap/heap_def.h>
 #include <util/list_link.h>
 
 /* 
@@ -24,17 +24,28 @@ typedef void (*pf_mem_walk)   (void* pheap, pf_mem_process allocated_cb, pf_mem_
 typedef void (*pf_mem_walk_v) (void* pheap, pf_mem_process_v allocated_cb, pf_mem_process_v freed_cb, void* param);
 */
 
+/* heap_wrap_node decribes an allocated block */
+struct heap_wrap_node {
+	struct list_link link;
+
+	void*            rel_addr;
+};
+
 struct heap_wrap {
+	void*            __parent;
+	pf_alloc         __alloc;
+	pf_dealloc       __dealloc;
+
 	struct list_link allocated;
 };
 
-void  heap_wrap_init    (struct heap_wrap* h, pf_alloc __alloc, pf_dealloc __dealloc);
+void  heap_wrap_init    (struct heap_wrap* h, void* parent, pf_alloc __alloc, pf_dealloc __dealloc);
 void  heap_wrap_deinit  (struct heap_wrap* h);
 
-void* heap_wrap_alloc   (struct heap_wrap* h, int size);
+void* heap_wrap_alloc_c (struct heap_wrap* h, int size);
 void* heap_wrap_alloc_v (struct heap_wrap* h, int size, const char* file ,int line);
 
-bool  heap_wrap_dealloc (struct heap_wrap* h, void* buff);
+bool  heap_wrap_dealloc_c(struct heap_wrap* h, void* buff);
 bool  heap_wrap_dealloc_v(struct heap_wrap* h, void* buff, const char* file, int line);
 
 void  heap_wrap_walk    (struct heap_wrap* h, pf_mem_process allocated_cb, pf_mem_process freed_cb);

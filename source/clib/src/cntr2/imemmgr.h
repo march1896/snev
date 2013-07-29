@@ -5,6 +5,7 @@
 #include <cominc.h>
 #include <oo_model.h>
 #include <heap_def.h>
+#include <heap_global.h>
 
 /* definitions in heap_def.h
 typedef void* (*pf_alloc_c)   (void* pheap, int size);
@@ -29,8 +30,8 @@ struct iheap_vtable {
  * Just like factory, the spawn/join manages the create/destroy of an object, 
  * but more than factory, it does dot creates the objects as a set, but organize 
  * them in a tree */
-typedef heap_handle (*pf_heap_spawn)(heap_handle parent, pf_alloc parent_alloc, pf_alloc_v parent_alloc_v, pf_dealloc parent_dealloc);
-typedef void        (*pf_heap_join )(heap_handle child);
+typedef unknown     (*pf_heap_spawn)(unknown parent, pf_alloc parent_alloc, pf_alloc_v parent_alloc_v, pf_dealloc parent_dealloc);
+typedef void        (*pf_heap_join )(unknown child);
 
 typedef void        (*pf_dispose)   (void* buff);
 typedef void*       (*pf_copy   )   (void* buff);

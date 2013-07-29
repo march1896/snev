@@ -3,13 +3,18 @@
 
 #include <heap_def.h>
 #include <util/llrb_link.h>
-#include <util/math.h>
+#include <util/list_link.h>
 
+#include <block_common.h>
 /*
  * This module implements a heap by using llrb as the free list container
  */
+
+/* heap_llrb_block describes a free block, 
+ * block_c describes a common block, no matter its allocated or free*/
 struct heap_llrb_block {
-	struct block_c 	   common;
+	struct block_c     common;
+	//struct block_c_clean xx;
 
 	struct llrb_link   link;
 };
@@ -17,8 +22,8 @@ struct heap_llrb_block {
 struct heap_llrb {
 	void*              __parent;
 	/* the inner alloc/dealloc callback to manage the inner usage of this heap */
-	pf_alloc           __alloc;
-	pf_dealloc         __dealloc;
+	pf_alloc_c           __alloc;
+	pf_dealloc_c         __dealloc;
 
 	/* point to the single free list */
 	struct llrb_link*  llrb_root; 
@@ -47,9 +52,9 @@ typedef void (*pf_mem_walk_v) (void* pheap, pf_mem_process_v allocated_cb, pf_me
 void heap_llrb_init     (struct heap_llrb* pheap, void* parent, pf_alloc __alloc, pf_dealloc __dealloc);
 void heap_llrb_init_v   (struct heap_llrb* pheap, void* parent, pf_alloc __alloc, pf_dealloc __dealloc, int __split_threadhold, int __expand_size);
 
-void heap_llrb_destroy  (struct heap_llrb* pheap);
+void heap_llrb_deinit   (struct heap_llrb* pheap);
 
-void* heap_llrb_alloc   (struct heap_llrb* pheap, int size);
+void* heap_llrb_alloc_c (struct heap_llrb* pheap, int size);
 void* heap_llrb_alloc_v (struct heap_llrb* pheap, int size, const char* file, int line);
 
 /* 
@@ -57,7 +62,7 @@ void* heap_llrb_alloc_v (struct heap_llrb* pheap, int size, const char* file, in
  * return true if the buff is successfully deallocateed or buff is NULL
  * return false if the buff is previous deallocated.
  */
-bool heap_llrb_dealloc  (struct heap_llrb* pheap, void* buff);
+bool heap_llrb_dealloc_c(struct heap_llrb* pheap, void* buff);
 bool heap_llrb_dealloc_v(struct heap_llrb* pheap, void* buff, const char* file, int line);
 
 /* TODO: 
