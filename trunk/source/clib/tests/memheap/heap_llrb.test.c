@@ -1,6 +1,8 @@
 #include <memheap/heap_factory.h>
+#include <memheap/heap_sys.h>
+#include <memheap/heap_global.h>
 
-#include <heap_util.test.h>
+#include <memheap/heap_util.test.h>
 
 void heap_llrb_correct_test() {
 	struct heap_llrb* testheap = heap_llrb_spawn(

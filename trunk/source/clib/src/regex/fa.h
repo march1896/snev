@@ -4,6 +4,7 @@
 #define _ENABLE_PRINT_
 
 #include <cominc.h>
+#include <memheap/heap_global.h>
 
 #define t_alloc halloc
 #define t_free hfree
