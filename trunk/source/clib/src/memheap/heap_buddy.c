@@ -162,7 +162,7 @@ void* heap_buddy_alloc_c(struct heap_buddy* pheap, int size) {
 		heap_buddy_expand_memory(pheap, expand_size);
 
 		/* second try */
-		mem = heap_buddy_alloc_try(pheap, expand_size);
+		mem = heap_buddy_alloc_try(pheap, size);
 		dbg_assert(mem != NULL);
 	}
 
@@ -201,7 +201,7 @@ bool heap_buddy_dealloc_c (struct heap_buddy* pheap, void* buff) {
 	}
 
 	if (block_com_free(pbc)) {
-		/* we wre try to dealloc the buff twice, handle this situation. */
+		/* we are try to dealloc the buff twice, handle this situation. */
 		return false;
 	}
 
@@ -284,6 +284,7 @@ bool heap_buddy_dealloc_v (struct heap_buddy* pheap, void* buff, const char* fil
 		printf("%s : (%d)\n", file, line);
 		*/
 		/* TODO: handle the message */
+		dbg_assert(false);
 	}
 
 	block_com_debug_set_fileline(pbc, file, line);

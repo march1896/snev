@@ -8,6 +8,8 @@
 #include <cntr_algorithm.h>
 #include <cntr_factory.h>
 
+#include <memheap/heap_global.h>
+
 /*
  * The 234 tree is not a good name since normally we don't want numbers to 
  * exist in the function or variable name, since 234 tree is a B tree that 

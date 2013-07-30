@@ -5,6 +5,7 @@
 #include <cntr_linear.local.h>
 
 #include <util/list_link.h>
+#include <memheap/heap_global.h>
 
 typedef struct __open_link {
 	struct list_link link;

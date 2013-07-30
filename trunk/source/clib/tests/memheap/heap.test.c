@@ -1,3 +1,4 @@
+#if 0
 #include <heap_llrb.h>
 #include <heap_buddy.h>
 #include <test_util.h>
@@ -212,3 +213,5 @@ void heap_test() {
 	heap_correctness_test();
 	heap_performance_test();
 }
+
+#endif

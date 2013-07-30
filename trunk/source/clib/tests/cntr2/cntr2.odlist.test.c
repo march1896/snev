@@ -18,13 +18,13 @@ static void __odlist_print(struct base_interface* ic) {
 	iterator begin = ilist_itr_begin(list);
 	iterator end   = ilist_itr_end(list);
 
-// 	while (!itr_equals(begin, end)) {
-// 		__ref_print(itr_get_ref(begin));
-// 		itr_to_next(begin);
-// 	}
-	//foreach(begin, end, __ref_print);
+	while (!itr_equals(begin, end)) {
+		__ref_print(itr_get_ref(begin));
+		itr_to_next(begin);
+	}
+	foreach(begin, end, __ref_print);
 
-	//printf("\n");
+	printf("\n");
 	itr_destroy(begin);
 	itr_destroy(end);
 }
@@ -72,11 +72,11 @@ static void __list_correct() {
 	}
 	
 	dbg_assert(ilist_size(list) == 6);
-
- 	__ref = (int)ilist_remove_back(list); /* { 3, 1, 0, 2, 4 } */
- 	dbg_assert(__ref == 4);
- 	__ref = (int)ilist_remove_back(list); /* { 1, 0, 2, 4 } */
- 	dbg_assert(__ref == 2);
+// 
+//  	__ref = (int)ilist_remove_back(list); /* { 3, 1, 0, 2, 4 } */
+//  	dbg_assert(__ref == 4);
+//  	__ref = (int)ilist_remove_back(list); /* { 1, 0, 2, 4 } */
+//  	dbg_assert(__ref == 2);
 
 	__odlist_print(list);
 
@@ -176,7 +176,7 @@ static void __stack_correct() {
 static void __set_correct() {
 	iset set = as_set(create_dblinked_list());
 
-	int a[10], i, __ref;
+	int a[10], i;
 	for (i = 0; i < 10; i ++) {
 		a[i] = i;
 	}

@@ -7,6 +7,7 @@
 #include <cntr_factory.h>
 
 #include <util/llrb_link.h>
+#include <memheap/heap_global.h>
 
 typedef struct __cntr_llrb_vtable {
 	/* from cntr_base */

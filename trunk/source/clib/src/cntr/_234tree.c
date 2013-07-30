@@ -1,4 +1,5 @@
 #include <_234tree.h>
+#include <memheap/heap_global.h>
 
 static pf_compare_function comp = NULL;
 

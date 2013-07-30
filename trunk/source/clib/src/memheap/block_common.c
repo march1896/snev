@@ -28,17 +28,16 @@ inline struct block_c* block_com_make_sentinels(
 	dbg_assert(buff_start && buff_end && buff_start < buff_end);
 
 	*sent_first = (struct block_c*)buff_start;
+	block_com_debug_init(*sent_first);
 	block_com_invalidate(*sent_first);
 
 	*sent_last = ((struct block_c*)(buff_end) - 1);
+	block_com_debug_init(*sent_last);
 	block_com_invalidate(*sent_last);
 
 	pb = (struct block_c*)buff_start + 1;
-	block_com_init_addr(pb, *sent_first, *sent_last, 0);
-
 	block_com_debug_init(pb);
-	block_com_debug_init(*sent_first);
-	block_com_debug_init(*sent_last);
+	block_com_init_addr(pb, *sent_first, *sent_last, 0);	
 
 	return pb;
 }
@@ -126,8 +125,9 @@ inline struct block_c* block_com_split(struct block_c* pbc, unsigned int size, u
 	if (sb_addr + sizeof(struct block_c) + thh <= (char*)block_com_next_adj(pbc)) {
 		/* big enough, split */
 		struct block_c* sb = (struct block_c*)sb_addr;
-
 		struct block_c* next_adj = block_com_next_adj(pbc);
+
+		block_com_debug_init(sb);
 
 		block_com_set_next_adj(pbc, sb);
 
@@ -136,8 +136,6 @@ inline struct block_c* block_com_split(struct block_c* pbc, unsigned int size, u
 
 		if (block_com_valid(next_adj))
 			block_com_set_prev_adj(next_adj, sb);
-
-		block_com_debug_init(sb);
 
 		return sb;
 	}
@@ -197,8 +195,13 @@ inline void block_c_debug_init(struct block_c_debug* pbc) {
 	pbc->footer = BLOCK_C_DEBUG_FOOTER;
 }
 inline void block_c_debug_deinit(struct block_c_debug* pbc) {
+	/*
+	TODO:
+	we can not deinit it here, because we may check a delete memory block to make sure it 
+	is not delete multiple times 
 	pbc->header = 0;
 	pbc->footer = 0;
+	*/
 }
 
 inline void block_c_debug_set_fileline(struct block_c_debug* pbc, const char* file, int line) {
