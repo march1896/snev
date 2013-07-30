@@ -3,6 +3,8 @@
 #include <citer_base.local.h>
 #include <citer_cont.local.h>
 
+#include <memheap/heap_global.h>
+
 void citer_swap(citer first, citer second) {
 	void *first_ref = citer_get_ref(first);
 

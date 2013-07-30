@@ -6,6 +6,8 @@
 #include <cntr_algorithm.h>
 #include <cntr_factory.h>
 
+#include <memheap/heap_global.h>
+
 typedef struct __bst_node {
 	struct __bst_node* parent;
 	struct __bst_node* left;

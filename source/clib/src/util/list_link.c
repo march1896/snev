@@ -56,20 +56,28 @@ typedef void (*pf_list_link_process)  (struct list_link* each);
 typedef void (*pf_list_link_process_v)(struct list_link* each, void* param);
 inline void list_foreach(struct list_link* sent, pf_list_link_process process) {
 	struct list_link* next = sent->next;
+	struct list_link* prev = NULL;
 
 	while (next != sent) {
-		process(next);
-
+		prev = next;
 		next = next->next;
+
+		/* we must first move the link to next, then do the processing, because 
+		 * the process callback may delete the link itself */
+		process(prev);
 	}
 }
 
 void list_foreach_v(struct list_link* sent, pf_list_link_process_v process_v, void* param) {
 	struct list_link* next = sent->next;
+	struct list_link* prev = NULL;
 
 	while (next != sent) {
-		process_v(next, param);
-
+		prev = next;
 		next = next->next;
+
+		/* we must first move the link to next, then do the processing, because 
+		 * the process callback may delete the link itself */
+		process_v(prev, param);
 	}
 }

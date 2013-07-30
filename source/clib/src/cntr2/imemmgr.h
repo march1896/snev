@@ -4,8 +4,9 @@
 
 #include <cominc.h>
 #include <oo_model.h>
-#include <heap_def.h>
-#include <heap_global.h>
+#include <memheap/heap_def.h>
+//#include <heap_global.h>
+#include <memheap/heap_sys.h>
 
 /* definitions in heap_def.h
 typedef void* (*pf_alloc_c)   (void* pheap, int size);
@@ -36,12 +37,8 @@ typedef void        (*pf_heap_join )(unknown child);
 typedef void        (*pf_dispose)   (void* buff);
 typedef void*       (*pf_copy   )   (void* buff);
 
-inline void* sys_alloc(int size) {
-	return halloc(size);
-}
-
-inline void sys_dealloc(void* buff) {
-	hfree(buff);
-}
+extern void* cntr_default_heap;
+#define cntr_default_alloc   heap_sysd_alloc
+#define cntr_default_dealloc heap_sysd_dealloc
 
 #endif /* _INTERFACE_MEMORY_MANAGEMENT_H_ */

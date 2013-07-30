@@ -3,7 +3,9 @@
 
 #include <cominc.h>
 #define _MEM_DEBUG_
-// #define _VERBOSE_ALLOC_DEALLOC_
+#ifdef _MEM_DEBUG_
+#define _VERBOSE_ALLOC_DEALLOC_
+#endif
 
 /*
  * For a heap implementation, the below methods should be implemented, since the 

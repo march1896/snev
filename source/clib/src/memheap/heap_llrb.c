@@ -138,7 +138,7 @@ static void* heap_llrb_alloc_try(struct heap_llrb* pheap, int size) {
 	struct block_c* rem = NULL;
 	
 	if (alink == NULL) {
-		/* we dont have enough space for this size */
+		/* we don't have enough space for this size */
 		return NULL;
 	}
 
@@ -166,7 +166,7 @@ void* heap_llrb_alloc_c(struct heap_llrb* pheap, int size) {
 	void* mem = heap_llrb_alloc_try(pheap, size);
 
 	if (mem == NULL) {
-		/* we dont have enough space to alloc this size */
+		/* we don't have enough space to alloc this size */
 		int expand_size = pheap->expand_size;
 		if (expand_size < 2 * size) {
 			/* if the expand size is not big enough for we need */
@@ -176,7 +176,7 @@ void* heap_llrb_alloc_c(struct heap_llrb* pheap, int size) {
 		heap_llrb_expand_memory(pheap, expand_size);
 
 		/* second try */
-		mem = heap_llrb_alloc_try(pheap, expand_size);
+		mem = heap_llrb_alloc_try(pheap, size);
 		dbg_assert(mem != NULL);
 	}
 
@@ -214,7 +214,7 @@ bool heap_llrb_dealloc_c(struct heap_llrb* pheap, void *buff) {
 	}
 
 	if (block_com_free(pbc)) {
-		/* we wre try to dealloc the buff twice, handle this situation. */
+		/* we are try to dealloc the buff twice, handle this situation. */
 		return false;
 	}
 
@@ -290,6 +290,7 @@ bool heap_llrb_dealloc_v(struct heap_llrb* pheap, void *buff, const char* file, 
 		printf("%s : (%d)\n", file, line);
 		*/
 		/* TODO: handle the message */
+		dbg_assert(false);
 	}
 
 	block_com_debug_set_fileline(pbc, file, line);

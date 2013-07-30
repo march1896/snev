@@ -44,6 +44,5 @@ typedef int bool;
 #define container_of(ptr, type, member) \
 	(type *)((char *)ptr - offsetof(type,member))
 
-//#include <heap_global.h>
 
 #endif /* _COMINC_H_ */

@@ -2,6 +2,7 @@
 #define _234TREE_H_
 
 #include <cominc.h>
+#include <memheap/heap_global.h>
 
 struct _234_node {
 	int dim;

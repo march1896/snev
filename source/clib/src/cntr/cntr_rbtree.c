@@ -6,6 +6,8 @@
 #include <cntr_algorithm.h>
 #include <cntr_factory.h>
 
+#include <memheap/heap_global.h>
+
 typedef struct __cntr_rbt_vtable {
 	/* from cntr_linear_vtable */
 	pf_cntr_attribute           __attrib;

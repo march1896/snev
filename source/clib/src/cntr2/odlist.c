@@ -4,8 +4,9 @@
 #include <iset.h>
 #include <iitr.h>
 
+#include <imemmgr.h>
+
 #include <util/list_link.h>
-#include <rdlist.h>
 
 enum list_interfaces {
 	e_list,
@@ -15,15 +16,25 @@ enum list_interfaces {
 	e_l_count
 };
 
-typedef struct o_dlist {
+struct o_dlist_node {
+	struct list_link              link;
+
+	void*                         reference;
+};
+
+struct o_dlist {
 	address                       __offset;
 	pf_cast                       __cast;
 	
 	struct base_interface         __iftable[e_l_count];
 
-	struct r_dlist                __cntr;
+	//struct r_dlist                __cntr;
+
+	struct list_link              __thelist;
+	int                           __size;
 
 	/* methods to manage the inner memory use by the container */
+	void*                         __heap;
 	pf_alloc                      __alloc;
 	pf_dealloc                    __dealloc;
 
@@ -33,7 +44,7 @@ typedef struct o_dlist {
 };
 
 static object*  o_dlist_create          ();
-static object*  o_dlist_create_v        (pf_alloc alloc, pf_dealloc dealloc, pf_copy copy, pf_dispose dispose);
+static object*  o_dlist_create_v        (void* heap, pf_alloc alloc, pf_dealloc dealloc, pf_copy copy, pf_dispose dispose);
 static void     o_dlist_destroy         (object* o);
 static void     o_dlist_clear           (object* o);
 static int      o_dlist_size            (object* o);
@@ -52,8 +63,8 @@ static object*  o_dlist_itr_end         (object* o);
 object* create_dblinked_list() {
 	return o_dlist_create();
 }
-object* create_dblinked_list_v(pf_alloc alloc, pf_dealloc dealloc, pf_copy copy, pf_dispose dispose) {
-	return o_dlist_create_v(alloc, dealloc, copy, dispose);
+object* create_dblinked_list_v(void* heap, pf_alloc alloc, pf_dealloc dealloc, pf_copy copy, pf_dispose dispose) {
+	return o_dlist_create_v(heap, alloc, dealloc, copy, dispose);
 }
 
 static struct ilist_vtable __ilist_vtable = {
@@ -112,6 +123,7 @@ typedef struct o_dlist_itr {
 
 	/* the iterator will never alloc memory, when acquire an iterator, the container will 
 	 * alloc the memory, but we should know how to delete this memory */
+	void*                         __heap;
 	pf_dealloc                    __dealloc;
 
 	struct list_link*             __current;
@@ -135,7 +147,8 @@ static void o_dlist_itr_destroy(object* citr) {
 	dbg_assert(itr->__cast == o_dlist_itr_cast);
 
 	/* destroy itself */
-	itr->__dealloc(itr);
+	//itr->__dealloc(itr);
+	dealloc(itr->__dealloc, itr->__heap, itr);
 }
 
 static bool o_dlist_itr_equals(object* a, object* b) {
@@ -151,24 +164,24 @@ static bool o_dlist_itr_equals(object* a, object* b) {
 }
 
 static void* o_dlist_itr_get_ref(object* citr) {
-	struct o_dlist_itr* itr = (struct o_dlist_itr*)citr;
-	struct r_dlist_node* node = NULL;
+	struct o_dlist_itr* itr   = (struct o_dlist_itr*)citr;
+	struct o_dlist_node* node = NULL;
 
 	dbg_assert(itr->__cast == o_dlist_itr_cast);
 	dbg_assert(itr->__current != NULL);
 
-	node = (struct r_dlist_node*)container_of(itr->__current, struct r_dlist_node, link);
+	node = (struct o_dlist_node*)container_of(itr->__current, struct o_dlist_node, link);
 	return node->reference;
 }
 
 static void o_dlist_itr_set_ref(object* citr, void* n_ref) {
-	struct o_dlist_itr* itr = (struct o_dlist_itr*)citr;
-	struct r_dlist_node* node = NULL;
+	struct o_dlist_itr* itr   = (struct o_dlist_itr*)citr;
+	struct o_dlist_node* node = NULL;
 
 	dbg_assert(itr->__cast == o_dlist_itr_cast);
 	dbg_assert(itr->__current != NULL);
 
-	node = (struct r_dlist_node*)container_of(itr->__current, struct r_dlist_node, link);
+	node = (struct o_dlist_node*)container_of(itr->__current, struct o_dlist_node, link);
 	node->reference = n_ref;
 }
 
@@ -242,17 +255,20 @@ static unknown o_dlist_itr_cast(unknown x, unique_id inf_id) {
 }
 
 static object* o_dlist_create() {
-	return o_dlist_create_v(NULL, NULL, NULL, NULL);
+	return o_dlist_create_v(NULL, NULL, NULL, NULL, NULL);
 }
 
-static object* o_dlist_create_v(pf_alloc alloc, pf_dealloc dealloc, pf_copy copy, pf_dispose dispose) {
+static object* o_dlist_create_v(void* __heap, pf_alloc __alloc, pf_dealloc __dealloc, pf_copy copy, pf_dispose dispose) {
 	struct o_dlist* olist = NULL;
-	pf_alloc __alloc = alloc != NULL ? alloc : sys_alloc;
-	pf_dealloc __dealloc = dealloc != NULL ? dealloc : sys_dealloc;
 
-	dbg_assert((alloc && dealloc) || (!alloc) && (!dealloc));
+	if (__heap == NULL) {
+		// use the default heap.
+		dbg_assert(__alloc == NULL && __dealloc == NULL);
+		__alloc = cntr_default_alloc;
+		__dealloc = cntr_default_dealloc;
+	}
 
-	olist = (struct o_dlist*)__alloc(sizeof(struct o_dlist));
+	olist = (struct o_dlist*)alloc(__alloc, __heap, sizeof(struct o_dlist));
 
 	olist->__offset = olist;
 	olist->__cast   = o_dlist_cast;
@@ -266,58 +282,139 @@ static object* o_dlist_create_v(pf_alloc alloc, pf_dealloc dealloc, pf_copy copy
 	olist->__iftable[e_set].__offset = (address)e_set;
 	olist->__iftable[e_set].__vtable = &__iset_vtable;
 
-	r_dlist_init(&olist->__cntr, __alloc, __dealloc);
+	//r_dlist_init(&olist->__cntr, __alloc, __dealloc);
+	list_init(&olist->__thelist);
 
-	olist->__alloc = __alloc;
+	olist->__heap    = __heap;
+	olist->__alloc   = __alloc;
 	olist->__dealloc = __dealloc;
 
-	olist->__copy  = copy;
+	olist->__size    = 0;
+
+	olist->__copy    = copy;
 	olist->__dispose = dispose;
 
 	return (object*)olist;
 }
 
+static void per_link_dispose(struct list_link* link, void* param) {
+	struct o_dlist_node* node = container_of(link, struct o_dlist_node, link);
+	struct o_dlist* olist     = (struct o_dlist*)param;
+
+	/* first dispose the reference */
+	if (olist->__dispose) {
+		olist->__dispose(node->reference);
+	}
+	
+	/* delete the node it self */
+	//olist->__dealloc(node);
+	dealloc(olist->__dealloc, olist->__heap, node);
+}
+
 static void o_dlist_destroy(object* o) {
 	struct o_dlist* olist = (struct o_dlist*)o;
 
-	r_dlist_clear(&olist->__cntr, olist->__dispose);
-	olist->__dealloc(olist);
+	o_dlist_clear(o);
+	dealloc(olist->__dealloc, olist->__heap, olist);
 }
 
 static void o_dlist_clear(object* o) {
 	struct o_dlist* olist = (struct o_dlist*)o;
 
-	r_dlist_clear(&olist->__cntr, olist->__dispose);
+	list_foreach_v(&olist->__thelist, per_link_dispose, (void*)olist);
+
+	list_init(&olist->__thelist);
+	olist->__size = 0;
 }
 
 static int o_dlist_size(object* o) {
 	struct o_dlist* olist = (struct o_dlist*)o;
 
-	return r_dlist_size(&olist->__cntr);
+	//return r_dlist_size(&olist->__cntr);
+	return olist->__size;
 }
 
 static void o_dlist_add_front(object* o, void* ref) {
 	struct o_dlist* olist = (struct o_dlist*)o;
 
-	r_dlist_add_front(&olist->__cntr, ref);
+	//r_dlist_add_front(&olist->__cntr, ref);
+	//
+	struct o_dlist_node* n_node = (struct o_dlist_node*)
+		alloc(olist->__alloc, olist->__heap, sizeof(struct o_dlist_node));
+
+	n_node->reference = ref;
+
+	list_insert_front(&olist->__thelist, &n_node->link);
+	olist->__size ++;
 }
 
 static void o_dlist_add_back(object* o, void* ref) {
 	struct o_dlist* olist = (struct o_dlist*)o;
 
-	r_dlist_add_back(&olist->__cntr, ref);
+	//r_dlist_add_back(&olist->__cntr, ref);
+	struct o_dlist_node* n_node = (struct o_dlist_node*)
+		alloc(olist->__alloc, olist->__heap, sizeof(struct o_dlist_node));
+
+	n_node->reference = ref;
+
+	list_insert_back(&olist->__thelist, &n_node->link);
+	olist->__size ++;
 }
 
 static void* o_dlist_remove_front(object* o) {
 	struct o_dlist* olist = (struct o_dlist*)o;
 
-	return r_dlist_remove_front(&olist->__cntr);
+	//return r_dlist_remove_front(&olist->__cntr);
+	if (olist->__size > 0) {
+		struct list_link* link    = olist->__thelist.next;
+		struct o_dlist_node* node = container_of(link, struct o_dlist_node, link);
+		void*  object_ref         = node->reference;
+
+		dbg_assert(link != &olist->__thelist);
+
+		list_unlink(link);
+		//olist->__dealloc(node);
+		dealloc(olist->__dealloc, olist->__heap, node);
+
+		olist->__size --;
+
+		return object_ref;
+	}
+
+	dbg_assert(olist->__size == 0);
+	dbg_assert(list_empty(&olist->__thelist));
+
+	dbg_assert(false);
+
+	return NULL;
 }
 
 static void* o_dlist_remove_back(object* o) {
 	struct o_dlist* olist = (struct o_dlist*)o;
 
-	return r_dlist_remove_back(&olist->__cntr);
+	//return r_dlist_remove_back(&olist->__cntr);
+	if (olist->__size > 0) {
+		struct list_link* link    = olist->__thelist.prev;
+		struct o_dlist_node* node = container_of(link, struct o_dlist_node, link);
+		void*  object_ref         = node->reference;
+
+		dbg_assert(link != &olist->__thelist);
+
+		list_unlink(link);
+		//olist->__dealloc(node);
+		dealloc(olist->__dealloc, olist->__heap, node);
+
+		olist->__size --;
+
+		return object_ref;
+	}
+
+	dbg_assert(olist->__size == 0);
+	dbg_assert(list_empty(&olist->__thelist));
+
+	dbg_assert(false);
+
+	return NULL;
 }
 
 /* initialize all part of an iterator except the __current position */
@@ -334,37 +431,49 @@ static void o_dlist_itr_com_init(struct o_dlist_itr* itr, struct o_dlist* list) 
 
 static object* o_dlist_itr_begin(object* o) {
 	struct o_dlist* olist = (struct o_dlist*)o;
-	struct o_dlist_itr* n_itr = 
-		(struct o_dlist_itr*)(olist->__alloc(sizeof(struct o_dlist_itr)));
+	struct o_dlist_itr* n_itr = (struct o_dlist_itr*)
+		alloc(olist->__alloc, olist->__heap, sizeof(struct o_dlist_itr));
 
 	o_dlist_itr_com_init(n_itr, olist);
 
 	//n_itr->__current = &(r_dlist_first(&olist->__cntr)->link);
 	/* if the list is empty, we just return the sentinel node */
-	n_itr->__current = (olist->__cntr).sent.next;
+	n_itr->__current = olist->__thelist.next;
 
 	return (object*)n_itr;
 }
 
 static object* o_dlist_itr_end(object* o) {
 	struct o_dlist* olist = (struct o_dlist*)o;
-	struct o_dlist_itr* n_itr = 
-		(struct o_dlist_itr*)olist->__alloc(sizeof(struct o_dlist_itr));
+	struct o_dlist_itr* n_itr = (struct o_dlist_itr*)
+		alloc(olist->__alloc, olist->__heap, sizeof(struct o_dlist_itr));
 
 	o_dlist_itr_com_init(n_itr, olist);
 
 	/* the end iterator is the sentinel node, since 
 	 * (begin, end) represents [begin, end) */
-	n_itr->__current = &olist->__cntr.sent;
+	n_itr->__current = &olist->__thelist;
 
 	return (object*)n_itr;
 }
 
 static object* o_dlist_itr_find(object* o, void* ref) {
-	struct o_dlist* olist = (struct o_dlist*)o;
-	struct o_dlist_itr* n_itr = 
-		(struct o_dlist_itr*)olist->__alloc(sizeof(struct o_dlist_itr));
-	struct r_dlist_node* node = r_dlist_find(&olist->__cntr, ref);
+	struct o_dlist* olist     = (struct o_dlist*)o;
+	struct o_dlist_itr* n_itr = (struct o_dlist_itr*)
+		alloc(olist->__alloc, olist->__heap, sizeof(struct o_dlist_itr));
+	struct list_link* link    = olist->__thelist.next;
+	struct o_dlist_node* node = NULL;
+
+	while (link != &olist->__thelist) {
+		struct o_dlist_node* temp = (struct o_dlist_node*)container_of(link, struct o_dlist_node, link);
+
+		if (temp->reference == ref) {
+			node = temp;
+			break;
+		}
+
+		link = link->next;
+	}
 
 	o_dlist_itr_com_init(n_itr, olist);
 
@@ -372,47 +481,62 @@ static object* o_dlist_itr_find(object* o, void* ref) {
 		n_itr->__current = &(node->link);
 	}
 	else {
-		n_itr->__current = &olist->__cntr.sent;
+		n_itr->__current = &olist->__thelist;
 	}
 
 	return (object*)n_itr;
 }
 
 static void* o_dlist_remove(object* o, iobject* itr) {
-	struct o_dlist* olist = (struct o_dlist*)o;
-	struct o_dlist_itr* oitr = (struct o_dlist_itr*)__object_from_interface(itr);
-	struct r_dlist_node* node = NULL;
-	void* obj_ref = NULL;
+	struct o_dlist* olist     = (struct o_dlist*)o;
+	struct o_dlist_itr* oitr  = (struct o_dlist_itr*)__object_from_interface(itr);
+	struct o_dlist_node* node = (struct o_dlist_node*)container_of(oitr->__current, struct o_dlist_node, link);
+	void* obj_ref             = node->reference;
+
 	dbg_assert(oitr->__cast == o_dlist_itr_cast);
 	dbg_assert(oitr->__current != NULL);
 
-	node = (struct r_dlist_node*)container_of(oitr->__current, struct r_dlist_node, link);
+	list_unlink(&node->link);
+	//olist->__dealloc(node);
+	dealloc(olist->__dealloc, olist->__heap, node);
 
-	return r_dlist_remove(&olist->__cntr, node);
+	olist->__size --;
+
+	return obj_ref;
 }
 
 static void o_dlist_insert_before(object* o, iobject* itr, void* n_ref) {
-	struct o_dlist* olist = (struct o_dlist*)o;
-	struct o_dlist_itr* oitr = (struct o_dlist_itr*)__object_from_interface(itr);
-	struct r_dlist_node* node = NULL;
+	struct o_dlist* olist       = (struct o_dlist*)o;
+	struct o_dlist_itr* oitr    = (struct o_dlist_itr*)__object_from_interface(itr);
+	struct o_dlist_node* node   = (struct o_dlist_node*)container_of(oitr->__current, struct o_dlist_node, link);
+	struct o_dlist_node* n_node = (struct o_dlist_node*)
+		alloc(olist->__alloc, olist->__heap, sizeof(struct o_dlist_node));
 
 	dbg_assert(oitr->__cast == o_dlist_itr_cast);
 	dbg_assert(oitr->__current != NULL);
 
-	node = (struct r_dlist_node*)container_of(oitr->__current, struct r_dlist_node, link);
+	//r_dlist_insert_before(&olist->__cntr, node, n_ref);
 
-	r_dlist_insert_before(&olist->__cntr, node, n_ref);
+	n_node->reference = n_ref;
+	list_link(&n_node->link, (&node->link)->prev, &node->link);
+
+	olist->__size ++;
 }
 
 static void o_dlist_insert_after(object* o, iobject* itr, void* n_ref) {
-	struct o_dlist* olist = (struct o_dlist*)o;
-	struct o_dlist_itr* oitr = (struct o_dlist_itr*)__object_from_interface(itr);
-	struct r_dlist_node* node = NULL;
+	struct o_dlist* olist       = (struct o_dlist*)o;
+	struct o_dlist_itr* oitr    = (struct o_dlist_itr*)__object_from_interface(itr);
+	struct o_dlist_node* node   = (struct o_dlist_node*)container_of(oitr->__current, struct o_dlist_node, link);
+	struct o_dlist_node* n_node = (struct o_dlist_node*)
+		alloc(olist->__alloc, olist->__heap, sizeof(struct o_dlist_node));
 
 	dbg_assert(oitr->__cast == o_dlist_itr_cast);
 	dbg_assert(oitr->__current != NULL);
 
-	node = (struct r_dlist_node*)container_of(oitr->__current, struct r_dlist_node, link);
+	//r_dlist_insert_after(&olist->__cntr, node, n_ref);
 
-	r_dlist_insert_after(&olist->__cntr, node, n_ref);
+	n_node->reference = n_ref;
+	list_link(&n_node->link, (&node->link), (&node->link)->next);
+
+	olist->__size ++;
 }

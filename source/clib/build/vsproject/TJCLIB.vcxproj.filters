@@ -106,8 +106,14 @@
     <ClCompile Include="..\..\src\cntr2\odlist.c">
       <Filter>Source Files\cntr2</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cntr2\rdlist.c">
-      <Filter>Source Files\cntr2</Filter>
+    <ClCompile Include="..\..\src\memheap\heap_global.c">
+      <Filter>Source Files\memheap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\memheap\heap_factory.c">
+      <Filter>Source Files\memheap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\memheap\heap_wrap.c">
+      <Filter>Source Files\memheap</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -265,6 +271,15 @@
     </ClInclude>
     <ClInclude Include="..\..\src\cntr2\ialgo.h">
       <Filter>Source Files\cntr2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\memheap\heap_factory.h">
+      <Filter>Source Files\memheap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\memheap\heap_global.h">
+      <Filter>Source Files\memheap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\memheap\heap_wrap.h">
+      <Filter>Source Files\memheap</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

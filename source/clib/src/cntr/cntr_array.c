@@ -2,6 +2,8 @@
 #include <cntr_linear.local.h>
 #include <citer_cont.local.h>
 
+#include <memheap/heap_global.h>
+
 typedef void (*pf_cntr_array_assign_capacity)(cntr pca, int n_size);
 
 typedef struct __cntr_array_vtable {

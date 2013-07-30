@@ -13,9 +13,6 @@
     <ClCompile Include="..\..\tests\cntr\cntr_sort.test.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\tests\memheap\heap.test.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\tests\util\llrb_link.test.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -28,6 +25,12 @@
     <ClCompile Include="..\..\tests\cntr2\cntr2.odlist.test.c">
       <Filter>Source Files\cntr2</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\tests\memheap\heap.test.c">
+      <Filter>Source Files\memheap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tests\memheap\heap_llrb.test.c">
+      <Filter>Source Files\memheap</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
@@ -35,6 +38,9 @@
     </Filter>
     <Filter Include="Source Files\cntr2">
       <UniqueIdentifier>{8dcae3fd-8d00-403f-bf02-de4756f48a20}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\memheap">
+      <UniqueIdentifier>{4996b439-aed9-4287-8d6b-39c97349fd23}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

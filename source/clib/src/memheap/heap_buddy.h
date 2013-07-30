@@ -42,10 +42,6 @@ typedef void (*pf_mem_process_v)(void* mem, void* param);
 typedef void (*pf_mem_walk)   (void* pheap, pf_mem_process allocated_cb, pf_mem_process freed_cb);
 typedef void (*pf_mem_walk_v) (void* pheap, pf_mem_process_v allocated_cb, pf_mem_process_v freed_cb, void* param);
 */
-void heap_buddy_init      (struct heap_llrb* pheap, void* __parent, pf_alloc __alloc, pf_dealloc __dealloc);
-void heap_buddy_init_v    (struct heap_llrb* pheap, void* __parent, pf_alloc __alloc, pf_dealloc __dealloc, int __split_threadhold, int __expand_size);
-
-void heap_buddy_deinit    (struct heap_llrb* pheap);
 
 void* heap_buddy_alloc_c  (void* pheap, int size);
 void* heap_buddy_alloc_v  (void* pheap, int size, const char* file, int line);
@@ -55,5 +51,17 @@ bool heap_buddy_dealloc_v (void* pheap, void* buff, const char* file, int line);
 
 void heap_buddy_mem_walk  (void* pheap, pf_mem_process allocated_cb, pf_mem_process freed_cb);
 void heap_buddy_mem_walk_v(void* pheap, pf_mem_process_v allocated_cb, pf_mem_process_v freed_cb, void* param);
+
+#ifdef _VERBOSE_ALLOC_DEALLOC_
+#define heap_buddy_alloc   heap_buddy_alloc_v
+#define heap_buddy_dealloc heap_buddy_dealloc_v
+#else 
+#define heap_buddy_alloc   heap_buddy_alloc_c
+#define heap_buddy_dealloc heap_buddy_dealloc_c
+#endif
+
+void heap_buddy_init      (struct heap_buddy* pheap, void* __parent, pf_alloc __alloc, pf_dealloc __dealloc);
+void heap_buddy_init_v    (struct heap_buddy* pheap, void* __parent, pf_alloc __alloc, pf_dealloc __dealloc, int __split_threadhold, int __expand_size);
+void heap_buddy_deinit    (struct heap_buddy* pheap);
 
 #endif /* _HEAP_BUDDY_H_ */
