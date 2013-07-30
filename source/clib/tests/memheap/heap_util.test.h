@@ -17,30 +17,35 @@ enum heaptest_op_order {
 };
 
 enum heaptest_page_size {
-	heap_pagesize_small,
-	heap_pagesize_middle,
-	heap_pagesize_large,
-
+	heap_pagesize_small,        /* smaller than 1/20 of HEAP_MINIMUM_EXPAND_SIZE */
+	heap_pagesize_middle,       /* between 1/20 and 1/4 of HEAP_MINIMUM_EXPAND_SIZE */
+	heap_pagesize_large,        /* between 1/4 and 1 HEAP_MINIMUM_EXPAND_SIZE */
+	heap_pagesize_huge,         /* between 1 and 5 HEAP_MINIMUM_EXPAND_SIZE */
+	heap_pagesize_random,       /* totally random */
 	heap_pagesize_count
 };
 
 enum heaptest_page_pattern {
-	heap_pagepattern_unique,     /* all pages are the same */
-	heap_pagepattern_increasing, /* page size is increasing */
-	heap_pagepattern_decreasing, /* page size is decreasing */
-	heap_pagepattern_jag,        /* page size is jagged */
+	heap_pagepattern_unique,           /* all pages are the same */
+	heap_pagepattern_increasing,       /* page size is increasing */
+	heap_pagepattern_decreasing,       /* page size is decreasing */
+	heap_pagepattern_jag,              /* page size is jagged */
 	heap_pagepattern_random_patterned, /* random page size, but size is pattern, in other words, not too much different king of size */
-	heap_pagepattern_random,     /* totally random page size */
+	heap_pagepattern_random,           /* totally random page size */
 	heap_pagepattern_special0,
 
 	heap_pagepattern_count
 };
 
+void heaptest_begin();
+void heaptest_end();
+
 void heaptest_set_heap(void* __heap, pf_alloc __alloc, pf_dealloc __dealloc);
+void heaptest_set_heap_plus(int split_threshold, int expand_size);
 void heaptest_set_debugstate(bool filldata, bool logtime);
 
 void heaptest_run_single(int __length, enum heaptest_op_order __order, enum heaptest_page_size __pagesize, enum heaptest_page_pattern __pagepattern);
 
-void heaptest_fun_allcomb(int __length);
+void heaptest_run_allcomb(int __length);
 
 #endif /* _HEAP_TEST_UTILITY_H_ */
