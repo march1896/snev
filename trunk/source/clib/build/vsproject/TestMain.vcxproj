@@ -289,6 +289,9 @@
       <Project>F064679C-4F52-49EA-A070-0ED4F2C0CF83</Project>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\tests\memheap\heap_util.test.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
