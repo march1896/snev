@@ -43,4 +43,9 @@
       <UniqueIdentifier>{4996b439-aed9-4287-8d6b-39c97349fd23}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\tests\memheap\heap_util.test.h">
+      <Filter>Source Files\memheap</Filter>
+    </ClInclude>
+  </ItemGroup>
 </Project>
