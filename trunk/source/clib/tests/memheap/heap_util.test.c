@@ -1,5 +1,7 @@
 #include <memheap/heap_util.test.h>
 
+#include <memheap/heap_def.h>
+
 #include <time.h>
 #include <stdlib.h>
 
@@ -7,103 +9,119 @@ static void*      g_heap;
 static pf_alloc   g_alloc;
 static pf_dealloc g_dealloc;
 
+/* global state to control the output */
 static bool       g_fill_data;
+static bool       g_log_operation;
+static const char* g_log_operation_file;
 static bool       g_log_time;
+static const char* g_log_time_file;
+static int        g_log_time_format;
 
-static enum heaptest_op_order     g_op_order;
-static enum heaptest_page_size    g_page_size;
-static enum heaptest_page_pattern g_page_pattern;
+/* global state of the current test */
+/* total number of heap operation */
+static int        g_op_count;
+/* continuous heap operation length */
+static int        g_op_step_length;
+static enum ht_op_order     g_op_order;
+static enum ht_data_size    g_page_size;
+static enum ht_data_pattern g_page_pattern;
 
-static int        g_last_sizevalue;
-/* next trend, < 0 means will smaller than g_last_sizevalue,
- * == 0 means will equal to g_last_sizevalue,
- * > 0 means will greater than g_last_size value.*/
-static int        g_next_trend;
-static int        g_step_length;
+static int        g_heap_op_alter_range_min;
+static int        g_heap_op_alter_range_max;
+static int        g_pagepattern_jag_range_min;
+static int        g_pagepattern_jag_range_max;
+static int        g_pagepattern_random_restricted_count;
 
-static int*       g_pagesize;
-static int        g_pagesize_length;
-static void**     g_address;
-static int        g_address_length;
+static int*       g_seeds_inuse;
+
+static int        g_preload_do;
+static int        g_preload_alloc_count;
+static int        g_preload_dealloc_count;
+static void**     g_preload_address;
+static void       heap_load_preload();
+static void       heap_release_preload();
+
+static int        g_pagesize_min = -1;
+static int        g_pagesize_max = -1;
+
+static const int  SMALL_PAGE_MIN  = 1;
+static const int  SMALL_PAGE_MAX  = HEAP_MINIMUM_EXPAND_SIZE/20;
+static const int  MIDDLE_PAGE_MIN = HEAP_MINIMUM_EXPAND_SIZE/20;
+static const int  MIDDLE_PAGE_MAX = HEAP_MINIMUM_EXPAND_SIZE/4;
+static const int  LARGE_PAGE_MIN  = HEAP_MINIMUM_EXPAND_SIZE/4;
+static const int  LARGE_PAGE_MAX  = HEAP_MINIMUM_EXPAND_SIZE;
+static const int  HUGE_PAGE_MIN   = HEAP_MINIMUM_EXPAND_SIZE;
+static const int  HUGE_PAGE_MAX   = HEAP_MINIMUM_EXPAND_SIZE*5;
+static const int  RANDOM_PAGE_MIN = 1;
+static const int  RANDOM_PAGE_MAX = HEAP_MINIMUM_EXPAND_SIZE*5;
+
+const char* ht_op_name[] = {
+	"op_inorder",
+	"op_reverseorder",
+	"op_alternately",
+	"op_random",
+	"op_patterned0", 
+	"op_patterned1",
+	"op_patterned2",
+	"op_order_count"
+};
+
+const char* ht_size_name[] = {
+	"data_small",
+	"data_middle",
+	"data_large",
+	"data_huge",
+	"data_random",
+	"data_count"
+};
+
+const char* ht_pattern_name[] = {
+	"pattern_unique",
+	"pattern_increasing",
+	"pattern_decreasing",
+	"pattern_jag",
+	"pattern_random_restricted",
+	"pattern_random",
+	"pattern_special0",
+	"pattern_special1",
+	"pattern_special2",
+	"pattern_count"
+};
 
 typedef void (*pf_heap_op_order)();
-void f_heap_op_increasing();
-void f_heap_op_decreasing();
+void f_heap_op_inorder();
+void f_heap_op_reverseorder();
 void f_heap_op_alternately();
 void f_heap_op_random();
-void f_heap_op_patterned0();
-void f_heap_op_patterned1();
-void f_heap_op_patterned2();
 
 static pf_heap_op_order heap_op_callbacks[] = {
-	f_heap_op_increasing,
-	f_heap_op_decreasing,
+	f_heap_op_inorder,
+	f_heap_op_reverseorder,
 	f_heap_op_alternately,
 	f_heap_op_random,
-	f_heap_op_patterned0,
-	f_heap_op_patterned1,
-	f_heap_op_patterned2,
 };
 
-enum heaptest_page_size {
-	heap_pagesize_small,        /* smaller than 1/20 of expand size */
-	heap_pagesize_middle,       /* between 1/20 and 1/4 of expand size */
-	heap_pagesize_large,        /* between 1/4 and 1 expand size */
-	heap_pagesize_huge,         /* between 1 and 5 expand size */
-	heap_pagesize_random,       /* totally random */
-	heap_pagesize_count
-};
-
-enum heaptest_page_pattern {
-	heap_pagepattern_unique,     /* all pages are the same */
-	heap_pagepattern_increasing, /* page size is increasing */
-	heap_pagepattern_decreasing, /* page size is decreasing */
-	heap_pagepattern_jag,        /* page size is jagged */
-	heap_pagepattern_random_patterned, /* random page size, but size is pattern, in other words, not too much different king of size */
-	heap_pagepattern_random,     /* totally random page size */
-	heap_pagepattern_special0,
-
-	heap_pagepattern_count
-};
-
-static enum heaptest_page_size    g_page_size;
-static enum heaptest_page_pattern g_page_pattern;
-
-static int small_page_min  = 1;
-static int small_page_max  = HEAP_MINIMUM_EXPAND_SIZE/20;
-static int middle_page_min = small_page_max;
-static int middle_page_max = HEAP_MINIMUM_EXPAND_SIZE/4;
-static int large_page_min  = middle_page_max;
-static int large_page_max  = HEAP_MINIMUM_EXPAND_SIZE;
-static int huge_page_min   = large_page_max;
-static int huge_page_max   = HEAP_MINIMUM_EXPAND_SIZE*5;
-static int random_page_min = small_page_min;
-static int random_page_max = huge_page_max;
-
-static int current_page_min = -1;
-static int current_page_max = -1;
-
-static void generate_reset_current() {
+static void generate_init_current() {
 	switch (g_page_size) {
-		case heap_pagesize_small:
-			current_page_min = small_page_min;
-			current_page_max = small_page_max;
+		case ht_data_small:
+			g_pagesize_min = SMALL_PAGE_MIN;
+			g_pagesize_max = SMALL_PAGE_MAX;
 			break;
-		case heap_pagesize_middle:
-			current_page_min = middle_page_min;
-			current_page_max = middle_page_max;
+		case ht_data_middle:
+			g_pagesize_min = MIDDLE_PAGE_MIN;
+			g_pagesize_max = MIDDLE_PAGE_MAX;
 			break;
-		case heap_pagesize_large:
-			current_page_min = large_page_min;
-			current_page_max = large_page_max;
+		case ht_data_large:
+			g_pagesize_min = LARGE_PAGE_MIN;
+			g_pagesize_max = LARGE_PAGE_MAX;
 			break;
-		case heap_pagesize_huge:
-			current_page_min = huge_page_min;
-			current_page_max = huge_page_max;
+		case ht_data_huge:
+			g_pagesize_min = HUGE_PAGE_MIN;
+			g_pagesize_max = HUGE_PAGE_MAX;
 			break;
-		case heap_pagesize_random:
-			current_page_min = random_page_min;
-			current_page_max = random_page_max;
+		case ht_data_random:
+			g_pagesize_min = RANDOM_PAGE_MIN;
+			g_pagesize_max = RANDOM_PAGE_MAX;
 			break;
 	}
 }
@@ -115,162 +133,438 @@ static int generate_in_range(int minimum, int maximum) {
 	return rand() % (maximum - minimum) + minimum;
 }
 
-static int generate_single_value() {
-	return generate_in_range(current_page_min, current_page_max);
-}
-
-static int generate_shrink_range(int n_value) {
-	dbg_assert(n_value >= current_page_min && n_value <= current_page_max);
-	g_steps ++;
-	if (g_steps >= g_step_legnth) {
-		if (g_next_trend > 0) {
-			current_page_min = n_value + 1;
-		}
-		else if (g_next_trend == 0)  {
-			current_page_min = current_page_max = n_value;
-		}
-		else {
-			current_page_max = n_value - 1;
-		}
-		g_steps = 0;
-	}
-}
-
-/* the return value depends on pagesize and pagepattern */
-static int generate_pagesize() {
-	int gen = -1;
-	switch (g_page_pattern) {
-		case heap_pagepattern_unique:
-		case heap_pagepattern_increasing:
-		case heap_pagepattern_decreasing:
-			gen = generate_single_value();
-			dbg_assert(gen > 0);
-			generate_shrink_range();
-			return gen;
-		case heap_pagepattern_jag:
-			/* TODO: */
-		case heap_pagepattern_random_patterned:
-		case heap_pagepattern_random:
-		case heap_pagepattern_special0:
-	}
-}
-
-static void generate_begin() {
-	unsigned int iseed = (unsigned int)time(NULL);
-	srand (iseed);
-
-	g_last_sizevalue = -1;
-	g_step_length = 0;
-
-	int small_page_min;
-	int small_page_max;
-	int middle_page_min;
-	int middle_page_max;
-	int large_page_min;
-	int large_page_max;
-	int huge_page_min;
-	int huge_page_max;
-}
-
-static void generate_end() {
-}
-
-void f_heap_op_increasing() {
+static void heap_load_preload() {
 	int i;
 
-	dbg_assert(g_pagesize_length == g_address_length);
+	g_preload_address = (void**)malloc(sizeof(void*) * g_preload_alloc_count);
 
-	/* first generate test data */
-	generate_begin();
-	for (i = 0; i < g_pagesize_length; i ++) {
-		g_pagesize[i] = generate_pagesize();
+	for (i = 0; i < g_preload_alloc_count; i ++) {
+		int size = generate_in_range(g_pagesize_min, g_pagesize_max);
+
+		g_preload_address[i] = (void*)alloc(g_alloc, g_heap, size);
 	}
-	generate_end();
 
+	for (i = 0; i < g_preload_dealloc_count; i ++) {
+		int index = rand() % g_preload_alloc_count;
+
+		if (g_preload_address[index] != NULL) {
+
+			dealloc(g_dealloc, g_heap, g_preload_address[index]);
+
+			g_preload_address[index] = NULL;
+		}
+	}
+}
+
+static void heap_release_preload() {
+	int i;
+
+	/* in fact, we only need to release the preload for system heap */
+	for (i = 0; i < g_preload_alloc_count; i ++) {
+		if (g_preload_address[i] != NULL) {
+			dealloc(g_dealloc, g_heap, g_preload_address[i]);
+
+			g_preload_address[i] = NULL;
+		}
+	}
+}
+
+static int cmpfunc (const void * a, const void * b) {
+   return ( *(int*)a - *(int*)b );
+}
+static void data_seeds_init() {
+	int i;
+	int* seeds_random  = (int*)malloc(sizeof(int) * g_op_count);
+	int* seeds_inorder = (int*)malloc(sizeof(int) * g_op_count);
+
+	g_seeds_inuse   = (int*)malloc(sizeof(int) * g_op_count);
+
+	for (i = 0; i < g_op_count; i ++) {
+		seeds_random[i] = generate_in_range(g_pagesize_min, g_pagesize_max);
+		seeds_inorder[i] = seeds_random[i];
+	}
+
+	qsort(seeds_inorder, g_op_count, sizeof(int), cmpfunc);
+
+	switch (g_page_pattern) {
+		int index;
+		case ht_pattern_unique:
+			index = generate_in_range(0, g_op_count);
+			for (i = 0; i < g_op_count; i ++) {
+				g_seeds_inuse[i] = seeds_random[index];
+			}
+			break;
+		case ht_pattern_increasing:
+			for (i = 0; i < g_op_count; i ++) {
+				g_seeds_inuse[i] = seeds_inorder[i];
+			}
+			break;
+		case ht_pattern_decreasing:
+			for (i = 0; i < g_op_count; i ++) {
+				g_seeds_inuse[i] = seeds_inorder[g_op_count-1-i];
+			}
+			break;
+		case ht_pattern_jag:
+			/* TODO: jag is not implemented, currently using random */
+			for (i = 0; i < g_op_count; i ++) {
+				g_seeds_inuse[i] = seeds_random[i];
+			}
+		case ht_pattern_random_restricted:
+			dbg_assert(g_pagepattern_random_restricted_count < g_op_count);
+
+			for (i = 0; i < g_op_count; i ++) {
+				int index = generate_in_range(0, g_pagepattern_random_restricted_count);
+				g_seeds_inuse[i] = seeds_inorder[index];
+			}
+		case ht_pattern_random:
+			for (i = 0; i < g_op_count; i ++) {
+				g_seeds_inuse[i] = seeds_random[i];
+			}
+			break;
+	}
+
+	free(seeds_random);
+	free(seeds_inorder);
+}
+
+static void data_seeds_deinit() {
+	free(g_seeds_inuse);
+}
+
+static int get_alloc_size(int ith_op) {
+	return g_seeds_inuse[ ith_op / g_op_step_length ];
+}
+
+void f_heap_op_inorder() {
+	int i;
+	char** addresses = (char**)malloc(sizeof(char*) * g_op_count);
 	/* allocate test data in order */
-	for (i = 0; i < g_pagesize_length; i ++) {
-		g_address[i] = (void*)alloc(g_alloc, g_heap, g_pagesize[i]);
+	for (i = 0; i < g_op_count; i ++) {
+		addresses[i] = (char*)alloc(g_alloc, g_heap, get_alloc_size(i));
 	}
 
 	if (g_fill_data) {
-		for (i = 0; i < g_pagesize_length; i ++) {
+		for (i = 0; i < g_op_count; i ++) {
+			int size = get_alloc_size(i);
 			int j;
-			for (j = 0; j < g_pagesize[i]; j ++) {
-				((char*)g_address[i])[j] = 0;
+			for (j = 0; j < size; j ++) {
+				addresses[i][j] = 0;
 			}
 		}
 	}
 
 	/* last, dealloc data in order */
-	for (i = 0; i < g_pagesize_length; i ++) {
-		dealloc(g_dealloc, g_heap, g_address[i]);
+	for (i = 0; i < g_op_count; i ++) {
+		dealloc(g_dealloc, g_heap, addresses[i]);
 	}
+
+	free(addresses);
 }
 
-void f_heap_op_decreasing() {
+void f_heap_op_reverseorder() {
+	int i;
+	char** addresses = (char**)malloc(sizeof(char*) * g_op_count);
+	/* allocate test data in order */
+	for (i = 0; i < g_op_count; i ++) {
+		addresses[i] = (char*)alloc(g_alloc, g_heap, get_alloc_size(i));
+	}
+
+	if (g_fill_data) {
+		for (i = 0; i < g_op_count; i ++) {
+			int size = get_alloc_size(i);
+			int j;
+			for (j = 0; j < size; j ++) {
+				((char*)addresses[i])[j] = 0;
+			}
+		}
+	}
+
+	/* last, dealloc data in reverse order */
+	for (i = g_op_count-1; i >= 0; i --) {
+		dealloc(g_dealloc, g_heap, addresses[i]);
+	}
+
+	free(addresses);
 }
+
 void f_heap_op_alternately() {
+	int i;
+	int step_length = -1, step = 0; 
+	int freelist_head = 0;
+	int alloclist_head = -1;
+	int op = 1; /* 1 means alloc, -1 means dealloc */
+	int pool_size = 5 * g_heap_op_alter_range_max;
+
+	/* the algorithm is a little complicated, but it ensures performance */
+	char** address = (char**)malloc(sizeof(char*) * pool_size);
+	int* freelist  = (int*)malloc(sizeof(int) * pool_size);
+	int* alloclist = (int*)malloc(sizeof(int) * pool_size);
+
+	/* form a memory pool to fast find an allocable unit */
+	for (i = 0; i < pool_size; i ++) {
+		address[i] = NULL;
+		freelist[i] = i + 1;
+		alloclist[i] = -1;
+	}
+	freelist[pool_size-1] = -1;
+
+	step_length = generate_in_range(g_heap_op_alter_range_min, 
+			g_heap_op_alter_range_max);
+
+	for (i = 0; i < g_op_count; i ++) {
+		if (op == 1) {
+			/* op == 1, we should alloc */
+			if (freelist_head == -1) {
+				/* no allocable address, just do nothing */
+			}
+			else {
+				dbg_assert(address[freelist_head] == NULL);
+				address[freelist_head] = (char*)alloc(g_alloc, g_heap, get_alloc_size(i));
+				/* add into allocated list */
+				alloclist[freelist_head] = alloclist_head;
+				alloclist_head = freelist_head;
+				
+				/* remove from freelist */
+				freelist_head = freelist[freelist_head];
+			}
+		}
+		else {
+			dbg_assert(op == -1);
+			/* op == -1, we should dealloc, dealloc the first address in the alloc list */
+			if (alloclist_head == -1) {
+				/* all are freed, do nothing */
+			}
+			else {
+				dbg_assert(address[alloclist_head] != NULL);
+				dealloc(g_dealloc, g_heap, address[alloclist_head]);
+				address[alloclist_head] = NULL;
+
+				/* add into free list */
+				freelist[alloclist_head] = freelist_head;
+				freelist_head = alloclist_head;
+
+				/* remove from alloclist */
+				alloclist_head = alloclist[alloclist_head];
+			}
+		}
+
+		step ++;
+		if (step >= step_length) {
+			step_length = generate_in_range(g_heap_op_alter_range_min, 
+					g_heap_op_alter_range_max);
+			step = 0;
+
+			/* we have done enough times of one kind operation, invert */
+			op = -op;
+		}
+	}
+
+	free(address);
+	free(freelist);
+	free(alloclist);
 }
+
 void f_heap_op_random() {
+	int i;
+	int freelist_head = 0;
+	int alloclist_head = -1;
+	int op = 1; /* 1 means alloc, 0 means dealloc */
+	int pool_size = 5 * g_heap_op_alter_range_max;
+
+	/* the algorithm is a little complicated, but it ensures performance */
+	char** address = (char**)malloc(sizeof(char*) * pool_size);
+	int* freelist  = (int*)malloc(sizeof(int) * pool_size);
+	int* alloclist = (int*)malloc(sizeof(int) * pool_size);
+
+	/* form a memory pool to fast find an allocable unit */
+	for (i = 0; i < pool_size; i ++) {
+		address[i] = NULL;
+		freelist[i] = i + 1;
+		alloclist[i] = -1;
+	}
+	freelist[pool_size-1] = -1;
+
+	for (i = 0; i < g_op_count; i ++) {
+		op = rand() % 2;
+		if (op == 1) {
+			/* op == 1, we should alloc */
+			if (freelist_head == -1) {
+				/* no allocable address, just do nothing */
+			}
+			else {
+				dbg_assert(address[freelist_head] == NULL);
+				address[freelist_head] = (char*)alloc(g_alloc, g_heap, get_alloc_size(i));
+				/* add into allocated list */
+				alloclist[freelist_head] = alloclist_head;
+				alloclist_head = freelist_head;
+				
+				/* remove from freelist */
+				freelist_head = freelist[freelist_head];
+			}
+		}
+		else {
+			/* op == -1, we should dealloc, dealloc the first address in the alloc list */
+			if (alloclist_head == -1) {
+				/* all are freed, do nothing */
+			}
+			else {
+				dbg_assert(address[alloclist_head] != NULL);
+				dealloc(g_dealloc, g_heap, address[alloclist_head]);
+				address[alloclist_head] = NULL;
+
+				/* add into free list */
+				freelist[alloclist_head] = freelist_head;
+				freelist_head = alloclist_head;
+
+				/* remove from alloclist */
+				alloclist_head = alloclist[alloclist_head];
+			}
+		}
+	}
+
+	free(address);
+	free(freelist);
+	free(alloclist);
 }
-void f_heap_op_patterned0() {
-}	
-void f_heap_op_patterned1() {
-}
-void f_heap_op_patterned2() {
+
+void heaptest_global_state_reset() {
+	g_heap                  = NULL;
+	g_alloc                 = NULL;
+	g_dealloc               = NULL;
+
+	g_fill_data             = false;
+	g_log_operation              = false;
+	g_log_operation_file         = NULL;
+	g_log_time              = false;
+	g_log_time_file         = NULL;
+	g_log_time_format       = 0;
+
+	g_op_count              = -1;
+	g_op_step_length        = 1;
+	g_op_order              = ht_op_random;
+	g_page_size             = ht_data_small;
+	g_page_pattern          = ht_pattern_random_restricted;
+
+	g_heap_op_alter_range_min             = 2;
+	g_heap_op_alter_range_max             = 10;
+	g_pagepattern_jag_range_min           = 3;
+	g_pagepattern_jag_range_max           = 6;
+	g_pagepattern_random_restricted_count = 50;
+
+	g_seeds_inuse           = NULL;
+	g_preload_do            = false;
+	g_preload_alloc_count   = 1000;
+	g_preload_dealloc_count = 1000;
+	g_preload_address       = NULL;
+
+	g_pagesize_min          = SMALL_PAGE_MIN;
+	g_pagesize_max          = SMALL_PAGE_MAX;
 }
 
 void heaptest_begin() {
-	/* reset static global variable */
-	g_heap     = NULL;
-	g_alloc    = NULL;
-	g_dealloc  = NULL;
+	heaptest_global_state_reset();
 }
 
 void heaptest_end() {
-	/* reset static global variable */
-	g_heap     = NULL;
-	g_alloc    = NULL;
-	g_dealloc  = NULL;
+	heaptest_global_state_reset();
 }
 
 void heaptest_set_heap(void* __heap, pf_alloc __alloc, pf_dealloc __dealloc) {
-	g_heap     = __heap;
-	g_alloc    = __alloc;
-	g_dealloc  = __dealloc;
+	g_heap = __heap;
+	g_alloc = __alloc;
+	g_dealloc = __dealloc;
+}
+
+/* load the heap with some data before test */
+void heaptest_set_preload(int alloc_count, int dealloc_count) {
+	g_preload_do            = true;
+	g_preload_alloc_count   = alloc_count;
+	g_preload_dealloc_count = dealloc_count;
 }
 
 void heaptest_set_filldata(bool filldata) {
+	g_fill_data             = filldata;
 }
 
-void heaptest_set_logdata(bool log, const char* file);
-/* format 0 is simplified, 1 is verbosed */
-void heaptest_set_logtime(bool log, int format, const char* file);
+void heaptest_set_logoperation(bool log, const char* file) {
+	g_log_operation         = log;
+	g_log_operation_file    = file;
+}
 
+void heaptest_set_logtime(bool log, int format, const char* file) {
+	/* format 0 is simplified, 1 is verbose */
+	g_log_time              = log;
+	g_log_time_file         = file;
+	g_log_time_format       = format;
+}
+
+#include <stdio.h>
 void heaptest_run_internal() {
+	clock_t start_c, end_c;
+
+	data_seeds_init();
+
+	start_c = clock();	
+	// call the test function
+	heap_op_callbacks[g_op_order]();
+
+	end_c = clock();
+	if (g_log_time) {
+		FILE * pFile = fopen(g_log_time_file, "a");
+		
+		fprintf(pFile, "%f    ", (float)(end_c - start_c)/CLOCKS_PER_SEC);
+		fprintf(pFile, "/* %d \toperations, mode: %-15s, %-15s, %-30s*/\n", 
+			g_op_count, ht_op_name[g_op_order], ht_size_name[g_page_size], ht_pattern_name[g_page_pattern]); 
+
+		fclose(pFile);
+	}
+
+	data_seeds_deinit();
 }
 
-void heaptest_run_single(int __length, enum heaptest_op_order __order, enum heaptest_page_size __pagesize, enum heaptest_page_pattern __pagepattern) {
-	g_pagesize_length = __length;
-	g_address_length  = __length;
+void heaptest_run_single(int op_count, enum ht_op_order order, enum ht_data_size pagesize, enum ht_data_pattern pagepattern) {
+	g_op_count        = op_count;
+	g_op_order        = order;
+	g_page_size       = pagesize;
+	g_page_pattern    = pagepattern;
 
-	g_op_order        = __order;
-	g_page_size       = __pagesize;
-	g_page_pattern    = __pagepattern;
+	/* first add preload */
+	if (g_preload_do) {
+		heap_load_preload();
+	}
 
 	heaptest_run_internal();
+
+	if (g_preload_do) {
+		heap_release_preload();
+	}
 }
 
-void heaptest_run_allcomb(int __length) {
-	enum heaptest_op_order order;
-	enum heaptest_page_size pagesize;
-	enum heaptest_page_pattern pagepattern;
+void heaptest_run_allcomb(int op_count) {
+	enum ht_op_order order;
+	enum ht_data_size pagesize;
+	enum ht_data_pattern pagepattern;
 
-	for (order = heap_op_increasing; order < heap_op_order_count; order ++) {
-		for (pagesize = heap_pagesize_small; pagesize < heap_pagesize_count; pagesize ++) {
-			for (pagepattern = heap_pagepattern_unique; pagepattern < heap_pagepattern_count; pagepattern ++) {
-				heaptest_run_single(__length, order, pagesize, pagepattern);
+	/* first add preload */
+	if (g_preload_do) {
+		heap_load_preload();
+	}
+
+	for (order = ht_op_inorder; order < ht_op_order_count; order ++) {
+		for (pagesize = ht_data_small; pagesize < ht_data_count; pagesize ++) {
+			for (pagepattern = ht_pattern_unique; pagepattern < ht_pattern_count; pagepattern ++) {
+				g_op_order        = order;
+				g_page_size       = pagesize;
+				g_page_pattern    = pagepattern;
+
+				g_op_count        = op_count;
+
+				heaptest_run_internal();
 			}
 		}
+	}
+
+	if (g_preload_do) {
+		heap_release_preload();
 	}
 }
