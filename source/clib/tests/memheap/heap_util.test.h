@@ -42,7 +42,11 @@ void heaptest_end();
 
 void heaptest_set_heap(void* __heap, pf_alloc __alloc, pf_dealloc __dealloc);
 void heaptest_set_heap_plus(int split_threshold, int expand_size);
-void heaptest_set_debugstate(bool filldata, bool logtime);
+
+void heaptest_set_filldata(bool filldata);
+void heaptest_set_logdata(bool log, const char* file);
+/* format 0 is simplified, 1 is verbosed */
+void heaptest_set_logtime(bool log, int format, const char* file);
 
 void heaptest_run_single(int __length, enum heaptest_op_order __order, enum heaptest_page_size __pagesize, enum heaptest_page_pattern __pagepattern);
 
