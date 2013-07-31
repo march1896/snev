@@ -8,7 +8,6 @@
 #if defined(__GCC__)
 
 #include <stdbool.h>
-#define force_inline inline
 #define dbg_assert assert
 
 #elif defined(_MSC_VER)
@@ -24,8 +23,6 @@ typedef int bool;
 #define inline __inline
 #endif
 
-#define force_inline __inline
-
 #ifdef _DEBUG
 #define dbg_assert(x) assert(x)
 #else 
@@ -36,6 +33,7 @@ typedef int bool;
 /* MinGW make does not contains __GCC__ macro */
 
 #include <stdbool.h>
+#define dbg_assert assert
 
 #endif
 

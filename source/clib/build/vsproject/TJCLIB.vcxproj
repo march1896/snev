@@ -210,6 +210,7 @@
     <ClCompile Include="..\..\src\cntr2\iset.c" />
     <ClCompile Include="..\..\src\cntr2\istack.c" />
     <ClCompile Include="..\..\src\cntr2\odlist.c" />
+    <ClCompile Include="..\..\src\cntr2\oo_model.c" />
     <ClCompile Include="..\..\src\memheap\block_common.c" />
     <ClCompile Include="..\..\src\memheap\block_link.c" />
     <ClCompile Include="..\..\src\memheap\heap_buddy.c" />

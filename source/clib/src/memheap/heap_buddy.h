@@ -43,14 +43,14 @@ typedef void (*pf_mem_walk)   (void* pheap, pf_mem_process allocated_cb, pf_mem_
 typedef void (*pf_mem_walk_v) (void* pheap, pf_mem_process_v allocated_cb, pf_mem_process_v freed_cb, void* param);
 */
 
-void* heap_buddy_alloc_c  (void* pheap, int size);
-void* heap_buddy_alloc_v  (void* pheap, int size, const char* file, int line);
+void* heap_buddy_alloc_c  (struct heap_buddy* pheap, int size);
+void* heap_buddy_alloc_v  (struct heap_buddy* pheap, int size, const char* file, int line);
 
-bool heap_buddy_dealloc_c (void* pheap, void* buff);
-bool heap_buddy_dealloc_v (void* pheap, void* buff, const char* file, int line);
+bool heap_buddy_dealloc_c (struct heap_buddy* pheap, void* buff);
+bool heap_buddy_dealloc_v (struct heap_buddy* pheap, void* buff, const char* file, int line);
 
-void heap_buddy_mem_walk  (void* pheap, pf_mem_process allocated_cb, pf_mem_process freed_cb);
-void heap_buddy_mem_walk_v(void* pheap, pf_mem_process_v allocated_cb, pf_mem_process_v freed_cb, void* param);
+void heap_buddy_mem_walk  (struct heap_buddy* pheap, pf_mem_process allocated_cb, pf_mem_process freed_cb);
+void heap_buddy_mem_walk_v(struct heap_buddy* pheap, pf_mem_process_v allocated_cb, pf_mem_process_v freed_cb, void* param);
 
 #ifdef _VERBOSE_ALLOC_DEALLOC_
 #define heap_buddy_alloc   heap_buddy_alloc_v

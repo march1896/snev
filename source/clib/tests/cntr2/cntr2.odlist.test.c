@@ -1,4 +1,3 @@
-#include <test_util.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -222,8 +221,13 @@ static void __performance_test() {
 	printf("add find remove performance test end\n");
 }
 
-void cntr2_odlist_test() {
-	do_test("cntr cntr_base correctness", __correctness_test);
+#define temp_do_test(test_name, test_function) \
+	printf("%s test start\n", test_name);\
+	test_function(); \
+	printf("%s test end\n\n", test_name);
 
-	do_test("cntr cntr_base performance", __performance_test);
+void cntr2_odlist_test() {
+	temp_do_test("cntr cntr_base correctness", __correctness_test);
+
+	temp_do_test("cntr cntr_base performance", __performance_test);
 }
