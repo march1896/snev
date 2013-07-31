@@ -130,8 +130,6 @@ void heap_llrb_deinit(struct heap_llrb* pheap) {
 	list_foreach_v(&pheap->memlist, mem_list_node_dispose, (void*)pheap);
 }
 
-#define SPLIT_THRETHHOLD sizeof(struct heap_llrb_block)
-
 static void* heap_llrb_alloc_try(struct heap_llrb* pheap, int size) {
 	struct llrb_link* alink = llrb_link_findbysize(pheap->llrb_root, size);
 	struct heap_llrb_block* pb = container_of(alink, struct heap_llrb_block, link);
