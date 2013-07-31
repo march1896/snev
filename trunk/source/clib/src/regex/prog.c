@@ -3,6 +3,7 @@
 #include "regc.h"
 
 #include <stdio.h>
+#include <string.h>
 
 const char* chset_num = "0123456789";
 const char* chset_word = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_";

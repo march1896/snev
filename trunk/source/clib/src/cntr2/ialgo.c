@@ -2,10 +2,6 @@
 #include <iitr.h>
 #include <ifactory.h>
 
-typedef void (*pf_ref_process)  (void* __ref);
-typedef void (*pf_ref_process_v)(void* __ref, void* param);
-typedef bool (*pf_ref_compare)  (void* ref_a, void* ref_b);
-
 void foreach(itrfwd begin, itrfwd end, pf_ref_process cb) {
 	/* get interface of existing object, we do not create any object on heap */
 	dbg_assert(is_itrfwd(begin));

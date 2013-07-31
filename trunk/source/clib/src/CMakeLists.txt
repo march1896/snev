@@ -19,7 +19,7 @@ set(PROJECT_INSTALL_DIR ${PROJECT_SOURCE_DIR}/../bin)
 include_directories(.)
 
 if (SINGLE_LIB)
-	set (SUB_DIRS memheap util cntr regex)
+	set (SUB_DIRS memheap util cntr cntr2 regex)
 	foreach (dir ${SUB_DIRS})
 		include_directories(${dir})
 
