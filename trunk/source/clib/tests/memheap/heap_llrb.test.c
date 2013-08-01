@@ -1,6 +1,7 @@
 #include <memheap/heap_factory.h>
 #include <memheap/heap_sys.h>
 #include <memheap/heap_global.h>
+#include <memheap/heap_walk.h>
 
 #include <memheap/heap_util.test.h>
 
@@ -18,6 +19,14 @@ void heap_llrb_correct_test() {
 	heaptest_run_allcomb(100);
 
 	heaptest_end();
+
+	{
+		struct heap_state cur_state;
+		heap_state_init(&cur_state);
+		heap_llrb_walk(testheap, heap_query_state, &cur_state);
+	}
+
+	heap_llrb_walk(testheap, heap_leak_print_to_terminal, NULL);
 	
 	heap_llrb_join(testheap);
 }

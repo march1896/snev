@@ -71,11 +71,11 @@ static void __list_correct() {
 	}
 	
 	dbg_assert(ilist_size(list) == 6);
-// 
-//  	__ref = (int)ilist_remove_back(list); /* { 3, 1, 0, 2, 4 } */
-//  	dbg_assert(__ref == 4);
-//  	__ref = (int)ilist_remove_back(list); /* { 1, 0, 2, 4 } */
-//  	dbg_assert(__ref == 2);
+
+ 	__ref = (int)ilist_remove_back(list); /* { 3, 1, 0, 2, 4 } */
+ 	dbg_assert(__ref == 4);
+ 	__ref = (int)ilist_remove_back(list); /* { 1, 0, 2, 4 } */
+ 	dbg_assert(__ref == 2);
 
 	__odlist_print(list);
 

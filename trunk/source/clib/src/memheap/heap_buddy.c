@@ -11,20 +11,9 @@ int block_data_size_from_blick(struct list_link *link) {
 	return block_com_data_size(&pb->common);
 }
 
-struct mem_list_node {
-	struct list_link link;
-
-	void*            memory;
-	int              size;
-
-	struct block_c*  bc_first;
-	struct block_c*  bc_front_sent;
-	struct block_c*  bc_end_sent;
-};
-
 static void heap_buddy_expand_memory(struct heap_buddy* pheap, int expand_size) {
-	struct mem_list_node* n_mem_node = (struct mem_list_node*)
-		alloc(pheap->__alloc, pheap->__parent, sizeof(struct mem_list_node));
+	struct block_c_pool* n_blk_pool = (struct block_c_pool*)
+		alloc(pheap->__alloc, pheap->__parent, sizeof(struct block_c_pool));
 
 	void* n_mem_begin = 
 		alloc(pheap->__alloc, pheap->__parent, expand_size);
@@ -41,21 +30,21 @@ static void heap_buddy_expand_memory(struct heap_buddy* pheap, int expand_size) 
 				n_mem_begin, n_mem_end, &sent_first, &sent_last);
 		block_com_set_free(init_block, true);
 
-		n_mem_node->memory = n_mem_begin;
-		n_mem_node->size   = expand_size;
-		n_mem_node->bc_first      = init_block;
-		n_mem_node->bc_front_sent = sent_first;
-		n_mem_node->bc_end_sent   = sent_last;
+		n_blk_pool->memory = n_mem_begin;
+		n_blk_pool->size   = expand_size;
+		n_blk_pool->bc_first      = init_block;
+		n_blk_pool->bc_front_sent = sent_first;
+		n_blk_pool->bc_end_sent   = sent_last;
 	}
 	
 	/* link the new memory into memory list */
-	list_insert_back(&pheap->memlist, &n_mem_node->link);
+	list_insert_back(&pheap->memlist, &n_blk_pool->link);
 
 	/* insert the new block into the heap */
 	{
 		struct heap_buddy_block *n_block = 
-			container_of(n_mem_node->bc_first, struct heap_buddy_block, common);
-		int sz = block_com_data_size(n_mem_node->bc_first);
+			container_of(n_blk_pool->bc_first, struct heap_buddy_block, common);
+		int sz = block_com_data_size(n_blk_pool->bc_first);
 
 		blink_push(&pheap->buddy[mlog2(sz)], &n_block->link);
 	}
@@ -85,21 +74,21 @@ void heap_buddy_init_v(struct heap_buddy* pheap, void* __parent, pf_alloc __allo
 	pheap->expand_size      = max(HEAP_MINIMUM_EXPAND_SIZE, __expand_size);
 }
 
-static void mem_list_node_dispose(struct list_link* link, void* param) {
-	struct mem_list_node* mem_node = 
-		container_of(link, struct mem_list_node, link);
+static void block_c_pool_dispose(struct list_link* link, void* param) {
+	struct block_c_pool* blk_pool = 
+		container_of(link, struct block_c_pool, link);
 	struct heap_buddy* pheap = (struct heap_buddy*)param;
 
 	/* first delete the memory hold by this node */
-	dealloc(pheap->__dealloc, pheap->__parent, mem_node->memory);
+	dealloc(pheap->__dealloc, pheap->__parent, blk_pool->memory);
 
 	/* second delete the memory node itself */
-	dealloc(pheap->__dealloc, pheap->__parent, mem_node);
+	dealloc(pheap->__dealloc, pheap->__parent, blk_pool);
 }
 
 void heap_buddy_deinit(struct heap_buddy* pheap) {
 	/* clear the memory hold by this heap */
-	list_foreach_v(&pheap->memlist, mem_list_node_dispose, (void*)pheap);
+	list_foreach_v(&pheap->memlist, block_c_pool_dispose, (void*)pheap);
 }
 
 static void* heap_buddy_alloc_try(struct heap_buddy* pheap, int size) {

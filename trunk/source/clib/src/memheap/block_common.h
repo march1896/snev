@@ -131,7 +131,7 @@ extern inline const char* block_c_debug_get_fileline(struct block_c_debug* pbc, 
 #define block_com_debug_init(x)   block_c_debug_init(x)
 #define block_com_debug_deinit(x) block_c_debug_deinit(x)
 #define block_com_debug_set_fileline(c, f, l) block_c_debug_set_fileline(c, f, l)
-#define block_com_debug_get_fileline(c, e);   block_c_debug_set_fileline(c, e)
+#define block_com_debug_get_fileline(c, e)    block_c_debug_get_fileline(c, e)
 
 #else
 extern inline const char* block_c_clean_get_fileline(struct block_c_clean* pbc, int* line);
@@ -145,7 +145,7 @@ inline void block_c_clean_donothingv(void* x, void* y, void* z) {}
 #define block_com_debug_init(x)  block_c_clean_donothing(x)
 #define block_com_debug_deinit(x) block_c_clean_donothing(x)
 #define block_com_debug_set_fileline(c, f, l) block_c_clean_donothingv(x)
-#define block_com_debug_get_fileline(c, e);   block_c_clean_set_fileline(c, e)
+#define block_com_debug_get_fileline(c, e)    block_c_clean_get_fileline(c, e)
 
 #endif
 /* 
@@ -224,6 +224,7 @@ extern inline void block_com_init_size(struct block_c* pbc, void* prev_adj, unsi
  *
  * @return firt valid block address in the buffer
  */
+
 extern inline struct block_c* block_com_make_sentinels(void* buff_start, void* buff_end, struct block_c **sent_first, struct block_c **sent_last);
 
 /**
@@ -247,4 +248,17 @@ extern inline struct block_c* block_com_split(struct block_c* pbc, unsigned int 
  */
 extern inline void block_com_merge(struct block_c* pstart, struct block_c* pend);
 
+/* when we want to expand a given heap, we usually allocate a large buff then use it to maintain block_c,
+ * block_c_pool defines this kind of buff, see heap_llrb or heap_buddy for details */
+#include <util/list_link.h>
+struct block_c_pool {
+	struct list_link link;
+
+	void*            memory;
+	int              size;
+
+	struct block_c*  bc_first;
+	struct block_c*  bc_front_sent;
+	struct block_c*  bc_end_sent;
+};
 #endif 

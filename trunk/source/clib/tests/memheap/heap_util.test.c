@@ -359,6 +359,14 @@ void f_heap_op_alternately() {
 		}
 	}
 
+	/* dealloc all allocated if they are not deleted */
+	for (i = 0; i < pool_size; i ++) {
+		if (address[i] != NULL) {
+			dealloc(g_dealloc, g_heap, address[i]);
+			address[i] = NULL;
+		}
+	}
+
 	free(address);
 	free(freelist);
 	free(alloclist);
@@ -419,6 +427,14 @@ void f_heap_op_random() {
 				/* remove from alloclist */
 				alloclist_head = alloclist[alloclist_head];
 			}
+		}
+	}
+
+	/* dealloc all allocated if they are not deleted */
+	for (i = 0; i < pool_size; i ++) {
+		if (address[i] != NULL) {
+			dealloc(g_dealloc, g_heap, address[i]);
+			address[i] = NULL;
 		}
 	}
 
