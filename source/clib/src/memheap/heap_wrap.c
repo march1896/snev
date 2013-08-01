@@ -79,9 +79,3 @@ bool  heap_wrap_dealloc_v(struct heap_wrap* h, void* buff, const char* file, int
 
 #endif
 
-void  heap_wrap_walk(struct heap_wrap* h, pf_mem_process allocated_cb, pf_mem_process freed_cb) {
-	/* TODO: we should know the walk function of the parent heap */
-}
-void  heap_wrap_walk_v  (struct heap_wrap* h, pf_mem_process allocated_cb, pf_mem_process freed_cb, void* param) {
-	/* TODO: we should know the walk function of the parent heap */
-}

@@ -8,20 +8,18 @@
 #endif
 
 /*
- * For a heap implementation, the below methods should be implemented, since the 
- * client may pass the heap method as callbacks to manage their memory.
+ * For a heap implementation, the below methods must be implemented.
  */
+/* require a buff from a heap, return the buff start address.
+ * return NULL if there is no enough space */
 typedef void* (*pf_alloc_c)   (void* pheap, int size);
 typedef void* (*pf_alloc_v)   (void* pheap, int size, const char* file, int line);
 
+/* give back a buff to the heap.
+ * return true if the buff is successfully deallocated or buff is NULL
+ * return false if the buff is previous deallocated.  */
 typedef bool (*pf_dealloc_c)  (void* pheap, void* buff);
 typedef bool (*pf_dealloc_v)  (void* pheap, void* buff, const char* file, int line);
-
-typedef void (*pf_mem_process) (void* mem);
-typedef void (*pf_mem_process_v)(void* mem, void* param);
-
-typedef void (*pf_mem_walk)   (void* pheap, pf_mem_process allocated_cb, pf_mem_process freed_cb);
-typedef void (*pf_mem_walk_v) (void* pheap, pf_mem_process_v allocated_cb, pf_mem_process_v freed_cb, void* param);
 
 /* TODO: move these macros to somewhere */
 #define __call0(function)                          function()
@@ -49,5 +47,33 @@ typedef void (*pf_mem_walk_v) (void* pheap, pf_mem_process_v allocated_cb, pf_me
 #endif 
 
 #define HEAP_MINIMUM_EXPAND_SIZE (4*1024*1024)
+
+/* the below methods may or may not be implemented by a heap */
+
+/* TODO: should the block info defined here? in other words, is every heap have the same 'block' concept.
+ * this should not be defined in block_com because this is a concept in common, not an inplement in common*/
+/* below defines the information we could get from a given memory address, useful for debug. */
+struct heap_blockinfo {
+	/* true if this block is allocated, false if the block is free */
+	bool          allocated;
+
+	void*         block_start;
+	int           block_size;
+
+	/* this is only useful for allocated blocks */
+	void*         allocable_addr;
+	int           allocable_size;
+
+	/* this is only useful if the heap carry the information */
+	const char*   file;
+	int           line;
+};
+
+/* the block info has nothing todo with the heap itself, is this api useful, plus, this module contains so much TODO */
+typedef void (*pf_get_blockinfo)(void* pheap, void* mem_addr, /* out */ struct heap_blockinfo* info);
+
+/* below defines method to traverse heap, useful for get the statistic of a heap */
+typedef void (*pf_process_block)(struct heap_blockinfo* block_info, void* param);
+typedef void (*pf_heap_walk)    (void* pheap, pf_process_block per_block_cb, void* param);
 
 #endif /* _HEAP_DEF_H_ */

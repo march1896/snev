@@ -35,23 +35,3 @@ bool heap_sysd_dealloc_v(void* h, void* buff, const char* file, int line) {
 
 	return true;
 }
-
-void heap_sysd_walk(void* h, pf_mem_process allocated_cb, pf_mem_process freed_cb) {
-	/* this method is not supported by the system heap */
-	unused(h);
-	unused(allocated_cb);
-	unused(freed_cb);
-
-	dbg_assert(false);
-}
-
-void heap_sysd_walk_v(void* h, pf_mem_process allocated_cb, pf_mem_process freed_cb, void* param) {
-	/* this method is not supported by the system heap */
-	unused(h);
-	unused(allocated_cb);
-	unused(freed_cb);
-	unused(param);
-
-	dbg_assert(false);
-}
-

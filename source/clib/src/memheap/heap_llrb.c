@@ -43,20 +43,9 @@ static struct llrb_link *llrb_link_findbysize(struct llrb_link *c, int size) {
 	return NULL;
 }
 
-struct mem_list_node {
-	struct list_link link;
-
-	void*            memory;
-	int              size;
-
-	struct block_c*  bc_first;
-	struct block_c*  bc_front_sent;
-	struct block_c*  bc_end_sent;
-};
-
 static void heap_llrb_expand_memory(struct heap_llrb* pheap, int expand_size) {
-	struct mem_list_node* n_mem_node = (struct mem_list_node*)
-		alloc(pheap->__alloc, pheap->__parent, sizeof(struct mem_list_node));
+	struct block_c_pool* n_block_pool = (struct block_c_pool*)
+		alloc(pheap->__alloc, pheap->__parent, sizeof(struct block_c_pool));
 
 	void* n_mem_begin = 
 		alloc(pheap->__alloc, pheap->__parent, expand_size);
@@ -72,22 +61,22 @@ static void heap_llrb_expand_memory(struct heap_llrb* pheap, int expand_size) {
 		init_block = block_com_make_sentinels(
 				n_mem_begin, n_mem_end, &sent_first, &sent_last);
 
-		n_mem_node->memory = n_mem_begin;
-		n_mem_node->size   = expand_size;
-		n_mem_node->bc_first      = init_block;
-		n_mem_node->bc_front_sent = sent_first;
-		n_mem_node->bc_end_sent   = sent_last;
+		n_block_pool->memory = n_mem_begin;
+		n_block_pool->size   = expand_size;
+		n_block_pool->bc_first      = init_block;
+		n_block_pool->bc_front_sent = sent_first;
+		n_block_pool->bc_end_sent   = sent_last;
 
 		block_com_set_free(init_block, true);
 	}
 	
 	/* link the new memory into memory list */
-	list_insert_back(&pheap->memlist, &n_mem_node->link);
+	list_insert_back(&pheap->memlist, &n_block_pool->link);
 
 	/* insert the new block into the heap */
 	{
 		struct heap_llrb_block *n_block = NULL;
-		n_block = container_of(n_mem_node->bc_first, struct heap_llrb_block, common);
+		n_block = container_of(n_block_pool->bc_first, struct heap_llrb_block, common);
 
 		pheap->llrb_root = llrb_insert(pheap->llrb_root, &n_block->link, block_comp);
 	}
@@ -113,21 +102,21 @@ void heap_llrb_init_v(struct heap_llrb* pheap, void* __parent, pf_alloc __alloc,
 	pheap->expand_size      = max(HEAP_MINIMUM_EXPAND_SIZE, __expand_size);
 }
 
-static void mem_list_node_dispose(struct list_link* link, void* param) {
-	struct mem_list_node* mem_node = 
-		container_of(link, struct mem_list_node, link);
+static void block_c_pool_dispose(struct list_link* link, void* param) {
+	struct block_c_pool* blk_pool = 
+		container_of(link, struct block_c_pool, link);
 	struct heap_llrb* pheap = (struct heap_llrb*)param;
 
 	/* first delete the memory hold by this node */
-	dealloc(pheap->__dealloc, pheap->__parent, mem_node->memory);
+	dealloc(pheap->__dealloc, pheap->__parent, blk_pool->memory);
 
 	/* second delete the memory node itself */
-	dealloc(pheap->__dealloc, pheap->__parent, mem_node);
+	dealloc(pheap->__dealloc, pheap->__parent, blk_pool);
 }
 
 void heap_llrb_deinit(struct heap_llrb* pheap) {
 	/* clear the memory hold by this heap */
-	list_foreach_v(&pheap->memlist, mem_list_node_dispose, (void*)pheap);
+	list_foreach_v(&pheap->memlist, block_c_pool_dispose, (void*)pheap);
 }
 
 static void* heap_llrb_alloc_try(struct heap_llrb* pheap, int size) {
@@ -294,4 +283,81 @@ bool heap_llrb_dealloc_v(struct heap_llrb* pheap, void *buff, const char* file, 
 	block_com_debug_set_fileline(pbc, file, line);
 
 	return res;
+}
+
+/* get block info part */
+void heap_llrb_get_blockinfo(void* mem_addr, /* out */ struct heap_blockinfo* info) {
+	struct block_c *pbc = block_com_from_data(mem_addr);
+	struct heap_llrb_block *pb = container_of(pbc, struct heap_llrb_block, common);
+	struct block_c *prev = block_com_prev_adj(pbc);
+	struct block_c *next = block_com_next_adj(pbc);
+
+	if (mem_addr == NULL) {
+		return;
+	}
+
+	if (!block_com_valid(pbc)) {
+		/* dealloc an invalid block, break it. */
+		dbg_assert(false);
+	}
+
+	/* TODO: */
+	info->allocated   = !block_com_free(pbc);
+	info->block_start = (void*)pbc;
+	info->block_size  = block_com_size(pbc);
+	info->allocable_addr  = block_com_data(pbc);
+	info->allocable_size  = block_com_data_size(pbc);
+	info->file        = block_com_debug_get_fileline(pbc, &info->line);
+
+	return;
+}
+
+struct block_process_param_pack {
+	pf_process_block per_block_cb;
+	void*            param;
+};
+
+static void traverse_mem(struct list_link* link, void* param) {
+	/* unpack the parameters */
+	struct block_process_param_pack* pack = (struct block_process_param_pack*)param;
+	pf_process_block per_block_cb  = pack->per_block_cb;
+	void* per_block_param          = pack->param;
+
+	/* get current memory info */
+	struct block_c_pool* blk_pool  = container_of(link, struct block_c_pool, link);
+	struct block_c*  pbc           = blk_pool->bc_first;
+	struct block_c*  end_sent      = blk_pool->bc_end_sent;
+
+	struct heap_blockinfo block_info;
+
+	dbg_assert(blk_pool->bc_front_sent == blk_pool->memory);
+
+	while (pbc != end_sent) {
+		dbg_assert(block_com_valid(pbc));
+
+		/* prepare block information */
+		block_info.allocated      = !block_com_free(pbc);
+		block_info.block_start    = (void*)pbc;
+		block_info.block_size     = block_com_size(pbc);
+		block_info.allocable_addr     = block_com_data(pbc);
+		block_info.allocable_size     = block_com_data_size(pbc);
+		block_info.file           = block_com_debug_get_fileline(pbc, &block_info.line);
+
+		/* call the callback */
+		per_block_cb(&block_info, per_block_param);
+
+		/* move to next block */
+		pbc = block_com_next_adj(pbc);
+	}
+
+	return;
+}
+
+/* traverse part */
+void heap_llrb_walk(struct heap_llrb* pheap, pf_process_block per_block_cb, void* param) {
+	struct block_process_param_pack pack;
+	pack.per_block_cb = per_block_cb;
+	pack.param = param;
+
+	list_foreach_v(&pheap->memlist, traverse_mem, (void*)&pack);
 }

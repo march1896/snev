@@ -3,7 +3,7 @@
 
 /* I really don't know how to name this file, because the
  * functions here are something not relative enough.
- * but all of them are process used in regexp, so I name it'prog(rocess).h'
+ * but all of them are process used in regexp, so I name it'prog(reses).h'
  * like generate nfa from regular expression,
  * check if the text is acceptable for a certain dfa,
  * print the dfa as the table format and etc.

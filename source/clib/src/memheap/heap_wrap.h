@@ -17,11 +17,6 @@ typedef void* (*pf_alloc_v)   (void* pheap, int size, const char* file, int line
 
 typedef bool (*pf_dealloc_c)  (void* pheap, void* buff);
 typedef bool (*pf_dealloc_v)  (void* pheap, void* buff, const char* file, int line);
-
-typedef void (*pf_mem_process)  (void* mem);
-typedef void (*pf_mem_process_v)(void* mem, void* param);
-typedef void (*pf_mem_walk)   (void* pheap, pf_mem_process allocated_cb, pf_mem_process freed_cb);
-typedef void (*pf_mem_walk_v) (void* pheap, pf_mem_process_v allocated_cb, pf_mem_process_v freed_cb, void* param);
 */
 
 /* heap_wrap_node describes an allocated block */
@@ -52,9 +47,6 @@ bool  heap_wrap_dealloc_c(struct heap_wrap* h, void* buff);
 #define heap_wrap_alloc   heap_wrap_alloc_c
 #define heap_wrap_dealloc heap_wrap_dealloc_c
 #endif
-
-void  heap_wrap_walk    (struct heap_wrap* h, pf_mem_process allocated_cb, pf_mem_process freed_cb);
-void  heap_wrap_walk_v  (struct heap_wrap* h, pf_mem_process allocated_cb, pf_mem_process freed_cb, void* param);
 
 void  heap_wrap_init    (struct heap_wrap* h, void* __parent, pf_alloc __alloc, pf_dealloc __dealloc);
 void  heap_wrap_deinit  (struct heap_wrap* h);

@@ -204,6 +204,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cntr2\ialgo.c" />
+    <ClCompile Include="..\..\src\cntr2\iheap.c" />
     <ClCompile Include="..\..\src\cntr2\iitr.c" />
     <ClCompile Include="..\..\src\cntr2\ilist.c" />
     <ClCompile Include="..\..\src\cntr2\iqueue.c" />
@@ -218,6 +219,7 @@
     <ClCompile Include="..\..\src\memheap\heap_global.c" />
     <ClCompile Include="..\..\src\memheap\heap_llrb.c" />
     <ClCompile Include="..\..\src\memheap\heap_sys.c" />
+    <ClCompile Include="..\..\src\memheap\heap_walk.c" />
     <ClCompile Include="..\..\src\memheap\heap_wrap.c" />
     <ClCompile Include="..\..\src\util\bit_math.c" />
     <ClCompile Include="..\..\src\util\list_link.c" />
@@ -247,6 +249,7 @@
     <ClInclude Include="..\..\src\cntr2\ialgo.h" />
     <ClInclude Include="..\..\src\cntr2\idef.h" />
     <ClInclude Include="..\..\src\cntr2\ifactory.h" />
+    <ClInclude Include="..\..\src\cntr2\iheap.h" />
     <ClInclude Include="..\..\src\cntr2\iitr.h" />
     <ClInclude Include="..\..\src\cntr2\ilist.h" />
     <ClInclude Include="..\..\src\cntr2\imemmgr.h" />
@@ -280,6 +283,7 @@
     <ClInclude Include="..\..\src\memheap\heap_global.h" />
     <ClInclude Include="..\..\src\memheap\heap_llrb.h" />
     <ClInclude Include="..\..\src\memheap\heap_sys.h" />
+    <ClInclude Include="..\..\src\memheap\heap_walk.h" />
     <ClInclude Include="..\..\src\memheap\heap_wrap.h" />
     <ClInclude Include="..\..\src\memheap\mem_common.h" />
     <ClInclude Include="..\..\src\regex\fa.h" />
