@@ -32,7 +32,13 @@ extern inline void iheap_walk         (iobject* iheap, pf_process_block per_bloc
  * TODO: should we define the interfaces here?
  * this is a philosophic problem, since it depends on that this project is fully object-oriented or not
  */
-typedef void        (*pf_heap_join )(unknown child);
+typedef void        (*pf_iheap_join)     (object* pheap);
+typedef void*       (*pf_iheap_alloc_c)  (object* pheap, int size);
+typedef void*       (*pf_iheap_alloc_v)  (object* pheap, int size, const char* file, int line);
+typedef bool        (*pf_iheap_dealloc_c)(object* pheap, void* buff);
+typedef bool        (*pf_iheap_dealloc_v)(object* pheap, void* buff, const char* file, int line);
+typedef void        (*pf_iheap_get_blockinfo)(object* pheap, void* mem_addr, /* out */ struct heap_blockinfo* info);
+typedef void        (*pf_iheap_walk)
 
 struct iheap_vtable {
 	/* heap doest not contains destroy method */

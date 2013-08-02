@@ -19,15 +19,15 @@ typedef struct __s_edge {
 #define NODE_START 1
 #define NODE_ACCEPT 2
 typedef struct __s_node {
-	int 			id; 	// the identity of the node, it's a unique interger
-	int 			info; 	// the infomation of the node, like it's START_NODE or ACCEPT_NODE
-	struct __s_edgelist* 	pel_f; 	// pointer to the first node in the edgelist
-	struct __s_edgelist* 	pel_l; 	// pointer to the last node in the edgelist
+	int 			id; 	// the identity of the node, it's a unique 
+	int 			info; 	// the information of the node, like it's START_NODE or ACCEPT_NODE
+	struct __s_edgelist* 	pel_f; 	// pointer to the first node in the edge list
+	struct __s_edgelist* 	pel_l; 	// pointer to the last node in the edge list
 } s_node, *p_node;
 
 /** 
-	edgelist is a list maintain in a certain node, when we create a new edge and add it to a
-	node, we should add it to the nodelist
+	edge list is a list maintain in a certain node, when we create a new edge and add it to a
+	node, we should add it to the node list
  */
 typedef struct __s_edgelist {
 	struct __s_edge* 	element;
@@ -35,8 +35,8 @@ typedef struct __s_edgelist {
 } s_edgelist, *p_edgelist;
 
 /** 
-	nodelist is a list maintain in a certain graph, when we create a new node and add it to a
-	graph, we should add it to the nodelist
+	node list is a list maintain in a certain graph, when we create a new node and add it to a
+	graph, we should add it to the node list
  */
 typedef struct __s_nodelist {
 	struct __s_node* 	element;
@@ -44,8 +44,8 @@ typedef struct __s_nodelist {
 } s_nodelist, *p_nodelist;
 
 typedef struct __s_nfa {
-	struct __s_nodelist* 	pnl_f; 	// pointer to the fisrt node in nodelist
-	struct __s_nodelist* 	pnl_l; 	// pointer to the last node in nodelist
+	struct __s_nodelist* 	pnl_f; 	// pointer to the first node in node list
+	struct __s_nodelist* 	pnl_l; 	// pointer to the last node in node list
 } s_nfa, *p_nfa;
 
 typedef struct __s_dfa {
