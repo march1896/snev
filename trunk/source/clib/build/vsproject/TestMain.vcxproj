@@ -273,11 +273,12 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\tests\cntr2\cntr2.oallocator.test.c" />
     <ClCompile Include="..\..\tests\cntr2\cntr2.odlist.test.c" />
     <ClCompile Include="..\..\tests\cntr\cntr_algorithm.test.c" />
     <ClCompile Include="..\..\tests\cntr\cntr_base.test.c" />
-    <ClCompile Include="..\..\tests\cntr\cntr_linear.test.c" />
     <ClCompile Include="..\..\tests\cntr\cntr_sort.test.c" />
+    <ClCompile Include="..\..\tests\cntr\cntr_test_util.c" />
     <ClCompile Include="..\..\tests\memheap\heap.test.c" />
     <ClCompile Include="..\..\tests\memheap\heap_llrb.test.c" />
     <ClCompile Include="..\..\tests\memheap\heap_sysd.test.c" />
@@ -292,7 +293,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\tests\cntr\cntr_test_util.h" />
     <ClInclude Include="..\..\tests\memheap\heap_util.test.h" />
+    <ClInclude Include="..\..\tests\test_util.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

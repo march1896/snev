@@ -204,12 +204,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cntr2\ialgo.c" />
-    <ClCompile Include="..\..\src\cntr2\iheap.c" />
+    <ClCompile Include="..\..\src\cntr2\iallocator.c" />
     <ClCompile Include="..\..\src\cntr2\iitr.c" />
     <ClCompile Include="..\..\src\cntr2\ilist.c" />
     <ClCompile Include="..\..\src\cntr2\iqueue.c" />
     <ClCompile Include="..\..\src\cntr2\iset.c" />
     <ClCompile Include="..\..\src\cntr2\istack.c" />
+    <ClCompile Include="..\..\src\cntr2\oallocator.c" />
     <ClCompile Include="..\..\src\cntr2\odlist.c" />
     <ClCompile Include="..\..\src\cntr2\oo_model.c" />
     <ClCompile Include="..\..\src\memheap\block_common.c" />
@@ -247,9 +248,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\cntr2\ialgo.h" />
+    <ClInclude Include="..\..\src\cntr2\iallocator.h" />
     <ClInclude Include="..\..\src\cntr2\idef.h" />
     <ClInclude Include="..\..\src\cntr2\ifactory.h" />
-    <ClInclude Include="..\..\src\cntr2\iheap.h" />
     <ClInclude Include="..\..\src\cntr2\iitr.h" />
     <ClInclude Include="..\..\src\cntr2\ilist.h" />
     <ClInclude Include="..\..\src\cntr2\imemmgr.h" />
