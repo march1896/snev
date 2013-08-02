@@ -1,5 +1,7 @@
 #include <cntr.h>
-#include <test_util.h>
+
+#include <cntr/cntr_test_util.h>
+
 #include <stdio.h>
 #include <string.h>
 

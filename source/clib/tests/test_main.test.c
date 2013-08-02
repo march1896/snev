@@ -25,23 +25,24 @@ static void debug_global_leak() {
 
 void run_all_test() {
 	//do_test("heap test", heap_test);
-	do_test("heap_llrb test", heap_llrb_test);
-	do_test("heap_sysd test", heap_sysd_test);
+	test_run_single("heap_llrb test", heap_llrb_test);
+	test_run_single("heap_sysd test", heap_sysd_test);
 
 	heap_global_init();
 	//do_test("llrb link", llrb_link_test);
-	do_test("cntr2 test", cntr2_odlist_test);
+	test_run_single("cntr2 test", cntr2_odlist_test);
 	debug_global_leak();
- 	do_test("algorithm test", algorithm_base_test);
+ 	test_run_single("algorithm test", algorithm_base_test);
  	debug_global_leak();
- 	do_test("cntr linear ALL", cntr_base_test);
+ 	test_run_single("cntr linear ALL", cntr_base_test);
  	debug_global_leak();
- 	do_test("sort algorithm", cntr_sort_test);
+ 	test_run_single("sort algorithm", cntr_sort_test);
  	debug_global_leak();
 	heap_global_deinit();
 // 	heap_deinit_global();
 }
 
+#include <cntr/cntr_test_util.h>
 void main() {
 	init_data();
 	run_all_test();

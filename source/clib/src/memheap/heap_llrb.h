@@ -22,7 +22,8 @@ struct heap_llrb_block {
 
 struct heap_llrb {
 	void*              __parent;
-	/* the inner alloc/dealloc callback to manage the inner usage of this heap */
+
+	/* the inner(parent) alloc/dealloc callback to manage the inner usage of this heap */
 	pf_alloc           __alloc;
 	pf_dealloc         __dealloc;
 

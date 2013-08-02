@@ -43,14 +43,6 @@ enum ht_data_pattern {
 	ht_pattern_count
 };
 
-static int g_heap_op_alter_range_min;
-static int g_heap_op_alter_range_max;
-
-static int g_pagepattern_jag_range_min;
-static int g_pagepattern_jag_range_max;
-
-static int g_pagepattern_random_restricted_count;
-
 void heaptest_begin();
 void heaptest_end();
 

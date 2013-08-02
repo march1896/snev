@@ -118,11 +118,14 @@
     <ClCompile Include="..\..\src\cntr2\oo_model.c">
       <Filter>Source Files\cntr2</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cntr2\iheap.c">
-      <Filter>Source Files\cntr2</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\memheap\heap_walk.c">
       <Filter>Source Files\memheap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cntr2\oallocator.c">
+      <Filter>Source Files\cntr2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cntr2\iallocator.c">
+      <Filter>Source Files\cntr2</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -290,11 +293,11 @@
     <ClInclude Include="..\..\src\memheap\heap_wrap.h">
       <Filter>Source Files\memheap</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\cntr2\iheap.h">
-      <Filter>Source Files\cntr2</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\memheap\heap_walk.h">
       <Filter>Source Files\memheap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cntr2\iallocator.h">
+      <Filter>Source Files\cntr2</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
