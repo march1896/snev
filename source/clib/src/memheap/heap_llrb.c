@@ -96,7 +96,7 @@ void heap_llrb_init_v(struct heap_llrb* pheap, void* __parent, pf_alloc __alloc,
 	pheap->llrb_root = NULL;
 	list_init(&pheap->memlist);
 
-	/* sizeof(struct heap_llrb_block) is the minimum threthhold, because after 
+	/* sizeof(struct heap_llrb_block) is the minimum threshold, because after 
 	 * splitting we should still the block in 'free list' */
 	pheap->split_threthhold = max(sizeof(struct heap_llrb_block), __split_threshold);
 	pheap->expand_size      = max(HEAP_MINIMUM_EXPAND_SIZE, __expand_size);

@@ -22,8 +22,6 @@ static void debug_global_leak() {
 void cntr_all_test() {
 	init_data();
 
-	heap_global_init();
-
 	debug_global_leak();
  	test_run_single("algorithm test", algorithm_base_test);
  	debug_global_leak();
@@ -33,8 +31,6 @@ void cntr_all_test() {
 
  	test_run_single("sort algorithm", cntr_sort_test);
  	debug_global_leak();
-
-	heap_global_deinit();
 
 	destroy_data();
 }

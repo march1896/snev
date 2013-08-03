@@ -7,7 +7,6 @@
 #include <memheap/heap_factory.h>
 #include <memheap/heap_global.h>
 
-#include <imemmgr.h>
 #include <util/list_link.h>
 
 /*****************************************************************************************
@@ -54,6 +53,13 @@ inline allocator allocator_get_parent(allocator o) {
 	return ((struct iallocator_vtable*)intf->__vtable)->__get_parent(o);
 }
 
+inline void allocator_walk(allocator o, pf_process_block per_block_cb, void* param) {
+	iobject* intf = __fast_cast(o, 0);
+	dbg_assert(intf == __cast(o, IALLOCATOR_ID));
+
+	((struct iallocator_vtable*)intf->__vtable)->__heap_walk(o, per_block_cb, param);
+}
+
 /*****************************************************************************************
  * allocator methods end
  *****************************************************************************************/
@@ -63,6 +69,99 @@ enum heap_interfaces {
 	e_heap,
 	e_heap_count
 };
+
+/*****************************************************************************************
+ * allocator system default begin 
+ *****************************************************************************************/
+
+struct allocator_sysd {
+	address                       __offset;
+	pf_cast                       __cast;
+	
+	struct base_interface         __iftable[e_heap_count];
+
+	allocator                     __parent;
+	void*                         __driver;
+};
+
+/* we can not spawn/join system default heap as well as the system default allocator,
+ * so we don't have these methods */
+#include <stdlib.h>
+#ifdef _VERBOSE_ALLOC_DEALLOC_
+static void* allocator_sysd_acquire_v(allocator alo, int size, const char* file, int line) {
+	return malloc(size);
+}
+static bool allocator_sysd_release_v(allocator alo, void* buff, const char* file, int line) {
+	free(buff);
+	return true;
+}
+#define allocator_sysd_acquire allocator_sysd_acquire_v
+#define allocator_sysd_release allocator_sysd_release_v
+#else 
+static void* allocator_sysd_acquire_c(allocator alo, int size) {
+	return malloc(size);
+}
+static bool allocator_sysd_release_c(allocator alo, void* buff) {
+	free(buff);
+	return true;
+}
+#define allocator_sysd_acquire allocator_sysd_acquire_c
+#define allocator_sysd_release allocator_sysd_release_c
+#endif
+static allocator allocator_sysd_get_parent(allocator alo) {
+	struct allocator_sysd* me = (struct allocator_sysd*)alo;
+	return me->__parent;
+}
+
+static void allocator_sysd_walk(allocator alo, pf_process_block per_block_cb, void* param) {
+	struct allocator_sysd* me = (struct allocator_sysd*)alo;
+
+	/* do nothing, the system heap does not contain walk method */
+	//return heap_sysd_walk(me->__driver, per_block_cb, param);
+}
+
+struct iallocator_vtable __allocator_sysd_vtable = {
+	NULL,  /* pf_iallocator_destroy */
+	allocator_sysd_acquire,
+	allocator_sysd_release,
+	allocator_sysd_get_parent,
+	allocator_sysd_walk
+};
+
+static unknown allocator_sysd_cast(unknown x, unique_id intf_id);
+static unknown allocator_sysd_cast(unknown x, unique_id intf_id) {
+	struct allocator_sysd* o = (struct allocator_sysd*)x;
+
+	dbg_assert(__is_object(x));
+
+	switch (intf_id) {
+	case IALLOCATOR_ID:
+		return (unknown)&o->__iftable[e_heap];
+	default:
+		return NULL;
+	}
+
+	return NULL;
+}
+
+/* defines a static system default allocator, which can not be spawned or joined */
+static struct allocator_sysd __allocator_sysd = {
+	(address)&__allocator_sysd,  /* __offset */
+	allocator_sysd_cast,         /* __cast   */
+	{
+		(address)e_heap,
+		&__allocator_sysd_vtable
+	},                           /* __iftable[e_heap_count]; */
+	NULL,                        /* __parent */
+	NULL                         /* __driver, should we use __global_heap_sysd instead? */
+};
+
+allocator default_allocator = (allocator)&__allocator_sysd;
+
+/*****************************************************************************************
+ * allocator system default end 
+ *****************************************************************************************/
+
 
 /*****************************************************************************************
  * allocator llrb begin 
@@ -120,13 +219,19 @@ static allocator allocator_llrb_get_parent(allocator alo) {
 	struct allocator_llrb* me = (struct allocator_llrb*)alo;
 	return me->__parent;
 }
-//static void allocator_llrb_walk(allocator alo, pf_process_block per_block_cb, void* param);
+
+static void allocator_llrb_walk(allocator alo, pf_process_block per_block_cb, void* param) {
+	struct allocator_llrb* me = (struct allocator_llrb*)alo;
+
+	heap_llrb_walk(me->__driver, per_block_cb, param);
+}
 
 struct iallocator_vtable __allocator_llrb_vtable = {
 	allocator_llrb_join,
 	allocator_llrb_acquire,
 	allocator_llrb_release,
-	allocator_llrb_get_parent
+	allocator_llrb_get_parent,
+	allocator_llrb_walk
 };
 
 static unknown allocator_llrb_cast(unknown x, unique_id intf_id);
@@ -167,92 +272,21 @@ allocator allocator_llrb_spawn(allocator parent) {
 	return (allocator)alo;
 }
 
+extern struct heap_llrb __global_static_heap_llrb;
+/* defines a static system default allocator, which can not be spawned or joined */
+static struct allocator_llrb __allocator_llrb = {
+	(address)&__allocator_llrb,  /* __offset */
+	allocator_llrb_cast,         /* __cast   */
+	{
+		(address)e_heap,
+			&__allocator_llrb_vtable
+	},                           /* __iftable[e_heap_count]; */
+	(allocator)&__allocator_sysd,/* __parent */
+	&__global_static_heap_llrb   /* __driver */
+};
+
+allocator global_llrb_allocator = (allocator)&__allocator_llrb;
 
 /*****************************************************************************************
  * allocator llrb end 
- *****************************************************************************************/
-
-/*****************************************************************************************
- * allocator system default begin 
- *****************************************************************************************/
-
-struct allocator_sysd {
-	address                       __offset;
-	pf_cast                       __cast;
-	
-	struct base_interface         __iftable[e_heap_count];
-
-	allocator                     __parent;
-	void*                         __driver;
-};
-
-/* we can not spawn/join system default heap as well as the system default allocator,
- * so we don't have these methods */
-#include <stdlib.h>
-#ifdef _VERBOSE_ALLOC_DEALLOC_
-static void* allocator_sysd_acquire_v(allocator alo, int size, const char* file, int line) {
-	return malloc(size);
-}
-static bool allocator_sysd_release_v(allocator alo, void* buff, const char* file, int line) {
-	free(buff);
-	return true;
-}
-#define allocator_sysd_acquire allocator_sysd_acquire_v
-#define allocator_sysd_release allocator_sysd_release_v
-#else 
-static void* allocator_sysd_acquire_c(allocator alo, int size) {
-	return malloc(size);
-}
-static bool allocator_sysd_release_c(allocator alo, void* buff) {
-	free(buff);
-	return true;
-}
-#define allocator_sysd_acquire allocator_sysd_acquire_c
-#define allocator_sysd_release allocator_sysd_release_c
-#endif
-static allocator allocator_sysd_get_parent(allocator alo) {
-	struct allocator_sysd* me = (struct allocator_sysd*)alo;
-	return me->__parent;
-}
-//static void allocator_sysd_walk(allocator alo, pf_process_block per_block_cb, void* param);
-
-struct iallocator_vtable __allocator_sysd_vtable = {
-	NULL,  /* pf_iallocator_destroy */
-	allocator_sysd_acquire,
-	allocator_sysd_release,
-	allocator_sysd_get_parent
-};
-
-static unknown allocator_sysd_cast(unknown x, unique_id intf_id);
-static unknown allocator_sysd_cast(unknown x, unique_id intf_id) {
-	struct allocator_sysd* o = (struct allocator_sysd*)x;
-
-	dbg_assert(__is_object(x));
-
-	switch (intf_id) {
-	case IALLOCATOR_ID:
-		return (unknown)&o->__iftable[e_heap];
-	default:
-		return NULL;
-	}
-
-	return NULL;
-}
-
-/* defines a static system default allocator, which can not be spawned or joined */
-static struct allocator_sysd __allocator_sysd = {
-	(address)&__allocator_sysd,  /* __offset */
-	allocator_sysd_cast,         /* __cast   */
-	{
-		(address)e_heap,
-		&__allocator_sysd_vtable
-	},                           /* __iftable[e_heap_count]; */
-	NULL,                        /* __parent */
-	NULL                         /* __driver, should we use __global_heap_sysd instead? */
-};
-
-allocator default_allocator = (allocator)&__allocator_sysd;
-
-/*****************************************************************************************
- * allocator system default end 
  *****************************************************************************************/

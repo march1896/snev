@@ -39,3 +39,10 @@ inline object* iallocator_get_parent(iobject* iallocator) {
 
 	return ((struct iallocator_vtable*)iallocator->__vtable)->__get_parent(oheap);
 }
+
+inline void iallocator_walk(iobject* iallocator, pf_process_block per_block_cb, void* param) {
+	object* oheap = __object_from_interface(iallocator);
+	dbg_assert(__cast(oheap, IALLOCATOR_ID) == iallocator);
+
+	((struct iallocator_vtable*)iallocator->__vtable)->__heap_walk(oheap, per_block_cb, param);
+}

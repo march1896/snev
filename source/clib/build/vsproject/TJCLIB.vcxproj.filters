@@ -275,9 +275,6 @@
     <ClInclude Include="..\..\src\cntr2\ifactory.h">
       <Filter>Source Files\cntr2</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\cntr2\imemmgr.h">
-      <Filter>Source Files\cntr2</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\cntr2\idef.h">
       <Filter>Source Files\cntr2</Filter>
     </ClInclude>
