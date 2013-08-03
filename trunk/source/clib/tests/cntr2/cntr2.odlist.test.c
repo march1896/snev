@@ -9,6 +9,8 @@
 #include <ialgo.h>
 #include <ifactory.h>
 
+#include <test_util.h>
+
 static void __ref_print(void* __ref) {
 	printf("%d ", (int)__ref);
 }
@@ -221,13 +223,8 @@ static void __performance_test() {
 	printf("add find remove performance test end\n");
 }
 
-#define temp_do_test(test_name, test_function) \
-	printf("%s test start\n", test_name);\
-	test_function(); \
-	printf("%s test end\n\n", test_name);
-
 void cntr2_odlist_test() {
-	temp_do_test("cntr cntr_base correctness", __correctness_test);
+	test_run_single("cntr cntr_base correctness", __correctness_test);
 
-	temp_do_test("cntr cntr_base performance", __performance_test);
+	test_run_single("cntr cntr_base performance", __performance_test);
 }

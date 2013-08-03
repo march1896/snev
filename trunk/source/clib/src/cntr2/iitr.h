@@ -14,7 +14,9 @@ extern inline void itr_to_next         (iterator itr);
 extern inline void itr_advance         (iterator itr, int length);
 extern inline int  itr_distance        (iterator from, iterator to);
 
-/* TODO: should we implement the below functions */
+/* TODO: should we implement the below functions 
+ * these are the 'real' interface functions, the above is not 'interface method',
+ * strictly specking, the above functions should not be in this 'interface' file.*/
 extern inline void iitr_destroy         (iobject* iitr);
 extern inline bool iitr_equals          (iobject* ia, iobject* ib);
 extern inline void* iitr_get_ref        (iobject* iitr);

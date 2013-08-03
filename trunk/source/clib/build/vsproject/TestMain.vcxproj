@@ -273,19 +273,22 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\tests\cntr2\cntr2.all.test.c" />
     <ClCompile Include="..\..\tests\cntr2\cntr2.oallocator.test.c" />
     <ClCompile Include="..\..\tests\cntr2\cntr2.odlist.test.c" />
     <ClCompile Include="..\..\tests\cntr\cntr_algorithm.test.c" />
+    <ClCompile Include="..\..\tests\cntr\cntr_all.test.c" />
     <ClCompile Include="..\..\tests\cntr\cntr_base.test.c" />
     <ClCompile Include="..\..\tests\cntr\cntr_sort.test.c" />
     <ClCompile Include="..\..\tests\cntr\cntr_test_util.c" />
-    <ClCompile Include="..\..\tests\memheap\heap.test.c" />
-    <ClCompile Include="..\..\tests\memheap\heap_llrb.test.c" />
-    <ClCompile Include="..\..\tests\memheap\heap_sysd.test.c" />
+    <ClCompile Include="..\..\tests\memheap\heap.all.test.c" />
+    <ClCompile Include="..\..\tests\memheap\heap.llrb.test.c" />
+    <ClCompile Include="..\..\tests\memheap\heap.sysd.test.c" />
     <ClCompile Include="..\..\tests\memheap\heap_util.test.c" />
-    <ClCompile Include="..\..\tests\test_main.test.c" />
+    <ClCompile Include="..\..\tests\test_main.c" />
     <ClCompile Include="..\..\tests\test_util.c" />
     <ClCompile Include="..\..\tests\util\llrb_link.test.c" />
+    <ClCompile Include="..\..\tests\util\util.all.test.c" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="./TJCLIB.vcxproj">

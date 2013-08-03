@@ -299,5 +299,8 @@
     <ClInclude Include="..\..\src\cntr2\iallocator.h">
       <Filter>Source Files\cntr2</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\cntr2\oallocator.h">
+      <Filter>Source Files\cntr2</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

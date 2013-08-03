@@ -257,6 +257,7 @@
     <ClInclude Include="..\..\src\cntr2\iqueue.h" />
     <ClInclude Include="..\..\src\cntr2\iset.h" />
     <ClInclude Include="..\..\src\cntr2\istack.h" />
+    <ClInclude Include="..\..\src\cntr2\oallocator.h" />
     <ClInclude Include="..\..\src\cntr2\oo_model.h" />
     <ClInclude Include="..\..\src\cntr\cattr.h" />
     <ClInclude Include="..\..\src\cntr\citer_base.h" />

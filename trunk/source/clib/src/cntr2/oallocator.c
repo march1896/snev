@@ -1,4 +1,5 @@
 #include <iallocator.h>
+#include <oallocator.h>
 
 #include <memheap/heap_def.h>
 #include <memheap/heap_llrb.h>
@@ -9,50 +10,63 @@
 #include <imemmgr.h>
 #include <util/list_link.h>
 
+/*****************************************************************************************
+ * allocator methods begin 
+ *****************************************************************************************/
+
+inline void  allocator_join     (allocator o) {
+	iobject* intf = __fast_cast(o, 0);
+	dbg_assert(intf == __cast(o, IALLOCATOR_ID));
+
+	((struct iallocator_vtable*)intf->__vtable)->__join(o);
+}
+#ifdef _VERBOSE_ALLOC_DEALLOC_
+inline void* allocator_acquire_v(allocator o, int size, const char* file, int line) {
+	iobject* intf = __fast_cast(o, 0);
+	dbg_assert(intf == __cast(o, IALLOCATOR_ID));
+
+	return ((struct iallocator_vtable*)intf->__vtable)->__acquire(o, size, file, line);
+}
+inline bool  allocator_release_v(allocator o, void* buff, const char* file, int line) {
+	iobject* intf = __fast_cast(o, 0);
+	dbg_assert(intf == __cast(o, IALLOCATOR_ID));
+
+	return ((struct iallocator_vtable*)intf->__vtable)->__release(o, buff, file, line);
+}
+#else 
+inline void* allocator_acquire_c(allocator o, int size) {
+	iobject* intf = __fast_cast(o, 0);
+	dbg_assert(intf == __cast(o, IALLOCATOR_ID));
+
+	return ((struct iallocator_vtable*)intf->__vtable)->__acquire(o, size);
+}
+inline bool  allocator_release_c(allocator o, void* buff) {
+	iobject* intf = __fast_cast(o, 0);
+	dbg_assert(intf == __cast(o, IALLOCATOR_ID));
+
+	return ((struct iallocator_vtable*)intf->__vtable)->__release(o, buff);
+}
+#endif
+inline allocator allocator_get_parent(allocator o) {
+	iobject* intf = __fast_cast(o, 0);
+	dbg_assert(intf == __cast(o, IALLOCATOR_ID));
+
+	return ((struct iallocator_vtable*)intf->__vtable)->__get_parent(o);
+}
+
+/*****************************************************************************************
+ * allocator methods end
+ *****************************************************************************************/
+
+/* interface that every allocator object must implement */
 enum heap_interfaces {
 	e_heap,
 	e_heap_count
 };
 
-/* by using the below adapter, we could mock the 'allocater heap' as a heap to 
- * pass it to pf_alloc/pf_dealloc interface. */
-
-#ifdef _VERBOSE_ALLOC_DEALLOC_
-
-static void* allocator_alloc_adapter_v(void* pheap, int size, const char* file, int line) {
-	iobject* allocator = (iobject*)pheap;
-
-	return iallocator_alloc_v(allocator, size, file, line);
-}
-
-static bool allocator_dealloc_adapter_v(void* pheap, void* buff, const char* file, int line) {
-	iobject* allocator = (iobject*)pheap;
-
-	return iallocator_dealloc_v(allocator, buff, file, line);
-}
-
-#define allocator_alloc_adapter allocator_alloc_adapter_v
-#define allocator_dealloc_adapter allocator_dealloc_adapter_v
-
-#else 
-
-static void* allocator_alloc_adapter_c(void* pheap, int size) {
-	iobject* allocator = (iobject*)pheap;
-
-	return iallocator_alloc_c(allocator, size);
-}
-
-static bool allocator_dealloc_adapter_c(void* pheap, void* size) {
-	iobject* allocator = (iobject*)pheap;
-
-	iallocator_dealloc_c(allocator, buff);
-}
-
-#define allocator_alloc_adapter allocator_alloc_adapter_c
-#define allocator_dealloc_adapter allocator_dealloc_adapter_c
-
-#endif
-
+/*****************************************************************************************
+ * allocator llrb begin 
+ *****************************************************************************************/
 
 struct allocator_llrb {
 	address                       __offset;
@@ -60,60 +74,58 @@ struct allocator_llrb {
 	
 	struct base_interface         __iftable[e_heap_count];
 
-	object*                       __parent;
+	allocator                     __parent;
 	struct heap_llrb*             __driver;
 };
 
-static void allocator_llrb_join(object* o) {
+static void allocator_llrb_join(allocator o) {
 	struct allocator_llrb* me = (struct allocator_llrb*)o;
-	iobject* ime = __cast(me, IALLOCATOR_ID);
-	object* parent = iallocator_get_parent(ime);
-	iobject* iparent = __cast(parent, IALLOCATOR_ID);
+	allocator parent = allocator_get_parent(o);
 
 	/* first join the driver */
 	heap_llrb_join(me->__driver);
 
 	/* release the memory of this object */
-	iallocator_dealloc(iparent, me);
+	allocator_dealloc(parent, me);
 }
 
 #ifdef _VERBOSE_ALLOC_DEALLOC_
-static void* allocator_llrb_alloc_v(object* pheap, int size, const char* file, int line) {
-	struct allocator_llrb* me = (struct allocator_llrb*)pheap;
+static void* allocator_llrb_acquire_v(allocator alo, int size, const char* file, int line) {
+	struct allocator_llrb* me = (struct allocator_llrb*)alo;
 
 	return heap_llrb_alloc_v(me->__driver, size, file, line);
 }
-static bool allocator_llrb_dealloc_v(object* pheap, void* buff, const char* file, int line) {
-	struct allocator_llrb* me = (struct allocator_llrb*)pheap;
+static bool allocator_llrb_release_v(allocator alo, void* buff, const char* file, int line) {
+	struct allocator_llrb* me = (struct allocator_llrb*)alo;
 
 	return heap_llrb_dealloc_v(me->__driver, buff, file, line);
 }
-#define allocator_llrb_alloc allocator_llrb_alloc_v
-#define allocator_llrb_dealloc allocator_llrb_dealloc_v
+#define allocator_llrb_acquire allocator_llrb_acquire_v
+#define allocator_llrb_release allocator_llrb_release_v
 #else 
-static void* allocator_llrb_alloc_c(object* pheap, int size) {
-	struct allocator_llrb* me = (struct allocator_llrb*)pheap;
+static void* allocator_llrb_acquire_c(allocator alo, int size) {
+	struct allocator_llrb* me = (struct allocator_llrb*)alo;
 
 	return heap_llrb_alloc_c(me->__driver, size);
 }
-static bool allocator_llrb_dealloc_c(object* pheap, void* buff) {
-	struct allocator_llrb* me = (struct allocator_llrb*)pheap;
+static bool allocator_llrb_release_c(allocator alo, void* buff) {
+	struct allocator_llrb* me = (struct allocator_llrb*)alo;
 
 	return heap_llrb_dealloc_c(me->__driver, buff);
 }
-#define allocator_llrb_alloc allocator_llrb_alloc_c
-#define allocator_llrb_dealloc allocator_llrb_dealloc_c
+#define allocator_llrb_acquire allocator_llrb_acquire_c
+#define allocator_llrb_release allocator_llrb_release_c
 #endif
-static object* allocator_llrb_get_parent(object* pheap) {
-	struct allocator_llrb* me = (struct allocator_llrb*)pheap;
+static allocator allocator_llrb_get_parent(allocator alo) {
+	struct allocator_llrb* me = (struct allocator_llrb*)alo;
 	return me->__parent;
 }
-//static void allocator_llrb_walk(object* pheap, pf_process_block per_block_cb, void* param);
+//static void allocator_llrb_walk(allocator alo, pf_process_block per_block_cb, void* param);
 
 struct iallocator_vtable __allocator_llrb_vtable = {
 	allocator_llrb_join,
-	allocator_llrb_alloc,
-	allocator_llrb_dealloc,
+	allocator_llrb_acquire,
+	allocator_llrb_release,
 	allocator_llrb_get_parent
 };
 
@@ -133,33 +145,34 @@ static unknown allocator_llrb_cast(unknown x, unique_id intf_id) {
 	return NULL;
 }
 
-object* allocator_llrb_spawn(object* oparent) {
-	iobject* iparent = __cast(oparent, IALLOCATOR_ID);
-	struct allocator_llrb* allocator = NULL;
+allocator allocator_llrb_spawn(allocator parent) {
+	struct allocator_llrb* alo = NULL;
 
-	dbg_assert(iparent != NULL);
-	allocator = (struct allocator_llrb*)iallocator_alloc(iparent, sizeof(struct allocator_llrb));
+	dbg_assert(parent != NULL);
+	alo = (struct allocator_llrb*)allocator_alloc(parent, sizeof(struct allocator_llrb));
 
-	allocator->__offset = allocator;
-	allocator->__cast   = allocator_llrb_cast;
+	alo->__offset = alo;
+	alo->__cast   = allocator_llrb_cast;
 
-	allocator->__iftable[e_heap].__offset = (address)e_heap;
-	allocator->__iftable[e_heap].__vtable = &__allocator_llrb_vtable;
+	alo->__iftable[e_heap].__offset = (address)e_heap;
+	alo->__iftable[e_heap].__vtable = &__allocator_llrb_vtable;
 
 
-	allocator->__parent = oparent;
+	alo->__parent = parent;
 
 	/* here is a little trick, it's interesting */
-	allocator->__driver = 
-		heap_llrb_spawn(iparent, allocator_alloc_adapter, allocator_dealloc_adapter);
+	alo->__driver = 
+		heap_llrb_spawn(parent, allocator_acquire, allocator_release);
 
-	return (object*)allocator;
+	return (allocator)alo;
 }
 
 
 /*****************************************************************************************
- * allocator llrb ends 
- *
+ * allocator llrb end 
+ *****************************************************************************************/
+
+/*****************************************************************************************
  * allocator system default begin 
  *****************************************************************************************/
 
@@ -169,7 +182,7 @@ struct allocator_sysd {
 	
 	struct base_interface         __iftable[e_heap_count];
 
-	object*                       __parent;
+	allocator                     __parent;
 	void*                         __driver;
 };
 
@@ -177,36 +190,36 @@ struct allocator_sysd {
  * so we don't have these methods */
 #include <stdlib.h>
 #ifdef _VERBOSE_ALLOC_DEALLOC_
-static void* allocator_sysd_alloc_v(object* pheap, int size, const char* file, int line) {
+static void* allocator_sysd_acquire_v(allocator alo, int size, const char* file, int line) {
 	return malloc(size);
 }
-static bool allocator_sysd_dealloc_v(object* pheap, void* buff, const char* file, int line) {
+static bool allocator_sysd_release_v(allocator alo, void* buff, const char* file, int line) {
 	free(buff);
 	return true;
 }
-#define allocator_sysd_alloc allocator_sysd_alloc_v
-#define allocator_sysd_dealloc allocator_sysd_dealloc_v
+#define allocator_sysd_acquire allocator_sysd_acquire_v
+#define allocator_sysd_release allocator_sysd_release_v
 #else 
-static void* allocator_sysd_alloc_c(object* pheap, int size) {
+static void* allocator_sysd_acquire_c(allocator alo, int size) {
 	return malloc(size);
 }
-static bool allocator_sysd_dealloc_c(object* pheap, void* buff) {
+static bool allocator_sysd_release_c(allocator alo, void* buff) {
 	free(buff);
 	return true;
 }
-#define allocator_sysd_alloc allocator_sysd_alloc_c
-#define allocator_sysd_dealloc allocator_sysd_dealloc_c
+#define allocator_sysd_acquire allocator_sysd_acquire_c
+#define allocator_sysd_release allocator_sysd_release_c
 #endif
-static object* allocator_sysd_get_parent(object* pheap) {
-	struct allocator_sysd* me = (struct allocator_sysd*)pheap;
+static allocator allocator_sysd_get_parent(allocator alo) {
+	struct allocator_sysd* me = (struct allocator_sysd*)alo;
 	return me->__parent;
 }
-//static void allocator_sysd_walk(object* pheap, pf_process_block per_block_cb, void* param);
+//static void allocator_sysd_walk(allocator alo, pf_process_block per_block_cb, void* param);
 
 struct iallocator_vtable __allocator_sysd_vtable = {
 	NULL,  /* pf_iallocator_destroy */
-	allocator_sysd_alloc,
-	allocator_sysd_dealloc,
+	allocator_sysd_acquire,
+	allocator_sysd_release,
 	allocator_sysd_get_parent
 };
 
@@ -226,6 +239,7 @@ static unknown allocator_sysd_cast(unknown x, unique_id intf_id) {
 	return NULL;
 }
 
+/* defines a static system default allocator, which can not be spawned or joined */
 static struct allocator_sysd __allocator_sysd = {
 	(address)&__allocator_sysd,  /* __offset */
 	allocator_sysd_cast,         /* __cast   */
@@ -237,4 +251,8 @@ static struct allocator_sysd __allocator_sysd = {
 	NULL                         /* __driver, should we use __global_heap_sysd instead? */
 };
 
-object* default_allocator = (object*)&__allocator_sysd;
+allocator default_allocator = (allocator)&__allocator_sysd;
+
+/*****************************************************************************************
+ * allocator system default end 
+ *****************************************************************************************/
