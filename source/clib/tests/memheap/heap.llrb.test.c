@@ -5,6 +5,8 @@
 
 #include <memheap/heap_util.test.h>
 
+#include <test_util.h>
+
 void heap_llrb_correct_test() {
 	struct heap_llrb* testheap = heap_llrb_spawn(
 				__global_heap_sysd, 
@@ -48,7 +50,7 @@ void heap_llrb_performance_test() {
 }
 
 void heap_llrb_test() {
-	heap_llrb_correct_test();
+	test_run_single("heap_llrb correctness test", heap_llrb_correct_test);
 
-	heap_llrb_performance_test();
+	test_run_single("heap_llrb performance test", heap_llrb_performance_test);
 }

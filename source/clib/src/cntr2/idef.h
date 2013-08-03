@@ -22,10 +22,13 @@
 #define ILIST_ID  0X0a0B0C04
 
 #include <oo_model.h>
+
 typedef iobject* iqueue;
 typedef iobject* istack;
 typedef iobject* ilist;
 typedef iobject* iset;
+
+typedef object* allocator;
 
 typedef object* container;
 typedef object* iterator;

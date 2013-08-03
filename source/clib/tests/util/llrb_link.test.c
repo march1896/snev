@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <time.h>
 
+#include <test_util.h>
+
 struct data {
 	int key;
 	int value;
@@ -69,19 +71,16 @@ void remove_data(int n, bool check) {
 
 void llrb_link_correctness_test() {
 	int length = 1000;
-	printf("llrb link correctness test begin\n");
 	_init_data(length);
 	insert_data(length, true);
 	remove_data(length, true);
 	_destroy_data(length);
-	printf("llrb link correctness test end\n");
 }
 
 void llrb_link_performance_test() {
 	clock_t start_c, end_c;
 	int length = N;
 
-	printf("llrb link performance test begin\n");
 	_init_data(length);
 
 	start_c = clock();	
@@ -91,11 +90,9 @@ void llrb_link_performance_test() {
 	printf("insert/remove %d elements used %f\n", length, (float)(end_c - start_c)/CLOCKS_PER_SEC);
 
 	_destroy_data(length);
-	
-	printf("llrb link performance test end\n");
 }
 
 void llrb_link_test() {
-	llrb_link_correctness_test();
-	llrb_link_performance_test();
+	test_run_single("llrb link correctness test", llrb_link_correctness_test);
+	test_run_single("llrb link performance test", llrb_link_performance_test);
 }
