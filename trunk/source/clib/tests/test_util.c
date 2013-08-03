@@ -7,7 +7,7 @@ static bool        g_use_file = false;
 static const char* g_log_file = NULL;
 static bool        g_log_header = true;
 static bool        g_log_footer = true;
-static bool        g_log_time = false;
+static bool        g_log_time = true;
 
 void test_run_single(const char* test_name, pf_test_case test_func) {
 	clock_t start_c, end_c;

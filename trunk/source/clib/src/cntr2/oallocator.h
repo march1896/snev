@@ -11,6 +11,7 @@
  * 2, allocator_acquire_v/allocator_acquire_c
  * 3, allocator_release_v/allocator_release_c
  * 4, allocator_get_parent
+ * 5, allocator_walk
  *
  * the 2 and 3 are methods name depends the compile macros, so macro
  * allocator_alloc   = allocator_acquire_v/allocator_acquire_c
@@ -20,6 +21,7 @@
  * 2, allocator_alloc
  * 3, allocator_dealloc
  * 4, allocator_get_parent
+ * 5, allocator_walk
  */
 
 /* allocator methods */
@@ -36,6 +38,7 @@ extern inline bool  allocator_release_c(allocator o, void* buff);
 #define allocator_release allocator_release_c
 #endif
 extern inline allocator allocator_get_parent(allocator o);
+extern inline void      allocator_walk      (allocator o, pf_process_block per_block_cb, void* param);
 
 #ifdef _VERBOSE_ALLOC_DEALLOC_
 #define allocator_alloc(i, size) allocator_acquire_v(i, size, __FILE__, __LINE__)
@@ -47,6 +50,8 @@ extern inline allocator allocator_get_parent(allocator o);
 
 /* system default allocator, which can not be spawned or joined */
 extern allocator default_allocator;
+
+extern allocator global_llrb_allocator;
 
 /* the factory methods */
 allocator allocator_llrb_spawn (allocator parent);

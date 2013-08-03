@@ -20,7 +20,4 @@ extern struct heap_buddy* __global_heap_buddy;
 #define balloc(size) alloc(heap_buddy_alloc, __global_heap_buddy, size)
 #define bfree(buff)  dealloc(heap_buddy_dealloc, __global_heap_buddy, buff)
 
-void heap_global_init();
-void heap_global_deinit();
-
 #endif /* _HEAP_GLOBAL_H_ */

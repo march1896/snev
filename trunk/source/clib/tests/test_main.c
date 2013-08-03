@@ -12,5 +12,5 @@ int main() {
 	test_run_single("cntr2 all test", cntr2_all_test);
 
 	/* deprecated */
-	test_run_single("cntr all test", cntr_all_test);
+	//test_run_single("cntr all test", cntr_all_test);
 }

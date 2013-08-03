@@ -253,7 +253,6 @@
     <ClInclude Include="..\..\src\cntr2\ifactory.h" />
     <ClInclude Include="..\..\src\cntr2\iitr.h" />
     <ClInclude Include="..\..\src\cntr2\ilist.h" />
-    <ClInclude Include="..\..\src\cntr2\imemmgr.h" />
     <ClInclude Include="..\..\src\cntr2\iqueue.h" />
     <ClInclude Include="..\..\src\cntr2\iset.h" />
     <ClInclude Include="..\..\src\cntr2\istack.h" />
