@@ -1,0 +1,4 @@
+we should add a heap_pool for fast alloc/dealloc with patterned memory blocks.
+1, memory pool that can only alloc/dealloc one fixed size.
+2, memory pool that can alloc/dealloc serveral fixed size, this could be done by put numbers of one fixed size pool together.
+3, memory pool that can alloc/dealloc large number of difference fixed size, at this point, we would incounter the index search problem, a hash table or a splay tree is a good choice.

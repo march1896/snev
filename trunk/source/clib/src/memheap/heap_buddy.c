@@ -280,3 +280,54 @@ bool heap_buddy_dealloc_v (struct heap_buddy* pheap, void* buff, const char* fil
 
 	return res;
 }
+
+struct block_process_param_pack {
+	pf_process_block per_block_cb;
+	void*            param;
+};
+
+/* this is exactly the same as llrb heap, shoudl this function be moved to somewhere else */
+static void traverse_mem(struct list_link* link, void* param) {
+	/* unpack the parameters */
+	struct block_process_param_pack* pack = (struct block_process_param_pack*)param;
+	pf_process_block per_block_cb  = pack->per_block_cb;
+	void* per_block_param          = pack->param;
+
+	/* get current memory info */
+	struct block_c_pool* blk_pool  = container_of(link, struct block_c_pool, link);
+	struct block_c*  pbc           = blk_pool->bc_first;
+	struct block_c*  end_sent      = blk_pool->bc_end_sent;
+
+	struct heap_blockinfo block_info;
+
+	dbg_assert(blk_pool->bc_front_sent == blk_pool->memory);
+
+	while (pbc != end_sent) {
+		dbg_assert(block_com_valid(pbc));
+
+		/* prepare block information */
+		block_info.allocated      = !block_com_free(pbc);
+		block_info.block_start    = (void*)pbc;
+		block_info.block_size     = block_com_size(pbc);
+		block_info.allocable_addr = block_com_data(pbc);
+		block_info.allocable_size = block_com_data_size(pbc);
+		block_info.file           = block_com_debug_get_fileline(pbc, &block_info.line);
+
+		/* call the callback */
+		per_block_cb(&block_info, per_block_param);
+
+		/* move to next block */
+		pbc = block_com_next_adj(pbc);
+	}
+
+	return;
+}
+
+/* traverse part */
+void heap_buddy_walk(struct heap_buddy* pheap, pf_process_block per_block_cb, void* param) {
+	struct block_process_param_pack pack;
+	pack.per_block_cb = per_block_cb;
+	pack.param = param;
+
+	list_foreach_v(&pheap->memlist, traverse_mem, (void*)&pack);
+}

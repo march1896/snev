@@ -14,7 +14,7 @@ extern inline void iset_insert          (iobject* iq, void* ref);
 extern inline iterator iset_find         (iobject* iq, void* ref);
 extern inline void iset_remove          (iobject* iq, iobject* itr);
 
-/* return a iterator, maybe foward/bidirectional/randomaccessed. */
+/* return a iterator, maybe forward/bidirectional/random accessed. */
 extern inline object* iset_itr_begin    (iobject* iq);
 extern inline object* iset_itr_end      (iobject* iq);
 

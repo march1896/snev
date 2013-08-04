@@ -53,6 +53,8 @@ extern allocator default_allocator;
 
 extern allocator global_llrb_allocator;
 
+extern allocator global_buddy_allocator;
+
 /* the factory methods */
 allocator allocator_llrb_spawn (allocator parent);
 

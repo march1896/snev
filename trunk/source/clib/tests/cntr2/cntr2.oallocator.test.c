@@ -46,6 +46,73 @@ static void allocator_trace_test() {
 	return;
 }
 
+typedef allocator (*pf_spawn_cb)(allocator parent);
+
+void cntr2_allocator_recursive_spawn_test() {
+	allocator grand_father = allocator_llrb_spawn(default_allocator);
+	allocator father       = allocator_llrb_spawn(grand_father);
+	allocator uncle        = allocator_llrb_spawn(grand_father);
+	allocator brother      = allocator_llrb_spawn(father);
+	allocator blade        = allocator_llrb_spawn(father);
+	/* blade's family */
+
+	int i;
+	void* addr[10];
+
+	/* brother alloc/dealloc all element */
+	for (i = 0; i < 10; i ++) {
+		addr[i] = allocator_alloc(brother, i * 10 + 1);
+	}
+	for (i = 0; i < 10; i ++) {
+		allocator_dealloc(brother, addr[i]);
+	}
+
+	/* blade has two memory leak */
+	for (i = 0; i < 10; i ++) {
+		addr[i] = allocator_alloc(blade, i * 10 + 1);
+	}
+	for (i = 0; i < 10; i ++) {
+		if (i != 5 && i != 7) {
+			allocator_dealloc(blade, addr[i]);
+		}
+	}
+
+	/* father has one memory leak */
+	allocator_alloc(father, 10);
+
+	/* no operations happened on uncle */
+	printf("before parent is joined\n");
+	printf("%s leak detect:\n", "grand_father");
+	allocator_walk(grand_father, heap_leak_print_to_terminal, NULL);
+	printf("%s leak detect:\n", "father");
+	allocator_walk(father, heap_leak_print_to_terminal, NULL);
+	printf("%s leak detect:\n", "uncle");
+	allocator_walk(uncle, heap_leak_print_to_terminal, NULL);
+	printf("%s leak detect:\n", "brother");
+	allocator_walk(brother, heap_leak_print_to_terminal, NULL);
+	printf("%s leak detect:\n", "blade");
+	allocator_walk(blade, heap_leak_print_to_terminal, NULL);
+
+	allocator_join(father);
+	printf("after parent is joined\n");
+	printf("%s leak detect:\n", "grand_father");
+	allocator_walk(grand_father, heap_leak_print_to_terminal, NULL);
+	/*
+	printf("%s leak detect:\n", "father");
+	allocator_walk(father, heap_leak_print_to_terminal, NULL);
+	*/
+	printf("%s leak detect:\n", "uncle");
+	allocator_walk(uncle, heap_leak_print_to_terminal, NULL);
+	/*
+	printf("%s leak detect:\n", "brother");
+	allocator_walk(brother, heap_leak_print_to_terminal, NULL);
+	printf("%s leak detect:\n", "blade");
+	allocator_walk(blade, heap_leak_print_to_terminal, NULL);
+	*/
+}
+
 void cntr2_oallocator_test() {
 	test_run_single("allocator simple trace test", allocator_trace_test);
+
+	test_run_single("allocator recursive spawn test", cntr2_allocator_recursive_spawn_test);
 }

@@ -216,7 +216,7 @@ inline const char* block_c_debug_get_fileline(struct block_c_debug* pbc, int* li
 #else
 
 static char* no_file_info = "no file info! please use _MEM_DEBUG_ to compile.\n";
-inline char* block_c_clean_get_fileline(struct block_c_clean* pbc, int* line) {
+inline const char* block_c_clean_get_fileline(struct block_c_clean* pbc, int* line) {
 	*line = 0;
 	return no_file_info;
 }

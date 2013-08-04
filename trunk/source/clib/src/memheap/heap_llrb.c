@@ -301,7 +301,6 @@ void heap_llrb_get_blockinfo(void* mem_addr, /* out */ struct heap_blockinfo* in
 		dbg_assert(false);
 	}
 
-	/* TODO: */
 	info->allocated   = !block_com_free(pbc);
 	info->block_start = (void*)pbc;
 	info->block_size  = block_com_size(pbc);

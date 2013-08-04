@@ -30,7 +30,7 @@ inline bool iallocator_release_c(iobject* iallocator, void* buff) {
 	object* oheap = __object_from_interface(iallocator);
 	dbg_assert(__cast(oheap, IALLOCATOR_ID) == iallocator);
 
-	return ((struct iallocator_vtable*)iallocator->__vtable)->__dealloc(oheap, buff);
+	return ((struct iallocator_vtable*)iallocator->__vtable)->__release(oheap, buff);
 }
 #endif
 inline object* iallocator_get_parent(iobject* iallocator) {
