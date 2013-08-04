@@ -26,13 +26,47 @@ struct heap_llrb __global_static_heap_llrb = {
 
 struct heap_llrb*  __global_heap_llrb  = &__global_static_heap_llrb;
 
-static struct heap_buddy __global_static_heap_buddy = {
+#define list_static_init(var) {&var, &var}
+
+struct heap_buddy __global_static_heap_buddy = {
 	NULL,                /* parent */
 	heap_sysd_alloc,     /* alloc  */
 	heap_sysd_dealloc,   /* dealloc */
 	{
-		NULL,            /* buddy[BUDDY_COUNT] */
-	},
+		/* is there a better way ? */
+		list_static_init(__global_static_heap_buddy.buddy[0]),
+		list_static_init(__global_static_heap_buddy.buddy[1]),
+		list_static_init(__global_static_heap_buddy.buddy[2]),
+		list_static_init(__global_static_heap_buddy.buddy[3]),
+		list_static_init(__global_static_heap_buddy.buddy[4]),
+		list_static_init(__global_static_heap_buddy.buddy[5]),
+		list_static_init(__global_static_heap_buddy.buddy[6]),
+		list_static_init(__global_static_heap_buddy.buddy[7]),
+		list_static_init(__global_static_heap_buddy.buddy[8]),
+		list_static_init(__global_static_heap_buddy.buddy[9]),
+		list_static_init(__global_static_heap_buddy.buddy[10]),
+		list_static_init(__global_static_heap_buddy.buddy[11]),
+		list_static_init(__global_static_heap_buddy.buddy[12]),
+		list_static_init(__global_static_heap_buddy.buddy[13]),
+		list_static_init(__global_static_heap_buddy.buddy[14]),
+		list_static_init(__global_static_heap_buddy.buddy[15]),
+		list_static_init(__global_static_heap_buddy.buddy[16]),
+		list_static_init(__global_static_heap_buddy.buddy[17]),
+		list_static_init(__global_static_heap_buddy.buddy[18]),
+		list_static_init(__global_static_heap_buddy.buddy[19]),
+		list_static_init(__global_static_heap_buddy.buddy[20]),
+		list_static_init(__global_static_heap_buddy.buddy[21]),
+		list_static_init(__global_static_heap_buddy.buddy[22]),
+		list_static_init(__global_static_heap_buddy.buddy[23]),
+		list_static_init(__global_static_heap_buddy.buddy[24]),
+		list_static_init(__global_static_heap_buddy.buddy[25]),
+		list_static_init(__global_static_heap_buddy.buddy[26]),
+		list_static_init(__global_static_heap_buddy.buddy[27]),
+		list_static_init(__global_static_heap_buddy.buddy[28]),
+		list_static_init(__global_static_heap_buddy.buddy[29]),
+		list_static_init(__global_static_heap_buddy.buddy[30]),
+		list_static_init(__global_static_heap_buddy.buddy[31])
+	},                   /* buddy[BUDDY_COUNT] */
 	{
 		&(__global_static_heap_buddy.memlist),
 		&(__global_static_heap_buddy.memlist)
@@ -42,47 +76,3 @@ static struct heap_buddy __global_static_heap_buddy = {
 };
 
 struct heap_buddy* __global_heap_buddy = &__global_static_heap_buddy;
-
-/* sys default heap does not need to init, we just give it a magic number,
- * then we spawn two heap(a llrb and a buddy) from the sys default heap */
-static void heap_global_init() {
-	if (__global_heap_sysd == NULL) {
-		__global_heap_sysd = (void*)&__system_global_heap_magic;
-	}
-
-	if (__global_heap_llrb == NULL) {
-		__global_heap_llrb = heap_llrb_spawn(
-				__global_heap_sysd, 
-				heap_sysd_alloc,
-				heap_sysd_dealloc
-				);
-
-		dbg_assert(__global_heap_llrb != NULL);
-	}
-
-	if (__global_heap_buddy == NULL) {
-		__global_heap_buddy = heap_buddy_spawn(
-				__global_heap_sysd, 
-				heap_sysd_alloc,
-				heap_sysd_dealloc
-				);
-
-		dbg_assert(__global_heap_buddy != NULL);
-	}
-}
-
-static void heap_global_deinit() {
-	if (__global_heap_sysd != NULL) {
-		__global_heap_sysd = NULL;
-	}
-
-	if (__global_heap_llrb != NULL) {
-		heap_llrb_join(__global_heap_llrb);
-		__global_heap_llrb = NULL;
-	}
-
-	if (__global_heap_buddy != NULL) {
-		heap_buddy_join(__global_heap_buddy);
-		__global_heap_buddy = NULL;
-	}
-}

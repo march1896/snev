@@ -290,3 +290,131 @@ allocator global_llrb_allocator = (allocator)&__allocator_llrb;
 /*****************************************************************************************
  * allocator llrb end 
  *****************************************************************************************/
+
+/*****************************************************************************************
+ * allocator buddy begin 
+ *****************************************************************************************/
+
+struct allocator_buddy {
+	address                       __offset;
+	pf_cast                       __cast;
+	
+	struct base_interface         __iftable[e_heap_count];
+
+	allocator                     __parent;
+	struct heap_buddy*            __driver;
+};
+
+static void allocator_buddy_join(allocator o) {
+	struct allocator_buddy* me = (struct allocator_buddy*)o;
+	allocator parent = allocator_get_parent(o);
+
+	/* first join the driver */
+	heap_buddy_join(me->__driver);
+
+	/* release the memory of this object */
+	allocator_dealloc(parent, me);
+}
+
+#ifdef _VERBOSE_ALLOC_DEALLOC_
+static void* allocator_buddy_acquire_v(allocator alo, int size, const char* file, int line) {
+	struct allocator_buddy* me = (struct allocator_buddy*)alo;
+
+	return heap_buddy_alloc_v(me->__driver, size, file, line);
+}
+static bool allocator_buddy_release_v(allocator alo, void* buff, const char* file, int line) {
+	struct allocator_buddy* me = (struct allocator_buddy*)alo;
+
+	return heap_buddy_dealloc_v(me->__driver, buff, file, line);
+}
+#define allocator_buddy_acquire allocator_buddy_acquire_v
+#define allocator_buddy_release allocator_buddy_release_v
+#else 
+static void* allocator_buddy_acquire_c(allocator alo, int size) {
+	struct allocator_buddy* me = (struct allocator_buddy*)alo;
+
+	return heap_buddy_alloc_c(me->__driver, size);
+}
+static bool allocator_buddy_release_c(allocator alo, void* buff) {
+	struct allocator_buddy* me = (struct allocator_buddy*)alo;
+
+	return heap_buddy_dealloc_c(me->__driver, buff);
+}
+#define allocator_buddy_acquire allocator_buddy_acquire_c
+#define allocator_buddy_release allocator_buddy_release_c
+#endif
+static allocator allocator_buddy_get_parent(allocator alo) {
+	struct allocator_buddy* me = (struct allocator_buddy*)alo;
+	return me->__parent;
+}
+
+static void allocator_buddy_walk(allocator alo, pf_process_block per_block_cb, void* param) {
+	struct allocator_buddy* me = (struct allocator_buddy*)alo;
+
+	heap_buddy_walk(me->__driver, per_block_cb, param);
+}
+
+struct iallocator_vtable __allocator_buddy_vtable = {
+	allocator_buddy_join,
+	allocator_buddy_acquire,
+	allocator_buddy_release,
+	allocator_buddy_get_parent,
+	allocator_buddy_walk
+};
+
+static unknown allocator_buddy_cast(unknown x, unique_id intf_id);
+static unknown allocator_buddy_cast(unknown x, unique_id intf_id) {
+	struct allocator_buddy* o = (struct allocator_buddy*)x;
+
+	dbg_assert(__is_object(x));
+
+	switch (intf_id) {
+	case IALLOCATOR_ID:
+		return (unknown)&o->__iftable[e_heap];
+	default:
+		return NULL;
+	}
+
+	return NULL;
+}
+
+allocator allocator_buddy_spawn(allocator parent) {
+	struct allocator_buddy* alo = NULL;
+
+	dbg_assert(parent != NULL);
+	alo = (struct allocator_buddy*)allocator_alloc(parent, sizeof(struct allocator_buddy));
+
+	alo->__offset = alo;
+	alo->__cast   = allocator_buddy_cast;
+
+	alo->__iftable[e_heap].__offset = (address)e_heap;
+	alo->__iftable[e_heap].__vtable = &__allocator_buddy_vtable;
+
+
+	alo->__parent = parent;
+
+	/* here is a little trick, it's interesting */
+	alo->__driver = 
+		heap_buddy_spawn(parent, allocator_acquire, allocator_release);
+
+	return (allocator)alo;
+}
+
+extern struct heap_buddy __global_static_heap_buddy;
+/* defines a static system default allocator, which can not be spawned or joined */
+static struct allocator_buddy __allocator_buddy = {
+	(address)&__allocator_buddy,  /* __offset */
+	allocator_buddy_cast,         /* __cast   */
+	{
+		(address)e_heap,
+		&__allocator_buddy_vtable
+	},                           /* __iftable[e_heap_count]; */
+	(allocator)&__allocator_sysd,/* __parent */
+	&__global_static_heap_buddy   /* __driver */
+};
+
+allocator global_buddy_allocator = (allocator)&__allocator_buddy;
+
+/*****************************************************************************************
+ * allocator buddy end 
+ *****************************************************************************************/

@@ -52,6 +52,9 @@ bool heap_buddy_dealloc_v (struct heap_buddy* pheap, void* buff, const char* fil
 #define heap_buddy_dealloc heap_buddy_dealloc_c
 #endif
 
+/* traverse part */
+void heap_buddy_walk      (struct heap_buddy* pheap, pf_process_block per_block_cb, void* param);
+
 void heap_buddy_init      (struct heap_buddy* pheap, void* __parent, pf_alloc __alloc, pf_dealloc __dealloc);
 void heap_buddy_init_v    (struct heap_buddy* pheap, void* __parent, pf_alloc __alloc, pf_dealloc __dealloc, int __split_threadhold, int __expand_size);
 void heap_buddy_deinit    (struct heap_buddy* pheap);

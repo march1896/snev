@@ -141,10 +141,10 @@ inline void block_c_clean_donothingv(void* x, void* y, void* z) {}
 /* by using these macros, control the efficiency explicitly. */
 #define block_c block_c_clean
 
-#define block_com_debug_check(x) block_c_clean_donothing(x)
-#define block_com_debug_init(x)  block_c_clean_donothing(x)
-#define block_com_debug_deinit(x) block_c_clean_donothing(x)
-#define block_com_debug_set_fileline(c, f, l) block_c_clean_donothingv(x)
+#define block_com_debug_check(x) 
+#define block_com_debug_init(x)  
+#define block_com_debug_deinit(x) 
+#define block_com_debug_set_fileline(c, f, l) 
 #define block_com_debug_get_fileline(c, e)    block_c_clean_get_fileline(c, e)
 
 #endif
