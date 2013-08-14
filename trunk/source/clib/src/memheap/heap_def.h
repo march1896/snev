@@ -50,7 +50,6 @@ typedef bool (*pf_dealloc_v)  (void* pheap, void* buff, const char* file, int li
 
 /* the below methods may or may not be implemented by a heap */
 
-
 /* below defines method to traverse heap, useful for get the statistic of a heap */
 /* TODO: should the block info defined here? in other words, is every heap have the same 'block' concept.
  * this should not be defined in block_com because this is a concept in common, not an implement in common*/
@@ -73,5 +72,13 @@ struct heap_blockinfo {
 typedef void (*pf_process_block)(struct heap_blockinfo* block_info, void* param);
 /* pf_heap_walk should be provided by the heap implementor */
 typedef void (*pf_heap_walk)    (void* pheap, pf_process_block per_block_cb, void* param);
+
+/* 
+ * below defines method to reclaim memory of a heap, a heap is usually a depot of memories, as the client trying 
+ * to alloc memory from this heap, the heap itself will trying to expand its memory depot from it's parent.
+ * idealy, the heap should reclaim the memory depot to its parent automaticly, but the heap itself really does not 
+ * know the use habbits of the client, this method give the client chance to control this.
+ */
+typedef void (*pf_heap_reclaim) (void* pheap);
 
 #endif /* _HEAP_DEF_H_ */

@@ -9,6 +9,12 @@
 
 #include <util/list_link.h>
 
+/* this module defines double linked list(with sentinel) container, it implements 
+ * ilist, iqueue, istack and iset, as you could imagine, using linked list to implement a set
+ * is not effective way.
+ * and we do not expose the object method currently, that is you have to use one of the interface 
+ * above, but not the list directly. */
+
 enum list_interfaces {
 	e_list,
 	e_queue,
@@ -142,7 +148,6 @@ static void o_dlist_itr_destroy(object* citr) {
 	dbg_assert(itr->__cast == o_dlist_itr_cast);
 
 	/* destroy itself */
-	//itr->__dealloc(itr);
 	allocator_dealloc(itr->__allocator, itr);
 }
 
@@ -272,7 +277,6 @@ static object* o_dlist_create_v(allocator alc, pf_dispose dispose) {
 	olist->__iftable[e_set].__offset = (address)e_set;
 	olist->__iftable[e_set].__vtable = &__iset_vtable;
 
-	//r_dlist_init(&olist->__cntr, __alloc, __dealloc);
 	list_init(&olist->__thelist);
 	olist->__size    = 0;
 
@@ -315,15 +319,12 @@ static void o_dlist_clear(object* o) {
 static int o_dlist_size(object* o) {
 	struct o_dlist* olist = (struct o_dlist*)o;
 
-	//return r_dlist_size(&olist->__cntr);
 	return olist->__size;
 }
 
 static void o_dlist_add_front(object* o, void* ref) {
 	struct o_dlist* olist = (struct o_dlist*)o;
 
-	//r_dlist_add_front(&olist->__cntr, ref);
-	//
 	struct o_dlist_node* n_node = (struct o_dlist_node*)
 		allocator_alloc(olist->__allocator, sizeof(struct o_dlist_node));
 
@@ -336,7 +337,6 @@ static void o_dlist_add_front(object* o, void* ref) {
 static void o_dlist_add_back(object* o, void* ref) {
 	struct o_dlist* olist = (struct o_dlist*)o;
 
-	//r_dlist_add_back(&olist->__cntr, ref);
 	struct o_dlist_node* n_node = (struct o_dlist_node*)
 		allocator_alloc(olist->__allocator, sizeof(struct o_dlist_node));
 
@@ -349,7 +349,6 @@ static void o_dlist_add_back(object* o, void* ref) {
 static void* o_dlist_remove_front(object* o) {
 	struct o_dlist* olist = (struct o_dlist*)o;
 
-	//return r_dlist_remove_front(&olist->__cntr);
 	if (olist->__size > 0) {
 		struct list_link* link    = olist->__thelist.next;
 		struct o_dlist_node* node = container_of(link, struct o_dlist_node, link);
@@ -376,7 +375,6 @@ static void* o_dlist_remove_front(object* o) {
 static void* o_dlist_remove_back(object* o) {
 	struct o_dlist* olist = (struct o_dlist*)o;
 
-	//return r_dlist_remove_back(&olist->__cntr);
 	if (olist->__size > 0) {
 		struct list_link* link    = olist->__thelist.prev;
 		struct o_dlist_node* node = container_of(link, struct o_dlist_node, link);
@@ -385,7 +383,6 @@ static void* o_dlist_remove_back(object* o) {
 		dbg_assert(link != &olist->__thelist);
 
 		list_unlink(link);
-		//olist->__dealloc(node);
 		allocator_dealloc(olist->__allocator, node);
 
 		olist->__size --;
@@ -420,7 +417,6 @@ static object* o_dlist_itr_begin(object* o) {
 
 	o_dlist_itr_com_init(n_itr, olist);
 
-	//n_itr->__current = &(r_dlist_first(&olist->__cntr)->link);
 	/* if the list is empty, we just return the sentinel node */
 	n_itr->__current = olist->__thelist.next;
 
@@ -499,8 +495,6 @@ static void o_dlist_insert_before(object* o, iobject* itr, void* n_ref) {
 	dbg_assert(oitr->__cast == o_dlist_itr_cast);
 	dbg_assert(oitr->__current != NULL);
 
-	//r_dlist_insert_before(&olist->__cntr, node, n_ref);
-
 	n_node->reference = n_ref;
 	list_link(&n_node->link, (&node->link)->prev, &node->link);
 
@@ -516,8 +510,6 @@ static void o_dlist_insert_after(object* o, iobject* itr, void* n_ref) {
 
 	dbg_assert(oitr->__cast == o_dlist_itr_cast);
 	dbg_assert(oitr->__current != NULL);
-
-	//r_dlist_insert_after(&olist->__cntr, node, n_ref);
 
 	n_node->reference = n_ref;
 	list_link(&n_node->link, (&node->link), (&node->link)->next);
