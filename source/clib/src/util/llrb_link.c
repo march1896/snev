@@ -59,6 +59,7 @@ static struct llrb_link *_rotate_right(struct llrb_link *n) {
 
 static pf_llrb_compare _key_comp;
 
+/* TODO: using global variable, anti multiple instances in multithread environment, change it */
 static void llrb_set_compare(pf_llrb_compare pc) {
 	_key_comp = pc;
 }

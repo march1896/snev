@@ -5,20 +5,20 @@
 #include <oo_model.h>
 #include <idef.h>
 
-extern inline void ilist_destroy         (iobject* iq);
-extern inline void ilist_clear           (iobject* iq);
-extern inline int  ilist_size            (iobject* iq);
-extern inline void ilist_add_front       (iobject* iq, void* n_ref);
-extern inline void ilist_add_back        (iobject* iq, void* n_ref);
-extern inline void* ilist_remove_front   (iobject* iq);
-extern inline void* ilist_remove_back    (iobject* iq);
-extern inline void* ilist_remove         (iobject* iq, iobject* itr);
-extern inline void ilist_insert_before   (iobject* iq, iobject* itr, void* n_ref);
-extern inline void ilist_insert_after    (iobject* iq, iobject* itr, void* n_ref);
+extern inline void ilist_destroy         (iobject* ilist);
+extern inline void ilist_clear           (iobject* ilist);
+extern inline int  ilist_size            (iobject* ilist);
+extern inline void ilist_add_front       (iobject* ilist, void* n_ref);
+extern inline void ilist_add_back        (iobject* ilist, void* n_ref);
+extern inline void* ilist_remove_front   (iobject* ilist);
+extern inline void* ilist_remove_back    (iobject* ilist);
+extern inline void* ilist_remove         (iobject* ilist, iobject* itr);
+extern inline void ilist_insert_before   (iobject* ilist, iobject* itr, void* n_ref);
+extern inline void ilist_insert_after    (iobject* ilist, iobject* itr, void* n_ref);
 
 /* return a iterator, maybe forward/bidirectional/random accessed. */
-extern inline object* ilist_itr_begin    (iobject* iq);
-extern inline object* ilist_itr_end      (iobject* iq);
+extern inline iterator ilist_itr_begin   (iobject* ilist);
+extern inline iterator ilist_itr_end     (iobject* ilist);
 
 /* 
  * TODO: if the target is not in the list, should we return NULL or
@@ -35,24 +35,24 @@ extern inline object* ilist_itr_end      (iobject* iq);
  *   ...
  *   if (itr != NULL) ifitr_destroy(itr); // which is error prone.
  */
-extern inline object* ilist_itr_find     (iobject* iq, void* __ref);
+extern inline iterator ilist_itr_find     (iobject* ilist, void* __ref);
 
 /* below is only useful for the container implementer */
 /* the virtual functions that each container should implement */
-typedef void     (*pf_ilist_destroy)      (object* iq);
-typedef void     (*pf_ilist_clear)        (object* iq);
-typedef int      (*pf_ilist_size)         (object* iq);
-typedef void     (*pf_ilist_add_front)    (object* iq, void* n_ref);
-typedef void     (*pf_ilist_add_back)     (object* iq, void* n_ref);
-typedef void*    (*pf_ilist_remove_front) (object* iq);
-typedef void*    (*pf_ilist_remove_back)  (object* iq);
+typedef void     (*pf_ilist_destroy)      (object* olist);
+typedef void     (*pf_ilist_clear)        (object* olist);
+typedef int      (*pf_ilist_size)         (object* olist);
+typedef void     (*pf_ilist_add_front)    (object* olist, void* n_ref);
+typedef void     (*pf_ilist_add_back)     (object* olist, void* n_ref);
+typedef void*    (*pf_ilist_remove_front) (object* olist);
+typedef void*    (*pf_ilist_remove_back)  (object* olist);
 
-typedef object*  (*pf_ilist_itr_begin)    (object* c);
-typedef object*  (*pf_ilist_itr_end)      (object* c);
-typedef object*  (*pf_ilist_itr_find)     (object* iq, void* __ref);
-typedef void*    (*pf_ilist_remove)       (object* iq, iobject* itr);
-typedef void     (*pf_ilist_insert_before)(object* iq, iobject* itr, void* n_ref);
-typedef void     (*pf_ilist_insert_after) (object* iq, iobject* itr, void* n_ref);
+typedef iterator (*pf_ilist_itr_begin)    (object* olist);
+typedef iterator (*pf_ilist_itr_end)      (object* olist);
+typedef iterator (*pf_ilist_itr_find)     (object* olist, void* __ref);
+typedef void*    (*pf_ilist_remove)       (object* olist, iobject* itr);
+typedef void     (*pf_ilist_insert_before)(object* olist, iobject* itr, void* n_ref);
+typedef void     (*pf_ilist_insert_after) (object* olist, iobject* itr, void* n_ref);
 
 struct ilist_vtable {
 	/* public */
