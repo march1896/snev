@@ -3,30 +3,40 @@
 platform := OSX
 include make_args
 include make_util
+cc_include_dir = -I ../src/ -I ../src/cntr/ -I ../src/cntr2/ -I ../src/memheap/ -I ../src/util/
+cc_include_dir += -I ../tests/ -I ../tests/cntr/ -I ../tests/cntr2/ -I ../tests/memheap/ -I ../tests/util/
 
-src_path = test/src
-obj_path = test/obj
-bin_path = test/bin
+src_path := ../src
+obj_path := make/clib/obj
+bin_path := make/clib/bin
+target_name := clib
+target_path := $(bin_path)/lib$(target_name).a
 
-target_name = test_exe
-build_type  = debug
+test_src_path := ../tests
+test_obj_path := make/test/obj
+test_bin_path := make/test/bin
+
+test_target_name := test
+test_target_path := $(test_bin_path)/$(test_target_name).out
+#build_type  := debug
 
 $(info building '$(target_name)')
+object_files := $(call gen_objectfiles,'*.c',$(src_path),$(obj_path))
+$(target_path) : $(object_files)
+	@echo [archiving] $@
+	@mkdir -p $(dir $@) && $(ar_exe) $(ar_flags) $@ $?
 
-#$(info $(.VARIABLES))
-
-object_files = $(call gen_objectfiles,'*.c',$(src_path),$(obj_path))
-$(info $(object_files))
-$(bin_path)/$(target_name) : $(object_files)
-	@echo [linking] $@
-	@mkdir -p $(dir $@) && $(ld_exe) -o $@ $? $(ld_flags)
-
+# note gen_objectfiles_dependency should be locate after the first target, since this function will generate
+# dependencies which would seize the first place
 $(call gen_objectfiles_dependency,'*.c',$(src_path),$(obj_path))
 
-#$(target_name) : $(object_files)
-#	@echo [archiving] $@
-#	@mkdir -p $(dir $@)
-#	@$(ar_exe) $(ar_flags) -o $@ $?
+$(info building '$(test_target_name)')
+test_object_files := $(call gen_objectfiles,'*.c',$(test_src_path),$(test_obj_path))
+$(test_target_path) : $(test_object_files)
+	@echo [linking] $@
+	@mkdir -p $(dir $@) && $(ld_exe) -o $@ $? $(ld_flags) $(target_path)
+
+$(call gen_objectfiles_dependency,'*.c',$(test_src_path),$(test_obj_path))
 
 .PHONY: clean
 clean:

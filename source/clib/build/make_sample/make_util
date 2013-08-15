@@ -7,12 +7,12 @@ grab_files = $(foreach path,$(1),$(shell find $(path) -maxdepth 0 -type f -name 
 grab_files_r = $(foreach path,$(1),$(shell find $(path) -type f -name $(2)))
 
 #x = $(call gen_denpendency, src/main.c)
-#x will be 'src/main.c src/include/a.h src/include/b.h src/include/c.h'
+#x will be 'a.h b.h c.h'
 #sed -e 's/.*: //'               #strip the first target, since gcc -MM results in 'x.o: x.c a.h b.h c.h'
 #sed -e 's/ *//'                 #strip the leading spaces
 #sed -e 's/\\$//' | tr '\n' ' '  #replace \ and newline seperated files into space seperated. 
 #gen_denpendency = $(shell $(cc_exe) -MM $(1) | sed -e 's/.*: //' -e 's/\\$//' -e 's/ *//' | tr '\n' ' ')
-gen_denpendency = $(shell $(cc_exe) $(cc_flags) -MM $(cc_include_dir) $(1) | sed -e 's/.*: //' -e 's/\\$$//' -e 's/ *//' | tr '\n' ' ')
+gen_denpendency = $(shell $(cc_exe) -MM $(1) | sed -e 's/.*: //' -e 's/\\$$//' -e 's/ *//' | tr '\n' ' ')
 
 # create a new variable
 define assign_variable
@@ -36,10 +36,10 @@ define object_dependency_template
 $(1): $(2)
 	@echo [compiling] $$<
 	@mkdir -p $$(dir $$@) && \
-	$$(cc_exe) $$(cc_preprocess_ctrl) $$(cc_flags) $$(cc_include_dir) -o $$(basename $$@).i $$< && \
+	$$(cc_exe) $$(cc_preprocess_ctrl) $$(cc_flags) -o $$(basename $$@).i $$< && \
 	$$(cc_exe) $$(cc_compile_ctrl) $$(cc_flags) -o $$(basename $$@).s $$(basename $$@).i && \
-	$$(cc_exe) $$(cc_assemble_ctrl) $$(cc_flags) -o $$(basename $$@).o $$(basename $$@).s && \
-	$$(cc_exe) $$(cc_dependency_ctrl) $$(cc_flags) $$(cc_include_dir) -o $$(basename $$@).d $$< 
+	$$(cc_exe) $$(cc_assemble_ctrl) $$(cc_flags) -o $$(basename $$@).o $$(basename $$@).s
+	@$$(cc_exe) $$(cc_dependency_ctrl) $$(cc_flags) -o $$(basename $$@).d $$< 
 endef
 
 # $(call gen_objectfiles_dependency,$(src_pattern),$(src_path),$(obj_path))
