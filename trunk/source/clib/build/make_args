@@ -1,0 +1,16 @@
+ifeq ($(platform),OSX)
+# $(CC) on OSX default points clang.
+cc_exe             := $(CC)
+cc_flags           := 
+cc_dependency_ctrl := -MM
+cc_preprocess_ctrl := -E
+cc_compile_ctrl    := -S
+cc_assemble_ctrl   := -c
+
+ar_exe             :=
+ar_flags           :=
+
+ld_exe             := $(LD)
+ld_flags           := -demangle -dynamic -arch x86_64 -macosx_version_min 10.8.0 -lSystem /usr/bin/../lib/clang/4.2/lib/darwin/libclang_rt.osx.a
+else ifeq ($(paltform),LINUX)
+endif
