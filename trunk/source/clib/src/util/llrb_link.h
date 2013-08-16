@@ -13,16 +13,16 @@ struct llrb_link {
 
 	unsigned           color;
 };
-typedef int (*pf_llrb_compare)(const struct llrb_link *l, const struct llrb_link *r, void* param);
+typedef int (*pf_llrb_compare)(const struct llrb_link *l, const struct llrb_link *r);
 
-struct llrb_link *llrb_insert(struct llrb_link *root, struct llrb_link *target, pf_llrb_compare pc, void* comp_param);
+struct llrb_link *llrb_insert(struct llrb_link *root, struct llrb_link *target, pf_llrb_compare pc);
 
-struct llrb_link *llrb_remove(struct llrb_link *root, struct llrb_link *target, pf_llrb_compare pc, void* comp_param);
+struct llrb_link *llrb_remove(struct llrb_link *root, struct llrb_link *target, pf_llrb_compare pc);
 
 /* TODO: why this interface is here */
 void llrb_swap_link  (struct llrb_link **pa, struct llrb_link **pb);
 
-void llrb_debug_check(struct llrb_link *root, pf_llrb_compare pc, void* comp_param);
+void llrb_debug_check(struct llrb_link *root, pf_llrb_compare pc);
 
 struct llrb_link* llrb_min(struct llrb_link* root);
 

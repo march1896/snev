@@ -26,9 +26,10 @@ struct o_llrb {
 	
 	struct base_interface         __iftable[e_l_count];
 
-	struct llrb_link*             __treeroot;
 	/* just a sentinel to represent the end of the tree, the maximum element of the tree */
 	struct llrb_link              __sentinel;
+	/* __root == __sentinel.left */
+	struct llrb_link*             __root;
 
 	int                           __size;
 	pf_compare                    __ref_comp;
@@ -216,19 +217,16 @@ static object* o_llrb_create_v(pf_compare ref_compare, allocator alc, pf_dispose
 	olist->__offset = olist;
 	olist->__cast   = o_llrb_cast;
 	
-	olist->__iftable[e_list].__offset = (address)e_list;
-	olist->__iftable[e_list].__vtable = &__ilist_vtable;
-	olist->__iftable[e_queue].__offset = (address)e_queue;
-	olist->__iftable[e_queue].__vtable = &__iqueue_vtable;
-	olist->__iftable[e_stack].__offset = (address)e_stack;
-	olist->__iftable[e_stack].__vtable = &__istack_vtable;
 	olist->__iftable[e_set].__offset = (address)e_set;
 	olist->__iftable[e_set].__vtable = &__iset_vtable;
 
 	olist->__size      = 0;
 	olist->__ref_comp  = ref_compare;
-	olist->__treeroot  = NULL;
-	olist->__treeroot  = llrb_insert(olist->__treeroot, olist->__sentinel, llrb_link_compare);
+	olist->__root      = NULL;
+	olist->__sentinel.left   = NULL;
+	olist->__sentinel.right  = NULL;
+	olist->__sentinel.parent = NULL;
+	olist->__sentinel.color  = 55; /* TODO: how to handle this color? */
 
 	olist->__allocator = alc;
 
@@ -246,8 +244,6 @@ static void per_link_dispose(struct list_link* link, void* param) {
 		olist->__dispose(node->reference);
 	}
 	
-	/* TODO: should we destroy the sentinel node */
-	
 	/* delete the node it self */
 	allocator_dealloc(olist->__allocator, node);
 }
@@ -259,12 +255,27 @@ static void o_llrb_destroy(object* o) {
 	allocator_dealloc(olist->__allocator, olist);
 }
 
+typedef void per_link_operation(struct llrb_link* link, void* param);
+static void llrb_traverse(struct llrb_link* cur, per_link_operation cb, void* param) {
+	if (cur == NULL) return;
+
+	llrb_traverse(cur->left, cb, param);
+	llrb_traverse(cur->right, cb, param);
+	cb(cur, param);
+}
+
+static inline void o_llrb_reassociate(struct llrb_link* __root, struct llrb_link* __sentinel) {
+	__sentinel->left = __root;
+	if (__root != NULL)
+		__root->parent = __sentinel;
+}
+
 static void o_llrb_clear(object* o) {
 	struct o_llrb* olist = (struct o_llrb*)o;
 
-	list_foreach_v(&olist->__thelist, per_link_dispose, (void*)olist);
+	llrb_traverse(olist->__root, per_link_dispose, (void*)olist);
 
-	list_init(&olist->__thelist);
+	olist->__root = NULL;
 	olist->__size = 0;
 }
 
@@ -272,82 +283,6 @@ static int o_llrb_size(object* o) {
 	struct o_llrb* olist = (struct o_llrb*)o;
 
 	return olist->__size;
-}
-
-static void o_llrb_add_front(object* o, void* ref) {
-	struct o_llrb* olist = (struct o_llrb*)o;
-
-	struct o_llrb_node* n_node = (struct o_llrb_node*)
-		allocator_alloc(olist->__allocator, sizeof(struct o_llrb_node));
-
-	n_node->reference = ref;
-
-	list_insert_front(&olist->__thelist, &n_node->link);
-	olist->__size ++;
-}
-
-static void o_llrb_add_back(object* o, void* ref) {
-	struct o_llrb* olist = (struct o_llrb*)o;
-
-	struct o_llrb_node* n_node = (struct o_llrb_node*)
-		allocator_alloc(olist->__allocator, sizeof(struct o_llrb_node));
-
-	n_node->reference = ref;
-
-	list_insert_back(&olist->__thelist, &n_node->link);
-	olist->__size ++;
-}
-
-static void* o_llrb_remove_front(object* o) {
-	struct o_llrb* olist = (struct o_llrb*)o;
-
-	if (olist->__size > 0) {
-		struct list_link* link    = olist->__thelist.next;
-		struct o_llrb_node* node = container_of(link, struct o_llrb_node, link);
-		void*  object_ref         = node->reference;
-
-		dbg_assert(link != &olist->__thelist);
-
-		list_unlink(link);
-		allocator_dealloc(olist->__allocator, node);
-
-		olist->__size --;
-
-		return object_ref;
-	}
-
-	dbg_assert(olist->__size == 0);
-	dbg_assert(list_empty(&olist->__thelist));
-
-	dbg_assert(false);
-
-	return NULL;
-}
-
-static void* o_llrb_remove_back(object* o) {
-	struct o_llrb* olist = (struct o_llrb*)o;
-
-	if (olist->__size > 0) {
-		struct list_link* link    = olist->__thelist.prev;
-		struct o_llrb_node* node = container_of(link, struct o_llrb_node, link);
-		void*  object_ref         = node->reference;
-
-		dbg_assert(link != &olist->__thelist);
-
-		list_unlink(link);
-		allocator_dealloc(olist->__allocator, node);
-
-		olist->__size --;
-
-		return object_ref;
-	}
-
-	dbg_assert(olist->__size == 0);
-	dbg_assert(list_empty(&olist->__thelist));
-
-	dbg_assert(false);
-
-	return NULL;
 }
 
 /* initialize all part of an iterator except the __current position */
@@ -370,7 +305,7 @@ static object* o_llrb_itr_begin(object* o) {
 	o_llrb_itr_com_init(n_itr, olist);
 
 	/* if the list is empty, we just return the sentinel node */
-	n_itr->__current = olist->__thelist.next;
+	n_itr->__current = olist->__sentinel.left;
 
 	return (object*)n_itr;
 }
@@ -384,7 +319,7 @@ static object* o_llrb_itr_end(object* o) {
 
 	/* the end iterator is the sentinel node, since 
 	 * (begin, end) represents [begin, end) */
-	n_itr->__current = &olist->__thelist;
+	n_itr->__current = &olist->__sentinel;
 
 	return (object*)n_itr;
 }
@@ -393,10 +328,10 @@ static object* o_llrb_itr_find(object* o, void* ref) {
 	struct o_llrb* olist     = (struct o_llrb*)o;
 	struct o_llrb_itr* n_itr = (struct o_llrb_itr*)
 		allocator_alloc(olist->__allocator, sizeof(struct o_llrb_itr));
-	struct list_link* link    = olist->__thelist.next;
+	struct llrb_link* link    = olist->__sentinel.left;
 	struct o_llrb_node* node = NULL;
 
-	while (link != &olist->__thelist) {
+	while (link != NULL) {
 		struct o_llrb_node* temp = (struct o_llrb_node*)container_of(link, struct o_llrb_node, link);
 
 		if (temp->reference == ref) {
