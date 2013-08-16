@@ -1,3 +1,4 @@
+#include <cominc.h>
 #include <bst_link.h>
 
 inline struct bst_link* bst_min(struct bst_link* root) {
@@ -91,14 +92,30 @@ static int bst_compare_warp_v(const struct bst_link* lhs, const struct bst_link*
 	return 0;
 }
 
+static int bst_compare_wrap(struct bst_link* a, struct bst_link* b, pf_bst_compare comp) {
+	int raw_result = comp(a, b);
+	if (raw_result < 0)
+		return -1;
+	else if (raw_result > 0)
+		return 1;
+
+	if (a < b) 
+		return -1;
+	else if (a > b)
+		return 1;
+
+	return 0;
+}
+
 struct bst_link* bst_insert(struct bst_link* root, struct bst_link* n_link, pf_bst_compare comp) {
 	struct bst_link* fwd = root;
 	struct bst_link* par = NULL;
+	int comp_res = 0;
 	if (root == NULL)
 		return n_link;
 
 	while (fwd != NULL) {
-		int comp_res = bst_compare_wrap(fwd, n_link, comp);
+		comp_res = bst_compare_wrap(fwd, n_link, comp);
 
 		if (comp_res == 0) {
 			/* the n_link is already in the tree, just return the root */
@@ -158,10 +175,13 @@ struct bst_link* bst_remove(struct bst_link* root, struct bst_link* to_rm, pf_bs
 		replace = to_rm->left;
 	}
 	else {
+		/*
+		 * TODO: two choices, randomly choose one.
 		int choice = math_rand(2);
 		struct bst_link* leaf_par = NULL;
 
 		
+		*/
 	}
 
 	if (par != NULL) {
@@ -176,5 +196,9 @@ struct bst_link* bst_remove(struct bst_link* root, struct bst_link* to_rm, pf_bs
 	return replace;
 }
 
-struct bst_link* bst_insert_v(struct bst_link* root, struct bst_link* n_link, pf_bst_compare comp, void* param);
-struct bst_link* bst_remove_v(struct bst_link* root, struct bst_link* n_link, pf_bst_compare comp, void* param);
+struct bst_link* bst_insert_v(struct bst_link* root, struct bst_link* n_link, pf_bst_compare_v comp, void* param) {
+	return NULL;
+}
+struct bst_link* bst_remove_v(struct bst_link* root, struct bst_link* n_link, pf_bst_compare_v comp, void* param) {
+	return NULL;
+}
