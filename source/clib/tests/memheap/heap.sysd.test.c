@@ -20,11 +20,11 @@ void heap_sysd_performance_test() {
 	heaptest_set_filldata(false);
 	heaptest_set_logtime(true, 0, "heap_sysd_performance.txt");
 
-	heaptest_run_allcomb(50000);
+	heaptest_run_allcomb(10000);
 }
 
 void heap_sysd_test() {
-	heap_sysd_correct_test();
+	test_run_single("heap_sysd correctness test", heap_sysd_correct_test);
 
-	heap_sysd_performance_test();
+	test_run_single("heap_sysd performance test", heap_sysd_performance_test);
 }

@@ -27,13 +27,14 @@
 /* allocator methods */
 extern inline void  allocator_join     (allocator o); 
 #ifdef _VERBOSE_ALLOC_DEALLOC_
-extern inline void* allocator_acquire_v(allocator o, int size, const char* file, int line);
-extern inline bool  allocator_release_v(allocator o, void* buff, const char* file, int line);
+/* here use 'void* o' instead of 'allocator o' is to obey the interface of pf_alloc */
+extern inline void* allocator_acquire_v(void* o, int size, const char* file, int line);
+extern inline bool  allocator_release_v(void* o, void* buff, const char* file, int line);
 #define allocator_acquire allocator_acquire_v
 #define allocator_release allocator_release_v
 #else 
-extern inline void* allocator_acquire_c(allocator o, int size);
-extern inline bool  allocator_release_c(allocator o, void* buff);
+extern inline void* allocator_acquire_c(void* o, int size);
+extern inline bool  allocator_release_c(void* o, void* buff);
 #define allocator_acquire allocator_acquire_c
 #define allocator_release allocator_release_c
 #endif

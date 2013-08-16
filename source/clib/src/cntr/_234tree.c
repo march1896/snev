@@ -19,7 +19,7 @@ static bool __node_isleaf(struct _234_node *n) {
 	return false;
 }
 
-static __node_init(struct _234_node *n, void *key) {
+static void __node_init(struct _234_node *n, void *key) {
 	n->dim = 1;
 	n->keys[0] = key;
 	n->parent = NULL;

@@ -116,7 +116,7 @@ static struct iset_vtable __iset_vtable = {
 	o_dlist_itr_end           /* __itr_end */
 };
 
-typedef struct o_dlist_itr {
+struct o_dlist_itr {
 	address                       __offset;
 	pf_cast                       __cast;
 
