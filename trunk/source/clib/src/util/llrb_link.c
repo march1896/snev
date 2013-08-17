@@ -380,7 +380,8 @@ struct llrb_link *llrb_remove(struct llrb_link *root, struct llrb_link *n, pf_ll
 }
 
 struct llrb_link* llrb_search(struct llrb_link* root, struct llrb_link* target, pf_llrb_compare pc) {
-
+	/* TODO: */
+	return NULL;
 }
 
 static int black_depth;

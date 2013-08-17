@@ -53,7 +53,7 @@ struct __base_vtable {
 /* 
  * get the object from a given interface
  */
-extern inline struct base_object* __object_from_interface(const struct base_interface* inf);
+extern inline struct base_object* __object_from_interface(struct base_interface* inf);
 
 /*
  * test if an unknown address is an object.

@@ -1,11 +1,16 @@
 #gnumake for this project.
 
 platform := CYGWIN
+
+# TODO: we should add some debug/release related cc_flags in make_args.mak, according the below variable.
+#build_type  := debug
+
 # make_args.mak should be included prior to make_util.mak, since variables used in make_util.mak
 # depends on make_arg.mak
 include make_args.mak
 include make_util.mak
 
+# TODO: remove so much include path.
 cc_include_dir = -I ../src/ -I ../src/cntr/ -I ../src/cntr2/ -I ../src/memheap/ -I ../src/util/
 cc_include_dir += -I ../tests/ -I ../tests/cntr/ -I ../tests/cntr2/ -I ../tests/memheap/ -I ../tests/util/
 
@@ -21,9 +26,8 @@ test_bin_path := make/test/bin
 
 test_target_name := test
 test_target_path := $(test_bin_path)/$(test_target_name).out
-#build_type  := debug
 
-$(info building '$(test_target_name)')
+#$(info building '$(test_target_name)')
 test_object_files := $(call gen_objectfiles,'*.c',$(test_src_path),$(test_obj_path))
 $(test_target_path) : $(test_object_files) $(clib_target_path)
 	@echo [linking] $@
@@ -31,7 +35,7 @@ $(test_target_path) : $(test_object_files) $(clib_target_path)
 
 $(call gen_objectfiles_dependency,'*.c',$(test_src_path),$(test_obj_path))
 
-$(info building '$(clib_target_name)')
+#$(info building '$(clib_target_name)')
 object_files := $(call gen_objectfiles,'*.c',$(clib_src_path),$(clib_obj_path))
 $(clib_target_path) : $(object_files)
 	@echo [archiving] $@
@@ -43,7 +47,9 @@ $(call gen_objectfiles_dependency,'*.c',$(clib_src_path),$(clib_obj_path))
 
 .PHONY: clean
 clean:
-	rm -fr $(test_obj_path)
-	rm -fr $(test_bin_path)
-	rm -fr $(clib_obj_path)
-	rm -fr $(clib_bin_path)
+	@echo [cleaning] $(clib_target_name)
+	@rm -fr $(clib_obj_path)
+	@rm -fr $(clib_bin_path)
+	@echo [cleaning] $(test_target_name)
+	@rm -fr $(test_obj_path)
+	@rm -fr $(test_bin_path)
