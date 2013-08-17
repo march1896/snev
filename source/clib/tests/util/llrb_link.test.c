@@ -87,7 +87,7 @@ void llrb_link_performance_test() {
 	insert_data(length, false);
 	remove_data(length, false);
 	end_c = clock();
-	printf("insert/remove %d elements used %f\n", length, (float)(end_c - start_c)/CLOCKS_PER_SEC);
+	log_printline("insert/remove %d elements used %f", length, (float)(end_c - start_c)/CLOCKS_PER_SEC);
 
 	_destroy_data(length);
 }

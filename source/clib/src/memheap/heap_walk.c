@@ -4,6 +4,19 @@
 #include <util/math.h>
 
 #include <stdio.h>
+#include <stdarg.h>
+
+// void log_printf(const char* format, ...) {
+// 	va_list arglist;
+// 	va_start( arglist, format );
+// 	vprintf(format, arglist);
+// 	if (g_use_file) {
+// 		FILE * pFile = fopen(g_log_file, "a");
+// 		vfprintf(pFile, format, arglist);
+// 		fclose(pFile);
+// 	}
+// 	va_end( arglist );
+// }
 
 void heap_leak_print_to_terminal(struct heap_blockinfo* binfo, void* param) {
 	if (binfo->allocated) {

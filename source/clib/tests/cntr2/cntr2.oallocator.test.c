@@ -81,32 +81,32 @@ void cntr2_allocator_recursive_spawn_test() {
 	allocator_alloc(father, 10);
 
 	/* no operations happened on uncle */
-	printf("before parent is joined\n");
-	printf("%s leak detect:\n", "grand_father");
+	log_printline("before parent is joined");
+	log_printline("%s leak detect:", "grand_father");
 	allocator_walk(grand_father, heap_leak_print_to_terminal, NULL);
-	printf("%s leak detect:\n", "father");
+	log_printline("%s leak detect:", "father");
 	allocator_walk(father, heap_leak_print_to_terminal, NULL);
-	printf("%s leak detect:\n", "uncle");
+	log_printline("%s leak detect:", "uncle");
 	allocator_walk(uncle, heap_leak_print_to_terminal, NULL);
-	printf("%s leak detect:\n", "brother");
+	log_printline("%s leak detect:", "brother");
 	allocator_walk(brother, heap_leak_print_to_terminal, NULL);
-	printf("%s leak detect:\n", "blade");
+	log_printline("%s leak detect:", "blade");
 	allocator_walk(blade, heap_leak_print_to_terminal, NULL);
 
 	allocator_join(father);
-	printf("after parent is joined\n");
-	printf("%s leak detect:\n", "grand_father");
+	log_printline("after parent is joined");
+	log_printline("%s leak detect:", "grand_father");
 	allocator_walk(grand_father, heap_leak_print_to_terminal, NULL);
 	/*
-	printf("%s leak detect:\n", "father");
+	log_printline("%s leak detect:\n", "father");
 	allocator_walk(father, heap_leak_print_to_terminal, NULL);
 	*/
-	printf("%s leak detect:\n", "uncle");
+	log_printline("%s leak detect:", "uncle");
 	allocator_walk(uncle, heap_leak_print_to_terminal, NULL);
 	/*
-	printf("%s leak detect:\n", "brother");
+	log_printline("%s leak detect:\n", "brother");
 	allocator_walk(brother, heap_leak_print_to_terminal, NULL);
-	printf("%s leak detect:\n", "blade");
+	log_printline("%s leak detect:\n", "blade");
 	allocator_walk(blade, heap_leak_print_to_terminal, NULL);
 	*/
 }

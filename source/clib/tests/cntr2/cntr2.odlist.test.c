@@ -14,12 +14,13 @@
 #include <stdint.h>
 
 static void __ref_print(void* __ref) {
-	printf("%d ", (int)(intptr_t)__ref);
+	log_printf("%d ", (int)(intptr_t)__ref);
 }
 static void __odlist_print(struct base_interface* ic) {
 	ilist list = as_list(ic);
 	iterator begin = ilist_itr_begin(list);
 	iterator end   = ilist_itr_end(list);
+	log_printtab();
 
 	while (!itr_equals(begin, end)) {
 		__ref_print(itr_get_ref(begin));
@@ -27,7 +28,7 @@ static void __odlist_print(struct base_interface* ic) {
 	}
 	foreach(begin, end, __ref_print);
 
-	printf("\n");
+	log_printf("\n");
 	itr_destroy(begin);
 	itr_destroy(end);
 }
@@ -216,17 +217,15 @@ static void __set_correct() {
 }
 
 static void __correctness_test() {
-	printf("add find remove correctness test start\n");
 	__list_correct();
 	__queue_correct();
 	__stack_correct();
 	__set_correct();
-	printf("add find remove correctness test end\n");
 }
 
 static void __performance_test() {
-	printf("add find remove performance test start\n");
-	printf("add find remove performance test end\n");
+	log_printline("add find remove performance test start");
+	log_printline("add find remove performance test end");
 }
 
 void cntr2_odlist_test() {
