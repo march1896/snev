@@ -1,3 +1,9 @@
+rem use one of the below options to generate the make system.
+rem cmake_build.bat "MinGW Makefiles"
+rem cmake_build.bat "Eclipse CDT4 - MinGW Makefiles"
+rem cmake_build.bat "Visual Studio 10"
+rem cmake_build.bat "Visual Studio 11"
+
 @ECHO OFF
 if exist set_env.bat call set_env.bat
 

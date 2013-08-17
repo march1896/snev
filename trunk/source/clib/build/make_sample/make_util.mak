@@ -14,20 +14,6 @@ grab_files_r = $(foreach path,$(1),$(shell find $(path) -type f -name $(2)))
 #gen_denpendency = $(shell $(cc_exe) -MM $(1) | sed -e 's/.*: //' -e 's/\\$//' -e 's/ *//' | tr '\n' ' ')
 gen_denpendency = $(shell $(cc_exe) $(cc_flags) -MM $(cc_include_dir) $(1) | sed -e 's/.*: //' -e 's/\\$$//' -e 's/ *//' | tr '\n' ' ')
 
-# create a new variable
-define assign_variable
-  $(1) := $(2)
-endef 
-
-# $(call force_redirect,$(file_path),$(content))
-# force_redirect = $(info mkdir -p $(dir $(1)) && echo $(2) > $(1))
-force_redirect = $(shell mkdir -p $(dir $(1)) && echo $(2) > $(1))
-
-# $(call dump_depend_variable,$(src_files),$(src_path),$(dump_path))
-# dump_depend_variable = $(foreach x,$(1),$(shell echo $(patsubst %,%.d,$(x)) > $(patsubst $(2)%,$(3)%.d,$(x))))
-dump_depend_variable = $(foreach x,$(1),$(call force_redirect,$(patsubst $(2)%,$(3)%.d,$(x)),$($(patsubst %,%.d,$(x)))))
-
-
 # $(call gen_objectfiles,$(src_pattern),$(src_path),$(obj_path))
 gen_objectfiles = $(patsubst $(2)%,$(3)%.o,$(call grab_files_r,$(2),$(1)))
 
@@ -43,16 +29,9 @@ $(1): $(2)
 endef
 
 # $(call gen_objectfiles_dependency,$(src_pattern),$(src_path),$(obj_path))
+# this function will generate a series of the object file dependency, in the above format.
+# since this will actually generate dependencies, so this function should be called after 
+# the main target of the makefile, or the 'first target' place will be occupied this call.
+#
+# this function should be call in pair of gen_objectfiles, please see the sample for more detail.
 gen_objectfiles_dependency = $(foreach x,$(call grab_files_r,$(2),$(1)),$(eval $(call object_dependency_template,$(patsubst $(2)%,$(3)%.o,$(x)),$(call gen_denpendency,$(x)))))
-
-# $(call archive_template,$(target_name),$(src_path),$(src_pattern),$(obj_path),$(bin_path)))
-define archive_template 
-$(5)/$(1):$(call gen_objectfiles,$(3),$(2),$(4))
-	@echo [archiving] $$@
-	@mkdir -p $$(dir $$@) && \
-	$$(ar_exe) $(ar_flags) -o $@ $?
-$(call gen_objectfiles_dependency,$(3),$(2),$(4))
-endef
-
-# $(call gen_archive,$(target_name),$(src_path),$(src_pattern),$(obj_path),$(bin_path))
-gen_archive = $(eval $(call archive_template,$(1),$(2),$(3),$(4),$(5)))

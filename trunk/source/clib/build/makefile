@@ -1,8 +1,11 @@
 #gnumake for this project.
 
 platform := CYGWIN
-include make_args
-include make_util
+# make_args.mak should be included prior to make_util.mak, since variables used in make_util.mak
+# depends on make_arg.mak
+include make_args.mak
+include make_util.mak
+
 cc_include_dir = -I ../src/ -I ../src/cntr/ -I ../src/cntr2/ -I ../src/memheap/ -I ../src/util/
 cc_include_dir += -I ../tests/ -I ../tests/cntr/ -I ../tests/cntr2/ -I ../tests/memheap/ -I ../tests/util/
 
@@ -40,7 +43,7 @@ $(call gen_objectfiles_dependency,'*.c',$(clib_src_path),$(clib_obj_path))
 
 .PHONY: clean
 clean:
-	rm -dfr $(test_obj_path)
-	rm -dfr $(test_bin_path)
-	rm -dfr $(clib_obj_path)
-	rm -dfr $(clib_bin_path)
+	rm -fr $(test_obj_path)
+	rm -fr $(test_bin_path)
+	rm -fr $(clib_obj_path)
+	rm -fr $(clib_bin_path)
