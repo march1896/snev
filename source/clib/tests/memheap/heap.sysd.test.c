@@ -3,6 +3,7 @@
 #include <memheap/heap_global.h>
 
 #include <memheap/heap_util.test.h>
+#include <test_util.h>
 
 void heap_sysd_correct_test() {
 	heaptest_begin();

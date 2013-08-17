@@ -235,7 +235,7 @@ static object* o_llrb_create_v(pf_compare ref_compare, allocator alc, pf_dispose
 	return (object*)olist;
 }
 
-static void per_link_dispose(struct list_link* link, void* param) {
+static void per_link_dispose(struct llrb_link* link, void* param) {
 	struct o_llrb_node* node = container_of(link, struct o_llrb_node, link);
 	struct o_llrb* olist     = (struct o_llrb*)param;
 
@@ -255,8 +255,8 @@ static void o_llrb_destroy(object* o) {
 	allocator_dealloc(olist->__allocator, olist);
 }
 
-typedef void per_link_operation(struct llrb_link* link, void* param);
-static void llrb_traverse(struct llrb_link* cur, per_link_operation cb, void* param) {
+typedef void (*pf_per_link_operation)(struct llrb_link* link, void* param);
+static void llrb_traverse(struct llrb_link* cur, pf_per_link_operation cb, void* param) {
 	if (cur == NULL) return;
 
 	llrb_traverse(cur->left, cb, param);
@@ -304,8 +304,7 @@ static object* o_llrb_itr_begin(object* o) {
 
 	o_llrb_itr_com_init(n_itr, olist);
 
-	/* if the list is empty, we just return the sentinel node */
-	n_itr->__current = olist->__sentinel.left;
+	n_itr->__current = llrb_min(olist->__root);
 
 	return (object*)n_itr;
 }
@@ -317,8 +316,6 @@ static object* o_llrb_itr_end(object* o) {
 
 	o_llrb_itr_com_init(n_itr, olist);
 
-	/* the end iterator is the sentinel node, since 
-	 * (begin, end) represents [begin, end) */
 	n_itr->__current = &olist->__sentinel;
 
 	return (object*)n_itr;
