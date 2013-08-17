@@ -1,12 +1,12 @@
 #gnumake for this project.
 
 platform := CYGWIN
-include make_args
-include make_util
+include ../make_args.mak
+include ../make_util.mak
 
-src_path := test/src
-obj_path := test/obj
-bin_path := test/bin
+src_path := ../src
+obj_path := obj
+bin_path := bin
 
 target_name := test
 target_path := $(bin_path)/$(target_name).out
