@@ -1,6 +1,6 @@
 #gnumake for this project.
 
-platform := OSX
+platform := CYGWIN
 include make_args
 include make_util
 cc_include_dir = -I ../src/ -I ../src/cntr/ -I ../src/cntr2/ -I ../src/memheap/ -I ../src/util/
@@ -24,7 +24,7 @@ $(info building '$(test_target_name)')
 test_object_files := $(call gen_objectfiles,'*.c',$(test_src_path),$(test_obj_path))
 $(test_target_path) : $(test_object_files) $(clib_target_path)
 	@echo [linking] $@
-	@mkdir -p $(dir $@) && $(ld_exe) -o $@ $^ $(ld_flags) $(clib_target_path)
+	@mkdir -p $(dir $@) && $(ld_exe) $(ld_flags_front) -o $@ $^ $(clib_target_path) $(ld_flags_back)
 
 $(call gen_objectfiles_dependency,'*.c',$(test_src_path),$(test_obj_path))
 
