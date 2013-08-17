@@ -164,31 +164,31 @@ static void cntr_fbt_add(cntr c, void* obj) {
 static void citer_fbt_to_prev(citer itr) {
 	citer_base* cur = (citer_base*)itr;
 	fbt_node* node = (fbt_node*)(cur->connection);
-	int index = (int)(cur->param_x);
+	int index = (int)(intptr_t)(cur->param_x);
 
 	dbg_assert(node && index < node->dim);
 	//dbg_assert(cur->__vt == &citer_fbt_vtable);
 
 	cur->connection = (void*)_234_node_predecessor(node, index, &index);
-	cur->param_x = (void*)index;
+	cur->param_x = (void*)(intptr_t)index;
 }
 
 static void citer_fbt_to_next(citer itr) {
 	citer_base* cur = (citer_base*)itr;
 	fbt_node* node = (fbt_node*)(cur->connection);
-	int index = (int)(cur->param_x);
+	int index = (int)(intptr_t)(cur->param_x);
 
 	dbg_assert(node && index < node->dim);
 	//dbg_assert(cur->__vt == &citer_fbt_vtable);
 
 	cur->connection = (void*)_234_node_successor(node, index, &index);
-	cur->param_x = (void*)index;
+	cur->param_x = (void*)(intptr_t)index;
 }
 
 static void* citer_fbt_get_ref(citer itr) {
 	citer_base* cur = (citer_base*)itr;
 	fbt_node* node = (fbt_node*)(cur->connection);
-	int index = (int)(cur->param_x);
+	int index = (int)(intptr_t)(cur->param_x);
 
 	dbg_assert(node && index < node->dim);
 
@@ -198,7 +198,7 @@ static void* citer_fbt_get_ref(citer itr) {
 static void citer_fbt_set_ref(citer itr, void* n_ref) {
 	citer_base* cur = (citer_base*)itr;
 	fbt_node* node = (fbt_node*)(cur->connection);
-	int index = (int)(cur->param_x);
+	int index = (int)(intptr_t)(cur->param_x);
 
 	dbg_assert(node && index < node->dim);
 
@@ -221,7 +221,7 @@ static citer_base_vtable citer_fbt_vtable = {
 void cntr_fbt_remove_proc(citer itr, void* param) {
 	cntr_fbt* pb = (cntr_fbt*)param;
 	fbt_node* pn = (fbt_node*)((citer_base*)itr)->connection;
-	int index = (int)((citer_base*)itr)->param_x;
+	int index = (int)(intptr_t)((citer_base*)itr)->param_x;
 	void *obj;
 
 	dbg_assert(index < pn->dim);
@@ -254,7 +254,7 @@ static bool  cntr_fbt_find(cntr c, void* object, citer itr) {
 
 	ci->__vt = &citer_fbt_vtable;
 	ci->connection = (void*)n;
-	ci->param_x = (void*)index;
+	ci->param_x = (void*)(intptr_t)index;
 
 	return n == NULL ? false : true;
 }
@@ -286,7 +286,7 @@ static void  cntr_fbt_citer_end(cntr c, citer itr) {
 
 	ci->__vt = &citer_fbt_vtable;
 	ci->connection = (void*)n;
-	ci->param_x = n == NULL ? (void*)0 : (void*)(n->dim-1);
+	ci->param_x = n == NULL ? (void*)0 : (void*)(intptr_t)(n->dim-1);
 }
 
 

@@ -78,8 +78,8 @@ static void reverse_test(TC_TYPE ct, TD_TYPE dt, TD_LENGTH dl) {
 	generate_test_data(dt, dl, &length, &ulength);
 
 	for (i = 0; i < length; i ++) {
-		cntr_add(c, (void*)rawdata[i]);
-		cntr_add(d, (void*)rawdata[i]);
+		cntr_add(c, (void*)(intptr_t)rawdata[i]);
+		cntr_add(d, (void*)(intptr_t)rawdata[i]);
 	}
 
 	cntr_citer_begin(c, first);
@@ -102,7 +102,7 @@ static void reverse_test(TC_TYPE ct, TD_TYPE dt, TD_LENGTH dl) {
 }
 
 static void print_element(citer itr) {
-	printf("%d ", (int)citer_get_ref(itr));
+	printf("%d ", (int)(intptr_t)citer_get_ref(itr));
 }
 #define PERMUTATION_LENGTH 5
 static void permutation_test(TC_TYPE ct) {
@@ -118,7 +118,7 @@ static void permutation_test(TC_TYPE ct) {
 
 	ans = 1;
 	for (i = 0; i < PERMUTATION_LENGTH; i ++) {
-		cntr_add(c, (void*)i);
+		cntr_add(c, (void*)(intptr_t)i);
 
 		ans *= (i + 1);
 	}

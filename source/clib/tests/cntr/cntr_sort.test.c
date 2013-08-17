@@ -19,7 +19,7 @@ static void judge(int length) {
 }
 
 static void assign_z(citer itr) {
-	z[i++] = (int)citer_get_ref(itr);
+	z[i++] = (int)(intptr_t)citer_get_ref(itr);
 }
 
 typedef void (*pf_sort_func)(citer begin, citer end, pf_compare_object comp);
@@ -39,7 +39,7 @@ static void sort_correctness_test(const char* sort_name, pf_sort_func the_sort,
 
 	c = cntr_create(ct);
 
-	for (i = 0; i < length; i ++) cntr_add_back(c, (void*)rawdata[i]);
+	for (i = 0; i < length; i ++) cntr_add_back(c, (void*)(intptr_t)rawdata[i]);
 
 	cntr_citer_begin(c, begin);
 	cntr_citer_end(c, end);
@@ -67,7 +67,7 @@ static void sort_performance_test(char* sort_name, pf_sort_func the_sort,
 
 	generate_test_data(data_type, data_length, &length, &ulength);
 	c = cntr_create(ct);
-	for (i = 0; i < length; i ++) cntr_add_back(c, (void*)rawdata[i]);
+	for (i = 0; i < length; i ++) cntr_add_back(c, (void*)(intptr_t)rawdata[i]);
 
 	cntr_citer_begin(c, begin);
 	cntr_citer_end(c, end);

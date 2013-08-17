@@ -1,6 +1,15 @@
 #ifndef _TEST_UTILITIES_H_
 #define _TEST_UTILITIES_H_
 #include <cominc.h>
+#include <stdint.h>
+
+#if defined(_MSC_VER)
+#else 
+// #include <inttypes.h>
+// void print_address(void* addr) {
+// 	printf("Here's a pointer for you: %"PRIxPTR"\n", (intptr_t)addr);
+// }
+#endif
 
 typedef void (*pf_test_case)();
 

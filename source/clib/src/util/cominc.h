@@ -37,6 +37,9 @@ typedef int bool;
 
 #endif
 
+/* handles the 32, 64bit pointers related problem */
+#include <stdint.h>
+
 #define unused(x) (void)(x)
 
 #define container_of(ptr, type, member) \

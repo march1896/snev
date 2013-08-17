@@ -22,22 +22,22 @@ static void add_find_remove_correctness_test(TC_TYPE ct, TD_TYPE dt, TD_LENGTH d
 
 	generate_test_data(dt, dl, &length, &ulength);
 
-	for (i = 0; i < ulength; i ++) cntr_add(c, (void*)uniquedata[i]);
+	for (i = 0; i < ulength; i ++) cntr_add(c, (void*)(intptr_t)uniquedata[i]);
 
 	/* test find */
 	for (i = 0; i < length; i ++) {
-		bool find = cntr_find(c, (void*)rawdata[i], first);
+		bool find = cntr_find(c, (void*)(intptr_t)rawdata[i], first);
 		dbg_assert(find);
 	}
 
 	for (i = length + 1; i < length + 50; i ++) {
-		bool find = cntr_find(c, (void*)i, first);
+		bool find = cntr_find(c, (void*)(intptr_t)i, first);
 		dbg_assert(find == false);
 	}
 
 	/* test remove, remove first half elements */
 	for (i = 0; i < ulength; i ++) {
-		bool find = cntr_find(c, (void*)uniquedata[i], first);
+		bool find = cntr_find(c, (void*)(intptr_t)uniquedata[i], first);
 		cntr_remove(c, first, first);
 		dbg_assert(cntr_size(c) == ulength - i - 1);
 	}
@@ -70,7 +70,7 @@ static void add_find_remove_performance_test(TC_TYPE ct, TD_TYPE dt, TD_LENGTH d
 	printf("add: ");
 	start_c = clock();	
 	for (i = 0; i < length; i ++) {
-		cntr_add(c, (void*)rawdata[i]);
+		cntr_add(c, (void*)(intptr_t)rawdata[i]);
 	}
 	end_c = clock();
 	printf("used %f\n", (float)(end_c - start_c)/CLOCKS_PER_SEC);
@@ -79,7 +79,7 @@ static void add_find_remove_performance_test(TC_TYPE ct, TD_TYPE dt, TD_LENGTH d
 	start_c = clock();
 	for (rep = 0; rep < 20; rep ++) {
 		for (i = 0; i < length; i ++) {
-			bool find = cntr_find(c, (void*)rawdata[i], first);
+			bool find = cntr_find(c, (void*)(intptr_t)rawdata[i], first);
 			dbg_assert(find);
 		}
 	}
@@ -92,7 +92,7 @@ static void add_find_remove_performance_test(TC_TYPE ct, TD_TYPE dt, TD_LENGTH d
 	find_used = 0.0;
 	start_c = clock();
 	for (i = 0; i < ulength; i ++) {
-		bool find = cntr_find(c, (void*)uniquedata[i], first);
+		bool find = cntr_find(c, (void*)(intptr_t)uniquedata[i], first);
 
 		cntr_remove(c, first, first);
 	}

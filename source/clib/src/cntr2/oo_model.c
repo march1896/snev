@@ -1,8 +1,7 @@
 #include <oo_model.h>
 
-inline struct base_object* __object_from_interface(const struct base_interface* inf) {
-	/* TODO: remove the const_cast */
-	struct base_interface* inf0 = (struct base_interface*)inf - (unsigned int)inf->__offset;
+inline struct base_object* __object_from_interface(struct base_interface* inf) {
+	struct base_interface* inf0 = inf - (intptr_t)inf->__offset;
 	struct base_object* obj = container_of(inf0, struct base_object, __iftable[0]);
 
 	return obj;
@@ -20,7 +19,7 @@ inline bool __is_object(unknown x) {
 
 inline bool __is_interface(unknown x) {
 	struct base_interface* inf = (struct base_interface*)x;
-	dbg_assert((int)(inf->__offset) <= __MAX_NUM_INTERFACE_PER_OBJECT);
+	dbg_assert((intptr_t)(inf->__offset) <= __MAX_NUM_INTERFACE_PER_OBJECT);
 
 	{
 		struct base_object* obj = __object_from_interface(inf);
@@ -38,7 +37,7 @@ inline unknown __cast(unknown x, unique_id id) {
 		return obj->__cast(obj, id);
 	}
 	else if (__is_interface(x)) {
-		struct base_object* obj = (struct base_object*)__object_from_interface(x);
+		struct base_object* obj = (struct base_object*)__object_from_interface((struct base_interface*)x);
 		return obj->__cast(obj, id);
 	}
 	dbg_assert(false);
