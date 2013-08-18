@@ -30,3 +30,9 @@ inline int mlog2(int x) {
 
 	return bit;
 }
+
+
+inline int mrand(int upper_bound) {
+	/* TODO: */
+	return 0;
+}

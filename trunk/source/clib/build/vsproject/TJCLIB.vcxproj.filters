@@ -127,6 +127,9 @@
     <ClCompile Include="..\..\src\cntr2\iallocator.c">
       <Filter>Source Files\cntr2</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\util\bst_link.c">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
@@ -298,6 +301,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\cntr2\oallocator.h">
       <Filter>Source Files\cntr2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\util\bst_link.h">
+      <Filter>Source Files\util</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

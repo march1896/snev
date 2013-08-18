@@ -61,4 +61,6 @@ void heaptest_run_single(int __length, enum ht_op_order __order, enum ht_data_si
 
 void heaptest_run_allcomb(int __length);
 
+extern bool enable_heap_bench;
+
 #endif /* _HEAP_TEST_UTILITY_H_ */

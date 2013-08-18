@@ -449,8 +449,8 @@ void heaptest_global_state_reset() {
 	g_dealloc               = NULL;
 
 	g_fill_data             = false;
-	g_log_operation              = false;
-	g_log_operation_file         = NULL;
+	g_log_operation         = false;
+	g_log_operation_file    = NULL;
 	g_log_time              = false;
 	g_log_time_file         = NULL;
 	g_log_time_format       = 0;
