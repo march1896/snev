@@ -15,6 +15,7 @@ extern inline void* ilist_remove_back    (iobject* ilist);
 extern inline void* ilist_remove         (iobject* ilist, iterator itr);
 extern inline void ilist_insert_before   (iobject* ilist, iterator itr, void* n_ref);
 extern inline void ilist_insert_after    (iobject* ilist, iterator itr, void* n_ref);
+extern inline bool ilist_contains        (iobject* ilist, void* __ref);
 
 /* return a iterator, maybe forward/bidirectional/random accessed. */
 extern inline iterator ilist_itr_begin   (iobject* ilist);
@@ -46,6 +47,7 @@ typedef void     (*pf_ilist_add_front)    (object* olist, void* n_ref);
 typedef void     (*pf_ilist_add_back)     (object* olist, void* n_ref);
 typedef void*    (*pf_ilist_remove_front) (object* olist);
 typedef void*    (*pf_ilist_remove_back)  (object* olist);
+typedef bool     (*pf_ilist_contains)     (object* olist, void* __ref);
 
 typedef iterator (*pf_ilist_itr_begin)    (object* olist);
 typedef iterator (*pf_ilist_itr_end)      (object* olist);
@@ -63,6 +65,7 @@ struct ilist_vtable {
 	pf_ilist_add_back       __add_back;
 	pf_ilist_remove_front   __remove_front;
 	pf_ilist_remove_back    __remove_back;
+	pf_ilist_contains       __contains;
 	pf_ilist_itr_begin      __itr_begin;
 	pf_ilist_itr_end        __itr_end;
 	pf_ilist_itr_find       __itr_find;

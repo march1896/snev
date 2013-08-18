@@ -66,6 +66,12 @@ inline void ilist_insert_after(iobject* iq, iterator itr, void* n_ref) {
 
 	((struct ilist_vtable*)iq->__vtable)->__insert_after(o, itr, n_ref);
 }
+inline bool ilist_contains(iobject* iq, void* __ref) {
+	object* o = __object_from_interface(iq);
+	dbg_assert(__cast(o, ILIST_ID) == iq);
+
+	return ((struct ilist_vtable*)iq->__vtable)->__contains(o, __ref);
+}
 inline object* ilist_itr_begin(iobject* iq) {
 	object* o = __object_from_interface(iq);
 	dbg_assert(__cast(o, ILIST_ID) == iq);
