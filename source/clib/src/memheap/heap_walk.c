@@ -19,6 +19,7 @@
 // }
 
 void heap_leak_print_to_terminal(struct heap_blockinfo* binfo, void* param) {
+	unused(param);
 	if (binfo->allocated) {
 		printf("0X%08X", (int)(intptr_t)binfo->allocable_addr);
 		printf("%8d bytes", binfo->allocable_size);

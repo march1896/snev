@@ -223,6 +223,7 @@
     <ClCompile Include="..\..\src\memheap\heap_walk.c" />
     <ClCompile Include="..\..\src\memheap\heap_wrap.c" />
     <ClCompile Include="..\..\src\util\bit_math.c" />
+    <ClCompile Include="..\..\src\util\bst_link.c" />
     <ClCompile Include="..\..\src\util\list_link.c" />
     <ClCompile Include="..\..\src\util\llrb_link.c" />
     <ClCompile Include="..\..\src\cntr\citer_base.c" />
@@ -293,6 +294,7 @@
     <ClInclude Include="..\..\src\regex\prog.h" />
     <ClInclude Include="..\..\src\regex\regc.h" />
     <ClInclude Include="..\..\src\util\bit_math.h" />
+    <ClInclude Include="..\..\src\util\bst_link.h" />
     <ClInclude Include="..\..\src\util\cominc.h" />
     <ClInclude Include="..\..\src\util\link.doc.h" />
     <ClInclude Include="..\..\src\util\list_link.h" />

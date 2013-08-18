@@ -49,6 +49,9 @@
     <ClCompile Include="..\..\tests\memheap\heap.llrb.test.c">
       <Filter>Source Files\memheap</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\tests\memheap\heap.buddy.test.c">
+      <Filter>Source Files\memheap</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">

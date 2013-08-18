@@ -40,11 +40,13 @@ struct bst_link* bst_insert  (struct bst_link* root, struct bst_link* n_link, pf
 struct bst_link* bst_search  (struct bst_link* root, void*  param,            pf_bst_direct dir);
 struct bst_link* bst_remove  (struct bst_link* root, struct bst_link* n_link, pf_bst_compare comp);
 
+/* implement it on requirements, is this a right development method */
 struct bst_link* bst_insert_v(struct bst_link* root, struct bst_link* n_link, pf_bst_compare_v comp, void* param);
 struct bst_link* bst_remove_v(struct bst_link* root, struct bst_link* n_link, pf_bst_compare_v comp, void* param);
 
 struct bstp_link {
-	struct bst_link   bst;
+	struct bstp_link* left;
+	struct bstp_link* right;
 
 	struct bstp_link* parent;  /* point to parent, NULL if current is root */
 };

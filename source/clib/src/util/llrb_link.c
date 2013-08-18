@@ -57,13 +57,6 @@ static struct llrb_link *_rotate_right(struct llrb_link *n) {
 	return l;
 }
 
-static pf_llrb_compare _key_comp;
-
-/* TODO: using global variable, anti multiple instances in multithread environment, change it */
-static void llrb_set_compare(pf_llrb_compare pc) {
-	_key_comp = pc;
-}
-
 static void llrb_init(struct llrb_link *n) {
 	dbg_assert(n != NULL);
 
@@ -217,18 +210,17 @@ static struct llrb_link *_swap_link(struct llrb_link *anc, struct llrb_link *des
 /*
  * use a <key, address> pair as the real key stored in the tree.
  */
-static int _compare(const struct llrb_link *l, const struct llrb_link *r) {
-	/* first compare the key */
-	int cmpr = _key_comp(l, r);
-	if (cmpr != 0) return cmpr;
+static int compare_wrap(const struct llrb_link* a, const struct llrb_link* b, pf_llrb_compare raw_comp) {
+	int raw_result = raw_comp(a, b);
 
-	/* if the key is the same, compare the link address */
-	if (l < r) 
+	if (raw_result != 0) return raw_result;
+
+	if (a < b) 
 		return -1;
-	else if (l == r) 
-		return 0;
-	else 
+	else if (a > b) 
 		return 1;
+
+	return 0;
 }
 
 static inline bool _is_red(const struct llrb_link *n) {
@@ -256,18 +248,18 @@ struct llrb_link *_fix_up(struct llrb_link *c) {
 	return c;
 }
 
-struct llrb_link *_insert(struct llrb_link *c, struct llrb_link *n) {
+struct llrb_link *__llrb_insert(struct llrb_link *c, struct llrb_link *n, pf_llrb_compare comp) {
 	if (c == NULL) return n;
 
 	{
-		int compr = _compare(n, c);
+		int compr = compare_wrap(n, c, comp);
 
 		if (compr < 0) {
-			c->left = _insert(c->left, n);
+			c->left = __llrb_insert(c->left, n, comp);
 			c->left->parent = c;
 		}
 		else {
-			c->right = _insert(c->right, n);
+			c->right = __llrb_insert(c->right, n, comp);
 			c->right->parent = c;
 		}
 	}
@@ -313,26 +305,26 @@ struct llrb_link *_delete_min(struct llrb_link *c) {
  * TODO: the code from the paper does not handle the case that n is not 
  * found in the tree.
  */
-struct llrb_link *_delete(struct llrb_link *c, struct llrb_link *n) {
-	int compr = _compare(n, c);
+struct llrb_link *__llrb_delete(struct llrb_link *c, struct llrb_link *n, pf_llrb_compare comp) {
+	int compr = compare_wrap(n, c, comp);
 
 	if (compr < 0) {
 		/* if n is not in the tree, we may crash here */
 		if (!_is_red(c->left) && !_is_red(c->left->left))
 			c = _move_red_left(c);
-		c->left = _delete(c->left, n);
+		c->left = __llrb_delete(c->left, n, comp);
 		if (c->left)
 			c->left->parent = c;
 	}
 	else {
 		if (_is_red(c->left))
 			c = _rotate_right(c);
-		compr = _compare(n, c);
+		compr = compare_wrap(n, c, comp);
 		if (compr == 0 && c->right == NULL)
 			return NULL;
 		if (!_is_red(c->right) && !_is_red(c->right->left))
 			c = _move_red_right(c);
-		compr = _compare(n, c);
+		compr = compare_wrap(n, c, comp);
 		if (compr == 0) {
 			{
 				struct llrb_link *suc = c->right;
@@ -348,7 +340,7 @@ struct llrb_link *_delete(struct llrb_link *c, struct llrb_link *n) {
 			c->right = _delete_min(c->right);
 		}
 		else {
-			c->right = _delete(c->right, n);
+			c->right = __llrb_delete(c->right, n, comp);
 			if (c->right)
 				c->right->parent = c;
 		}
@@ -357,21 +349,17 @@ struct llrb_link *_delete(struct llrb_link *c, struct llrb_link *n) {
 	return _fix_up(c);
 }
 
-struct llrb_link *llrb_insert(struct llrb_link *root, struct llrb_link *nlink, pf_llrb_compare pc) {
-	llrb_set_compare(pc);
-
+struct llrb_link *llrb_insert(struct llrb_link *root, struct llrb_link *nlink, pf_llrb_compare comp) {
 	llrb_init(nlink);
-	root = _insert(root, nlink);
+	root = __llrb_insert(root, nlink, comp);
 
 	root->color = BLACK;
 
 	return root;
 }
 
-struct llrb_link *llrb_remove(struct llrb_link *root, struct llrb_link *n, pf_llrb_compare pc) {
-	llrb_set_compare(pc);
-
-	root = _delete(root, n);
+struct llrb_link *llrb_remove(struct llrb_link *root, struct llrb_link *n, pf_llrb_compare comp) {
+	root = __llrb_delete(root, n, comp);
 
 	if (root)
 		root->color = BLACK;
@@ -379,13 +367,29 @@ struct llrb_link *llrb_remove(struct llrb_link *root, struct llrb_link *n, pf_ll
 	return root;
 }
 
-struct llrb_link* llrb_search(struct llrb_link* root, struct llrb_link* target, pf_llrb_compare pc) {
-	/* TODO: */
+struct llrb_link* llrb_search(struct llrb_link* root, pf_llrb_direct direct, void* param) {
+	struct llrb_link* fwd = root;
+
+	while (true) {
+		int comp_res = direct(fwd, param);
+
+		if (comp_res == 0) {
+			/* found */
+			return fwd;
+		}
+		else if (comp_res < 0) {
+			fwd = fwd->left;
+		}
+		else {
+			fwd = fwd->right;
+		}
+	}
+
 	return NULL;
 }
 
 static int black_depth;
-static void _debug_check(struct llrb_link *c, int depth) {
+static void __llrb_check(struct llrb_link *c, int depth, pf_llrb_compare comp) {
 	if (c == NULL) {
 		if (black_depth == -1) black_depth = depth;
 		else dbg_assert(depth == black_depth);
@@ -399,13 +403,13 @@ static void _debug_check(struct llrb_link *c, int depth) {
 		if (lc) {
 			dbg_assert(lc->parent == c);
 
-			cmpr = _compare(lc, c);
+			cmpr = compare_wrap(lc, c, comp);
 			dbg_assert(cmpr == -1);
 		}
 		if (rc) {
 			dbg_assert(rc->parent == c);
 
-			cmpr = _compare(rc, c);
+			cmpr = compare_wrap(rc, c, comp);
 			dbg_assert(cmpr == 1);
 		}
 
@@ -416,16 +420,14 @@ static void _debug_check(struct llrb_link *c, int depth) {
 
 		if (!_is_red(c)) depth ++;
 
-		_debug_check(c->left, depth);
-		_debug_check(c->right, depth);
+		__llrb_check(c->left, depth, comp);
+		__llrb_check(c->right, depth, comp);
 	}
 }
 
-void llrb_debug_check(struct llrb_link *root, pf_llrb_compare pc) {
-	llrb_set_compare(pc);
-
+void llrb_debug_check(struct llrb_link *root, pf_llrb_compare comp) {
 	black_depth = -1;
-	_debug_check(root, 0);
+	__llrb_check(root, 0, comp);
 }
 
 struct llrb_link* llrb_min(struct llrb_link* root) {
