@@ -8,6 +8,8 @@
 #include "cntr2/iitr.h"
 #include "cntr2/ialgo.h"
 
+#include "memheap/heap_global.h"
+
 #include "test_util.h"
 #include "cntr2.test.h"
 
@@ -30,6 +32,81 @@ void icntr_print(iobject* icntr) {
 	log_printf("\n");
 	itr_destroy(begin);
 	itr_destroy(end);
+}
+
+static void list_test_base(iobject* list) {
+	ilist_clear(list);
+	dbg_assert(ilist_size(list) == 0);
+
+	ilist_add_front(list, (void*)(intptr_t)4);
+	ilist_add_back (list, (void*)(intptr_t)5);
+	ilist_add_front(list, (void*)(intptr_t)3);
+	ilist_add_back (list, (void*)(intptr_t)6);
+	ilist_add_front(list, (void*)(intptr_t)2);
+	ilist_add_back (list, (void*)(intptr_t)7);
+	ilist_add_front(list, (void*)(intptr_t)1);
+	ilist_add_back (list, (void*)(intptr_t)8);
+	/* now the list contains { 1, 2, 3, 4, 5, 6, 7, 8 } */
+	dbg_assert(ilist_size(list) == 8);
+	{
+		iterator begin = ilist_itr_begin(list);
+		iterator end   = ilist_itr_end(list);
+		int current = 1;
+
+		for (; current <= 8; current ++) {
+			dbg_assert(ilist_contains(list, (void*)(intptr_t)current));
+		}
+		dbg_assert(ilist_contains(list, (void*)(intptr_t)0) == false);
+		dbg_assert(ilist_contains(list, (void*)(intptr_t)9) == false);
+
+		current = 1;
+		for (; !itr_equals(begin, end); itr_to_next(begin)) {
+			dbg_assert(itr_get_ref(begin) == (void*)(intptr_t)current);
+			current ++;
+		}
+
+		itr_destroy(begin);
+		itr_destroy(end);
+	}
+
+	ilist_clear(list);
+	dbg_assert(ilist_size(list) == 0);
+
+	{
+		/* make sure there is no data stored in the list */
+		iterator begin = ilist_itr_begin(list);
+		iterator end   = ilist_itr_end(list);
+
+		itr_to_next(begin);
+		dbg_assert(itr_equals(begin, end));
+
+		itr_destroy(begin);
+		itr_destroy(end);
+	}
+}
+
+static void list_test_addfindremove(iobject* list, int data_size) {
+	void** raw_data = 0;
+	int i;
+
+	raw_data = (void**)salloc(sizeof(void*) * data_size);
+
+	for (i = 0; i < data_size; i ++) {
+		raw_data[i] = (void*)(intptr_t)i;
+	}
+	ilist_clear(list);
+	dbg_assert(ilist_size(list) == 0);
+
+	for (i = 0; i < data_size; i ++) {
+		ilist_add_back(list, raw_data[i]);
+	}
+
+	for (i = 0; i < data_size; i ++) {
+
+	}
+
+
+	sfree(raw_data);
 }
 
 void list_correct(iobject* list) {
