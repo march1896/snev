@@ -48,19 +48,19 @@ inline object* ilist_itr_find(iobject* iq, void* ref) {
 
 	return ((struct ilist_vtable*)iq->__vtable)->__itr_find(o, ref);
 }
-inline void* ilist_remove(iobject* iq, iobject* itr) {
+inline void* ilist_remove(iobject* iq, iterator itr) {
 	object* o = __object_from_interface(iq);
 	dbg_assert(__cast(o, ILIST_ID) == iq);
 
 	return ((struct ilist_vtable*)iq->__vtable)->__remove(o, itr);
 }
-inline void ilist_insert_before(iobject* iq, iobject* itr, void* n_ref) {
+inline void ilist_insert_before(iobject* iq, iterator itr, void* n_ref) {
 	object* o = __object_from_interface(iq);
 	dbg_assert(__cast(o, ILIST_ID) == iq);
 
 	((struct ilist_vtable*)iq->__vtable)->__insert_before(o, itr, n_ref);
 }
-inline void ilist_insert_after(iobject* iq, iobject* itr, void* n_ref) {
+inline void ilist_insert_after(iobject* iq, iterator itr, void* n_ref) {
 	object* o = __object_from_interface(iq);
 	dbg_assert(__cast(o, ILIST_ID) == iq);
 

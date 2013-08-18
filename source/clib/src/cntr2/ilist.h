@@ -12,9 +12,9 @@ extern inline void ilist_add_front       (iobject* ilist, void* n_ref);
 extern inline void ilist_add_back        (iobject* ilist, void* n_ref);
 extern inline void* ilist_remove_front   (iobject* ilist);
 extern inline void* ilist_remove_back    (iobject* ilist);
-extern inline void* ilist_remove         (iobject* ilist, iobject* itr);
-extern inline void ilist_insert_before   (iobject* ilist, iobject* itr, void* n_ref);
-extern inline void ilist_insert_after    (iobject* ilist, iobject* itr, void* n_ref);
+extern inline void* ilist_remove         (iobject* ilist, iterator itr);
+extern inline void ilist_insert_before   (iobject* ilist, iterator itr, void* n_ref);
+extern inline void ilist_insert_after    (iobject* ilist, iterator itr, void* n_ref);
 
 /* return a iterator, maybe forward/bidirectional/random accessed. */
 extern inline iterator ilist_itr_begin   (iobject* ilist);
@@ -50,9 +50,9 @@ typedef void*    (*pf_ilist_remove_back)  (object* olist);
 typedef iterator (*pf_ilist_itr_begin)    (object* olist);
 typedef iterator (*pf_ilist_itr_end)      (object* olist);
 typedef iterator (*pf_ilist_itr_find)     (object* olist, void* __ref);
-typedef void*    (*pf_ilist_remove)       (object* olist, iobject* itr);
-typedef void     (*pf_ilist_insert_before)(object* olist, iobject* itr, void* n_ref);
-typedef void     (*pf_ilist_insert_after) (object* olist, iobject* itr, void* n_ref);
+typedef void*    (*pf_ilist_remove)       (object* olist, iterator itr);
+typedef void     (*pf_ilist_insert_before)(object* olist, iterator itr, void* n_ref);
+typedef void     (*pf_ilist_insert_after) (object* olist, iterator itr, void* n_ref);
 
 struct ilist_vtable {
 	/* public */

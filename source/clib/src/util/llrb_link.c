@@ -210,7 +210,7 @@ static struct llrb_link *_swap_link(struct llrb_link *anc, struct llrb_link *des
 /*
  * use a <key, address> pair as the real key stored in the tree.
  */
-static int compare_wrap(const struct llrb_link* a, const struct llrb_link* b, pf_llrb_compare raw_comp) {
+static int __compare_wrap(const struct llrb_link* a, const struct llrb_link* b, pf_llrb_compare raw_comp) {
 	int raw_result = raw_comp(a, b);
 
 	if (raw_result != 0) return raw_result;
@@ -252,7 +252,7 @@ struct llrb_link *__llrb_insert(struct llrb_link *c, struct llrb_link *n, pf_llr
 	if (c == NULL) return n;
 
 	{
-		int compr = compare_wrap(n, c, comp);
+		int compr = __compare_wrap(n, c, comp);
 
 		if (compr < 0) {
 			c->left = __llrb_insert(c->left, n, comp);
@@ -306,7 +306,7 @@ struct llrb_link *_delete_min(struct llrb_link *c) {
  * found in the tree.
  */
 struct llrb_link *__llrb_delete(struct llrb_link *c, struct llrb_link *n, pf_llrb_compare comp) {
-	int compr = compare_wrap(n, c, comp);
+	int compr = __compare_wrap(n, c, comp);
 
 	if (compr < 0) {
 		/* if n is not in the tree, we may crash here */
@@ -319,12 +319,12 @@ struct llrb_link *__llrb_delete(struct llrb_link *c, struct llrb_link *n, pf_llr
 	else {
 		if (_is_red(c->left))
 			c = _rotate_right(c);
-		compr = compare_wrap(n, c, comp);
+		compr = __compare_wrap(n, c, comp);
 		if (compr == 0 && c->right == NULL)
 			return NULL;
 		if (!_is_red(c->right) && !_is_red(c->right->left))
 			c = _move_red_right(c);
-		compr = compare_wrap(n, c, comp);
+		compr = __compare_wrap(n, c, comp);
 		if (compr == 0) {
 			{
 				struct llrb_link *suc = c->right;
@@ -360,6 +360,101 @@ struct llrb_link *llrb_insert(struct llrb_link *root, struct llrb_link *nlink, p
 
 struct llrb_link *llrb_remove(struct llrb_link *root, struct llrb_link *n, pf_llrb_compare comp) {
 	root = __llrb_delete(root, n, comp);
+
+	if (root)
+		root->color = BLACK;
+
+	return root;
+}
+
+static int __compare_wrap_v(const struct llrb_link* a, const struct llrb_link* b, pf_llrb_compare_v raw_comp, void* param) {
+	int raw_result = raw_comp(a, b, param);
+
+	if (raw_result != 0) return raw_result;
+
+	if (a < b) 
+		return -1;
+	else if (a > b) 
+		return 1;
+
+	return 0;
+}
+
+struct llrb_link *__llrb_insert_v(struct llrb_link *c, struct llrb_link *n, pf_llrb_compare_v comp, void* param) {
+	if (c == NULL) return n;
+
+	{
+		int compr = __compare_wrap_v(n, c, comp, param);
+
+		if (compr < 0) {
+			c->left = __llrb_insert_v(c->left, n, comp, param);
+			c->left->parent = c;
+		}
+		else {
+			c->right = __llrb_insert_v(c->right, n, comp, param);
+			c->right->parent = c;
+		}
+	}
+
+	return _fix_up(c);
+}
+
+struct llrb_link* llrb_insert_v (struct llrb_link* root, struct llrb_link* nlink, pf_llrb_compare_v comp, void* param) {
+	llrb_init(nlink);
+	root = __llrb_insert_v(root, nlink, comp, param);
+
+	root->color = BLACK;
+
+	return root;
+}
+
+/* TODO: the code from the paper does not handle the case that n is not found in the tree. */
+struct llrb_link *__llrb_delete_v(struct llrb_link *c, struct llrb_link *n, pf_llrb_compare_v comp, void* param) {
+	int compr = __compare_wrap_v(n, c, comp, param);
+
+	if (compr < 0) {
+		/* if n is not in the tree, we may crash here */
+		if (!_is_red(c->left) && !_is_red(c->left->left))
+			c = _move_red_left(c);
+		c->left = __llrb_delete_v(c->left, n, comp, param);
+		if (c->left)
+			c->left->parent = c;
+	}
+	else {
+		if (_is_red(c->left))
+			c = _rotate_right(c);
+		compr = __compare_wrap_v(n, c, comp, param);
+		if (compr == 0 && c->right == NULL)
+			return NULL;
+		if (!_is_red(c->right) && !_is_red(c->right->left))
+			c = _move_red_right(c);
+		compr = __compare_wrap_v(n, c, comp, param);
+		if (compr == 0) {
+			{
+				struct llrb_link *suc = c->right;
+
+				while (suc->left != NULL)
+					suc = suc->left;
+
+				dbg_assert(suc->right == NULL);
+
+				c = _swap_link(c, suc);
+				//llrb_swap_link(&c, &suc);
+			}
+			c->right = _delete_min(c->right);
+		}
+		else {
+			c->right = __llrb_delete_v(c->right, n, comp, param);
+			if (c->right)
+				c->right->parent = c;
+		}
+	}
+
+	return _fix_up(c);
+}
+
+struct llrb_link* llrb_remove_v (struct llrb_link* root, struct llrb_link* target, pf_llrb_compare_v comp, void* param) {
+	root = __llrb_delete_v(root, target, comp, param);
 
 	if (root)
 		root->color = BLACK;
@@ -403,13 +498,13 @@ static void __llrb_check(struct llrb_link *c, int depth, pf_llrb_compare comp) {
 		if (lc) {
 			dbg_assert(lc->parent == c);
 
-			cmpr = compare_wrap(lc, c, comp);
+			cmpr = __compare_wrap(lc, c, comp);
 			dbg_assert(cmpr == -1);
 		}
 		if (rc) {
 			dbg_assert(rc->parent == c);
 
-			cmpr = compare_wrap(rc, c, comp);
+			cmpr = __compare_wrap(rc, c, comp);
 			dbg_assert(cmpr == 1);
 		}
 

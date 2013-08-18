@@ -35,7 +35,7 @@ inline object* iset_find(iobject* iq, void* ref) {
 	return ((struct iset_vtable*)(iq->__vtable))->__find(o, ref);
 }
 
-inline void iset_remove(iobject* iq, iobject* itr) {
+inline void iset_remove(iobject* iq, iterator itr) {
 	object* o = __object_from_interface(iq);
 	dbg_assert(__cast(o, ISET_ID) == iq);
 
