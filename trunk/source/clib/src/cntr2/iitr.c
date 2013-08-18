@@ -1,13 +1,14 @@
 #include <iitr.h>
 
-inline void itr_destroy(object* itr) {
+inline void itr_destroy(iterator itr) {
+	/* iterator object always inherit iiterator as the first interface */
 	iobject* intf = __fast_cast(itr, 0);
 	dbg_assert(intf == __cast(itr, ITR_BAS_ID));
 
 	((struct itr_base_vtable*)(intf->__vtable))->__destroy(itr);
 }
 
-inline bool itr_equals(object* ia, object* ib) {
+inline bool itr_equals(iterator ia, iterator ib) {
 	iobject* intf = __fast_cast(ia, 0);
 	dbg_assert(__cast(ia, ITR_BAS_ID) == __fast_cast(ia, 0));
 	dbg_assert(__cast(ib, ITR_BAS_ID) == __fast_cast(ib, 0));
@@ -15,42 +16,42 @@ inline bool itr_equals(object* ia, object* ib) {
 	return ((struct itr_base_vtable*)(intf->__vtable))->__equals(ia, ib);
 }
 
-inline void* itr_get_ref(object* itr) {
+inline void* itr_get_ref(iterator itr) {
 	iobject* intf = __fast_cast(itr, 0);
 	dbg_assert(intf == __cast(itr, ITR_REF_ID));
 
 	return ((struct itr_readable_vtable*)(intf->__vtable))->__get_ref(itr);
 }
 
-inline void itr_set_ref(object* itr, void* __ref) {
+inline void itr_set_ref(iterator itr, void* __ref) {
 	iobject* intf = __fast_cast(itr, 0);
 	dbg_assert(intf == __cast(itr, ITR_ACC_ID));
 
 	((struct itr_accessible_vtable*)(intf->__vtable))->__set_ref(itr, __ref);
 }
 
-inline void itr_to_next(object* itr) {
+inline void itr_to_next(iterator itr) {
 	iobject* intf = __fast_cast(itr, 0);
 	dbg_assert(intf == __cast(itr, ITR_FWD_ID));
 
 	((struct itr_forward_vtable*)(intf->__vtable))->__to_next(itr);
 }
 
-inline void itr_to_prev(object* itr) {
+inline void itr_to_prev(iterator itr) {
 	iobject* intf = __fast_cast(itr, 0);
 	dbg_assert(intf == __cast(itr, ITR_BID_ID));
 
 	((struct itr_bidirectional_vtable*)(intf->__vtable))->__to_prev(itr);
 }
 
-inline void itr_advance(object* itr, int length) {
+inline void itr_advance(iterator itr, int length) {
 	iobject* intf = __fast_cast(itr, 0);
 	dbg_assert(intf == __cast(itr, ITR_RAC_ID));
 
 	((struct itr_randomaccessible_vtable*)(intf->__vtable))->__advance(itr, length);
 }
 
-inline int  itr_distance(object* from, object* to) {
+inline int  itr_distance(iterator from, iterator to) {
 	iobject* intf = __fast_cast(from, 0);
 	dbg_assert(intf == __cast(from, ITR_RAC_ID));
 

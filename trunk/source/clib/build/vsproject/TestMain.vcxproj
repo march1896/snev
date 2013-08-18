@@ -276,6 +276,7 @@
     <ClCompile Include="..\..\tests\cntr2\cntr2.all.test.c" />
     <ClCompile Include="..\..\tests\cntr2\cntr2.oallocator.test.c" />
     <ClCompile Include="..\..\tests\cntr2\cntr2.odlist.test.c" />
+    <ClCompile Include="..\..\tests\cntr2\cntr2.test.c" />
     <ClCompile Include="..\..\tests\cntr\cntr_algorithm.test.c" />
     <ClCompile Include="..\..\tests\cntr\cntr_all.test.c" />
     <ClCompile Include="..\..\tests\cntr\cntr_base.test.c" />
@@ -297,6 +298,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\tests\cntr2\cntr2.test.h" />
     <ClInclude Include="..\..\tests\cntr\cntr_test_util.h" />
     <ClInclude Include="..\..\tests\memheap\heap_util.test.h" />
     <ClInclude Include="..\..\tests\test_util.h" />

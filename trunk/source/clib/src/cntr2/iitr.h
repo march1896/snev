@@ -17,25 +17,25 @@ extern inline int  itr_distance        (iterator from, iterator to);
 /* TODO: should we implement the below functions 
  * these are the 'real' interface functions, the above is not 'interface method',
  * strictly specking, the above functions should not be in this 'interface' file.*/
-extern inline void iitr_destroy         (iobject* iitr);
-extern inline bool iitr_equals          (iobject* ia, iobject* ib);
-extern inline void* iitr_get_ref        (iobject* iitr);
-extern inline void iitr_set_ref         (iobject* iitr, void* ref);
-extern inline void iitr_to_prev         (iobject* iitr);
-extern inline void iitr_to_next         (iobject* iitr);
-extern inline void iitr_advance         (iobject* iitr, int length);
-extern inline int  iitr_distance        (iobject* ifrom, iobject* ito);
+extern inline void iitr_destroy        (iobject* iitr);
+extern inline bool iitr_equals         (iobject* ia, iobject* ib);
+extern inline void* iitr_get_ref       (iobject* iitr);
+extern inline void iitr_set_ref        (iobject* iitr, void* ref);
+extern inline void iitr_to_prev        (iobject* iitr);
+extern inline void iitr_to_next        (iobject* iitr);
+extern inline void iitr_advance        (iobject* iitr, int length);
+extern inline int  iitr_distance       (iobject* ifrom, iobject* ito);
 
 /* below is only useful for the container implementer */
 /* the virtual functions that each container should implement */
-typedef void     (*pf_itr_destroy)     (object* citr);
-typedef bool     (*pf_itr_equals)      (object* itr_a, object* itr_b);
-typedef void*    (*pf_itr_get_ref)     (object* citr);
-typedef void     (*pf_itr_set_ref)     (object* citr, void* object);
-typedef void     (*pf_itr_to_prev)     (object* citr);
-typedef void     (*pf_itr_to_next)     (object* citr);
-typedef void*    (*pf_itr_advance)     (object* citr, int length);
-typedef int      (*pf_itr_distance)    (object* citr_from, object* citr_to);
+typedef void     (*pf_itr_destroy)     (iterator citr);
+typedef bool     (*pf_itr_equals)      (iterator itr_a, iterator itr_b);
+typedef void*    (*pf_itr_get_ref)     (iterator citr);
+typedef void     (*pf_itr_set_ref)     (iterator citr, void* object);
+typedef void     (*pf_itr_to_prev)     (iterator citr);
+typedef void     (*pf_itr_to_next)     (iterator citr);
+typedef void*    (*pf_itr_advance)     (iterator citr, int length);
+typedef int      (*pf_itr_distance)    (iterator citr_from, iterator citr_to);
 
 #define is_itrbas(itr) (__cast(itr, ITR_BAS_ID) != NULL)
 #define is_itrref(itr) (__cast(itr, ITR_REF_ID) != NULL)

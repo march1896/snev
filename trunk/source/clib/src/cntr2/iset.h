@@ -12,7 +12,7 @@ extern inline void iset_insert          (iobject* iq, void* __ref);
 /* TODO: make some documentation on this topic */
 /* currently the find will return the end iterator of the container instead of NULL */
 extern inline iterator iset_find        (iobject* iq, void* __ref);
-extern inline void iset_remove          (iobject* iq, iobject* itr);
+extern inline void iset_remove          (iobject* iq, iterator itr);
 
 /* return a iterator, maybe forward/bidirectional/random accessed. */
 extern inline iterator iset_itr_begin   (iobject* iq);
@@ -25,7 +25,7 @@ typedef void     (*pf_iset_clear)       (object* c);
 typedef int      (*pf_iset_size)        (object* c);
 typedef void     (*pf_iset_insert)      (object* c, void* __ref);
 typedef iterator (*pf_iset_find)        (object* c, void* __ref);
-typedef void*    (*pf_iset_remove)      (object* c, iobject* itr);
+typedef void*    (*pf_iset_remove)      (object* c, iterator itr);
 typedef iterator (*pf_iset_itr_begin)   (object* c);
 typedef iterator (*pf_iset_itr_end)     (object* c);
 
