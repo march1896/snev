@@ -15,7 +15,7 @@ typedef void* (*pf_copy   )(void* buff);
  */
 
 /* compare two object that holds in the container, useful when the container holds object in some order */
-typedef bool  (*pf_compare)(void* ref_a, void* ref_b);
+typedef bool  (*pf_compare)(const void* ref_a, const void* ref_b);
 
 /* give the container right to dispose the object it holds, set this function only if you want to 
  * transfer the object lifetime management to the container */
