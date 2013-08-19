@@ -8,7 +8,7 @@ inline void itr_destroy(iterator itr) {
 	((struct itr_base_vtable*)(intf->__vtable))->__destroy(itr);
 }
 
-inline bool itr_equals(iterator ia, iterator ib) {
+inline bool itr_equals(const iterator ia, const iterator ib) {
 	iobject* intf = __fast_cast(ia, 0);
 	dbg_assert(__cast(ia, ITR_BAS_ID) == __fast_cast(ia, 0));
 	dbg_assert(__cast(ib, ITR_BAS_ID) == __fast_cast(ib, 0));
@@ -16,14 +16,14 @@ inline bool itr_equals(iterator ia, iterator ib) {
 	return ((struct itr_base_vtable*)(intf->__vtable))->__equals(ia, ib);
 }
 
-inline void* itr_get_ref(iterator itr) {
+inline const void* itr_get_ref(const iterator itr) {
 	iobject* intf = __fast_cast(itr, 0);
 	dbg_assert(intf == __cast(itr, ITR_REF_ID));
 
 	return ((struct itr_readable_vtable*)(intf->__vtable))->__get_ref(itr);
 }
 
-inline void itr_set_ref(iterator itr, void* __ref) {
+inline void itr_set_ref(iterator itr, const void* __ref) {
 	iobject* intf = __fast_cast(itr, 0);
 	dbg_assert(intf == __cast(itr, ITR_ACC_ID));
 
@@ -51,7 +51,7 @@ inline void itr_advance(iterator itr, int length) {
 	((struct itr_randomaccessible_vtable*)(intf->__vtable))->__advance(itr, length);
 }
 
-inline int  itr_distance(iterator from, iterator to) {
+inline int  itr_distance(const iterator from, const iterator to) {
 	iobject* intf = __fast_cast(from, 0);
 	dbg_assert(intf == __cast(from, ITR_RAC_ID));
 
@@ -60,10 +60,10 @@ inline int  itr_distance(iterator from, iterator to) {
 
 /* TODO: not implemented yet */
 inline void iitr_destroy(iobject* iitr);
-inline bool iitr_equals(iobject* ia, iobject* ib);
+inline bool iitr_equals(const iobject* ia, const iobject* ib);
 inline void iitr_to_prev(iobject* iitr);
 inline void iitr_to_next(iobject* iitr);
-inline void* iitr_get_ref(iobject* iitr);
-inline void iitr_set_ref(iobject* iitr, void* __ref);
+inline const void* iitr_get_ref(const iobject* iitr);
+inline void iitr_set_ref(iobject* iitr, const void* __ref);
 inline void iitr_advance(iobject* iitr, int length);
-inline int  iitr_distance(iobject* ifrom, iobject* ito);
+inline int  iitr_distance(const iobject* ifrom, const iobject* ito);

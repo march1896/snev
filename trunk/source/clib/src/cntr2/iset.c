@@ -41,15 +41,26 @@ inline void iset_remove(iobject* iq, iterator itr) {
 
 	((struct iset_vtable*)(iq->__vtable))->__remove(o, itr);
 }
+inline iterator iset_itr_create(iobject* iq, itr_pos pos) {
+	object* o = __object_from_interface(iq);
+	dbg_assert(__cast(o, ISET_ID) == iq);
 
-inline object* iset_itr_begin(iobject* iq) {
+	return ((struct iset_vtable*)iq->__vtable)->__itr_create(o, pos);
+}
+inline void iset_itr_assign(iobject* iq, iterator itr, itr_pos pos) {
+	object* o = __object_from_interface(iq);
+	dbg_assert(__cast(o, ISET_ID) == iq);
+
+	((struct iset_vtable*)iq->__vtable)->__itr_assign(o, itr, pos);
+}
+inline const iterator iset_itr_begin(iobject* iq) {
 	object* o = __object_from_interface(iq);
 	dbg_assert(__cast(o, ISET_ID) == iq);
 
 	return ((struct iset_vtable*)(iq->__vtable))->__itr_begin(o);
 }
 
-inline object* iset_itr_end(iobject* iq) {
+inline const iterator iset_itr_end(iobject* iq) {
 	object* o = __object_from_interface(iq);
 	dbg_assert(__cast(o, ISET_ID) == iq);
 

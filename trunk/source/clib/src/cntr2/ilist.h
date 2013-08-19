@@ -17,26 +17,26 @@ extern inline void ilist_insert_before   (iobject* ilist, iterator itr, void* n_
 extern inline void ilist_insert_after    (iobject* ilist, iterator itr, void* n_ref);
 extern inline bool ilist_contains        (iobject* ilist, void* __ref);
 
-/* return a iterator, maybe forward/bidirectional/random accessed. */
-extern inline iterator ilist_itr_begin   (iobject* ilist);
-extern inline iterator ilist_itr_end     (iobject* ilist);
+extern inline iterator ilist_itr_create  (iobject* ilist, itr_pos pos);
+extern inline void     ilist_itr_assign  (iobject* ilist, iterator itr, itr_pos pos);
+extern inline iterator ilist_itr_find    (iobject* ilist, void* __ref);
 
-/* 
- * TODO: if the target is not in the list, should we return NULL or
- * the sentinel end of the container? 
- * in the algorithm find(iterator begin, iterator end, void* ref)
- * it makes more sense to return an iterator equals end.
- * but here if we return the end, in the following program, we may 
- * further more 
- * 1,acquire the end, 
- * 2,do the comparison, 
- * 3,then delete two iterators.
- * instead, if we return NULL, we should always write like,
- *   itr = as_ifitr(ilist_itr_find(list, obj));
- *   ...
- *   if (itr != NULL) ifitr_destroy(itr); // which is error prone.
- */
-extern inline iterator ilist_itr_find     (iobject* ilist, void* __ref);
+/* return the begin iterator of the container, this iterator is constant, 
+ * you could only use it for comparison, dereferencing.
+ * you can not move it or set reference on it. */
+extern inline const iterator ilist_itr_begin(iobject* ilist);
+extern inline const iterator ilist_itr_end  (iobject* ilist);
+
+/*
+{
+	iterator itr = ilist_itr_create(list, itr_begin);
+	const iterator end = ilist_itr_end(ilist);
+	for (; !itr_equals(itr, end); itr_to_next(itr)) {
+		// do something on itr
+	}
+	itr_destroy(itr);
+}
+*/
 
 /* below is only useful for the container implementer */
 /* the virtual functions that each container should implement */
@@ -49,12 +49,23 @@ typedef void*    (*pf_ilist_remove_front) (object* olist);
 typedef void*    (*pf_ilist_remove_back)  (object* olist);
 typedef bool     (*pf_ilist_contains)     (object* olist, void* __ref);
 
-typedef iterator (*pf_ilist_itr_begin)    (object* olist);
-typedef iterator (*pf_ilist_itr_end)      (object* olist);
-typedef iterator (*pf_ilist_itr_find)     (object* olist, void* __ref);
+typedef const iterator (*pf_ilist_itr_begin) (object* olist);
+typedef const iterator (*pf_ilist_itr_end)   (object* olist);
+
+typedef       iterator (*pf_ilist_itr_find)  (object* olist, void* __ref);
+typedef       iterator (*pf_ilist_itr_create)(object* ilist, itr_pos pos);
+typedef       void     (*pf_ilist_itr_assign)(object* ilist, iterator itr, itr_pos pos);
+
+/* return the begin iterator of the container, this iterator is constant, 
+ * you could only use it for comparison, dereferencing.
+ * you can not move it or set reference on it. */
+extern inline const iterator ilist_itr_begin(iobject* ilist);
+extern inline const iterator ilist_itr_end  (iobject* ilist);
+
 typedef void*    (*pf_ilist_remove)       (object* olist, iterator itr);
 typedef void     (*pf_ilist_insert_before)(object* olist, iterator itr, void* n_ref);
 typedef void     (*pf_ilist_insert_after) (object* olist, iterator itr, void* n_ref);
+
 
 struct ilist_vtable {
 	/* public */
@@ -66,9 +77,13 @@ struct ilist_vtable {
 	pf_ilist_remove_front   __remove_front;
 	pf_ilist_remove_back    __remove_back;
 	pf_ilist_contains       __contains;
+
 	pf_ilist_itr_begin      __itr_begin;
 	pf_ilist_itr_end        __itr_end;
 	pf_ilist_itr_find       __itr_find;
+	pf_ilist_itr_create     __itr_create;
+	pf_ilist_itr_assign     __itr_assign;
+
 	pf_ilist_remove         __remove;
 	pf_ilist_insert_before  __insert_before;
 	pf_ilist_insert_after   __insert_after;

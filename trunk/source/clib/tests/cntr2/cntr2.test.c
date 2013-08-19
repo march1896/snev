@@ -24,7 +24,7 @@ void icntr_print(iobject* icntr) {
 	log_printtab();
 
 	while (!itr_equals(begin, end)) {
-		__ref_print(itr_get_ref(begin));
+		__ref_print((void*)itr_get_ref(begin));
 		itr_to_next(begin);
 	}
 	foreach(begin, end, __ref_print);
@@ -68,6 +68,8 @@ static void list_test_base(iobject* list) {
 		itr_destroy(begin);
 		itr_destroy(end);
 	}
+
+	/* now delete the even ones */
 
 	ilist_clear(list);
 	dbg_assert(ilist_size(list) == 0);
