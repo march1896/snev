@@ -16,7 +16,22 @@ enum llrb_interfaces {
 struct o_llrb_node {
 	struct llrb_link              link;
 
-	void*                         reference;
+	const void*                   reference;
+};
+
+
+struct o_llrb_itr {
+	address                       __offset;
+	pf_cast                       __cast;
+
+	/* there is always one interface to implement, since the interface is inherited */
+	struct base_interface         __iftable[1];
+
+	/* the iterator will never alloc memory, when acquire an iterator, the container will 
+	 * alloc the memory, but we should know how to delete this memory */
+	allocator                     __allocator;
+
+	struct llrb_link*             __current;
 };
 
 /* binary search tree */
@@ -38,7 +53,10 @@ struct o_llrb {
 	allocator                     __allocator;
 
 	/* methods to manage the object's lifetime which is stored in the container */
-	pf_dispose                    __dispose;
+	pf_dispose                    __dispose;         
+
+	struct o_llrb_itr             __itr_begin;
+	struct o_llrb_itr             __itr_end;
 };
 
 static object*  o_llrb_create          (pf_compare ref_comp);
@@ -52,8 +70,8 @@ static void*    o_llrb_remove          (object* o, iterator itr);
 
 static iterator o_llrb_itr_create      (object* o, itr_pos pos);
 static void     o_llrb_itr_assign      (object* o, iterator itr, itr_pos pos);
-static object*  o_llrb_itr_begin       (object* o);
-static object*  o_llrb_itr_end         (object* o);
+static const iterator o_llrb_itr_begin (object* o);
+static const iterator o_llrb_itr_end   (object* o);
 
 /* factory method, the only public function in this file */
 object* create_llrb_container(pf_compare ref_compare) {
@@ -77,28 +95,13 @@ static struct iset_vtable __iset_vtable = {
 	o_llrb_itr_end           /* __itr_end */
 };
 
-struct o_llrb_itr {
-	address                       __offset;
-	pf_cast                       __cast;
-
-	/* there is always one interface to implement, since the interface is inherited */
-	struct base_interface         __iftable[1];
-
-	/* the iterator will never alloc memory, when acquire an iterator, the container will 
-	 * alloc the memory, but we should know how to delete this memory */
-	allocator                     __allocator;
-
-	struct llrb_link*             __current;
-};
-
-
 static unknown o_llrb_itr_cast(unknown x, unique_id inf_id);
 static unknown o_llrb_cast(unknown x, unique_id intf_id);
 
 static void o_llrb_itr_destroy(object* citr);
-static bool o_llrb_itr_equals(object* a, object* b);
-static void* o_llrb_itr_get_ref(object* citr);
-static void o_llrb_itr_set_ref(object* citr, void* n_ref);
+static bool o_llrb_itr_equals(const iterator a, const iterator b);
+static const void* o_llrb_itr_get_ref(const iterator citr);
+static void o_llrb_itr_set_ref(iterator citr, const void* n_ref);
 static void o_llrb_itr_to_next(object* citr);
 static void o_llrb_itr_to_prev(object* citr);
 
@@ -122,9 +125,9 @@ static void o_llrb_itr_destroy(object* citr) {
 	allocator_dealloc(itr->__allocator, itr);
 }
 
-static bool o_llrb_itr_equals(object* a, object* b) {
-	struct o_llrb_itr* itr_a = (struct o_llrb_itr*)a;
-	struct o_llrb_itr* itr_b = (struct o_llrb_itr*)b;
+static bool o_llrb_itr_equals(const iterator a, const iterator b) {
+	const struct o_llrb_itr* itr_a = (const struct o_llrb_itr*)a;
+	const struct o_llrb_itr* itr_b = (const struct o_llrb_itr*)b;
 
 	dbg_assert(__is_object(a));
 	dbg_assert(__is_object(b));
@@ -134,18 +137,18 @@ static bool o_llrb_itr_equals(object* a, object* b) {
 	return itr_a->__current == itr_b->__current;
 }
 
-static void* o_llrb_itr_get_ref(object* citr) {
-	struct o_llrb_itr* itr   = (struct o_llrb_itr*)citr;
-	struct o_llrb_node* node = NULL;
+static const void* o_llrb_itr_get_ref(const iterator citr) {
+	const struct o_llrb_itr* itr   = (const struct o_llrb_itr*)citr;
+	const struct o_llrb_node* node = NULL;
 
 	dbg_assert(itr->__cast == o_llrb_itr_cast);
 	dbg_assert(itr->__current != NULL);
 
-	node = (struct o_llrb_node*)container_of(itr->__current, struct o_llrb_node, link);
+	node = (const struct o_llrb_node*)container_of(itr->__current, struct o_llrb_node, link);
 	return node->reference;
 }
 
-static void o_llrb_itr_set_ref(object* citr, void* n_ref) {
+static void o_llrb_itr_set_ref(iterator citr, const void* n_ref) {
 	struct o_llrb_itr* itr   = (struct o_llrb_itr*)citr;
 	struct o_llrb_node* node = NULL;
 
@@ -223,6 +226,7 @@ static object* o_llrb_create(pf_compare ref_compare) {
 	return o_llrb_create_v(ref_compare, global_llrb_allocator, NULL);
 }
 
+static void o_llrb_itr_com_init(struct o_llrb_itr* itr, struct o_llrb* list);
 static object* o_llrb_create_v(pf_compare ref_compare, allocator alc, pf_dispose dispose) {
 	struct o_llrb* ollrb = NULL;
 
@@ -248,6 +252,10 @@ static object* o_llrb_create_v(pf_compare ref_compare, allocator alc, pf_dispose
 
 	ollrb->__dispose   = dispose;
 
+	/* initialize begin/end iterators, the position is reassigned when each query */
+	o_llrb_itr_com_init(&ollrb->__itr_begin, ollrb);
+	o_llrb_itr_com_init(&ollrb->__itr_end, ollrb);
+
 	return (object*)ollrb;
 }
 
@@ -257,7 +265,7 @@ static void per_link_dispose(struct llrb_link* link, void* param) {
 
 	/* first dispose the reference */
 	if (ollrb->__dispose) {
-		ollrb->__dispose(node->reference);
+		ollrb->__dispose((void*)node->reference);
 	}
 	
 	/* delete the node it self */
@@ -317,29 +325,53 @@ static void o_llrb_itr_com_init(struct o_llrb_itr* itr, struct o_llrb* list) {
 	/* itr->__current = NULL; */
 }
 
-static object* o_llrb_itr_begin(object* o) {
+static const iterator o_llrb_itr_begin(object* o) {
+	struct o_llrb* ollrb = (struct o_llrb*)o;
+
+	ollrb->__itr_begin.__current = llrb_min(ollrb->__root);
+
+	return (const iterator)&ollrb->__itr_begin;
+}
+
+static const iterator o_llrb_itr_end(object* o) {
+	struct o_llrb* ollrb = (struct o_llrb*)o;
+
+	ollrb->__itr_end.__current = &ollrb->__sentinel;
+
+	return (const iterator)&ollrb->__itr_end;
+}
+
+static iterator o_llrb_itr_create(object* o, itr_pos pos) {
 	struct o_llrb* ollrb = (struct o_llrb*)o;
 	struct o_llrb_itr* n_itr = (struct o_llrb_itr*)
 		allocator_alloc(ollrb->__allocator, sizeof(struct o_llrb_itr));
 
 	o_llrb_itr_com_init(n_itr, ollrb);
 
-	n_itr->__current = llrb_min(ollrb->__root);
-
+	if (pos == itr_begin) {
+		n_itr->__current = llrb_min(ollrb->__root);
+	}
+	else {
+		/* __sentinel will be the maximum element in the tree */
+		n_itr->__current = &ollrb->__sentinel;
+	}
+	
 	return (object*)n_itr;
 }
 
-static object* o_llrb_itr_end(object* o) {
+static void o_llrb_itr_assign(object* o, iterator itr, itr_pos pos) {
 	struct o_llrb* ollrb = (struct o_llrb*)o;
-	struct o_llrb_itr* n_itr = (struct o_llrb_itr*)
-		allocator_alloc(ollrb->__allocator, sizeof(struct o_llrb_itr));
+	struct o_llrb_itr* n_itr = (struct o_llrb_itr*)itr;
 
 	o_llrb_itr_com_init(n_itr, ollrb);
 
-	/* __sentinel will be the maximum element in the tree */
-	n_itr->__current = &ollrb->__sentinel;
-
-	return (object*)n_itr;
+	if (pos == itr_begin) {
+		n_itr->__current = llrb_min(ollrb->__root);
+	}
+	else {
+		/* __sentinel will be the maximum element in the tree */
+		n_itr->__current = &ollrb->__sentinel;
+	}
 }
 
 static int o_llrb_direct(const struct llrb_link* link, void* ref) {
@@ -391,7 +423,7 @@ static void* o_llrb_remove(object* o, iterator itr) {
 	struct o_llrb* ollrb     = (struct o_llrb*)o;
 	struct o_llrb_itr* oitr  = (struct o_llrb_itr*)itr;
 	struct o_llrb_node* node = (struct o_llrb_node*)container_of(oitr->__current, struct o_llrb_node, link);
-	void* obj_ref             = node->reference;
+	const void* obj_ref      = node->reference;
 
 	dbg_assert(oitr->__cast == o_llrb_itr_cast);
 	dbg_assert(oitr->__current != NULL);
@@ -404,6 +436,6 @@ static void* o_llrb_remove(object* o, iterator itr) {
 
 	ollrb->__size --;
 
-	return obj_ref;
+	return (void*)obj_ref;
 }
 
