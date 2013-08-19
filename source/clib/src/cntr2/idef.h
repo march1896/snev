@@ -39,4 +39,10 @@ typedef object* itrfwd;
 typedef object* itrbid;
 typedef object* itrrac;
 
+typedef enum {
+	itr_begin,
+	itr_end,
+	itr_pos_count
+} itr_pos;
+
 #endif /* _INTERFACE_DEFINITIONS_H_ */

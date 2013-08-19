@@ -49,6 +49,9 @@ static int      o_llrb_size            (object* o);
 static void     o_llrb_insert          (object* o, void* __ref);
 static object*  o_llrb_itr_find        (object* o, void* __ref);
 static void*    o_llrb_remove          (object* o, iterator itr);
+
+static iterator o_llrb_itr_create      (object* o, itr_pos pos);
+static void     o_llrb_itr_assign      (object* o, iterator itr, itr_pos pos);
 static object*  o_llrb_itr_begin       (object* o);
 static object*  o_llrb_itr_end         (object* o);
 
@@ -67,6 +70,9 @@ static struct iset_vtable __iset_vtable = {
 	o_llrb_insert,           /* __insert */
 	o_llrb_itr_find,         /* __itr_find */
 	o_llrb_remove,           /* __remove */
+
+	o_llrb_itr_create,       /* __itr_create */
+	o_llrb_itr_assign,       /* __itr_assign */
 	o_llrb_itr_begin,        /* __itr_begin */
 	o_llrb_itr_end           /* __itr_end */
 };

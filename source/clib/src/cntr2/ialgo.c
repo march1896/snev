@@ -8,7 +8,8 @@ void foreach(itrfwd begin, itrfwd end, pf_ref_process cb) {
 	dbg_assert(is_itrfwd(end));
 
 	while (!itr_equals(begin, end)) {
-		cb(itr_get_ref(begin));
+		/* TODO: const cast */
+		cb((void*)itr_get_ref(begin));
 		itr_to_next(begin);
 	}
 
@@ -20,7 +21,7 @@ void foreach_v(itrfwd begin, itrfwd end, pf_ref_process_v cb, void* param) {
 	dbg_assert(is_itrfwd(end));
 
 	while (!itr_equals(begin, end)) {
-		cb(itr_get_ref(begin), param);
+		cb((void*)itr_get_ref(begin), param);
 		itr_to_next(begin);
 	}
 
@@ -37,8 +38,8 @@ void sort_r(itrrac begin, itrrac end, pf_ref_compare comp) {
 }
 
 static void itr_swap_ref(iterator itr_a, iterator itr_b) {
-	void* ref_a = itr_get_ref(itr_a);
-	void* ref_b = itr_get_ref(itr_b);
+	const void* ref_a = itr_get_ref(itr_a);
+	const void* ref_b = itr_get_ref(itr_b);
 
 	itr_set_ref(itr_a, ref_b);
 	itr_set_ref(itr_b, ref_a);

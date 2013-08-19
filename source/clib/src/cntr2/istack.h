@@ -11,9 +11,10 @@ extern inline int  istack_size            (iobject* iq);
 extern inline void istack_push            (iobject* iq, void* ref);
 extern inline void* istack_pop            (iobject* iq);
 
-/* return a iterator, maybe forward/bidirectional/random accessed. */
-extern inline object* istack_itr_begin    (iobject* iq);
-extern inline object* istack_itr_end      (iobject* iq);
+extern inline       iterator istack_itr_create  (iobject* iq, itr_pos pos);
+extern inline       void     istack_itr_assign  (iobject* iq, iterator itr, itr_pos pos);
+extern inline const iterator istack_itr_begin   (iobject* iq);
+extern inline const iterator istack_itr_end     (iobject* iq);
 
 /* below is only useful for the container implementer */
 /* the virtual functions that each container should implement */
@@ -22,8 +23,11 @@ typedef void     (*pf_istack_clear)       (object* c);
 typedef int      (*pf_istack_size)        (object* c);
 typedef void     (*pf_istack_push)        (object* c, void* object);
 typedef void*    (*pf_istack_pop)         (object* c);
-typedef object*  (*pf_istack_itr_begin)   (object* c);
-typedef object*  (*pf_istack_itr_end)     (object* c);
+
+typedef       iterator (*pf_istack_itr_create)  (object* c, itr_pos pos);
+typedef       void     (*pf_istack_itr_assign)  (object* c, iterator itr, itr_pos pos);
+typedef const iterator (*pf_istack_itr_begin)   (object* c);
+typedef const iterator (*pf_istack_itr_end)     (object* c);
 
 struct istack_vtable {
 	/* public */
@@ -32,6 +36,9 @@ struct istack_vtable {
 	pf_istack_size        __size;
 	pf_istack_push        __push;
 	pf_istack_pop         __pop;
+
+	pf_istack_itr_create  __itr_create;
+	pf_istack_itr_assign  __itr_assign;
 	pf_istack_itr_begin   __itr_begin;
 	pf_istack_itr_end     __itr_end;
 };

@@ -55,12 +55,14 @@ static void     o_dlist_add_back        (object* o, void* __ref);
 static void*    o_dlist_remove_front    (object* o);
 static void*    o_dlist_remove_back     (object* o);
 static bool     o_dlist_contains        (object* o, void* __ref);
-static object*  o_dlist_itr_find        (object* o, void* __ref);
+static iterator o_dlist_itr_find        (object* o, void* __ref);
+static iterator o_dlist_itr_create      (object* o, itr_pos pos);
+static void     o_dlist_itr_assign      (object* o, iterator itr, itr_pos pos);
 static void*    o_dlist_remove          (object* o, iterator itr);
 static void     o_dlist_insert_before   (object* o, iterator itr, void* n_ref);
 static void     o_dlist_insert_after    (object* o, iterator itr, void* n_ref);
-static object*  o_dlist_itr_begin       (object* o);
-static object*  o_dlist_itr_end         (object* o);
+static const iterator o_dlist_itr_begin (object* o);
+static const iterator o_dlist_itr_end   (object* o);
 
 /* factory method, the only public function in this file */
 object* create_dblinked_list() {
@@ -82,6 +84,8 @@ static struct ilist_vtable __ilist_vtable = {
 	o_dlist_itr_begin,        /* __itr_begin */
 	o_dlist_itr_end,          /* __itr_end */
 	o_dlist_itr_find,         /* __itr_find */
+	o_dlist_itr_create,       /* __itr_create */
+	o_dlist_itr_assign,       /* __itr_assign */
 	o_dlist_remove,           /* __remove */
 	o_dlist_insert_before,    /* __insert_before */
 	o_dlist_insert_after      /* __insert_after */
@@ -93,6 +97,8 @@ static struct iqueue_vtable __iqueue_vtable = {
 	o_dlist_size,             /* __size */
 	o_dlist_add_back,         /* __push */
 	o_dlist_remove_front,     /* __pop */
+	o_dlist_itr_create,       /* __itr_create */
+	o_dlist_itr_assign,       /* __itr_assign */
 	o_dlist_itr_begin,        /* __itr_begin */
 	o_dlist_itr_end           /* __itr_end */
 };
@@ -103,6 +109,8 @@ static struct istack_vtable __istack_vtable = {
 	o_dlist_size,             /* __size */
 	o_dlist_add_back,         /* __push */
 	o_dlist_remove_back,      /* __pop */
+	o_dlist_itr_create,       /* __itr_create */
+	o_dlist_itr_assign,       /* __itr_assign */
 	o_dlist_itr_begin,        /* __itr_begin */
 	o_dlist_itr_end           /* __itr_end */
 };
@@ -114,6 +122,8 @@ static struct iset_vtable __iset_vtable = {
 	o_dlist_add_back,         /* __insert */
 	o_dlist_itr_find,         /* __itr_find */
 	o_dlist_remove,           /* __remove */
+	o_dlist_itr_create,       /* __itr_create */
+	o_dlist_itr_assign,       /* __itr_assign */
 	o_dlist_itr_begin,        /* __itr_begin */
 	o_dlist_itr_end           /* __itr_end */
 };
@@ -137,8 +147,8 @@ static unknown o_dlist_itr_cast(unknown x, unique_id inf_id);
 static unknown o_dlist_cast(unknown x, unique_id intf_id);
 
 static void o_dlist_itr_destroy(iterator citr);
-static bool o_dlist_itr_equals(iterator a, iterator b);
-static void* o_dlist_itr_get_ref(iterator citr);
+static bool o_dlist_itr_equals(const iterator a, const iterator b);
+static const void* o_dlist_itr_get_ref(const iterator citr);
 static void o_dlist_itr_set_ref(iterator citr, void* n_ref);
 static void o_dlist_itr_to_next(iterator citr);
 static void o_dlist_itr_to_prev(iterator citr);
@@ -153,9 +163,9 @@ static void o_dlist_itr_destroy(iterator citr) {
 	allocator_dealloc(itr->__allocator, itr);
 }
 
-static bool o_dlist_itr_equals(iterator a, iterator b) {
-	struct o_dlist_itr* itr_a = (struct o_dlist_itr*)a;
-	struct o_dlist_itr* itr_b = (struct o_dlist_itr*)b;
+static bool o_dlist_itr_equals(const iterator a, const iterator b) {
+	const struct o_dlist_itr* itr_a = (const struct o_dlist_itr*)a;
+	const struct o_dlist_itr* itr_b = (const struct o_dlist_itr*)b;
 
 	dbg_assert(__is_object(a));
 	dbg_assert(__is_object(b));
@@ -165,14 +175,14 @@ static bool o_dlist_itr_equals(iterator a, iterator b) {
 	return itr_a->__current == itr_b->__current;
 }
 
-static void* o_dlist_itr_get_ref(iterator citr) {
-	struct o_dlist_itr* itr   = (struct o_dlist_itr*)citr;
-	struct o_dlist_node* node = NULL;
+static const void* o_dlist_itr_get_ref(const iterator citr) {
+	const struct o_dlist_itr* itr   = (const struct o_dlist_itr*)citr;
+	const struct o_dlist_node* node = NULL;
 
 	dbg_assert(itr->__cast == o_dlist_itr_cast);
 	dbg_assert(itr->__current != NULL);
 
-	node = (struct o_dlist_node*)container_of(itr->__current, struct o_dlist_node, link);
+	node = (const struct o_dlist_node*)container_of(itr->__current, struct o_dlist_node, link);
 	return node->reference;
 }
 
@@ -430,7 +440,7 @@ static void o_dlist_itr_com_init(struct o_dlist_itr* itr, struct o_dlist* list) 
 	/* itr->__current = NULL; */
 }
 
-static iterator o_dlist_itr_begin(object* o) {
+static const iterator o_dlist_itr_begin(object* o) {
 	struct o_dlist* olist = (struct o_dlist*)o;
 	struct o_dlist_itr* n_itr = (struct o_dlist_itr*)
 		allocator_alloc(olist->__allocator, sizeof(struct o_dlist_itr));
@@ -443,7 +453,7 @@ static iterator o_dlist_itr_begin(object* o) {
 	return (iterator)n_itr;
 }
 
-static iterator o_dlist_itr_end(object* o) {
+static const iterator o_dlist_itr_end(object* o) {
 	struct o_dlist* olist = (struct o_dlist*)o;
 	struct o_dlist_itr* n_itr = (struct o_dlist_itr*)
 		allocator_alloc(olist->__allocator, sizeof(struct o_dlist_itr));
