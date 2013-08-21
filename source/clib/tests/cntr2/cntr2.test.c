@@ -19,6 +19,7 @@ static void __ref_print(void* __ref) {
 
 void icntr_print(iobject* icntr) {
 	ilist list = as_list(icntr);
+	/* TODO: why here is no warnings */
 	iterator begin = ilist_itr_begin(list);
 	iterator end   = ilist_itr_end(list);
 	log_printtab();

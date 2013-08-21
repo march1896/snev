@@ -53,21 +53,21 @@ struct __base_vtable {
 /* 
  * get the object from a given interface
  */
-extern inline struct base_object* __object_from_interface(struct base_interface* inf);
+extern inline struct base_object* __object_from_interface(const struct base_interface* inf);
 
 /*
  * test if an unknown address is an object.
  * currently, this test is a little weak, since the only rule we base is that:
  * for any object, the first (void*) bytes saves the address itself.
  */
-extern inline bool __is_object(unknown x);
+extern inline bool __is_object(const unknown x);
 
 /*
  * test if an unknown address is an interface.
  * if unknown x is an interface, we could found the base object's address,
  * if the deduced 'object' is a real object, then this is a interface.
  */
-extern inline bool __is_interface(unknown x);
+extern inline bool __is_interface(const unknown x);
 
 /* 
  * cast everything,
@@ -75,11 +75,11 @@ extern inline bool __is_interface(unknown x);
  * from interface to interface(not common in c++), from object to object(which will return NULL since we 
  * have only one layer of inherit, that is object inherit from interfaces.
  */
-extern inline unknown __cast(unknown x, unique_id id);
+extern inline unknown __cast(const unknown x, unique_id id);
 
 /* 
  * cast a object to one of its interfaces if you know the offset of the interface in the object.
  */
-extern inline struct base_interface* __fast_cast(unknown x, int ifoffset);
+extern inline struct base_interface* __fast_cast(const unknown x, int ifoffset);
 
 #endif /* _OO_MODEL_H_ */
