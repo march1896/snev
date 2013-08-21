@@ -113,6 +113,7 @@ static void list_test_addfindremove(iobject* list, int data_size) {
 
 void list_correct(iobject* list) {
 	void* a[10];
+	iterator itr;
     int i, __ref;
 	for (i = 0; i < 10; i ++) {
 		a[i] = (void*)(intptr_t)i;
@@ -132,25 +133,21 @@ void list_correct(iobject* list) {
 	ilist_add_front(list, a[5]); /* { 5, 3, 1, 0, 2, 4 } */
 	icntr_print(list);
 
+	itr = ilist_itr_create(list, itr_begin);
 	for (i = 0; i <= 5; i ++) {
-		iterator itr = ilist_itr_find(list, a[i]);
-		iterator end = ilist_itr_end(list);
+		ilist_itr_find(list, itr, a[i]);
 
-		dbg_assert(!itr_equals(itr, end));
+		dbg_assert(!itr_equals(itr, ilist_itr_end(list)));
 		dbg_assert(itr_get_ref(itr) == a[i]);
-
-		itr_destroy(itr);
-		itr_destroy(end);
 	}
+	
+
 	for (i = 6; i < 10; i ++) {
-		iterator itr = ilist_itr_find(list, a[i]);
-		iterator end = ilist_itr_end(list);
+		ilist_itr_find(list, itr, a[i]);
 
-		dbg_assert(itr_equals(itr, end));
-
-		itr_destroy(itr);
-		itr_destroy(end);
+		dbg_assert(itr_equals(itr, ilist_itr_end(list)));
 	}
+	itr_destroy(itr);
 	
 	dbg_assert(ilist_size(list) == 6);
 
@@ -248,6 +245,7 @@ void stack_correct(istack stack) {
 
 void set_correct(iset set) {
     void* a[10];
+	iterator itr;
 	int i;
 	for (i = 0; i < 10; i ++) {
 		a[i] = (void*)(intptr_t)i;
@@ -261,19 +259,17 @@ void set_correct(iset set) {
 
 	dbg_assert(iset_size(set) == 5);
 
+	itr = iset_itr_create(set, itr_begin);
 	for (i = 0; i < 10; i ++) {
-		iterator itr = iset_find(set, a[i]);
-		iterator end = iset_itr_end(set);
+		iset_itr_find(set, itr, a[i]);
 
 		if (i % 2 == 0) {
-			dbg_assert(!itr_equals(itr, end));
+			dbg_assert(!itr_equals(itr, iset_itr_end(set)));
 			dbg_assert(itr_get_ref(itr) == a[i]);
 		}
 		else {
-			dbg_assert(itr_equals(itr, end));
+			dbg_assert(itr_equals(itr, iset_itr_end(set)));
 		}
-
-		itr_destroy(itr);
-		itr_destroy(end);
 	}
+	itr_destroy(itr);
 }

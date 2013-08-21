@@ -55,13 +55,13 @@ inline void ilist_itr_assign(iobject* iq, iterator itr, itr_pos pos) {
 
 	((struct ilist_vtable*)iq->__vtable)->__itr_assign(o, itr, pos);
 }
-inline iterator ilist_itr_find(iobject* iq, void* ref) {
+inline void ilist_itr_find(iobject* iq, iterator itr, void* ref) {
 	object* o = __object_from_interface(iq);
 	dbg_assert(__cast(o, ILIST_ID) == iq);
 
-	return ((struct ilist_vtable*)iq->__vtable)->__itr_find(o, ref);
+	((struct ilist_vtable*)iq->__vtable)->__itr_find(o, itr, ref);
 }
-inline void* ilist_remove(iobject* iq, iterator itr) {
+inline void* ilist_itr_remove(iobject* iq, iterator itr) {
 	object* o = __object_from_interface(iq);
 	dbg_assert(__cast(o, ILIST_ID) == iq);
 

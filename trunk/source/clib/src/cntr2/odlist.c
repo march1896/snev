@@ -72,7 +72,7 @@ static void     o_dlist_add_back        (object* o, void* __ref);
 static void*    o_dlist_remove_front    (object* o);
 static void*    o_dlist_remove_back     (object* o);
 static bool     o_dlist_contains        (object* o, void* __ref);
-static iterator o_dlist_itr_find        (object* o, void* __ref);
+static void     o_dlist_itr_find        (object* o, iterator itr, void* __ref);
 static iterator o_dlist_itr_create      (object* o, itr_pos pos);
 static void     o_dlist_itr_assign      (object* o, iterator itr, itr_pos pos);
 static void*    o_dlist_remove          (object* o, iterator itr);
@@ -100,9 +100,9 @@ static struct ilist_vtable __ilist_vtable = {
 	o_dlist_contains,         /* __contains */
 	o_dlist_itr_begin,        /* __itr_begin */
 	o_dlist_itr_end,          /* __itr_end */
-	o_dlist_itr_find,         /* __itr_find */
 	o_dlist_itr_create,       /* __itr_create */
 	o_dlist_itr_assign,       /* __itr_assign */
+	o_dlist_itr_find,         /* __itr_find */
 	o_dlist_remove,           /* __remove */
 	o_dlist_insert_before,    /* __insert_before */
 	o_dlist_insert_after      /* __insert_after */
@@ -509,12 +509,15 @@ static void o_dlist_itr_assign(object* o, iterator __itr, itr_pos pos) {
 	return;
 }
 
-static iterator o_dlist_itr_find(object* o, void* __ref) {
+static void o_dlist_itr_find(object* o, iterator itr, void* __ref) {
 	struct o_dlist* olist     = (struct o_dlist*)o;
-	struct o_dlist_itr* n_itr = (struct o_dlist_itr*)
-		allocator_alloc(olist->__allocator, sizeof(struct o_dlist_itr));
+	struct o_dlist_itr* oitr = (struct o_dlist_itr*)itr;
 	struct list_link* link    = olist->__sentinel.next;
 	struct o_dlist_node* node = NULL;
+
+	/* make sure the type information is right */
+	dbg_assert(itr->__iftable[0].__offset = (address)0);
+	dbg_assert(itr->__iftable[0].__vtable = (unknown)&__itr_vtable);
 
 	while (link != &olist->__sentinel) {
 		struct o_dlist_node* temp = (struct o_dlist_node*)container_of(link, struct o_dlist_node, link);
@@ -527,16 +530,12 @@ static iterator o_dlist_itr_find(object* o, void* __ref) {
 		link = link->next;
 	}
 
-	o_dlist_itr_com_init(n_itr, olist);
-
 	if (node != NULL) {
-		n_itr->__current = &(node->link);
+		oitr->__current = &(node->link);
 	}
 	else {
-		n_itr->__current = &olist->__sentinel;
+		oitr->__current = &olist->__sentinel;
 	}
-
-	return (iterator)n_itr;
 }
 
 static void* o_dlist_remove(object* o, iterator itr) {
