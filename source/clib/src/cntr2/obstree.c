@@ -65,11 +65,12 @@ static void     o_llrb_destroy         (object* o);
 static void     o_llrb_clear           (object* o);
 static int      o_llrb_size            (object* o);
 static void     o_llrb_insert          (object* o, void* __ref);
-static object*  o_llrb_itr_find        (object* o, void* __ref);
 static void*    o_llrb_remove          (object* o, iterator itr);
 
 static iterator o_llrb_itr_create      (object* o, itr_pos pos);
 static void     o_llrb_itr_assign      (object* o, iterator itr, itr_pos pos);
+static void     o_llrb_itr_find        (object* o, iterator itr, void* __ref);
+
 static const iterator o_llrb_itr_begin (object* o);
 static const iterator o_llrb_itr_end   (object* o);
 
@@ -385,24 +386,21 @@ static int o_llrb_direct(const struct llrb_link* link, void* ref) {
 		return -1;
 }
 
-static object* o_llrb_itr_find(object* o, void* ref) {
+static void o_llrb_itr_find(object* o, iterator itr, void* ref) {
 	struct o_llrb* ollrb     = (struct o_llrb*)o;
-
-	struct o_llrb_itr* n_itr = (struct o_llrb_itr*)
-		allocator_alloc(ollrb->__allocator, sizeof(struct o_llrb_itr));
-
+	struct o_llrb_itr* oitr = (struct o_llrb_itr*)itr;
 	struct llrb_link* link    = llrb_search(ollrb->__sentinel.left, o_llrb_direct, ref);
 
-	o_llrb_itr_com_init(n_itr, ollrb);
+	/* make sure the iterator type is right */
+	dbg_assert(itr->__iftable[0].__offset == (address)0);
+	dbg_assert(itr->__iftable[0].__vtable == (unknown)&__itr_vtable);
 
 	if (link != NULL) {
-		n_itr->__current = link;
+		oitr->__current = link;
 	}
 	else {
-		n_itr->__current = &ollrb->__sentinel;
+		oitr->__current = &ollrb->__sentinel;
 	}
-
-	return (object*)n_itr;
 }
 
 static void o_llrb_insert (object* o, void* __ref) {

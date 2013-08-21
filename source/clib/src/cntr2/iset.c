@@ -28,18 +28,18 @@ inline void iset_insert(iobject* iq, void* ref) {
 	((struct iset_vtable*)(iq->__vtable))->__insert(o, ref);
 }
 
-inline object* iset_find(iobject* iq, void* ref) {
+inline void iset_itr_find(iobject* iq, iterator itr, void* ref) {
 	object* o = __object_from_interface(iq);
 	dbg_assert(__cast(o, ISET_ID) == iq);
 
-	return ((struct iset_vtable*)(iq->__vtable))->__find(o, ref);
+	((struct iset_vtable*)(iq->__vtable))->__find(o, itr, ref);
 }
 
-inline void iset_remove(iobject* iq, iterator itr) {
+inline void* iset_itr_remove(iobject* iq, iterator itr) {
 	object* o = __object_from_interface(iq);
 	dbg_assert(__cast(o, ISET_ID) == iq);
 
-	((struct iset_vtable*)(iq->__vtable))->__remove(o, itr);
+	return ((struct iset_vtable*)(iq->__vtable))->__remove(o, itr);
 }
 inline iterator iset_itr_create(iobject* iq, itr_pos pos) {
 	object* o = __object_from_interface(iq);
