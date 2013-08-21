@@ -63,16 +63,18 @@ static object*  o_llrb_create          (pf_compare ref_comp);
 static object*  o_llrb_create_v        (pf_compare ref_comp, allocator alc, pf_dispose dispose);
 static void     o_llrb_destroy         (object* o);
 static void     o_llrb_clear           (object* o);
-static int      o_llrb_size            (object* o);
+static int      o_llrb_size            (const object* o);
 static void     o_llrb_insert          (object* o, void* __ref);
-static void*    o_llrb_remove          (object* o, iterator itr);
+static bool     o_llrb_contains        (const object* o, void* __ref);
+static bool     o_llrb_remove          (object* o, void* __ref);
 
-static iterator o_llrb_itr_create      (object* o, itr_pos pos);
-static void     o_llrb_itr_assign      (object* o, iterator itr, itr_pos pos);
-static void     o_llrb_itr_find        (object* o, iterator itr, void* __ref);
+static iterator o_llrb_itr_create      (const object* o, itr_pos pos);
+static void     o_llrb_itr_assign      (const object* o, iterator itr, itr_pos pos);
+static void     o_llrb_itr_find        (const object* o, iterator itr, void* __ref);
+static void*    o_llrb_itr_remove      (object* o, iterator itr);
 
-static const iterator o_llrb_itr_begin (object* o);
-static const iterator o_llrb_itr_end   (object* o);
+static const iterator o_llrb_itr_begin (const object* o);
+static const iterator o_llrb_itr_end   (const object* o);
 
 /* factory method, the only public function in this file */
 object* create_llrb_container(pf_compare ref_compare) {
@@ -87,11 +89,13 @@ static struct iset_vtable __iset_vtable = {
 	o_llrb_clear,            /* __clear */
 	o_llrb_size,             /* __size */
 	o_llrb_insert,           /* __insert */
-	o_llrb_itr_find,         /* __itr_find */
+	o_llrb_contains,         /* __contains */
 	o_llrb_remove,           /* __remove */
 
 	o_llrb_itr_create,       /* __itr_create */
 	o_llrb_itr_assign,       /* __itr_assign */
+	o_llrb_itr_find,         /* __itr_find */
+	o_llrb_itr_remove,       /* __itr_remove */
 	o_llrb_itr_begin,        /* __itr_begin */
 	o_llrb_itr_end           /* __itr_end */
 };
@@ -130,8 +134,8 @@ static bool o_llrb_itr_equals(const iterator a, const iterator b) {
 	const struct o_llrb_itr* itr_a = (const struct o_llrb_itr*)a;
 	const struct o_llrb_itr* itr_b = (const struct o_llrb_itr*)b;
 
-	dbg_assert(__is_object(a));
-	dbg_assert(__is_object(b));
+	dbg_assert(__is_object((unknown)a));
+	dbg_assert(__is_object((unknown)b));
 	dbg_assert(itr_a->__cast == o_llrb_itr_cast);
 	dbg_assert(itr_b->__cast == o_llrb_itr_cast);
 
@@ -308,7 +312,7 @@ static void o_llrb_clear(object* o) {
 	ollrb->__size = 0;
 }
 
-static int o_llrb_size(object* o) {
+static int o_llrb_size(const object* o) {
 	struct o_llrb* ollrb = (struct o_llrb*)o;
 
 	return ollrb->__size;
@@ -326,23 +330,23 @@ static void o_llrb_itr_com_init(struct o_llrb_itr* itr, struct o_llrb* list) {
 	/* itr->__current = NULL; */
 }
 
-static const iterator o_llrb_itr_begin(object* o) {
+static const iterator o_llrb_itr_begin(const object* o) {
 	struct o_llrb* ollrb = (struct o_llrb*)o;
 
 	ollrb->__itr_begin.__current = llrb_min(ollrb->__root);
 
-	return (const iterator)&ollrb->__itr_begin;
+	return (iterator)&ollrb->__itr_begin;
 }
 
-static const iterator o_llrb_itr_end(object* o) {
+static const iterator o_llrb_itr_end(const object* o) {
 	struct o_llrb* ollrb = (struct o_llrb*)o;
 
 	ollrb->__itr_end.__current = &ollrb->__sentinel;
 
-	return (const iterator)&ollrb->__itr_end;
+	return (iterator)&ollrb->__itr_end;
 }
 
-static iterator o_llrb_itr_create(object* o, itr_pos pos) {
+static iterator o_llrb_itr_create(const object* o, itr_pos pos) {
 	struct o_llrb* ollrb = (struct o_llrb*)o;
 	struct o_llrb_itr* n_itr = (struct o_llrb_itr*)
 		allocator_alloc(ollrb->__allocator, sizeof(struct o_llrb_itr));
@@ -360,7 +364,7 @@ static iterator o_llrb_itr_create(object* o, itr_pos pos) {
 	return (object*)n_itr;
 }
 
-static void o_llrb_itr_assign(object* o, iterator itr, itr_pos pos) {
+static void o_llrb_itr_assign(const object* o, iterator itr, itr_pos pos) {
 	struct o_llrb* ollrb = (struct o_llrb*)o;
 	struct o_llrb_itr* n_itr = (struct o_llrb_itr*)itr;
 
@@ -386,10 +390,10 @@ static int o_llrb_direct(const struct llrb_link* link, void* ref) {
 		return -1;
 }
 
-static void o_llrb_itr_find(object* o, iterator itr, void* ref) {
+static void o_llrb_itr_find(const object* o, iterator itr, void* __ref) {
 	struct o_llrb* ollrb     = (struct o_llrb*)o;
-	struct o_llrb_itr* oitr = (struct o_llrb_itr*)itr;
-	struct llrb_link* link    = llrb_search(ollrb->__sentinel.left, o_llrb_direct, ref);
+	struct o_llrb_itr* oitr  = (struct o_llrb_itr*)itr;
+	struct llrb_link* link   = llrb_search(ollrb->__sentinel.left, o_llrb_direct, __ref);
 
 	/* make sure the iterator type is right */
 	dbg_assert(itr->__iftable[0].__offset == (address)0);
@@ -417,7 +421,38 @@ static void o_llrb_insert (object* o, void* __ref) {
 	return;
 }
 
-static void* o_llrb_remove(object* o, iterator itr) {
+static bool o_llrb_contains(const object* o, void* __ref) {
+	struct o_llrb* ollrb     = (struct o_llrb*)o;
+	struct llrb_link* link    = llrb_search(ollrb->__sentinel.left, o_llrb_direct, __ref);
+
+	if (link != NULL) {
+		return true;
+	}
+	
+	return false;
+}
+
+static bool o_llrb_remove(object* o, void* __ref) {
+	struct o_llrb* ollrb     = (struct o_llrb*)o;
+	struct llrb_link* link   = llrb_search(ollrb->__sentinel.left, o_llrb_direct, __ref);
+
+	if (link != NULL) {
+		struct o_llrb_node* node = (struct o_llrb_node*)container_of(link, struct o_llrb_node, link);
+
+		ollrb->__root = llrb_remove_v(ollrb->__root, link, o_llrb_compare_v, ollrb->__ref_comp);
+		o_llrb_reassociate(ollrb);
+
+		allocator_dealloc(ollrb->__allocator, node);
+
+		ollrb->__size --;
+
+		return true;
+	}
+
+	return false;
+}
+
+static void* o_llrb_itr_remove(object* o, iterator itr) {
 	struct o_llrb* ollrb     = (struct o_llrb*)o;
 	struct o_llrb_itr* oitr  = (struct o_llrb_itr*)itr;
 	struct o_llrb_node* node = (struct o_llrb_node*)container_of(oitr->__current, struct o_llrb_node, link);

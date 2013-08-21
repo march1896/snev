@@ -30,7 +30,6 @@ typedef iobject* iset;
 
 typedef object* allocator;
 
-typedef object* container;
 typedef object* iterator;
 typedef object* itrbas;
 typedef object* itrref;

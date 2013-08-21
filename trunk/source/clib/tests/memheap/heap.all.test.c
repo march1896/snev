@@ -6,7 +6,7 @@ extern void heap_llrb_test();
 extern void heap_buddy_test();
 extern void heap_sysd_test();
 
-bool enable_heap_bench = true;
+bool enable_heap_bench = false;
 
 void heap_all_test() {
 	/* NOTE, this test is not very accurate, since I have run a lot of the this 
