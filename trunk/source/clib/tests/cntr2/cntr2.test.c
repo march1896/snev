@@ -20,19 +20,18 @@ static void __ref_print(void* __ref) {
 void icntr_print(iobject* icntr) {
 	ilist list = as_list(icntr);
 	/* TODO: why here is no warnings */
-	iterator begin = ilist_itr_begin(list);
-	iterator end   = ilist_itr_end(list);
+	iterator itr = ilist_itr_create(list, itr_begin);
+	const iterator end   = ilist_itr_end(list);
 	log_printtab();
 
-	while (!itr_equals(begin, end)) {
-		__ref_print((void*)itr_get_ref(begin));
-		itr_to_next(begin);
+	while (!itr_equals(itr, end)) {
+		__ref_print((void*)itr_get_ref(itr));
+		itr_to_next(itr);
 	}
-	foreach(begin, end, __ref_print);
+	foreach(itr, end, __ref_print);
 
 	log_printf("\n");
-	itr_destroy(begin);
-	itr_destroy(end);
+	itr_destroy(itr);
 }
 
 static void list_test_base(iobject* list) {
@@ -50,8 +49,8 @@ static void list_test_base(iobject* list) {
 	/* now the list contains { 1, 2, 3, 4, 5, 6, 7, 8 } */
 	dbg_assert(ilist_size(list) == 8);
 	{
-		iterator begin = ilist_itr_begin(list);
-		iterator end   = ilist_itr_end(list);
+		iterator itr = ilist_itr_create(list, itr_begin);
+		const iterator end   = ilist_itr_end(list);
 		int current = 1;
 
 		for (; current <= 8; current ++) {
@@ -61,13 +60,12 @@ static void list_test_base(iobject* list) {
 		dbg_assert(ilist_contains(list, (void*)(intptr_t)9) == false);
 
 		current = 1;
-		for (; !itr_equals(begin, end); itr_to_next(begin)) {
-			dbg_assert(itr_get_ref(begin) == (void*)(intptr_t)current);
+		for (; !itr_equals(itr, end); itr_to_next(itr)) {
+			dbg_assert(itr_get_ref(itr) == (void*)(intptr_t)current);
 			current ++;
 		}
 
-		itr_destroy(begin);
-		itr_destroy(end);
+		itr_destroy(itr);
 	}
 
 	/* now delete the even ones */
@@ -77,14 +75,12 @@ static void list_test_base(iobject* list) {
 
 	{
 		/* make sure there is no data stored in the list */
-		iterator begin = ilist_itr_begin(list);
-		iterator end   = ilist_itr_end(list);
+		iterator begin = ilist_itr_create(list, itr_begin);
 
 		itr_to_next(begin);
-		dbg_assert(itr_equals(begin, end));
+		dbg_assert(itr_equals(begin, ilist_itr_end(list)));
 
 		itr_destroy(begin);
-		itr_destroy(end);
 	}
 }
 
@@ -158,7 +154,8 @@ void list_correct(iobject* list) {
  	dbg_assert(__ref == 2);
 
 	icntr_print(list);
-
+	
+	ilist_clear(list);
 }
 
 void queue_correct(iqueue queue) {
@@ -201,6 +198,8 @@ void queue_correct(iqueue queue) {
 	dbg_assert(__ref == 4);
 
 	dbg_assert(iqueue_size(queue) == 1);
+
+	iqueue_clear(queue);
 }
 
 void stack_correct(istack stack) {
@@ -242,6 +241,8 @@ void stack_correct(istack stack) {
 	dbg_assert(__ref == 1);
 
 	dbg_assert(istack_size(stack) == 1);
+
+	istack_clear(stack);
 }
 
 void set_correct(iset set) {
@@ -273,4 +274,6 @@ void set_correct(iset set) {
 		}
 	}
 	itr_destroy(itr);
+
+	iset_clear(set);
 }

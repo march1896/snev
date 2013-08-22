@@ -549,8 +549,8 @@ static void o_dlist_itr_find(const object* o, iterator itr, void* __ref) {
 	struct o_dlist_node* node = NULL;
 
 	/* make sure the type information is right */
-	dbg_assert(itr->__iftable[0].__offset = (address)0);
-	dbg_assert(itr->__iftable[0].__vtable = (unknown)&__itr_vtable);
+	dbg_assert(itr->__iftable[0].__offset == (address)0);
+	dbg_assert(itr->__iftable[0].__vtable == (unknown)&__itr_vtable);
 
 	while (link != &olist->__sentinel) {
 		struct o_dlist_node* temp = (struct o_dlist_node*)container_of(link, struct o_dlist_node, link);
