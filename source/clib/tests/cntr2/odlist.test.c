@@ -4,13 +4,16 @@
 #include "cntr2/ilist.h"
 #include "cntr2/ifactory.h"
 
-#include <test_util.h>
-#include "cntr2.test.h"
+#include "test_util.h"
+#include "cntr2/ilist.test.h"
+
+// remove this 
+#include "cntr2/test.h"
 
 static void __correctness_test() {
 	object* dlist = create_dblinked_list();
 
-	list_correct(as_list(dlist));
+	list_test_basic(as_list(dlist));
 
 	queue_correct(as_queue(dlist));
 	stack_correct(as_stack(dlist));

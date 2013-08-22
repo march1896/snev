@@ -78,17 +78,17 @@ inline void* ilist_itr_remove(iobject* iq, iterator itr) {
 
 	return ((struct ilist_vtable*)iq->__vtable)->__itr_remove(o, itr);
 }
-inline void ilist_insert_before(iobject* iq, iterator itr, void* n_ref) {
+inline void ilist_itr_insert_before(iobject* iq, iterator itr, void* n_ref) {
 	object* o = __object_from_interface(iq);
 	dbg_assert(__cast(o, ILIST_ID) == iq);
 
-	((struct ilist_vtable*)iq->__vtable)->__insert_before(o, itr, n_ref);
+	((struct ilist_vtable*)iq->__vtable)->__itr_insert_before(o, itr, n_ref);
 }
-inline void ilist_insert_after(iobject* iq, iterator itr, void* n_ref) {
+inline void ilist_itr_insert_after(iobject* iq, iterator itr, void* n_ref) {
 	object* o = __object_from_interface(iq);
 	dbg_assert(__cast(o, ILIST_ID) == iq);
 
-	((struct ilist_vtable*)iq->__vtable)->__insert_after(o, itr, n_ref);
+	((struct ilist_vtable*)iq->__vtable)->__itr_insert_after(o, itr, n_ref);
 }
 inline const iterator ilist_itr_begin(const iobject* iq) {
 	object* o = __object_from_interface(iq);

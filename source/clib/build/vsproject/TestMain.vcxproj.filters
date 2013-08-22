@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="..\..\tests\cntr2\cntr2.odlist.test.c">
-      <Filter>Source Files\cntr2</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\tests\memheap\heap_util.test.c">
       <Filter>Source Files\memheap</Filter>
     </ClCompile>
@@ -19,9 +16,6 @@
     <ClCompile Include="..\..\tests\util\llrb_link.test.c">
       <Filter>Source Files\util</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\tests\cntr2\cntr2.oallocator.test.c">
-      <Filter>Source Files\cntr2</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\tests\cntr\cntr_test_util.c">
       <Filter>Source Files\cntr</Filter>
     </ClCompile>
@@ -30,9 +24,6 @@
     </ClCompile>
     <ClCompile Include="..\..\tests\memheap\heap.all.test.c">
       <Filter>Source Files\memheap</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\tests\cntr2\cntr2.all.test.c">
-      <Filter>Source Files\cntr2</Filter>
     </ClCompile>
     <ClCompile Include="..\..\tests\cntr\cntr_all.test.c">
       <Filter>Source Files\cntr</Filter>
@@ -52,7 +43,19 @@
     <ClCompile Include="..\..\tests\memheap\heap.buddy.test.c">
       <Filter>Source Files\memheap</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\tests\cntr2\cntr2.test.c">
+    <ClCompile Include="..\..\tests\cntr2\all.test.c">
+      <Filter>Source Files\cntr2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tests\cntr2\ilist.test.c">
+      <Filter>Source Files\cntr2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tests\cntr2\oallocator.test.c">
+      <Filter>Source Files\cntr2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tests\cntr2\odlist.test.c">
+      <Filter>Source Files\cntr2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tests\cntr2\test.c">
       <Filter>Source Files\cntr2</Filter>
     </ClCompile>
   </ItemGroup>
@@ -83,7 +86,10 @@
     <ClInclude Include="..\..\tests\test_util.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\tests\cntr2\cntr2.test.h">
+    <ClInclude Include="..\..\tests\cntr2\ilist.test.h">
+      <Filter>Source Files\cntr2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\tests\cntr2\test.h">
       <Filter>Source Files\cntr2</Filter>
     </ClInclude>
   </ItemGroup>

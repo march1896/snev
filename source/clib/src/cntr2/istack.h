@@ -5,11 +5,11 @@
 #include <oo_model.h>
 #include <idef.h>
 
-extern inline void istack_destroy         (iobject* iq);
-extern inline void istack_clear           (iobject* iq);
-extern inline int  istack_size            (const iobject* iq);
-extern inline void istack_push            (iobject* iq, void* ref);
-extern inline void* istack_pop            (iobject* iq);
+extern inline       void     istack_destroy     (iobject* iq);
+extern inline       void     istack_clear       (iobject* iq);
+extern inline       int      istack_size        (const iobject* iq);
+extern inline       void     istack_push        (iobject* iq, void* ref);
+extern inline       void*    istack_pop         (iobject* iq);
 
 extern inline       iterator istack_itr_create  (const iobject* iq, itr_pos pos);
 extern inline       void     istack_itr_assign  (const iobject* iq, iterator itr, itr_pos pos);
@@ -18,11 +18,11 @@ extern inline const iterator istack_itr_end     (const iobject* iq);
 
 /* below is only useful for the container implementer */
 /* the virtual functions that each container should implement */
-typedef void     (*pf_istack_destroy)     (object* c);
-typedef void     (*pf_istack_clear)       (object* c);
-typedef int      (*pf_istack_size)        (const object* c);
-typedef void     (*pf_istack_push)        (object* c, void* object);
-typedef void*    (*pf_istack_pop)         (object* c);
+typedef       void     (*pf_istack_destroy)     (object* c);
+typedef       void     (*pf_istack_clear)       (object* c);
+typedef       int      (*pf_istack_size)        (const object* c);
+typedef       void     (*pf_istack_push)        (object* c, void* object);
+typedef       void*    (*pf_istack_pop)         (object* c);
 
 typedef       iterator (*pf_istack_itr_create)  (const object* c, itr_pos pos);
 typedef       void     (*pf_istack_itr_assign)  (const object* c, iterator itr, itr_pos pos);
