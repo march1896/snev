@@ -31,6 +31,17 @@ typedef iobject* iset;
 typedef object* allocator;
 
 typedef object* iterator;
+/* TODO: the const problem
+ * after typedef object* iterator;
+ * const iterator is equal to 
+ * object* const but not 
+ * const object* .
+ * In fact we will never need a 
+ * object* const, since the if a iterater is 
+ * not changable, it's output iterator.
+ * A good solution is to define another const_iterator */
+typedef const object* const_iterator;
+
 typedef object* itrbas;
 typedef object* itrref;
 typedef object* itracc;
