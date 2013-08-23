@@ -1,11 +1,27 @@
 ifeq ($(platform),OSX)
-# $(CC) on OSX default points clang.
+# $(CC) on OSX default points llvm-gcc.
 cc_exe             := $(CC)
 cc_flags           := 
 cc_dependency_ctrl := -MM
 cc_preprocess_ctrl := -E
 cc_compile_ctrl    := -S
 cc_assemble_ctrl   := -c
+
+ifeq ($(opt), 0)
+	cc_compile_ctrl += -O0
+endif 
+ifeq ($(opt), 1)
+	cc_compile_ctrl += -O1
+endif 
+ifeq ($(opt), 2)
+	cc_compile_ctrl += -O2
+endif 
+ifeq ($(opt), 3)
+	cc_compile_ctrl += -O3
+endif
+ifeq ($(debug), 1)
+	cc_compile_ctrl += -g
+endif
 
 ar_exe             := $(AR)
 ar_flags           := cr
