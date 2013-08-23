@@ -1,6 +1,8 @@
 #gnumake for this project.
 
-platform := CYGWIN
+platform := OSX
+opt      := 0
+debug    := 1
 
 # TODO: we should add some debug/release related cc_flags in make_args.mak, according the below variable.
 #build_type  := debug
@@ -10,19 +12,28 @@ platform := CYGWIN
 include make_args.mak
 include make_util.mak
 
+src_root   := ../..
+build_root := ./build
+buildtype_folder := 
+ifeq ($(debug), 0)
+	buildtype_folder := release
+else
+	buildtype_folder := debug
+endif
+
 # TODO: remove so much include path.
-cc_include_dir = -I ../src/ -I ../src/cntr/ -I ../src/cntr2/ -I ../src/memheap/ -I ../src/util/
-cc_include_dir += -I ../tests/ -I ../tests/cntr/ -I ../tests/cntr2/ -I ../tests/memheap/ -I ../tests/util/
+cc_include_dir = -I $(src_root)/src/ -I $(src_root)/src/cntr/ -I $(src_root)/src/cntr2/ -I $(src_root)/src/memheap/ -I $(src_root)/src/util/
+cc_include_dir += -I $(src_root)/tests/ -I $(src_root)/tests/cntr/ -I $(src_root)/tests/cntr2/ -I $(src_root)/tests/memheap/ -I $(src_root)/tests/util/
 
-clib_src_path := ../src
-clib_obj_path := make/clib/obj
-clib_bin_path := make/clib/bin
+clib_src_path := $(src_root)/src
+clib_obj_path := $(build_root)/clib/obj/$(buildtype_folder)
+clib_bin_path := $(build_root)/clib/bin/$(buildtype_folder)
 clib_target_name := clib
-clib_target_path := $(clib_bin_path)/lib$(clib_target_name).a
+clib_target_path := $(clib_bin_path)/lib/$(clib_target_name).a
 
-test_src_path := ../tests
-test_obj_path := make/test/obj
-test_bin_path := make/test/bin
+test_src_path := $(src_root)/tests
+test_obj_path := $(build_root)/test/obj/$(buildtype_folder)
+test_bin_path := $(build_root)/test/bin/$(buildtype_folder)
 
 test_target_name := test
 test_target_path := $(test_bin_path)/$(test_target_name).out
@@ -53,3 +64,4 @@ clean:
 	@echo [cleaning] $(test_target_name)
 	@rm -fr $(test_obj_path)
 	@rm -fr $(test_bin_path)
+	@rm -fr $(out_root)
