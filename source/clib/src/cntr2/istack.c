@@ -46,14 +46,14 @@ inline void istack_itr_assign(const iobject* iq, iterator itr, itr_pos pos) {
 
 	((struct istack_vtable*)iq->__vtable)->__itr_assign(o, itr, pos);
 }
-inline const iterator istack_itr_begin(const iobject* iq) {
+inline const_iterator istack_itr_begin(const iobject* iq) {
 	object* o = __object_from_interface(iq);
 	dbg_assert(__cast(o, ISTACK_ID) == iq);
 
 	return ((struct istack_vtable*)(iq->__vtable))->__itr_begin(o);
 }
 
-inline const iterator istack_itr_end(const iobject* iq) {
+inline const_iterator istack_itr_end(const iobject* iq) {
 	object* o = __object_from_interface(iq);
 	dbg_assert(__cast(o, ISTACK_ID) == iq);
 

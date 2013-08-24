@@ -308,5 +308,8 @@
     <ClInclude Include="..\..\src\util\bst_link.h">
       <Filter>Source Files\util</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\util\math.h">
+      <Filter>Source Files\util</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

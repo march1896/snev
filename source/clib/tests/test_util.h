@@ -5,7 +5,7 @@
 
 typedef void (*pf_test_case)();
 
-void move_tab(bool inc);
+void log_inc_tab(bool forward);
 void log_printf(const char* format, ...);
 void log_printtab();
 void log_printline(const char* format, ...);

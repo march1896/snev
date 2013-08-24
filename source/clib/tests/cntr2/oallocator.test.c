@@ -1,11 +1,21 @@
-#include <stdio.h>
+//#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include <oallocator.h>
-#include <memheap/heap_walk.h>
+#include "oallocator.h"
+#include "memheap/heap_walk.h"
 
-#include <test_util.h>
+#include "test_util.h"
+
+static void allocator_heap_walk_print(struct heap_blockinfo* binfo, void* param) {
+	unused(param);
+	if (binfo->allocated) {
+		log_printtab();
+		log_printf("0X%08X", (int)(intptr_t)binfo->allocable_addr);
+		log_printf("%8d bytes", binfo->allocable_size);
+		log_printf(" at %s %d\n", binfo->file, binfo->line);
+	}
+}
 
 static void allocator_trace_test() {
 	void* addr[10];
@@ -38,7 +48,7 @@ static void allocator_trace_test() {
 			allocator_dealloc(allrb, addr[i]);
 		}
 
-		allocator_walk(allrb, heap_leak_print_to_terminal, NULL);
+		allocator_walk(allrb, allocator_heap_walk_print, NULL);
 
 		allocator_join(allrb);
 	}
@@ -83,26 +93,26 @@ void cntr2_allocator_recursive_spawn_test() {
 	/* no operations happened on uncle */
 	log_printline("before parent is joined");
 	log_printline("%s leak detect:", "grand_father");
-	allocator_walk(grand_father, heap_leak_print_to_terminal, NULL);
+	allocator_walk(grand_father, allocator_heap_walk_print, NULL);
 	log_printline("%s leak detect:", "father");
-	allocator_walk(father, heap_leak_print_to_terminal, NULL);
+	allocator_walk(father, allocator_heap_walk_print, NULL);
 	log_printline("%s leak detect:", "uncle");
-	allocator_walk(uncle, heap_leak_print_to_terminal, NULL);
+	allocator_walk(uncle, allocator_heap_walk_print, NULL);
 	log_printline("%s leak detect:", "brother");
-	allocator_walk(brother, heap_leak_print_to_terminal, NULL);
+	allocator_walk(brother, allocator_heap_walk_print, NULL);
 	log_printline("%s leak detect:", "blade");
-	allocator_walk(blade, heap_leak_print_to_terminal, NULL);
+	allocator_walk(blade, allocator_heap_walk_print, NULL);
 
 	allocator_join(father);
 	log_printline("after parent is joined");
 	log_printline("%s leak detect:", "grand_father");
-	allocator_walk(grand_father, heap_leak_print_to_terminal, NULL);
+	allocator_walk(grand_father, allocator_heap_walk_print, NULL);
 	/*
 	log_printline("%s leak detect:\n", "father");
 	allocator_walk(father, heap_leak_print_to_terminal, NULL);
 	*/
 	log_printline("%s leak detect:", "uncle");
-	allocator_walk(uncle, heap_leak_print_to_terminal, NULL);
+	allocator_walk(uncle, allocator_heap_walk_print, NULL);
 	/*
 	log_printline("%s leak detect:\n", "brother");
 	allocator_walk(brother, heap_leak_print_to_terminal, NULL);

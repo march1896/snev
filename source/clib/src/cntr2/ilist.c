@@ -90,13 +90,13 @@ inline void ilist_itr_insert_after(iobject* iq, iterator itr, void* n_ref) {
 
 	((struct ilist_vtable*)iq->__vtable)->__itr_insert_after(o, itr, n_ref);
 }
-inline const iterator ilist_itr_begin(const iobject* iq) {
+inline const_iterator ilist_itr_begin(const iobject* iq) {
 	object* o = __object_from_interface(iq);
 	dbg_assert(__cast(o, ILIST_ID) == iq);
 
 	return ((struct ilist_vtable*)iq->__vtable)->__itr_begin(o);
 }
-inline const iterator ilist_itr_end(const iobject* iq) {
+inline const_iterator ilist_itr_end(const iobject* iq) {
 	object* o = __object_from_interface(iq);
 	dbg_assert(__cast(o, ILIST_ID) == iq);
 

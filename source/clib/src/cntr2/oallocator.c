@@ -78,7 +78,7 @@ struct allocator_sysd {
 	address                       __offset;
 	pf_cast                       __cast;
 	
-	struct base_interface         __iftable[e_heap_count];
+	iobject                       __iftable[e_heap_count];
 
 	allocator                     __parent;
 	void*                         __driver;
@@ -171,7 +171,7 @@ struct allocator_llrb {
 	address                       __offset;
 	pf_cast                       __cast;
 	
-	struct base_interface         __iftable[e_heap_count];
+	iobject         __iftable[e_heap_count];
 
 	allocator                     __parent;
 	struct heap_llrb*             __driver;
@@ -299,7 +299,7 @@ struct allocator_buddy {
 	address                       __offset;
 	pf_cast                       __cast;
 	
-	struct base_interface         __iftable[e_heap_count];
+	iobject         __iftable[e_heap_count];
 
 	allocator                     __parent;
 	struct heap_buddy*            __driver;

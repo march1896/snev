@@ -1,10 +1,12 @@
-#include <iset.h>
-#include <iitr.h>
+#include <string.h>
 
-#include <ifactory.h>
-#include <oallocator.h>
+#include "cntr2/iset.h"
+#include "cntr2/iitr.h"
 
-#include <util/llrb_link.h>
+#include "cntr2/ifactory.h"
+#include "cntr2/oallocator.h"
+
+#include "util/llrb_link.h"
 
 /* this module defines a left-lean red black tree container, which implements iset interface. */
 
@@ -25,7 +27,7 @@ struct o_llrb_itr {
 	pf_cast                       __cast;
 
 	/* there is always one interface to implement, since the interface is inherited */
-	struct base_interface         __iftable[1];
+	iobject         __iftable[1];
 
 	/* the iterator will never alloc memory, when acquire an iterator, the container will 
 	 * alloc the memory, but we should know how to delete this memory */
@@ -39,7 +41,7 @@ struct o_llrb {
 	address                       __offset;
 	pf_cast                       __cast;
 	
-	struct base_interface         __iftable[e_l_count];
+	iobject         __iftable[e_l_count];
 
 	/* just a sentinel to represent the end of the tree, the maximum element of the tree */
 	struct llrb_link              __sentinel;
@@ -73,8 +75,8 @@ static void     o_llrb_itr_assign      (const object* o, iterator itr, itr_pos p
 static void     o_llrb_itr_find        (const object* o, iterator itr, void* __ref);
 static void*    o_llrb_itr_remove      (object* o, iterator itr);
 
-static const iterator o_llrb_itr_begin (const object* o);
-static const iterator o_llrb_itr_end   (const object* o);
+static const_iterator o_llrb_itr_begin (const object* o);
+static const_iterator o_llrb_itr_end   (const object* o);
 
 /* factory method, the only public function in this file */
 object* create_llrb_container(pf_compare ref_compare) {
@@ -103,15 +105,17 @@ static struct iset_vtable __iset_vtable = {
 static unknown o_llrb_itr_cast(unknown x, unique_id inf_id);
 static unknown o_llrb_cast(unknown x, unique_id intf_id);
 
-static void o_llrb_itr_destroy(object* citr);
-static bool o_llrb_itr_equals(const iterator a, const iterator b);
-static const void* o_llrb_itr_get_ref(const iterator citr);
+static void o_llrb_itr_destroy(iterator citr);
+static iterator o_llrb_itr_clone(const_iterator citr);
+static bool o_llrb_itr_equals(const_iterator a, const_iterator b);
+static const void* o_llrb_itr_get_ref(const_iterator citr);
 static void o_llrb_itr_set_ref(iterator citr, const void* n_ref);
-static void o_llrb_itr_to_next(object* citr);
-static void o_llrb_itr_to_prev(object* citr);
+static void o_llrb_itr_to_next(iterator citr);
+static void o_llrb_itr_to_prev(iterator citr);
 
 static struct itr_bidirectional_vtable __itr_vtable = {
 	o_llrb_itr_destroy,      /* __destroy */
+	o_llrb_itr_clone,        /* __clone   */
 	o_llrb_itr_equals,       /* __equals  */
 	o_llrb_itr_get_ref,      /* __get_ref */
 	o_llrb_itr_set_ref,      /* __set_ref */
@@ -130,7 +134,24 @@ static void o_llrb_itr_destroy(object* citr) {
 	allocator_dealloc(itr->__allocator, itr);
 }
 
-static bool o_llrb_itr_equals(const iterator a, const iterator b) {
+static iterator o_llrb_itr_clone(const_iterator citr) {
+	struct o_llrb_itr* itr = (struct o_llrb_itr*)citr;
+	struct o_llrb_itr* n_itr = NULL;
+
+	dbg_assert(__is_object(citr));
+	dbg_assert(itr->__cast == o_llrb_itr_cast);
+
+	/* destroy itself */
+	n_itr = (struct o_llrb_itr*)allocator_alloc(itr->__allocator, sizeof(struct o_llrb_itr));
+
+	memcpy (n_itr, itr, sizeof(struct o_llrb_itr));
+	/* TODO: this is error prone */
+	n_itr->__offset = n_itr;
+
+	return (iterator)n_itr;
+}
+
+static bool o_llrb_itr_equals(const_iterator a, const_iterator b) {
 	const struct o_llrb_itr* itr_a = (const struct o_llrb_itr*)a;
 	const struct o_llrb_itr* itr_b = (const struct o_llrb_itr*)b;
 
@@ -142,7 +163,7 @@ static bool o_llrb_itr_equals(const iterator a, const iterator b) {
 	return itr_a->__current == itr_b->__current;
 }
 
-static const void* o_llrb_itr_get_ref(const iterator citr) {
+static const void* o_llrb_itr_get_ref(const_iterator citr) {
 	const struct o_llrb_itr* itr   = (const struct o_llrb_itr*)citr;
 	const struct o_llrb_node* node = NULL;
 
@@ -330,7 +351,7 @@ static void o_llrb_itr_com_init(struct o_llrb_itr* itr, struct o_llrb* list) {
 	/* itr->__current = NULL; */
 }
 
-static const iterator o_llrb_itr_begin(const object* o) {
+static const_iterator o_llrb_itr_begin(const object* o) {
 	struct o_llrb* ollrb = (struct o_llrb*)o;
 
 	ollrb->__itr_begin.__current = llrb_min(ollrb->__root);
@@ -338,7 +359,7 @@ static const iterator o_llrb_itr_begin(const object* o) {
 	return (iterator)&ollrb->__itr_begin;
 }
 
-static const iterator o_llrb_itr_end(const object* o) {
+static const_iterator o_llrb_itr_end(const object* o) {
 	struct o_llrb* ollrb = (struct o_llrb*)o;
 
 	ollrb->__itr_end.__current = &ollrb->__sentinel;

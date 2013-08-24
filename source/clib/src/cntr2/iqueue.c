@@ -47,14 +47,14 @@ inline void iqueue_itr_assign(const iobject* iq, iterator itr, itr_pos pos) {
 	((struct iqueue_vtable*)iq->__vtable)->__itr_assign(o, itr, pos);
 }
 
-inline const iterator iqueue_itr_begin(const iobject* iq) {
+inline const_iterator iqueue_itr_begin(const iobject* iq) {
 	object* o = __object_from_interface(iq);
 	dbg_assert(__cast(o, IQUEUE_ID) == iq);
 
 	return ((struct iqueue_vtable*)(iq->__vtable))->__itr_begin(o);
 }
 
-inline const iterator iqueue_itr_end(const iobject* iq) {
+inline const_iterator iqueue_itr_end(const iobject* iq) {
 	object* o = __object_from_interface(iq);
 	dbg_assert(__cast(o, IQUEUE_ID) == iq);
 

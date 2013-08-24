@@ -18,8 +18,8 @@ extern inline bool           ilist_remove          (iobject* ilist, void* __ref)
 /* return the begin iterator of the container, this iterator is constant, 
  * you could only use it for comparison, dereferencing.
  * you can not move it or set reference on it. */
-extern inline const iterator ilist_itr_begin     (const iobject* ilist);
-extern inline const iterator ilist_itr_end       (const iobject* ilist);
+extern inline const_iterator ilist_itr_begin     (const iobject* ilist);
+extern inline const_iterator ilist_itr_end       (const iobject* ilist);
 extern inline       iterator ilist_itr_create    (const iobject* ilist, itr_pos pos);
 extern inline       void     ilist_itr_assign    (const iobject* ilist, iterator itr, itr_pos pos);
 extern inline       void     ilist_itr_find      (const iobject* ilist, iterator itr, void* __ref);
@@ -30,7 +30,7 @@ extern inline       void     ilist_itr_insert_after  (iobject* ilist, iterator i
 /*
 {
 	iterator itr = ilist_itr_create(list, itr_begin);
-	const iterator end = ilist_itr_end(ilist);
+	const_iterator end = ilist_itr_end(ilist);
 	for (; !itr_equals(itr, end); itr_to_next(itr)) {
 		// do something on itr
 	}
@@ -50,8 +50,8 @@ typedef       void*    (*pf_ilist_remove_back)  (object* olist);
 typedef       bool     (*pf_ilist_contains)     (const object* olist, void* __ref);
 typedef       bool     (*pf_ilist_remove)       (object* olist, void* __ref);
 
-typedef const iterator (*pf_ilist_itr_begin)    (const object* olist);
-typedef const iterator (*pf_ilist_itr_end)      (const object* olist);
+typedef const_iterator (*pf_ilist_itr_begin)    (const object* olist);
+typedef const_iterator (*pf_ilist_itr_end)      (const object* olist);
 typedef       iterator (*pf_ilist_itr_create)   (const object* ilist, itr_pos pos);
 typedef       void     (*pf_ilist_itr_assign)   (const object* ilist, /*out*/iterator itr, itr_pos pos);
 typedef       void     (*pf_ilist_itr_find)     (const object* olist, /*out*/iterator itr, void* __ref);

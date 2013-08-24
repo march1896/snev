@@ -15,7 +15,7 @@ static char        g_table_buff[101];
 static int         g_table_step = 2;
 static int         g_table_length = 0;
 
-void move_tab(bool inc) {
+void log_inc_tab(bool inc) {
 	int i;
 
 	if (inc == true) {
@@ -82,7 +82,7 @@ void test_run_single(const char* test_name, pf_test_case test_func) {
 		test_name = "unknown test";
 	}
 
-	move_tab(true);
+	log_inc_tab(true);
 
 	if (g_log_header) {
 		log_printline("[%s begins]", test_name);
@@ -99,7 +99,7 @@ void test_run_single(const char* test_name, pf_test_case test_func) {
 			log_printline("[%s ends]", test_name);
 	}
 
-	move_tab(false);
+	log_inc_tab(false);
 }
 
 void test_log_use_file(const char* file_name) {
