@@ -1,13 +1,15 @@
-#include <ilist.h>
-#include <iqueue.h>
-#include <istack.h>
-#include <iset.h>
-#include <iitr.h>
+#include <string.h>
 
-#include <ifactory.h>
-#include <oallocator.h>
+#include "ilist.h"
+#include "iqueue.h"
+#include "istack.h"
+#include "iset.h"
+#include "iitr.h"
 
-#include <util/list_link.h>
+#include "ifactory.h"
+#include "oallocator.h"
+
+#include "util/list_link.h"
 
 /* this module defines double linked list(with sentinel) container, it implements 
  * ilist, iqueue, istack and iset, as you could imagine, using linked list to implement a set
@@ -34,7 +36,7 @@ struct o_dlist_itr {
 	pf_cast                       __cast;
 
 	/* there is always one interface to implement, since the interface is inherited */
-	struct base_interface         __iftable[1];
+	iobject                       __iftable[1];
 
 	/* the iterator will never alloc memory, when acquire an iterator, the container will 
 	 * alloc the memory, but we should know how to delete this memory */
@@ -47,7 +49,7 @@ struct o_dlist {
 	address                       __offset;
 	pf_cast                       __cast;
 	
-	struct base_interface         __iftable[e_l_count];
+	iobject         __iftable[e_l_count];
 
 	struct list_link              __sentinel;
 	int                           __size;
@@ -80,8 +82,8 @@ static void     o_dlist_itr_find        (const object* o, iterator itr, void* __
 static void*    o_dlist_itr_remove      (object* o, iterator itr);
 static void     o_dlist_insert_before   (object* o, iterator itr, void* n_ref);
 static void     o_dlist_insert_after    (object* o, iterator itr, void* n_ref);
-static const iterator o_dlist_itr_begin (const object* o);
-static const iterator o_dlist_itr_end   (const object* o);
+static const_iterator o_dlist_itr_begin (const object* o);
+static const_iterator o_dlist_itr_end   (const object* o);
 
 /* factory method, the only public function in this file */
 object* create_dblinked_list() {
@@ -156,8 +158,9 @@ static unknown o_dlist_itr_cast(unknown x, unique_id inf_id);
 static unknown o_dlist_cast(unknown x, unique_id intf_id);
 
 static void o_dlist_itr_destroy(iterator citr);
-static bool o_dlist_itr_equals(const iterator a, const iterator b);
-static const void* o_dlist_itr_get_ref(const iterator citr);
+static iterator o_dlist_itr_clone(const_iterator citr);
+static bool o_dlist_itr_equals(const_iterator a, const_iterator b);
+static const void* o_dlist_itr_get_ref(const_iterator citr);
 static void o_dlist_itr_set_ref(iterator citr, const void* n_ref);
 static void o_dlist_itr_to_next(iterator citr);
 static void o_dlist_itr_to_prev(iterator citr);
@@ -172,7 +175,24 @@ static void o_dlist_itr_destroy(iterator citr) {
 	allocator_dealloc(itr->__allocator, itr);
 }
 
-static bool o_dlist_itr_equals(const iterator a, const iterator b) {
+static iterator o_dlist_itr_clone(const_iterator citr) {
+	struct o_dlist_itr* itr = (struct o_dlist_itr*)citr;
+	struct o_dlist_itr* n_itr = NULL;
+
+	dbg_assert(__is_object(citr));
+	dbg_assert(itr->__cast == o_dlist_itr_cast);
+
+	/* destroy itself */
+	n_itr = (struct o_dlist_itr*)allocator_alloc(itr->__allocator, sizeof(struct o_dlist_itr));
+
+	memcpy(n_itr, itr, sizeof(struct o_dlist_itr));
+	/* TODO: this is error prone */
+	n_itr->__offset = n_itr;
+
+	return (iterator)n_itr;
+}
+
+static bool o_dlist_itr_equals(const_iterator a, const_iterator b) {
 	const struct o_dlist_itr* itr_a = (const struct o_dlist_itr*)a;
 	const struct o_dlist_itr* itr_b = (const struct o_dlist_itr*)b;
 
@@ -184,7 +204,7 @@ static bool o_dlist_itr_equals(const iterator a, const iterator b) {
 	return itr_a->__current == itr_b->__current;
 }
 
-static const void* o_dlist_itr_get_ref(const iterator citr) {
+static const void* o_dlist_itr_get_ref(const_iterator citr) {
 	const struct o_dlist_itr* itr   = (const struct o_dlist_itr*)citr;
 	const struct o_dlist_node* node = NULL;
 
@@ -226,6 +246,7 @@ static void o_dlist_itr_to_prev(iterator citr) {
 
 static struct itr_bidirectional_vtable __itr_vtable = {
 	o_dlist_itr_destroy,      /* __destroy */
+	o_dlist_itr_clone,        /* __clone   */
 	o_dlist_itr_equals,       /* __equals  */
 	o_dlist_itr_get_ref,      /* __get_ref */
 	o_dlist_itr_set_ref,      /* __set_ref */
@@ -480,21 +501,21 @@ static void o_dlist_itr_com_init(struct o_dlist_itr* itr, struct o_dlist* list) 
 	/* itr->__current = NULL; */
 }
 
-static const iterator o_dlist_itr_begin(const object* o) {
+static const_iterator o_dlist_itr_begin(const object* o) {
 	struct o_dlist* olist = (struct o_dlist*)o;
 
 	/* if the list is empty, we just return the sentinel node */
 	olist->__itr_begin.__current = olist->__sentinel.next;
 
-	return (const iterator)&olist->__itr_begin;
+	return (const_iterator)&olist->__itr_begin;
 }
 
-static const iterator o_dlist_itr_end(const object* o) {
+static const_iterator o_dlist_itr_end(const object* o) {
 	struct o_dlist* olist = (struct o_dlist*)o;
 
 	olist->__itr_end.__current = &olist->__sentinel;
 
-	return (const iterator)&olist->__itr_end;
+	return (const_iterator)&olist->__itr_end;
 }
 
 static iterator o_dlist_itr_create(const object* o, itr_pos pos) {

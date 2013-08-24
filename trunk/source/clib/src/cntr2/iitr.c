@@ -8,15 +8,22 @@ inline void itr_destroy(iterator itr) {
 	((struct itr_base_vtable*)(intf->__vtable))->__destroy(itr);
 }
 
-inline bool itr_equals(const iterator ia, const iterator ib) {
-	iobject* intf = __fast_cast((unknown)ia, 0);
-	dbg_assert(__cast((unknown)ia, ITR_BAS_ID) == __fast_cast((unknown)ia, 0));
-	dbg_assert(__cast((unknown)ib, ITR_BAS_ID) == __fast_cast((unknown)ib, 0));
+inline iterator itr_clone(const_iterator itr) {
+	iobject* intf = __fast_cast(itr, 0);
+	dbg_assert(intf == __cast(itr, ITR_BAS_ID));
+
+	return ((struct itr_base_vtable*)(intf->__vtable))->__clone(itr);
+}
+
+inline bool itr_equals(const_iterator ia, const_iterator ib) {
+	iobject* intf = __fast_cast(ia, 0);
+	dbg_assert(__cast(ia, ITR_BAS_ID) == __fast_cast(ia, 0));
+	dbg_assert(__cast(ib, ITR_BAS_ID) == __fast_cast(ib, 0));
 
 	return ((struct itr_base_vtable*)(intf->__vtable))->__equals(ia, ib);
 }
 
-inline const void* itr_get_ref(const iterator itr) {
+inline const void* itr_get_ref(const_iterator itr) {
 	iobject* intf = __fast_cast((unknown)itr, 0);
 	dbg_assert(intf == __cast((unknown)itr, ITR_REF_ID));
 
@@ -51,7 +58,7 @@ inline void itr_advance(iterator itr, int length) {
 	((struct itr_randomaccessible_vtable*)(intf->__vtable))->__advance(itr, length);
 }
 
-inline int  itr_distance(const iterator from, const iterator to) {
+inline int  itr_distance(const_iterator from, const_iterator to) {
 	iobject* intf = __fast_cast((unknown)from, 0);
 	dbg_assert(intf == __cast((unknown)from, ITR_RAC_ID));
 

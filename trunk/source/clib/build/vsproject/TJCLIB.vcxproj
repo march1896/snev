@@ -300,6 +300,7 @@
     <ClInclude Include="..\..\src\util\link.doc.h" />
     <ClInclude Include="..\..\src\util\list_link.h" />
     <ClInclude Include="..\..\src\util\llrb_link.h" />
+    <ClInclude Include="..\..\src\util\math.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

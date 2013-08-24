@@ -1,15 +1,15 @@
 #include <oo_model.h>
 
-inline struct base_object* __object_from_interface(const struct base_interface* inf) {
-	const struct base_interface* inf0 = inf - (intptr_t)inf->__offset;
-	struct base_object* obj = container_of(inf0, struct base_object, __iftable[0]);
+inline object* __object_from_interface(const iobject* inf) {
+	const iobject* inf0 = inf - (intptr_t)inf->__offset;
+	object* obj = container_of(inf0, object, __iftable[0]);
 
 	return obj;
 }
 
-inline bool __is_object(const unknown x) {
-	struct base_object* obj = (struct base_object*)x;
-	if (obj->__offset == __address_of(x)) {
+inline bool __is_object(const_unknown x) {
+	const object* obj = (const object*)x;
+	if (obj->__offset == x) {
 		//dbg_assert(obj->__cast(x, OBJECT_ME) == x);
 		return true;
 	}
@@ -17,12 +17,12 @@ inline bool __is_object(const unknown x) {
 	return false;
 }
 
-inline bool __is_interface(const unknown x) {
-	struct base_interface* inf = (struct base_interface*)x;
+inline bool __is_interface(const_unknown x) {
+	const iobject* inf = (const iobject*)x;
 	dbg_assert((intptr_t)(inf->__offset) <= __MAX_NUM_INTERFACE_PER_OBJECT);
 
 	{
-		struct base_object* obj = __object_from_interface(inf);
+		object* obj = __object_from_interface(inf);
 		if (__is_object(obj)) {
 			return true;
 		}
@@ -31,13 +31,13 @@ inline bool __is_interface(const unknown x) {
 	return false;
 }
 
-inline unknown __cast(unknown x, unique_id id) {
+inline unknown __cast(const_unknown x, unique_id id) {
 	if (__is_object(x)) {
-		struct base_object* obj = ((struct base_object*)x);
+		object* obj = ((object*)x);
 		return obj->__cast(obj, id);
 	}
 	else if (__is_interface(x)) {
-		struct base_object* obj = (struct base_object*)__object_from_interface((struct base_interface*)x);
+		object* obj = (object*)__object_from_interface((iobject*)x);
 		return obj->__cast(obj, id);
 	}
 	dbg_assert(false);
@@ -45,10 +45,10 @@ inline unknown __cast(unknown x, unique_id id) {
 	return NULL;
 }
 
-inline struct base_interface* __fast_cast(const unknown x, int ifoffset) {
-	struct base_object* obj = ((struct base_object*)x);
+inline iobject* __fast_cast(const object* x, int ifoffset) {
+	object* obj = ((object*)x);
 
 	dbg_assert(__is_object(obj));
-	return (struct base_interface*)&obj->__iftable[ifoffset];
+	return (iobject*)&obj->__iftable[ifoffset];
 }
 

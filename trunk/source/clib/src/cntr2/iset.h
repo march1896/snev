@@ -17,8 +17,8 @@ extern inline void     iset_itr_assign       (const iobject* ic, /* out */iterat
 extern inline void     iset_itr_find         (const iobject* ic, /* out */iterator itr, void* __ref);
 extern inline void*    iset_itr_remove       (iobject* ic, iterator itr);
 /* return a iterator, maybe forward/bidirectional/random accessed. */
-extern inline const iterator iset_itr_begin  (const iobject* ic);
-extern inline const iterator iset_itr_end    (const iobject* ic);
+extern inline const_iterator iset_itr_begin  (const iobject* ic);
+extern inline const_iterator iset_itr_end    (const iobject* ic);
 
 /* below is only useful for the container implementer */
 /* the virtual functions that each container should implement */
@@ -33,8 +33,8 @@ typedef       iterator (*pf_iset_itr_create) (const object* c, itr_pos pos);
 typedef       void     (*pf_iset_itr_assign) (const object* c, iterator itr, itr_pos pos);
 typedef       void     (*pf_iset_itr_find)   (const object* c, iterator itr, void* __ref);
 typedef       void*    (*pf_iset_itr_remove) (object* c, iterator itr);
-typedef const iterator (*pf_iset_itr_begin)  (const object* c);
-typedef const iterator (*pf_iset_itr_end)    (const object* c);
+typedef const_iterator (*pf_iset_itr_begin)  (const object* c);
+typedef const_iterator (*pf_iset_itr_end)    (const object* c);
 
 struct iset_vtable {
 	/* public */

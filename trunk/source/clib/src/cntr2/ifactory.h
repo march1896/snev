@@ -9,11 +9,6 @@
 #define as_stack(obj) (iobject*)__cast((obj), ISTACK_ID)
 #define as_set(obj)   (iobject*)__cast((obj), ISET_ID)
 
-/* TODO: the below functions should be moved to some header named like object_trait.h */
-/* now we only keep reference, not instance, in container, so copy is useless.
-typedef void* (*pf_copy   )(void* buff);
- */
-
 /* compare two object that holds in the container, useful when the container holds object in some order */
 typedef bool  (*pf_compare)(const void* ref_a, const void* ref_b);
 

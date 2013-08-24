@@ -21,7 +21,7 @@ static void list_test_basic_itr_operation(iobject* list) {
 	dbg_assert(ilist_size(list) == 8);
 	{
 		iterator itr = ilist_itr_create(list, itr_begin);
-		const iterator end = ilist_itr_end(list);
+		const_iterator end = ilist_itr_end(list);
 		intptr_t current = 1;
 
 		/* traverse the list */
@@ -208,5 +208,12 @@ void list_test_basic(iobject* list) {
 	list_test_basic_operation(list);
 
 	list_test_basic_itr_operation(list);
+}
+
+void list_test_memory(iobject* list) {
+}
+
+void list_test_bench(iobject* list) {
+	/* should this exist, or it just compares with the raw list_link to show the overhead of 'virtual' funtions */
 }
 

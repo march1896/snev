@@ -13,7 +13,7 @@
 #include "test_util.h"
 #include "cntr2/test.h"
 
-static void __ref_print(void* __ref) {
+static void __ref_print(const void* __ref) {
 	log_printf("%d ", (int)(intptr_t)__ref);
 }
 
@@ -21,7 +21,7 @@ void icntr_print(iobject* icntr) {
 	ilist list = as_list(icntr);
 	/* TODO: why here is no warnings */
 	iterator itr = ilist_itr_create(list, itr_begin);
-	const iterator end   = ilist_itr_end(list);
+	const_iterator end   = ilist_itr_end(list);
 	log_printtab();
 
 	while (!itr_equals(itr, end)) {
