@@ -207,6 +207,7 @@
     <ClCompile Include="..\..\src\cntr2\iallocator.c" />
     <ClCompile Include="..\..\src\cntr2\iitr.c" />
     <ClCompile Include="..\..\src\cntr2\ilist.c" />
+    <ClCompile Include="..\..\src\cntr2\imset.c" />
     <ClCompile Include="..\..\src\cntr2\iqueue.c" />
     <ClCompile Include="..\..\src\cntr2\iset.c" />
     <ClCompile Include="..\..\src\cntr2\istack.c" />
@@ -255,6 +256,7 @@
     <ClInclude Include="..\..\src\cntr2\ifactory.h" />
     <ClInclude Include="..\..\src\cntr2\iitr.h" />
     <ClInclude Include="..\..\src\cntr2\ilist.h" />
+    <ClInclude Include="..\..\src\cntr2\imset.h" />
     <ClInclude Include="..\..\src\cntr2\iqueue.h" />
     <ClInclude Include="..\..\src\cntr2\iset.h" />
     <ClInclude Include="..\..\src\cntr2\istack.h" />

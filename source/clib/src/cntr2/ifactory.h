@@ -8,6 +8,7 @@
 #define as_queue(obj) (iobject*)__cast((obj), IQUEUE_ID)
 #define as_stack(obj) (iobject*)__cast((obj), ISTACK_ID)
 #define as_set(obj)   (iobject*)__cast((obj), ISET_ID)
+#define as_mset(obj)  (iobject*)__cast((obj), IMSET_ID)
 
 /* compare two object that holds in the container, useful when the container holds object in some order */
 typedef int   (*pf_compare)(const void* ref_a, const void* ref_b);

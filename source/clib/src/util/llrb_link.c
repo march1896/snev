@@ -281,11 +281,11 @@ static struct llrb_link *__llrb_insert_s(struct llrb_link *c, struct llrb_link *
 			*dup = true;
 		}
 		else if (compr < 0) {
-			c->left = __llrb_insert(c->left, n, comp);
+			c->left = __llrb_insert_s(c->left, n, comp, dup);
 			c->left->parent = c;
 		}
 		else {
-			c->right = __llrb_insert(c->right, n, comp);
+			c->right = __llrb_insert_s(c->right, n, comp, dup);
 			c->right->parent = c;
 		}
 	}
@@ -455,11 +455,11 @@ struct llrb_link *__llrb_insert_sv(struct llrb_link *c, struct llrb_link *n, pf_
 			*dup = true;
 		}
 		else if (compr < 0) {
-			c->left = __llrb_insert_v(c->left, n, comp, param);
+			c->left = __llrb_insert_sv(c->left, n, comp, param, dup);
 			c->left->parent = c;
 		}
 		else {
-			c->right = __llrb_insert_v(c->right, n, comp, param);
+			c->right = __llrb_insert_sv(c->right, n, comp, param, dup);
 			c->right->parent = c;
 		}
 	}
@@ -639,7 +639,7 @@ struct llrb_link* llrb_predesessor(struct llrb_link* link, bool only_sub) {
 
 struct llrb_link* llrb_successor(struct llrb_link* link, bool only_sub) {
 	if (link->right != NULL) {
-		/* find the minimun element in the right sub tree */
+		/* find the minimum element in the right sub tree */
 		struct llrb_link* fwd = link->right;
 
 		while (fwd->left != NULL) fwd = fwd->left;

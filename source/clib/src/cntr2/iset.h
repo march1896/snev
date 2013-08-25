@@ -9,12 +9,15 @@ extern inline void     iset_destroy          (iobject* ic);
 extern inline void     iset_clear            (iobject* ic);
 extern inline int      iset_size             (const iobject* ic);
 extern inline bool     iset_empty            (const iobject* ic);
+/* return false if __ref is already in the set */
 extern inline bool     iset_insert           (iobject* ic, void* __ref);
 extern inline bool     iset_contains         (const iobject* ic, void* __ref);
+/* return false if __ref is not in the set */
 extern inline bool     iset_remove           (iobject* ic, void* __ref);
 
 extern inline iterator iset_itr_create       (const iobject* ic, itr_pos pos);
 extern inline void     iset_itr_assign       (const iobject* ic, /* out */iterator itr, itr_pos pos);
+/* points to end if __ref is not in the set */
 extern inline void     iset_itr_find         (const iobject* ic, /* out */iterator itr, void* __ref);
 extern inline void*    iset_itr_remove       (iobject* ic, iterator itr);
 /* return a iterator, maybe forward/bidirectional/random accessed. */
