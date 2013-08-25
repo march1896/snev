@@ -14,11 +14,25 @@ inline void istack_clear(iobject* iq) {
 	((struct istack_vtable*)(iq->__vtable))->__clear(o);
 }
 
-inline int  istack_size(const iobject* iq) {
+inline int istack_size(const iobject* iq) {
 	object* o = __object_from_interface(iq);
 	dbg_assert(__cast(o, ISTACK_ID) == iq);
 
 	return ((struct istack_vtable*)(iq->__vtable))->__size(o);
+}
+
+inline bool istack_empty(const iobject* iq) {
+	object* o = __object_from_interface(iq);
+	dbg_assert(__cast(o, ISTACK_ID) == iq);
+
+	return ((struct istack_vtable*)(iq->__vtable))->__empty(o);
+}
+
+inline const void* istack_top(const iobject* iq) {
+	object* o = __object_from_interface(iq);
+	dbg_assert(__cast(o, ISTACK_ID) == iq);
+
+	return ((struct istack_vtable*)(iq->__vtable))->__top(o);
 }
 
 inline void istack_push(iobject* iq, void* ref) {

@@ -248,13 +248,39 @@ struct llrb_link *_fix_up(struct llrb_link *c) {
 	return c;
 }
 
-struct llrb_link *__llrb_insert(struct llrb_link *c, struct llrb_link *n, pf_llrb_compare comp) {
+static struct llrb_link *__llrb_insert(struct llrb_link *c, struct llrb_link *n, pf_llrb_compare comp) {
 	if (c == NULL) return n;
 
 	{
 		int compr = __compare_wrap(n, c, comp);
+		dbg_assert(compr != 0);
 
 		if (compr < 0) {
+			c->left = __llrb_insert(c->left, n, comp);
+			c->left->parent = c;
+		}
+		else {
+			c->right = __llrb_insert(c->right, n, comp);
+			c->right->parent = c;
+		}
+	}
+
+	return _fix_up(c);
+}
+
+/* insert single instance of the link by using the raw comparison function */
+static struct llrb_link *__llrb_insert_s(struct llrb_link *c, struct llrb_link *n, pf_llrb_compare comp, bool* dup) {
+	if (c == NULL) return n;
+
+	{
+		int compr = comp(n, c);
+
+		if (compr == 0) {
+			/* we don't have to do anything here */
+			/* the __fix_up function will do nothing */
+			*dup = true;
+		}
+		else if (compr < 0) {
 			c->left = __llrb_insert(c->left, n, comp);
 			c->left->parent = c;
 		}
@@ -358,6 +384,16 @@ struct llrb_link *llrb_insert(struct llrb_link *root, struct llrb_link *nlink, p
 	return root;
 }
 
+struct llrb_link* llrb_insert_s (struct llrb_link* root, struct llrb_link* nlink, pf_llrb_compare comp, bool* dup) {
+	llrb_init(nlink);
+	*dup = false;
+
+	root = __llrb_insert_s(root, nlink, comp, dup);
+	root->color = BLACK;
+
+	return root;
+}
+
 struct llrb_link *llrb_remove(struct llrb_link *root, struct llrb_link *n, pf_llrb_compare comp) {
 	root = __llrb_delete(root, n, comp);
 
@@ -402,6 +438,40 @@ struct llrb_link *__llrb_insert_v(struct llrb_link *c, struct llrb_link *n, pf_l
 struct llrb_link* llrb_insert_v (struct llrb_link* root, struct llrb_link* nlink, pf_llrb_compare_v comp, void* param) {
 	llrb_init(nlink);
 	root = __llrb_insert_v(root, nlink, comp, param);
+
+	root->color = BLACK;
+
+	return root;
+}
+
+struct llrb_link *__llrb_insert_sv(struct llrb_link *c, struct llrb_link *n, pf_llrb_compare_v comp, void* param, bool* dup) {
+	if (c == NULL) return n;
+
+	{
+		int compr = comp(n, c, param);
+
+		if (compr == 0) {
+			/* we need to do nothing */
+			*dup = true;
+		}
+		else if (compr < 0) {
+			c->left = __llrb_insert_v(c->left, n, comp, param);
+			c->left->parent = c;
+		}
+		else {
+			c->right = __llrb_insert_v(c->right, n, comp, param);
+			c->right->parent = c;
+		}
+	}
+
+	return _fix_up(c);
+}
+
+struct llrb_link* llrb_insert_sv(struct llrb_link* root, struct llrb_link* nlink, pf_llrb_compare_v comp, void* param, bool* dup) {
+	llrb_init(nlink);
+	*dup = false;
+
+	root = __llrb_insert_sv(root, nlink, comp, param, dup);
 
 	root->color = BLACK;
 
@@ -465,7 +535,7 @@ struct llrb_link* llrb_remove_v (struct llrb_link* root, struct llrb_link* targe
 struct llrb_link* llrb_search(struct llrb_link* root, pf_llrb_direct direct, void* param) {
 	struct llrb_link* fwd = root;
 
-	while (true) {
+	while (fwd != NULL) {
 		int comp_res = direct(fwd, param);
 
 		if (comp_res == 0) {

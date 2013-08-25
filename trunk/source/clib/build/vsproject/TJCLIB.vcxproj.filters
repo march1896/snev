@@ -103,9 +103,6 @@
     <ClCompile Include="..\..\src\cntr2\ialgo.c">
       <Filter>Source Files\cntr2</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cntr2\odlist.c">
-      <Filter>Source Files\cntr2</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\memheap\heap_global.c">
       <Filter>Source Files\memheap</Filter>
     </ClCompile>
@@ -130,7 +127,10 @@
     <ClCompile Include="..\..\src\util\bst_link.c">
       <Filter>Source Files\util</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cntr2\obstree.c">
+    <ClCompile Include="..\..\src\cntr2\ollrb.c">
+      <Filter>Source Files\cntr2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cntr2\olist.c">
       <Filter>Source Files\cntr2</Filter>
     </ClCompile>
   </ItemGroup>

@@ -52,10 +52,22 @@
     <ClCompile Include="..\..\tests\cntr2\oallocator.test.c">
       <Filter>Source Files\cntr2</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\tests\cntr2\odlist.test.c">
+    <ClCompile Include="..\..\tests\cntr2\test.c">
       <Filter>Source Files\cntr2</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\tests\cntr2\test.c">
+    <ClCompile Include="..\..\tests\cntr2\iqueue.test.c">
+      <Filter>Source Files\cntr2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tests\cntr2\istack.test.c">
+      <Filter>Source Files\cntr2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tests\cntr2\iset.test.c">
+      <Filter>Source Files\cntr2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tests\cntr2\olist.test.c">
+      <Filter>Source Files\cntr2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tests\cntr2\ollrb.test.c">
       <Filter>Source Files\cntr2</Filter>
     </ClCompile>
   </ItemGroup>
@@ -90,6 +102,15 @@
       <Filter>Source Files\cntr2</Filter>
     </ClInclude>
     <ClInclude Include="..\..\tests\cntr2\test.h">
+      <Filter>Source Files\cntr2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\tests\cntr2\iqueue.test.h">
+      <Filter>Source Files\cntr2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\tests\cntr2\istack.test.h">
+      <Filter>Source Files\cntr2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\tests\cntr2\iset.test.h">
       <Filter>Source Files\cntr2</Filter>
     </ClInclude>
   </ItemGroup>

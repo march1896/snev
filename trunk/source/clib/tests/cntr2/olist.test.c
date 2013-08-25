@@ -2,24 +2,36 @@
 #include <string.h>
 
 #include "cntr2/ilist.h"
+#include "cntr2/iqueue.h"
+#include "cntr2/istack.h"
 #include "cntr2/ifactory.h"
 
 #include "test_util.h"
 #include "cntr2/ilist.test.h"
+#include "cntr2/iqueue.test.h"
+#include "cntr2/istack.test.h"
 
 // remove this 
 #include "cntr2/test.h"
 
 static void __correctness_test() {
-	object* dlist = create_dblinked_list();
+	{
+		ilist list = as_list(cntr_create_olist());
+		list_test_basic(list);
+		ilist_destroy(list);
+	}
+	
+	{
+		iqueue queue = as_queue(cntr_create_olist());
+		queue_test_basic(queue);
+		iqueue_destroy(queue);
+	}	
 
-	list_test_basic(as_list(dlist));
-
-	queue_correct(as_queue(dlist));
-	stack_correct(as_stack(dlist));
-	set_correct(as_set(dlist));
-
-	ilist_destroy(as_list(dlist));
+	{
+		istack stack = as_stack(cntr_create_olist());
+		stack_test_basic(stack);
+		istack_destroy(stack);
+	}	
 }
 
 static void __performance_test() {

@@ -14,18 +14,25 @@ inline void iset_clear(iobject* iq) {
 	((struct iset_vtable*)(iq->__vtable))->__clear(o);
 }
 
-inline int  iset_size(const iobject* iq) {
+inline int iset_size(const iobject* iq) {
 	object* o = __object_from_interface(iq);
 	dbg_assert(__cast(o, ISET_ID) == iq);
 
 	return ((struct iset_vtable*)(iq->__vtable))->__size(o);
 }
 
-inline void iset_insert(iobject* iq, void* ref) {
+inline bool iset_empty(const iobject* iq) {
 	object* o = __object_from_interface(iq);
 	dbg_assert(__cast(o, ISET_ID) == iq);
 
-	((struct iset_vtable*)(iq->__vtable))->__insert(o, ref);
+	return ((struct iset_vtable*)(iq->__vtable))->__empty(o);
+}
+
+inline bool iset_insert(iobject* iq, void* ref) {
+	object* o = __object_from_interface(iq);
+	dbg_assert(__cast(o, ISET_ID) == iq);
+
+	return ((struct iset_vtable*)(iq->__vtable))->__insert(o, ref);
 }
 
 inline bool iset_contains(const iobject* ic, void* __ref) {

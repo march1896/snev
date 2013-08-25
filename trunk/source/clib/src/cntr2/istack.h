@@ -8,6 +8,8 @@
 extern inline       void     istack_destroy     (iobject* iq);
 extern inline       void     istack_clear       (iobject* iq);
 extern inline       int      istack_size        (const iobject* iq);
+extern inline       bool     istack_empty       (const iobject* iq);
+extern inline const void*    istack_top         (const iobject* iq);
 extern inline       void     istack_push        (iobject* iq, void* ref);
 extern inline       void*    istack_pop         (iobject* iq);
 
@@ -21,6 +23,8 @@ extern inline const_iterator istack_itr_end     (const iobject* iq);
 typedef       void     (*pf_istack_destroy)     (object* c);
 typedef       void     (*pf_istack_clear)       (object* c);
 typedef       int      (*pf_istack_size)        (const object* c);
+typedef       bool     (*pf_istack_empty)       (const object* c);
+typedef const void*    (*pf_istack_top)         (const object* c);
 typedef       void     (*pf_istack_push)        (object* c, void* object);
 typedef       void*    (*pf_istack_pop)         (object* c);
 
@@ -34,6 +38,8 @@ struct istack_vtable {
 	pf_istack_destroy     __destroy;
 	pf_istack_clear       __clear;
 	pf_istack_size        __size;
+	pf_istack_empty       __empty;
+	pf_istack_top         __top;
 	pf_istack_push        __push;
 	pf_istack_pop         __pop;
 
