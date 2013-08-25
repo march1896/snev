@@ -11,9 +11,6 @@
 #include "cntr2/iqueue.test.h"
 #include "cntr2/istack.test.h"
 
-// remove this 
-#include "cntr2/test.h"
-
 static void __correctness_test() {
 	{
 		ilist list = as_list(cntr_create_olist());

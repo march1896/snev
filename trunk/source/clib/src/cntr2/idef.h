@@ -18,8 +18,9 @@
 
 #define IQUEUE_ID 0X0A0B0C01
 #define ISTACK_ID 0X0A0B0C02
-#define ISET_ID   0X0A0B0C03
-#define ILIST_ID  0X0a0B0C04
+#define ILIST_ID  0X0A0B0C03
+#define ISET_ID   0X0A0B0C04
+#define IMSET_ID  0X0A0B0C05
 
 #include <oo_model.h>
 
@@ -27,19 +28,13 @@ typedef iobject* iqueue;
 typedef iobject* istack;
 typedef iobject* ilist;
 typedef iobject* iset;
+typedef iobject* imset;
 
 typedef object* allocator;
 
 typedef object* iterator;
 /* 'const iterator' equals 'object* const', so we should have a new type */
 typedef const object* const_iterator;
-
-typedef object* itrbas;
-typedef object* itrref;
-typedef object* itracc;
-typedef object* itrfwd;
-typedef object* itrbid;
-typedef object* itrrac;
 
 typedef enum {
 	itr_begin,

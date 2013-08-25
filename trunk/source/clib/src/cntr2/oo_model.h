@@ -40,14 +40,16 @@ typedef struct base_object {
 
 /* The above definition only defines the memory layout of object and interface, 
  * but does not define some common property of all 'objects' like 
- * destroy and clone, the below function does these. So they should typically 
+ * destroy, copy and clone, the below function does these. So they should typically 
  * in a interfaces vtable struct, and then in the object's vtable, like below,
 	struct __base_vtable {
 		pf_oo_destroy              __destroy;
+		pf_oo_copy                 __copy;
 		pf_oo_clone                __clone;
 	};
  */
 typedef void (*pf_oo_destroy)(object* obj);
+typedef void (*pf_oo_copy)   (const object* obj, object* to);
 
 /* An object should know how to clone itself, but the clone method has transitivity.
  * that is, if an object has a clone method, all objects that it inherit or hold should 

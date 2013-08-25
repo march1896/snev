@@ -17,6 +17,7 @@ void test_log_use_header(bool use_or_not);
 void test_log_use_footer(bool use_or_not);
 void test_log_time(bool log);
 
+struct heap_blockinfo;
 void allocator_heap_walk_print(struct heap_blockinfo* binfo, void* param);
 
 #endif /* _TEST_UTILITIES_H_ */

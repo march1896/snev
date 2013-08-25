@@ -267,7 +267,37 @@ static void set_test_basic_operation(iobject* set) {
 	}
 }
 
-void set_test_randomized(int dataset_size) {
+void set_test_dataset(iobject* set, int dataset_size) {
+	intptr_t x = 0;
+	bool res = false;
+
+	iset_clear(set);
+	dbg_assert(iset_empty(set));
+
+	for (x = 0; x < (intptr_t)dataset_size; x ++) {
+		res = iset_insert(set, (void*)x);
+		dbg_assert(res == true);
+	}
+	dbg_assert(iset_size(set) == dataset_size);
+
+	/* insert the data set again */
+	for (x = 0; x < (intptr_t)dataset_size; x ++) {
+		res = iset_insert(set, (void*)x);
+		dbg_assert(res == false);
+	}
+	dbg_assert(iset_size(set) == dataset_size);
+
+	for (x = 0; x < (intptr_t)dataset_size; x ++) {
+		res = iset_contains(set, (void*)x);
+		dbg_assert(res == true);
+	}
+	dbg_assert(iset_contains(set, (void*)(x + 1)) == false);
+
+	for (x = 0; x < (intptr_t)dataset_size; x ++) {
+		res = iset_remove(set, (void*)x);
+		dbg_assert(res == true);
+	}
+	dbg_assert(iset_size(set) == 0);
 }
 
 void set_test_basic(iobject* set) {
@@ -275,12 +305,13 @@ void set_test_basic(iobject* set) {
 	set_test_basic_operation(set);
 
 	set_test_basic_itr_operation(set);
+
+	set_test_dataset(set, 100000); 
 }
 
 void set_test_memory(iobject* set) {
 }
 
-void set_test_bench(iobject* set) {
-	/* should this exist, or it just compares with the raw set_link to show the overhead of 'virtual' funtions */
+void set_test_bench(iobject* set, int dataset_size) {
+	/* the test bench should contain special data query pattern */
 }
-

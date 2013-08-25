@@ -8,6 +8,9 @@
 extern inline void itr_destroy         (iterator itr);
 extern inline iterator itr_clone       (const_iterator itr);
 
+/* TODO: dest = itr if they are the same type */
+extern inline bool itr_assign          (const_iterator itr, iterator dest);
+
 extern inline bool itr_equals          (const_iterator ia, const_iterator ib);
 extern inline const void* itr_get_ref  (const_iterator itr);
 extern inline void itr_set_ref         (iterator itr, const void* __ref);

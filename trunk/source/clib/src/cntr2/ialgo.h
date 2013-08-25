@@ -24,7 +24,7 @@
 
 typedef void (*pf_ref_process)  (const void* __ref);
 typedef void (*pf_ref_process_v)(const void* __ref, void* param);
-typedef bool (*pf_ref_compare)  (const void* ref_a, const void* ref_b);
+typedef int (*pf_ref_compare)  (const void* ref_a, const void* ref_b);
 
 /* iterator should be at least forward able */
 void foreach     (const_iterator begin, const_iterator end, pf_ref_process cb);
