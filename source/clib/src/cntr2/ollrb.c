@@ -66,7 +66,8 @@ static object*  o_llrb_create_v        (pf_compare ref_comp, allocator alc, pf_d
 static void     o_llrb_destroy         (object* o);
 static void     o_llrb_clear           (object* o);
 static int      o_llrb_size            (const object* o);
-static void     o_llrb_insert          (object* o, void* __ref);
+static bool     o_llrb_empty           (const object* o);
+static bool     o_llrb_insert          (object* o, void* __ref);
 static bool     o_llrb_contains        (const object* o, void* __ref);
 static bool     o_llrb_remove          (object* o, void* __ref);
 
@@ -90,6 +91,7 @@ static struct iset_vtable __iset_vtable = {
 	o_llrb_destroy,          /* __destroy */
 	o_llrb_clear,            /* __clear */
 	o_llrb_size,             /* __size */
+	o_llrb_empty,            /* __empty */
 	o_llrb_insert,           /* __insert */
 	o_llrb_contains,         /* __contains */
 	o_llrb_remove,           /* __remove */
@@ -285,6 +287,15 @@ static object* o_llrb_create_v(pf_compare ref_compare, allocator alc, pf_dispose
 	return (object*)ollrb;
 }
 
+/* from ifactory.h  */
+object* cntr_create_ollrb(pf_compare comp) {
+	return o_llrb_create(comp);
+}
+object* cntr_create_ollrb_v(pf_compare comp, allocator alc, pf_dispose dispose) {
+	return o_llrb_create_v(comp, alc, dispose);
+}
+
+
 static void per_link_dispose(struct llrb_link* link, void* param) {
 	struct o_llrb_node* node = container_of(link, struct o_llrb_node, link);
 	struct o_llrb* ollrb     = (struct o_llrb*)param;
@@ -337,6 +348,11 @@ static int o_llrb_size(const object* o) {
 	struct o_llrb* ollrb = (struct o_llrb*)o;
 
 	return ollrb->__size;
+}
+
+static bool o_llrb_empty(const object* o) {
+	struct o_llrb* ollrb = (struct o_llrb*)o;
+	return ollrb->__size == 0;
 }
 
 /* initialize all part of an iterator except the __current position */
@@ -400,12 +416,12 @@ static void o_llrb_itr_assign(const object* o, iterator itr, itr_pos pos) {
 	}
 }
 
-static int o_llrb_direct(const struct llrb_link* link, void* ref) {
+static int o_llrb_direct(const struct llrb_link* link, void* __ref) {
 	struct o_llrb_node* node = (struct o_llrb_node*)container_of(link, struct o_llrb_node, link);
 
-	if (node->reference == ref) 
+	if (node->reference == __ref) 
 		return 0;
-	else if (node->reference < ref) /* we should expose right side */
+	else if (node->reference < __ref) /* we should expose right side */
 		return 1;
 	else 
 		return -1;
@@ -428,18 +444,24 @@ static void o_llrb_itr_find(const object* o, iterator itr, void* __ref) {
 	}
 }
 
-static void o_llrb_insert (object* o, void* __ref) {
+static bool o_llrb_insert(object* o, void* __ref) {
 	struct o_llrb* ollrb     = (struct o_llrb*)o;
 	struct o_llrb_node* node = (struct o_llrb_node*)
 		allocator_alloc(ollrb->__allocator, sizeof(struct o_llrb_node));
+	bool duplicated;
 
 	node->reference = __ref;
-	ollrb->__root = llrb_insert_v(ollrb->__root, &node->link, o_llrb_compare_v, ollrb->__ref_comp);
+	ollrb->__root = llrb_insert_sv(ollrb->__root, &node->link, o_llrb_compare_v, ollrb->__ref_comp, &duplicated);
 	o_llrb_reassociate(ollrb);
 
+	if (duplicated == true) {
+		allocator_dealloc(ollrb->__allocator, node);
+		return false;
+	}
+	
 	ollrb->__size ++;
 
-	return;
+	return true;
 }
 
 static bool o_llrb_contains(const object* o, void* __ref) {

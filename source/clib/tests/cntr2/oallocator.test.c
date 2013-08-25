@@ -7,16 +7,6 @@
 
 #include "test_util.h"
 
-static void allocator_heap_walk_print(struct heap_blockinfo* binfo, void* param) {
-	unused(param);
-	if (binfo->allocated) {
-		log_printtab();
-		log_printf("0X%08X", (int)(intptr_t)binfo->allocable_addr);
-		log_printf("%8d bytes", binfo->allocable_size);
-		log_printf(" at %s %d\n", binfo->file, binfo->line);
-	}
-}
-
 static void allocator_trace_test() {
 	void* addr[10];
 	int size[10], i;

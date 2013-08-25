@@ -10,13 +10,16 @@
 #define as_set(obj)   (iobject*)__cast((obj), ISET_ID)
 
 /* compare two object that holds in the container, useful when the container holds object in some order */
-typedef bool  (*pf_compare)(const void* ref_a, const void* ref_b);
+typedef int   (*pf_compare)(const void* ref_a, const void* ref_b);
 
 /* give the container right to dispose the object it holds, set this function only if you want to 
  * transfer the object lifetime management to the container */
 typedef void  (*pf_dispose)(void* buff);
 
-object* create_dblinked_list();
-object* create_dblinked_list_v(allocator alc, pf_dispose dispose);
+object* cntr_create_olist();
+object* cntr_create_olist_v(allocator alc, pf_dispose dispose);
+
+object* cntr_create_ollrb(pf_compare comp);
+object* cntr_create_ollrb_v(pf_compare comp, allocator alc, pf_dispose dispose);
 
 #endif /* _INTERFACE_FACTORY_H_ */

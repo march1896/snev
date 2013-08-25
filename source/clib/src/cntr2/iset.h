@@ -8,7 +8,8 @@
 extern inline void     iset_destroy          (iobject* ic);
 extern inline void     iset_clear            (iobject* ic);
 extern inline int      iset_size             (const iobject* ic);
-extern inline void     iset_insert           (iobject* ic, void* __ref);
+extern inline bool     iset_empty            (const iobject* ic);
+extern inline bool     iset_insert           (iobject* ic, void* __ref);
 extern inline bool     iset_contains         (const iobject* ic, void* __ref);
 extern inline bool     iset_remove           (iobject* ic, void* __ref);
 
@@ -25,7 +26,8 @@ extern inline const_iterator iset_itr_end    (const iobject* ic);
 typedef       void     (*pf_iset_destroy)    (object* c);
 typedef       void     (*pf_iset_clear)      (object* c);
 typedef       int      (*pf_iset_size)       (const object* c);
-typedef       void     (*pf_iset_insert)     (object* c, void* __ref);
+typedef       bool     (*pf_iset_empty)      (const object* c);
+typedef       bool     (*pf_iset_insert)     (object* c, void* __ref);
 typedef       bool     (*pf_iset_contains)   (const object* c, void* __ref);
 typedef       bool     (*pf_iset_remove)     (object* c, void* __ref);
 
@@ -41,6 +43,7 @@ struct iset_vtable {
 	pf_iset_destroy     __destroy;
 	pf_iset_clear       __clear;
 	pf_iset_size        __size;
+	pf_iset_empty       __empty;
 	pf_iset_insert      __insert;
 	pf_iset_contains    __contains;
 	pf_iset_remove      __remove;

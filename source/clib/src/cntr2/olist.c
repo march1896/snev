@@ -3,7 +3,6 @@
 #include "ilist.h"
 #include "iqueue.h"
 #include "istack.h"
-#include "iset.h"
 #include "iitr.h"
 
 #include "ifactory.h"
@@ -12,8 +11,7 @@
 #include "util/list_link.h"
 
 /* this module defines double linked list(with sentinel) container, it implements 
- * ilist, iqueue, istack and iset, as you could imagine, using linked list to implement a set
- * is not effective way.
+ * ilist, iqueue, istack 
  * and we do not expose the object method currently, that is you have to use one of the interface 
  * above, but not the list directly. */
 
@@ -21,7 +19,6 @@ enum list_interfaces {
 	e_list,
 	e_queue,
 	e_stack,
-	e_set,
 	e_l_count
 };
 
@@ -69,6 +66,9 @@ static object*  o_dlist_create_v        (allocator alc, pf_dispose dispose);
 static void     o_dlist_destroy         (object* o);
 static void     o_dlist_clear           (object* o);
 static int      o_dlist_size            (const object* o);
+static bool     o_dlist_empty           (const object* o);
+static const void* o_dlist_front        (const object* o);
+static const void* o_dlist_back         (const object* o);
 static void     o_dlist_add_front       (object* o, void* __ref);
 static void     o_dlist_add_back        (object* o, void* __ref);
 static void*    o_dlist_remove_front    (object* o);
@@ -86,10 +86,10 @@ static const_iterator o_dlist_itr_begin (const object* o);
 static const_iterator o_dlist_itr_end   (const object* o);
 
 /* factory method, the only public function in this file */
-object* create_dblinked_list() {
+object* cntr_create_olist() {
 	return o_dlist_create();
 }
-object* create_dblinked_list_v(allocator alc, pf_dispose dispose) {
+object* cntr_create_olist_v(allocator alc, pf_dispose dispose) {
 	return o_dlist_create_v(alc, dispose);
 }
 
@@ -97,6 +97,9 @@ static struct ilist_vtable __ilist_vtable = {
 	o_dlist_destroy,          /* __destroy */
 	o_dlist_clear,            /* __clear */
 	o_dlist_size,             /* __size */
+	o_dlist_empty,            /* __empty */
+	o_dlist_front,            /* __front */
+	o_dlist_back,             /* __back */
 	o_dlist_add_front,        /* __add_front */
 	o_dlist_add_back,         /* __add_back */
 	o_dlist_remove_front,     /* __remove_front */
@@ -118,6 +121,9 @@ static struct iqueue_vtable __iqueue_vtable = {
 	o_dlist_destroy,          /* __destroy */
 	o_dlist_clear,            /* __clear */
 	o_dlist_size,             /* __size */
+	o_dlist_empty,            /* __empty */
+	o_dlist_front,            /* __front */
+	o_dlist_back,             /* __back */
 	o_dlist_add_back,         /* __push */
 	o_dlist_remove_front,     /* __pop */
 	o_dlist_itr_create,       /* __itr_create */
@@ -130,26 +136,12 @@ static struct istack_vtable __istack_vtable = {
 	o_dlist_destroy,          /* __destroy */
 	o_dlist_clear,            /* __clear */
 	o_dlist_size,             /* __size */
+	o_dlist_empty,            /* __empty */
+	o_dlist_back,             /* __top */
 	o_dlist_add_back,         /* __push */
 	o_dlist_remove_back,      /* __pop */
 	o_dlist_itr_create,       /* __itr_create */
 	o_dlist_itr_assign,       /* __itr_assign */
-	o_dlist_itr_begin,        /* __itr_begin */
-	o_dlist_itr_end           /* __itr_end */
-};
-
-static struct iset_vtable __iset_vtable = {
-	o_dlist_destroy,          /* __destroy */
-	o_dlist_clear,            /* __clear */
-	o_dlist_size,             /* __size */
-	o_dlist_add_back,         /* __insert */
-	o_dlist_contains,         /* __contains */
-	o_dlist_remove,           /* __remove */
-
-	o_dlist_itr_create,       /* __itr_create */
-	o_dlist_itr_assign,       /* __itr_assign */
-	o_dlist_itr_find,         /* __itr_find */
-	o_dlist_itr_remove,       /* __itr_remove */
 	o_dlist_itr_begin,        /* __itr_begin */
 	o_dlist_itr_end           /* __itr_end */
 };
@@ -266,8 +258,6 @@ static unknown o_dlist_cast(unknown x, unique_id intf_id) {
 		return (unknown)&o->__iftable[e_queue];
 	case ISTACK_ID:
 		return (unknown)&o->__iftable[e_stack];
-	case ISET_ID:
-		return (unknown)&o->__iftable[e_set];
 	default:
 		return NULL;
 	}
@@ -317,8 +307,6 @@ static object* o_dlist_create_v(allocator alc, pf_dispose dispose) {
 	olist->__iftable[e_queue].__vtable = &__iqueue_vtable;
 	olist->__iftable[e_stack].__offset = (address)e_stack;
 	olist->__iftable[e_stack].__vtable = &__istack_vtable;
-	olist->__iftable[e_set].__offset = (address)e_set;
-	olist->__iftable[e_set].__vtable = &__iset_vtable;
 
 	list_init(&olist->__sentinel);
 	olist->__size    = 0;
@@ -368,6 +356,38 @@ static int o_dlist_size(const object* o) {
 	return olist->__size;
 }
 
+static bool o_dlist_empty(const object* o) {
+	const struct o_dlist* olist = (const struct o_dlist*)o;
+
+	return olist->__size == 0;
+}
+
+static const void* o_dlist_front(const object* o) {
+	const struct o_dlist* olist = (const struct o_dlist*)o;
+	struct o_dlist_node* n_node = NULL;
+
+	if (olist->__size == 0) {
+		return NULL;
+	}
+
+	n_node = container_of(olist->__sentinel.next, struct o_dlist_node, link);
+
+	return n_node->reference;
+}
+
+static const void* o_dlist_back(const object* o) {
+	const struct o_dlist* olist = (const struct o_dlist*)o;
+	struct o_dlist_node* n_node = NULL;
+
+	if (olist->__size == 0) {
+		return NULL;
+	}
+
+	n_node = container_of(olist->__sentinel.prev, struct o_dlist_node, link);
+
+	return n_node->reference;
+}
+
 static void o_dlist_add_front(object* o, void* ref) {
 	struct o_dlist* olist = (struct o_dlist*)o;
 
@@ -414,8 +434,6 @@ static void* o_dlist_remove_front(object* o) {
 	dbg_assert(olist->__size == 0);
 	dbg_assert(list_empty(&olist->__sentinel));
 
-	dbg_assert(false);
-
 	return NULL;
 }
 
@@ -439,8 +457,6 @@ static void* o_dlist_remove_back(object* o) {
 
 	dbg_assert(olist->__size == 0);
 	dbg_assert(list_empty(&olist->__sentinel));
-
-	dbg_assert(false);
 
 	return NULL;
 }

@@ -1,8 +1,10 @@
-#include <test_util.h>
-
 #include <stdio.h>
 #include <stdarg.h>
 #include <time.h>
+
+#include "memheap/heap_def.h"
+
+#include "test_util.h"
 
 static bool        g_use_file = false;
 static const char* g_log_file = NULL;
@@ -116,4 +118,14 @@ void test_log_use_footer(bool use_or_not) {
 
 void test_log_time(bool log) {
 	g_log_time = log;
+}
+
+void allocator_heap_walk_print(struct heap_blockinfo* binfo, void* param) {
+	unused(param);
+	if (binfo->allocated) {
+		log_printtab();
+		log_printf("0X%08X", (int)(intptr_t)binfo->allocable_addr);
+		log_printf("%8d bytes", binfo->allocable_size);
+		log_printf(" at %s %d\n", binfo->file, binfo->line);
+	}
 }
