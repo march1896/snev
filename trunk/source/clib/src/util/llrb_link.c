@@ -615,7 +615,7 @@ struct llrb_link* llrb_max(struct llrb_link* root) {
 	return root;
 }
 
-struct llrb_link* llrb_predesessor(struct llrb_link* link, bool only_sub) {
+struct llrb_link* llrb_predesessor(const struct llrb_link* link, bool only_sub) {
 	if (link->left != NULL) {
 		/* find the max element in the left sub tree */
 		struct llrb_link* fwd = link->left;
@@ -637,7 +637,7 @@ struct llrb_link* llrb_predesessor(struct llrb_link* link, bool only_sub) {
 	return NULL;
 }
 
-struct llrb_link* llrb_successor(struct llrb_link* link, bool only_sub) {
+struct llrb_link* llrb_successor(const struct llrb_link* link, bool only_sub) {
 	if (link->right != NULL) {
 		/* find the minimum element in the right sub tree */
 		struct llrb_link* fwd = link->right;
