@@ -490,6 +490,7 @@ static int ollrb_direct_lower(const struct llrb_link* link, void* param) {
 	else if (compr < 0) /* we should explore right side */
 		return 1;
 	else {
+		dir->candidate = link;
 		return -1;
 	}
 
@@ -503,12 +504,12 @@ static int ollrb_direct_upper(const struct llrb_link* link, void* param) {
 	int    compr            = dir->comp(node->reference, dir->target);
 
 	if (compr == 0) {
-		dir->candidate = link; /* update the candidate */
 		return 1; /* explore the right side */
 	}
 	else if (compr < 0) /* we should explore right side */
 		return 1;
 	else {
+		dir->candidate = link; /* update the candidate */
 		return -1;
 	}
 
@@ -540,7 +541,7 @@ static void ollrb_itr_find_lower(const object* o, iterator itr, void* __ref) {
 	struct ollrb* ollrb     = (struct ollrb*)o;
 	struct ollrb_itr* oitr  = (struct ollrb_itr*)itr;
 	struct direct_s   dir   = { ollrb->__ref_comp, __ref, NULL };
-	struct llrb_link* link  = llrb_search(ollrb->__sentinel.left, ollrb_direct_lower, __ref);
+	struct llrb_link* link  = llrb_search(ollrb->__sentinel.left, ollrb_direct_lower, &dir);
 
 	dbg_assert(link == NULL); /* we will always direct down */
 	/* TODO: remove const cast */
@@ -562,7 +563,7 @@ static void ollrb_itr_find_upper(const object* o, iterator itr, void* __ref) {
 	struct ollrb* ollrb     = (struct ollrb*)o;
 	struct ollrb_itr* oitr  = (struct ollrb_itr*)itr;
 	struct direct_s   dir   = { ollrb->__ref_comp, __ref, NULL };
-	const struct llrb_link* link  = llrb_search(ollrb->__sentinel.left, ollrb_direct_upper, __ref);
+	struct llrb_link* link  = llrb_search(ollrb->__sentinel.left, ollrb_direct_upper, &dir);
 
 	dbg_assert(link == NULL); /* we will always direct down */
 	link = (struct llrb_link*)dir.candidate;
@@ -572,7 +573,7 @@ static void ollrb_itr_find_upper(const object* o, iterator itr, void* __ref) {
 	dbg_assert(itr->__iftable[0].__vtable == (unknown)&__itr_vtable);
 
 	if (link != NULL) { 
-		oitr->__current = llrb_successor(dir.candidate, false); /* the successor is what we need */
+		oitr->__current = link;
 	}
 	else {
 		oitr->__current = &ollrb->__sentinel;
@@ -614,7 +615,8 @@ static void ollrb_insert_m(object* o, void* __ref) {
 
 static bool ollrb_contains(const object* o, void* __ref) {
 	struct ollrb* ollrb    = (struct ollrb*)o;
-	struct llrb_link* link = llrb_search(ollrb->__sentinel.left, ollrb_direct, __ref);
+	struct direct_s   dir  = { ollrb->__ref_comp, __ref, NULL };
+	struct llrb_link* link = llrb_search(ollrb->__sentinel.left, ollrb_direct, &dir);
 
 	if (link != NULL) {
 		return true;
@@ -624,12 +626,22 @@ static bool ollrb_contains(const object* o, void* __ref) {
 }
 
 static int ollrb_count(const object* o, void* __ref) {
-	struct ollrb* ollrb    = (struct ollrb*)o;
-	struct llrb_link* lb = llrb_search(ollrb->__sentinel.left, ollrb_direct, __ref);
+	struct ollrb*     ollrb    = (struct ollrb*)o;
+	struct direct_s   dir      = { ollrb->__ref_comp, __ref, NULL };
+	const struct llrb_link* lb = llrb_search(ollrb->__sentinel.left, ollrb_direct_lower, &dir);
+	dbg_assert(lb == NULL);
+	lb = (dir.candidate);
 
+	dir.candidate = NULL;
 	if (lb != NULL) {
-		struct llrb_link* ub = llrb_search(ollrb->__sentinel.left, ollrb_direct_upper, __ref);
+		const struct llrb_link* ub = llrb_search(ollrb->__sentinel.left, ollrb_direct_upper, &dir);
 		int count = 0;
+
+		dbg_assert(ub == NULL);
+		ub = (dir.candidate);
+		
+		if (ub == NULL) 
+			ub = &ollrb->__sentinel;
 
 		while (lb != ub) {
 			count ++;
@@ -644,7 +656,8 @@ static int ollrb_count(const object* o, void* __ref) {
 
 static bool ollrb_remove(object* o, void* __ref) {
 	struct ollrb* ollrb     = (struct ollrb*)o;
-	struct llrb_link* link   = llrb_search(ollrb->__sentinel.left, ollrb_direct, __ref);
+	struct direct_s   dir   = { ollrb->__ref_comp, __ref, NULL };
+	struct llrb_link* link   = llrb_search(ollrb->__sentinel.left, ollrb_direct, &dir);
 
 	if (link != NULL) {
 		struct ollrb_node* node = container_of(link, struct ollrb_node, link);

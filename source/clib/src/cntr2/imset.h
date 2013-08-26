@@ -17,9 +17,9 @@ extern inline       bool     imset_remove     (iobject* i, void* __ref);
 
 extern inline       iterator imset_itr_create (const iobject* i, itr_pos pos);
 extern inline       void     imset_itr_assign (const iobject* i, /* out */iterator itr, itr_pos pos);
-/* points to end if __ref is not in the set, or find the first element equal to __ref in the mset */
+/* find the minimum element which is greater or equal to __ref */
 extern inline       void     imset_itr_find_lower(const iobject* i, /* out */iterator itr, void* __ref);
-/* points to end if __ref is not in the set, or find the first element greater than in the mset */
+/* find the minimum element which is greater than __ref */
 extern inline       void     imset_itr_find_upper(const iobject* i, /* out */iterator itr, void* __ref);
 extern inline       void*    imset_itr_remove (iobject* i, iterator itr);
 /* return a iterator, maybe forward/bidirectional/random accessed. */

@@ -624,7 +624,7 @@ struct llrb_link* llrb_predesessor(const struct llrb_link* link, bool only_sub) 
 		return fwd;
 	}
 	else if (!only_sub && link->parent) {
-		struct llrb_link* fwd = link;
+		const struct llrb_link* fwd = link;
 
 		while (fwd->parent != NULL) {
 			if (fwd->parent->right == fwd) break;
@@ -647,7 +647,7 @@ struct llrb_link* llrb_successor(const struct llrb_link* link, bool only_sub) {
 		return fwd;
 	}
 	else if (!only_sub && link->parent) {
-		struct llrb_link* fwd = link;
+		const struct llrb_link* fwd = link;
 
 		while (fwd->parent != NULL) {
 			if (fwd->parent->left == fwd) break;

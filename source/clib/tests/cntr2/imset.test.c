@@ -55,9 +55,20 @@ static void mset_test_basic_itr_operation(iobject* mset) {
 		/* test itr_find_lower, itr_find_upper */
 		/* find element not int the mset */
 		imset_itr_find_lower(mset, lower, (void*)(intptr_t)0);
-		dbg_assert(itr_equals(lower, imset_itr_end(mset)));
 		imset_itr_find_upper(mset, upper, (void*)(intptr_t)0);
-		dbg_assert(itr_equals(upper, imset_itr_end(mset)));
+		/* NOTE: we will not find the end of the set */
+		/* dbg_assert(itr_equals(lower, imset_itr_end(mset))); */
+		dbg_assert(itr_equals(upper, lower));
+		dbg_assert(itr_equals(lower, imset_itr_begin(mset)));
+
+		/* test itr_find_lower, itr_find_upper */
+		/* find element not int the mset */
+		imset_itr_find_lower(mset, lower, (void*)(intptr_t)5);
+		imset_itr_find_upper(mset, upper, (void*)(intptr_t)5);
+		/* NOTE: we will not find the end of the set */
+		/* dbg_assert(itr_equals(lower, imset_itr_end(mset))); */
+		dbg_assert(itr_equals(upper, lower));
+		dbg_assert(itr_equals(lower, imset_itr_end(mset)));
 
 		imset_itr_find_lower(mset, lower, (void*)(intptr_t)1);
 		imset_itr_find_upper(mset, upper, (void*)(intptr_t)1);
@@ -94,8 +105,8 @@ static void mset_test_basic_itr_operation(iobject* mset) {
 		/* now the mset is { 1, 1, 2,  3, 3, 4, 4 } */
 		dbg_assert(current == 2);
 		dbg_assert(imset_size(mset) == 7);
-		imset_itr_find_lower(mset, lower, (void*)(intptr_t)4);
-		imset_itr_find_upper(mset, upper, (void*)(intptr_t)4);
+		imset_itr_find_lower(mset, lower, (void*)(intptr_t)2);
+		imset_itr_find_upper(mset, upper, (void*)(intptr_t)2);
 		dbg_assert(!itr_equals(lower, upper));
 		counter.count = 0;
 		counter.sum = 0;
@@ -123,6 +134,8 @@ static void mset_test_basic_itr_operation(iobject* mset) {
 		imset_itr_find_lower(mset, lower, (void*)(intptr_t)2);
 		imset_itr_find_upper(mset, upper, (void*)(intptr_t)2);
 		dbg_assert(itr_equals(lower, upper));
+		imset_itr_find_lower(mset, upper, (void*)(intptr_t)3);
+		dbg_assert(itr_equals(lower, upper));
 		counter.count = 0;
 		counter.sum = 0;
 		foreach_v(lower, upper, foreach_count, &counter);
@@ -131,7 +144,7 @@ static void mset_test_basic_itr_operation(iobject* mset) {
 
 		imset_itr_find_lower(mset, lower, (void*)(intptr_t)1);
 		imset_itr_find_upper(mset, upper, (void*)(intptr_t)2);
-		dbg_assert(itr_equals(lower, upper));
+		dbg_assert(!itr_equals(lower, upper));
 		counter.count = 0;
 		counter.sum = 0;
 		foreach_v(lower, upper, foreach_count, &counter);
@@ -179,7 +192,6 @@ static void mset_test_basic_operation(iobject* mset) {
 	dbg_assert(imset_empty(mset) == false);
 	{
 		/* now the mset contains { 1, 1, 2, 2, 3, 3, 4, 4 } */
-		intptr_t x;
 		bool res;
 
 		res = imset_remove(mset, (void*)(intptr_t)2);
