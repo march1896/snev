@@ -77,6 +77,7 @@ static bool     ollrb_remove          (object* o, void* __ref);
 
 static iterator ollrb_itr_create      (const object* o, itr_pos pos);
 static void     ollrb_itr_assign      (const object* o, iterator itr, itr_pos pos);
+static void     ollrb_itr_find        (const object* o, iterator itr, void* __ref);
 static void     ollrb_itr_find_lower  (const object* o, iterator itr, void* __ref);
 static void     ollrb_itr_find_upper  (const object* o, iterator itr, void* __ref);
 
@@ -104,7 +105,7 @@ static struct iset_vtable __iset_vtable = {
 
 	ollrb_itr_create,       /* __itr_create */
 	ollrb_itr_assign,       /* __itr_assign */
-	ollrb_itr_find_lower,         /* __itr_find */
+	ollrb_itr_find,         /* __itr_find */
 	ollrb_itr_remove,       /* __itr_remove */
 	ollrb_itr_begin,        /* __itr_begin */
 	ollrb_itr_end           /* __itr_end */
@@ -457,46 +458,93 @@ static void ollrb_itr_assign(const object* o, iterator itr, itr_pos pos) {
 	}
 }
 
-/* TODO: totally wrong, using directly compare instead of the comparison callback */
-static int ollrb_direct(const struct llrb_link* link, void* __ref) {
-	struct ollrb_node* node = container_of(link, struct ollrb_node, link);
+struct direct_s {
+	pf_compare  comp;
+	const void* target;
+	const struct llrb_link* candidate; /* only useful for multiple instances */
+};
 
-	if (node->reference == __ref) 
+/* TODO: totally wrong, using directly compare instead of the comparison callback */
+static int ollrb_direct(const struct llrb_link* link, void* param) {
+	struct ollrb_node* node = container_of(link, struct ollrb_node, link);
+	struct direct_s* dir    = (struct direct_s*)param;
+	int    compr            = dir->comp(node->reference, dir->target);
+
+	if (compr == 0)
 		return 0;
-	else if (node->reference < __ref) /* we should expose right side */
+	else if (compr < 0) /* we should expose right side */
 		return 1;
 	else 
 		return -1;
 }
 
-static int ollrb_direct_upper(const struct llrb_link* link, void* __ref) {
+static int ollrb_direct_lower(const struct llrb_link* link, void* param) {
 	struct ollrb_node* node = container_of(link, struct ollrb_node, link);
+	struct direct_s* dir    = (struct direct_s*)param;
+	int    compr            = dir->comp(node->reference, dir->target);
 
-	dbg_assert(false);
-	if (node->reference == __ref) {
-
+	if (compr == 0) {
+		dir->candidate = link; /* update the candidate */
+		return -1; /* explore the left side */
 	}
-	else if (node->reference < __ref) /* we should explore right side */
+	else if (compr < 0) /* we should explore right side */
 		return 1;
 	else {
+		return -1;
 	}
-		
-	if (node->reference == __ref) {
-		if (link->right != NULL) {
-			/* explore right child, trying to find a greater one */
-			return 1;
-		}
-		else {
-			/* no right  children, return a successor */
-		}
-	}
+
+	/* never been here */
 	return 0;
+}
+
+static int ollrb_direct_upper(const struct llrb_link* link, void* param) {
+	struct ollrb_node* node = container_of(link, struct ollrb_node, link);
+	struct direct_s* dir    = (struct direct_s*)param;
+	int    compr            = dir->comp(node->reference, dir->target);
+
+	if (compr == 0) {
+		dir->candidate = link; /* update the candidate */
+		return 1; /* explore the right side */
+	}
+	else if (compr < 0) /* we should explore right side */
+		return 1;
+	else {
+		return -1;
+	}
+
+	/* never been here */
+	return 0;
+}
+
+static void ollrb_itr_find(const object* o, iterator itr, void* __ref) {
+	struct ollrb* ollrb     = (struct ollrb*)o;
+	struct ollrb_itr* oitr  = (struct ollrb_itr*)itr;
+	struct direct_s   dir   = { ollrb->__ref_comp, __ref, NULL };
+	struct llrb_link* link  = llrb_search(ollrb->__sentinel.left, ollrb_direct, &dir);
+
+	dbg_assert(dir.candidate == NULL);
+
+	/* make sure the iterator type is right */
+	dbg_assert(itr->__iftable[0].__offset == (address)0);
+	dbg_assert(itr->__iftable[0].__vtable == (unknown)&__itr_vtable);
+
+	if (link != NULL) {
+		oitr->__current = link;
+	}
+	else {
+		oitr->__current = &ollrb->__sentinel;
+	}
 }
 
 static void ollrb_itr_find_lower(const object* o, iterator itr, void* __ref) {
 	struct ollrb* ollrb     = (struct ollrb*)o;
 	struct ollrb_itr* oitr  = (struct ollrb_itr*)itr;
-	struct llrb_link* link  = llrb_search(ollrb->__sentinel.left, ollrb_direct, __ref);
+	struct direct_s   dir   = { ollrb->__ref_comp, __ref, NULL };
+	struct llrb_link* link  = llrb_search(ollrb->__sentinel.left, ollrb_direct_lower, __ref);
+
+	dbg_assert(link == NULL); /* we will always direct down */
+	/* TODO: remove const cast */
+	link = (struct llrb_link*)dir.candidate;    /* the last candidate, the most closed to leaf one, is what we want */
 
 	/* make sure the iterator type is right */
 	dbg_assert(itr->__iftable[0].__offset == (address)0);
@@ -513,14 +561,18 @@ static void ollrb_itr_find_lower(const object* o, iterator itr, void* __ref) {
 static void ollrb_itr_find_upper(const object* o, iterator itr, void* __ref) {
 	struct ollrb* ollrb     = (struct ollrb*)o;
 	struct ollrb_itr* oitr  = (struct ollrb_itr*)itr;
-	struct llrb_link* link  = llrb_search(ollrb->__sentinel.left, ollrb_direct_upper, __ref);
+	struct direct_s   dir   = { ollrb->__ref_comp, __ref, NULL };
+	const struct llrb_link* link  = llrb_search(ollrb->__sentinel.left, ollrb_direct_upper, __ref);
+
+	dbg_assert(link == NULL); /* we will always direct down */
+	link = (struct llrb_link*)dir.candidate;
 
 	/* make sure the iterator type is right */
 	dbg_assert(itr->__iftable[0].__offset == (address)0);
 	dbg_assert(itr->__iftable[0].__vtable == (unknown)&__itr_vtable);
 
-	if (link != NULL) {
-		oitr->__current = link;
+	if (link != NULL) { 
+		oitr->__current = llrb_successor(dir.candidate, false); /* the successor is what we need */
 	}
 	else {
 		oitr->__current = &ollrb->__sentinel;
