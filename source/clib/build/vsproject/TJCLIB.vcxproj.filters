@@ -136,6 +136,9 @@
     <ClCompile Include="..\..\src\cntr2\imset.c">
       <Filter>Source Files\cntr2</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\memheap\heap_pool.c">
+      <Filter>Source Files\memheap</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
@@ -316,6 +319,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\cntr2\imset.h">
       <Filter>Source Files\cntr2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\memheap\heap_pool.h">
+      <Filter>Source Files\memheap</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

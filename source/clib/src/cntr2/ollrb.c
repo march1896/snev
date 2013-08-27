@@ -380,9 +380,8 @@ static void ollrb_clear(object* o) {
 
 	llrb_traverse(ollrb->__root, per_link_dispose, (void*)ollrb);
 
-	ollrb_reassociate(ollrb);
-
 	ollrb->__root = NULL;
+	ollrb_reassociate(ollrb);
 	ollrb->__size = 0;
 }
 
