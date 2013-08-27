@@ -1,6 +1,6 @@
 #gnumake for this project.
 
-platform := CYGWIN
+platform := OSX
 opt      := 0
 debug    := 1
 

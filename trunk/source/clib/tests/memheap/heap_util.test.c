@@ -123,7 +123,10 @@ static void generate_init_current() {
 			g_pagesize_min = RANDOM_PAGE_MIN;
 			g_pagesize_max = RANDOM_PAGE_MAX;
 			break;
+		default:
+			break;
 	}
+	return;
 }
 
 static int generate_in_range(int minimum, int maximum) {
@@ -220,6 +223,8 @@ static void data_seeds_init() {
 			for (i = 0; i < g_op_count; i ++) {
 				g_seeds_inuse[i] = seeds_random[i];
 			}
+			break;
+		default:
 			break;
 	}
 

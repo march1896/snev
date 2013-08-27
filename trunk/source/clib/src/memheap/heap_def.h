@@ -2,7 +2,11 @@
 #define _HEAP_DEF_H_
 
 #include <cominc.h>
+
+//#ifdef _DEBUG
 #define _MEM_DEBUG_
+//#endif
+
 #ifdef _MEM_DEBUG_
 #define _VERBOSE_ALLOC_DEALLOC_
 #endif
