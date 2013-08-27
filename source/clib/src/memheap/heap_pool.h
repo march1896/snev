@@ -18,13 +18,15 @@ struct heap_pool_single {
 	pf_alloc         __alloc;
 	pf_dealloc       __dealloc;
 
-	int              psize;     /* the pooled memory size */
-	int              count;     /* number of allocated block in this pool */
-	int              level;     /* level of totally buffered memory in this single pool */
+	int              target_size;           /* the target size, which will pooled in */
+	int              alloc_count;     /* number of allocated block in this pool */
+	int              level;           /* level is the current storage level */
 
 	void*            next;
 	struct list_link sentinel;
 };
+
+#define HEAP_POOL_START_LEVEL 4
 
 struct heap_pool_multiple {
 	void*            __parent;
