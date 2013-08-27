@@ -86,14 +86,6 @@ static void*    ollrb_itr_remove      (object* o, iterator itr);
 static const_iterator ollrb_itr_begin (const object* o);
 static const_iterator ollrb_itr_end   (const object* o);
 
-/* factory method, the only public function in this file */
-object* create_llrb_container(pf_compare ref_compare) {
-	return ollrb_create(ref_compare);
-}
-object* create_llrb_container_v(pf_compare ref_compare, allocator alc, pf_dispose dispose) {
-	return ollrb_create_v(ref_compare, alc, dispose);
-}
-
 static struct iset_vtable __iset_vtable = {
 	ollrb_destroy,          /* __destroy */
 	ollrb_clear,            /* __clear */
@@ -291,7 +283,7 @@ static int ollrb_compare_v(const struct llrb_link* a, const struct llrb_link* b,
 }
 
 static object* ollrb_create(pf_compare ref_compare) {
-	return ollrb_create_v(ref_compare, global_sysd_allocator, NULL);
+	return ollrb_create_v(ref_compare, global_buddy_allocator, NULL);
 }
 
 static void ollrb_itr_com_init(struct ollrb_itr* itr, struct ollrb* list);
