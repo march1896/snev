@@ -291,7 +291,7 @@ static int ollrb_compare_v(const struct llrb_link* a, const struct llrb_link* b,
 }
 
 static object* ollrb_create(pf_compare ref_compare) {
-	return ollrb_create_v(ref_compare, global_llrb_allocator, NULL);
+	return ollrb_create_v(ref_compare, global_sysd_allocator, NULL);
 }
 
 static void ollrb_itr_com_init(struct ollrb_itr* itr, struct ollrb* list);

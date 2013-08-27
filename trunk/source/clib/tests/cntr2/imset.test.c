@@ -293,7 +293,7 @@ void mset_test_basic(iobject* mset) {
 
 	mset_test_basic_itr_operation(mset);
 
-	mset_test_datamset(mset, 100000); 
+	mset_test_datamset(mset, 1000000); 
 }
 
 void mset_test_memory(iobject* mset) {

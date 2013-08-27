@@ -306,7 +306,7 @@ void set_test_basic(iobject* set) {
 
 	set_test_basic_itr_operation(set);
 
-	set_test_dataset(set, 100000); 
+	set_test_dataset(set, 1000000); 
 }
 
 void set_test_memory(iobject* set) {

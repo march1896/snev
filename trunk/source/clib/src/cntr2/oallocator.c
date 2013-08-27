@@ -156,7 +156,7 @@ static struct allocator_sysd __allocator_sysd = {
 	NULL                         /* __driver, should we use __global_heap_sysd instead? */
 };
 
-allocator default_allocator = (allocator)&__allocator_sysd;
+allocator global_sysd_allocator = (allocator)&__allocator_sysd;
 
 /*****************************************************************************************
  * allocator system default end 
