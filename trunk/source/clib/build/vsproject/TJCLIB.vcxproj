@@ -221,6 +221,7 @@
     <ClCompile Include="..\..\src\memheap\heap_factory.c" />
     <ClCompile Include="..\..\src\memheap\heap_global.c" />
     <ClCompile Include="..\..\src\memheap\heap_llrb.c" />
+    <ClCompile Include="..\..\src\memheap\heap_pool.c" />
     <ClCompile Include="..\..\src\memheap\heap_sys.c" />
     <ClCompile Include="..\..\src\memheap\heap_walk.c" />
     <ClCompile Include="..\..\src\memheap\heap_wrap.c" />
@@ -287,6 +288,7 @@
     <ClInclude Include="..\..\src\memheap\heap_factory.h" />
     <ClInclude Include="..\..\src\memheap\heap_global.h" />
     <ClInclude Include="..\..\src\memheap\heap_llrb.h" />
+    <ClInclude Include="..\..\src\memheap\heap_pool.h" />
     <ClInclude Include="..\..\src\memheap\heap_sys.h" />
     <ClInclude Include="..\..\src\memheap\heap_walk.h" />
     <ClInclude Include="..\..\src\memheap\heap_wrap.h" />
