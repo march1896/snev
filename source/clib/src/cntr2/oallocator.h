@@ -49,7 +49,7 @@ extern inline void      allocator_walk      (allocator o, pf_process_block per_b
 #endif
 
 /* system default allocator, which can not be spawned or joined */
-extern allocator default_allocator;
+extern allocator global_sysd_allocator;
 
 extern allocator global_llrb_allocator;
 
