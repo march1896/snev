@@ -55,6 +55,7 @@ struct ollrb {
 
 	/* methods to manage the inner memory use by the container */
 	allocator                     __allocator;
+	bool                          __allocator_join_ondispose;
 
 	/* methods to manage the object's lifetime which is stored in the container */
 	pf_dispose                    __dispose;         
@@ -283,14 +284,18 @@ static int ollrb_compare_v(const struct llrb_link* a, const struct llrb_link* b,
 }
 
 static object* ollrb_create(pf_compare ref_compare) {
-	return ollrb_create_v(ref_compare, global_buddy_allocator, NULL);
+	return ollrb_create_v(ref_compare, global_sysd_allocator, NULL);
 }
 
 static void ollrb_itr_com_init(struct ollrb_itr* itr, struct ollrb* list);
 static object* ollrb_create_v(pf_compare ref_compare, allocator alc, pf_dispose dispose) {
 	struct ollrb* ollrb = NULL;
+	bool managed_allocator = false;
 
-	dbg_assert(alc != NULL);
+	if (alc == NULL) {
+		alc = allocator_mpool_spawn(global_sysd_allocator, 10);
+		managed_allocator = true;
+	}
 
 	ollrb = (struct ollrb*)allocator_alloc(alc, sizeof(struct ollrb));
 
@@ -310,7 +315,9 @@ static object* ollrb_create_v(pf_compare ref_compare, allocator alc, pf_dispose 
 	ollrb->__sentinel.parent = NULL;
 	ollrb->__sentinel.color  = 55; /* TODO: how to handle this color? */
 
+
 	ollrb->__allocator = alc;
+	ollrb->__allocator_join_ondispose = managed_allocator;
 
 	ollrb->__dispose   = dispose;
 
@@ -345,9 +352,16 @@ static void per_link_dispose(struct llrb_link* link, void* param) {
 
 static void ollrb_destroy(object* o) {
 	struct ollrb* ollrb = (struct ollrb*)o;
+	allocator alc = ollrb->__allocator;
+	bool join_alc = ollrb->__allocator_join_ondispose;
 
 	ollrb_clear(o);
-	allocator_dealloc(ollrb->__allocator, ollrb);
+
+	allocator_dealloc(alc, ollrb);
+
+	if (join_alc) {
+		allocator_join(alc);
+	}
 }
 
 typedef void (*pf_per_link_operation)(struct llrb_link* link, void* param);

@@ -31,6 +31,11 @@ void heap_spool_deinit(struct heap_spool* h) {
 	list_init(&h->sentinel);
 }
 
+void heap_spool_walk(struct heap_spool* pheap, pf_process_block per_block_cb, void* param) {
+	/* TODO: not implemented */
+	dbg_assert(false);
+}
+
 /* this is only useful for verbose block */
 struct pool_block_header {
 	const char* file;
@@ -73,7 +78,7 @@ void heap_spool_expand_memory(struct heap_spool* h) {
 
 void* heap_spool_alloc_c(struct heap_spool* h, int size) {
 	void* mem = NULL;
-	dbg_assert(size == h->target_size);
+	dbg_assert(h->target_size == -1 || size == h->target_size);
 
 	if (h->next == NULL) {
 		if (h->target_size == -1) {
@@ -104,15 +109,17 @@ bool heap_spool_dealloc_c(struct heap_spool* h, void* buff) {
 		int level = h->start_level;
 		while (link != &h->sentinel) {
 			int block_size = h->target_size;
-			int mem_size = (1 << h->level) * block_size + sizeof(struct list_link);
+			int mem_size = (1 << level) * block_size + sizeof(struct list_link);
 			char* m_start = (char*)(link + 1);
-			char* m_last  = (char*)link + mem_size - sizeof(struct list_link);
+			char* m_last  = (char*)link + mem_size - block_size;
+			dbg_assert(m_last == m_start + (1 << level) * block_size - block_size);
 
 			if ((char*)buff >= m_start && (char*)buff <= m_last) {
 				if (((char*)buff - m_start) % block_size == 0) {
 					break;
 				}
 			}
+			link = link->next;
 			level ++;
 		}
 		dbg_assert(link != &h->sentinel);
@@ -129,13 +136,14 @@ bool heap_spool_dealloc_c(struct heap_spool* h, void* buff) {
 void* heap_spool_alloc_v(struct heap_spool* h, int size, const char* file, int line) {
 	void* mem = NULL;
 	struct pool_block_header* header = NULL;
-	dbg_assert(size == h->target_size);
 
+	dbg_assert(h->target_size == -1 || size == h->target_size);
 	if (h->next == NULL) {
 		if (h->target_size == -1) {
 			/* first allocation, got the size */
 			h->target_size = size >= sizeof(void*) ? size : sizeof(void*); 
 		}
+		
 		heap_spool_expand_memory(h);
 	}
 	dbg_assert(h->next != NULL);
@@ -163,16 +171,18 @@ bool heap_spool_dealloc_v(struct heap_spool* h, void* buff, const char* file, in
 		struct list_link* link = h->sentinel.next;
 		int level = h->start_level;
 		while (link != &h->sentinel) {
-			int block_size = h->target_size;
-			int mem_size = (1 << h->level) * block_size + sizeof(struct list_link);
+			int block_size = sizeof(struct pool_block_header) + h->target_size;
+			int mem_size = (1 << level) * block_size + sizeof(struct list_link);
 			char* m_start = (char*)(link + 1);
-			char* m_last  = (char*)link + mem_size - sizeof(struct list_link);
+			char* m_last  = (char*)link + mem_size - block_size;
+			dbg_assert(m_last == m_start + (1 << level) * block_size -block_size);
 
-			if ((char*)buff >= m_start && (char*)buff <= m_last) {
-				if (((char*)buff - m_start) % block_size == 0) {
+			if ((char*)mem >= m_start && (char*)mem <= m_last) {
+				if (((char*)mem - m_start) % block_size == 0) {
 					break;
 				}
 			}
+			link = link->next;
 			level ++;
 		}
 		dbg_assert(link != &h->sentinel);
@@ -212,6 +222,11 @@ void heap_mpool_deinit(struct heap_mpool* h) {
 		dealloc(h->__dealloc, h->__parent, h->spools[i]);
 	}
 	dealloc(h->__dealloc, h->__parent, h->spools);
+}
+
+void heap_mpool_walk(struct heap_mpool* pheap, pf_process_block per_block_cb, void* param) {
+	/* TODO: not implemented */
+	dbg_assert(false);
 }
 
 #ifndef _VERBOSE_ALLOC_DEALLOC_
@@ -261,7 +276,7 @@ void* heap_mpool_alloc_c(struct heap_mpool* h, int __size) {
 	h->alloc_count ++;
 
 	/* attach the size info */
-	*(int*)mem = __size;
+	*(int*)mem = size;
 	mem = (void*)((char*)mem + sizeof(int));
 
 	return mem;
@@ -269,7 +284,7 @@ void* heap_mpool_alloc_c(struct heap_mpool* h, int __size) {
 
 bool heap_mpool_dealloc_c(struct heap_mpool* h, void* buff) {
 	void* mem = (void*)((int*)buff - 1);
-	int size = (int)(intptr_t)mem;
+	int size = *(int*)mem;
 	int i, res;
 
 	for (i = 0; i < h->used_pools; i ++) {
@@ -346,7 +361,7 @@ void* heap_mpool_alloc_v(struct heap_mpool* h, int __size, const char* file, int
 	h->alloc_count ++;
 
 	/* attach the size info */
-	*(int*)mem = __size;
+	*(int*)mem = size;
 	mem = (void*)((char*)mem + sizeof(int));
 
 	return mem;
@@ -354,7 +369,7 @@ void* heap_mpool_alloc_v(struct heap_mpool* h, int __size, const char* file, int
 
 bool heap_mpool_dealloc_v(struct heap_mpool* h, void* buff, const char* file, int line) {
 	void* mem = (void*)((int*)buff - 1);
-	int size = (int)(intptr_t)mem;
+	int size = *(int*)mem;
 	int i, res;
 
 	for (i = 0; i < h->used_pools; i ++) {

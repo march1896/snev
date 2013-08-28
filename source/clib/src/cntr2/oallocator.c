@@ -4,6 +4,7 @@
 #include <memheap/heap_def.h>
 #include <memheap/heap_llrb.h>
 #include <memheap/heap_sys.h>
+#include <memheap/heap_pool.h>
 #include <memheap/heap_factory.h>
 #include <memheap/heap_global.h>
 
@@ -417,4 +418,230 @@ allocator global_buddy_allocator = (allocator)&__allocator_buddy;
 
 /*****************************************************************************************
  * allocator buddy end 
+ *****************************************************************************************/
+
+/*****************************************************************************************
+ * allocator spool begin 
+ *****************************************************************************************/
+
+struct allocator_spool {
+	address                       __offset;
+	pf_cast                       __cast;
+	
+	iobject                       __iftable[e_heap_count];
+
+	allocator                     __parent;
+	struct heap_spool*            __driver;
+};
+
+static void allocator_spool_join(allocator o) {
+	struct allocator_spool* me = (struct allocator_spool*)o;
+	allocator parent = allocator_get_parent(o);
+
+	/* first join the driver */
+	heap_spool_join(me->__driver);
+
+	/* release the memory of this object */
+	allocator_dealloc(parent, me);
+}
+
+#ifdef _VERBOSE_ALLOC_DEALLOC_
+static void* allocator_spool_acquire_v(allocator alo, int size, const char* file, int line) {
+	struct allocator_spool* me = (struct allocator_spool*)alo;
+
+	return heap_spool_alloc_v(me->__driver, size, file, line);
+}
+static bool allocator_spool_release_v(allocator alo, void* buff, const char* file, int line) {
+	struct allocator_spool* me = (struct allocator_spool*)alo;
+
+	return heap_spool_dealloc_v(me->__driver, buff, file, line);
+}
+#define allocator_spool_acquire allocator_spool_acquire_v
+#define allocator_spool_release allocator_spool_release_v
+#else 
+static void* allocator_spool_acquire_c(allocator alo, int size) {
+	struct allocator_spool* me = (struct allocator_spool*)alo;
+
+	return heap_spool_alloc_c(me->__driver, size);
+}
+static bool allocator_spool_release_c(allocator alo, void* buff) {
+	struct allocator_spool* me = (struct allocator_spool*)alo;
+
+	return heap_spool_dealloc_c(me->__driver, buff);
+}
+#define allocator_spool_acquire allocator_spool_acquire_c
+#define allocator_spool_release allocator_spool_release_c
+#endif
+static allocator allocator_spool_get_parent(allocator alo) {
+	struct allocator_spool* me = (struct allocator_spool*)alo;
+	return me->__parent;
+}
+
+static void allocator_spool_walk(allocator alo, pf_process_block per_block_cb, void* param) {
+	struct allocator_spool* me = (struct allocator_spool*)alo;
+
+	heap_spool_walk(me->__driver, per_block_cb, param);
+}
+
+struct iallocator_vtable __allocator_spool_vtable = {
+	allocator_spool_join,
+	allocator_spool_acquire,
+	allocator_spool_release,
+	allocator_spool_get_parent,
+	allocator_spool_walk
+};
+
+static unknown allocator_spool_cast(unknown x, unique_id intf_id);
+static unknown allocator_spool_cast(unknown x, unique_id intf_id) {
+	struct allocator_spool* o = (struct allocator_spool*)x;
+
+	dbg_assert(__is_object(x));
+
+	switch (intf_id) {
+	case IALLOCATOR_ID:
+		return (unknown)&o->__iftable[e_heap];
+	default:
+		return NULL;
+	}
+
+	return NULL;
+}
+
+allocator allocator_spool_spawn(allocator parent) {
+	struct allocator_spool* alo = NULL;
+
+	dbg_assert(parent != NULL);
+	alo = (struct allocator_spool*)allocator_alloc(parent, sizeof(struct allocator_spool));
+
+	alo->__offset = alo;
+	alo->__cast   = allocator_spool_cast;
+
+	alo->__iftable[e_heap].__offset = (address)e_heap;
+	alo->__iftable[e_heap].__vtable = &__allocator_spool_vtable;
+
+
+	alo->__parent = parent;
+
+	/* here is a little trick, it's interesting */
+	alo->__driver = 
+		heap_spool_spawn(parent, (pf_alloc)allocator_acquire, (pf_dealloc)allocator_release);
+
+	return (allocator)alo;
+}
+
+/*****************************************************************************************
+ * allocator spool end 
+ *****************************************************************************************/
+
+/*****************************************************************************************
+ * allocator mpool begin 
+ *****************************************************************************************/
+
+struct allocator_mpool {
+	address                       __offset;
+	pf_cast                       __cast;
+	
+	iobject                       __iftable[e_heap_count];
+
+	allocator                     __parent;
+	struct heap_mpool*            __driver;
+};
+
+static void allocator_mpool_join(allocator o) {
+	struct allocator_mpool* me = (struct allocator_mpool*)o;
+	allocator parent = allocator_get_parent(o);
+
+	/* first join the driver */
+	heap_mpool_join(me->__driver);
+
+	/* release the memory of this object */
+	allocator_dealloc(parent, me);
+}
+
+#ifdef _VERBOSE_ALLOC_DEALLOC_
+static void* allocator_mpool_acquire_v(allocator alo, int size, const char* file, int line) {
+	struct allocator_mpool* me = (struct allocator_mpool*)alo;
+
+	return heap_mpool_alloc_v(me->__driver, size, file, line);
+}
+static bool allocator_mpool_release_v(allocator alo, void* buff, const char* file, int line) {
+	struct allocator_mpool* me = (struct allocator_mpool*)alo;
+
+	return heap_mpool_dealloc_v(me->__driver, buff, file, line);
+}
+#define allocator_mpool_acquire allocator_mpool_acquire_v
+#define allocator_mpool_release allocator_mpool_release_v
+#else 
+static void* allocator_mpool_acquire_c(allocator alo, int size) {
+	struct allocator_mpool* me = (struct allocator_mpool*)alo;
+
+	return heap_mpool_alloc_c(me->__driver, size);
+}
+static bool allocator_mpool_release_c(allocator alo, void* buff) {
+	struct allocator_mpool* me = (struct allocator_mpool*)alo;
+
+	return heap_mpool_dealloc_c(me->__driver, buff);
+}
+#define allocator_mpool_acquire allocator_mpool_acquire_c
+#define allocator_mpool_release allocator_mpool_release_c
+#endif
+static allocator allocator_mpool_get_parent(allocator alo) {
+	struct allocator_mpool* me = (struct allocator_mpool*)alo;
+	return me->__parent;
+}
+
+static void allocator_mpool_walk(allocator alo, pf_process_block per_block_cb, void* param) {
+	struct allocator_mpool* me = (struct allocator_mpool*)alo;
+
+	heap_mpool_walk(me->__driver, per_block_cb, param);
+}
+
+struct iallocator_vtable __allocator_mpool_vtable = {
+	allocator_mpool_join,
+	allocator_mpool_acquire,
+	allocator_mpool_release,
+	allocator_mpool_get_parent,
+	allocator_mpool_walk
+};
+
+static unknown allocator_mpool_cast(unknown x, unique_id intf_id);
+static unknown allocator_mpool_cast(unknown x, unique_id intf_id) {
+	struct allocator_mpool* o = (struct allocator_mpool*)x;
+
+	dbg_assert(__is_object(x));
+
+	switch (intf_id) {
+	case IALLOCATOR_ID:
+		return (unknown)&o->__iftable[e_heap];
+	default:
+		return NULL;
+	}
+
+	return NULL;
+}
+
+allocator allocator_mpool_spawn(allocator parent, int max_diff_types) {
+	struct allocator_mpool* alo = NULL;
+
+	dbg_assert(parent != NULL);
+	alo = (struct allocator_mpool*)allocator_alloc(parent, sizeof(struct allocator_mpool));
+
+	alo->__offset = alo;
+	alo->__cast   = allocator_mpool_cast;
+
+	alo->__iftable[e_heap].__offset = (address)e_heap;
+	alo->__iftable[e_heap].__vtable = &__allocator_mpool_vtable;
+
+
+	alo->__parent = parent;
+
+	/* here is a little trick, it's interesting */
+	alo->__driver = 
+		heap_mpool_spawn(parent, (pf_alloc)allocator_acquire, (pf_dealloc)allocator_release, max_diff_types);
+
+	return (allocator)alo;
+}
+
+/*****************************************************************************************
+ * allocator mpool end 
  *****************************************************************************************/

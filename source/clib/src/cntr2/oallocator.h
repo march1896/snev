@@ -60,6 +60,8 @@ allocator allocator_llrb_spawn (allocator parent);
 
 allocator allocator_buddy_spawn(allocator parent);
 
-allocator allocator_pool_spawn (allocator parent);
+allocator allocator_spool_spawn(allocator parent);
+
+allocator allocator_mpool_spawn(allocator parent, int max_diff_types);
 
 #endif /* _OBJECT_ALLOCATOR_H_ */

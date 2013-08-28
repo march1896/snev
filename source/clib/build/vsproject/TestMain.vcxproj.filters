@@ -70,6 +70,9 @@
     <ClCompile Include="..\..\tests\cntr2\imset.test.c">
       <Filter>Source Files\cntr2</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\tests\memheap\heap.pool.test.c">
+      <Filter>Source Files\memheap</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">

@@ -290,6 +290,7 @@
     <ClCompile Include="..\..\tests\memheap\heap.all.test.c" />
     <ClCompile Include="..\..\tests\memheap\heap.buddy.test.c" />
     <ClCompile Include="..\..\tests\memheap\heap.llrb.test.c" />
+    <ClCompile Include="..\..\tests\memheap\heap.pool.test.c" />
     <ClCompile Include="..\..\tests\memheap\heap.sysd.test.c" />
     <ClCompile Include="..\..\tests\memheap\heap_util.test.c" />
     <ClCompile Include="..\..\tests\test_main.c" />
