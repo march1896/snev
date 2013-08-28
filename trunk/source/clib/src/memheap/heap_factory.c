@@ -4,6 +4,7 @@
 #include <memheap/heap_wrap.h>
 #include <memheap/heap_llrb.h>
 #include <memheap/heap_buddy.h>
+#include <memheap/heap_pool.h>
 
 struct heap_wrap* heap_wrap_spawn(void* __parent, pf_alloc __alloc, pf_dealloc __dealloc) {
 	struct heap_wrap* wheap = (struct heap_wrap*)
@@ -73,6 +74,42 @@ void heap_buddy_join(struct heap_buddy* pheap) {
 	pf_dealloc __dealloc = pheap->__dealloc;
 
 	heap_buddy_deinit(pheap);
+
+	dealloc(__dealloc, __parent, pheap);
+}
+
+struct heap_spool* heap_spool_spawn(void* __parent, pf_alloc __alloc, pf_dealloc __dealloc) {
+	struct heap_spool* sheap = (struct heap_spool*)
+		alloc(__alloc, __parent, sizeof(struct heap_spool));
+
+	heap_spool_init(sheap, __parent, __alloc, __dealloc);
+
+	return sheap;
+}
+
+void heap_spool_join(struct heap_spool* pheap) {
+	void* __parent       = pheap->__parent;
+	pf_dealloc __dealloc = pheap->__dealloc;
+
+	heap_spool_deinit(pheap);
+
+	dealloc(__dealloc, __parent, pheap);
+}
+
+struct heap_mpool* heap_mpool_spawn(void* __parent, pf_alloc __alloc, pf_dealloc __dealloc, int max_diff_type) {
+	struct heap_mpool* mheap = (struct heap_mpool*)
+		alloc(__alloc, __parent, sizeof(struct heap_mpool));
+
+	heap_mpool_init(mheap, __parent, __alloc, __dealloc, max_diff_type);
+
+	return mheap;
+}
+
+void heap_mpool_join(struct heap_mpool* pheap) {
+	void* __parent       = pheap->__parent;
+	pf_dealloc __dealloc = pheap->__dealloc;
+
+	heap_mpool_deinit(pheap);
 
 	dealloc(__dealloc, __parent, pheap);
 }

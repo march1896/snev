@@ -221,4 +221,13 @@ inline const char* block_c_clean_get_fileline(struct block_c_clean* pbc, int* li
 	return no_file_info;
 }
 
+inline void block_c_clean_donothing(void* x) {
+
+}
+
+inline void block_c_clean_donothingv(void* x, void* y, void* z) {
+
+}
+
+
 #endif
