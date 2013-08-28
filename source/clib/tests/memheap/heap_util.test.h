@@ -6,7 +6,7 @@
 /* alloc/dealloc operation order */
 enum ht_op_order {
 	ht_op_inorder,      /* first alloc all data, then dealloc them in the same order */
-	hr_op_reverseorder, /* first alloc all data, then dealloc them in reverse order */
+	ht_op_reverseorder, /* first alloc all data, then dealloc them in reverse order */
 	ht_op_alternately,  /* alloc dealloc alternately */
 	ht_op_random,       /* totally random order */
 	/*

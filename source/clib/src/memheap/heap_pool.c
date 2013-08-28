@@ -1,12 +1,12 @@
 #include "heap_pool.h"
 
-void  heap_spool_init(struct heap_spool* h, void* __parent, pf_alloc __alloc, pf_dealloc __dealloc, int __size) {
+void  heap_spool_init(struct heap_spool* h, void* __parent, pf_alloc __alloc, pf_dealloc __dealloc) {
 	h->__parent  = __parent;
 	h->__alloc   = __alloc;
 	h->__dealloc = __dealloc;
 
 	/* we should save the address to next when freed */
-	h->target_size = __size >= sizeof(void*) ? __size : sizeof(void*); 
+	h->target_size = -1;
 	h->alloc_count = 0;
 	h->start_level = HEAP_POOL_START_LEVEL;
 	h->level       = HEAP_POOL_START_LEVEL;
@@ -51,6 +51,7 @@ void heap_spool_expand_memory(struct heap_spool* h) {
 	char* m_last  = m_end - block_size;
 	char* m_itr   = NULL;
 
+	dbg_assert(h->target_size != -1);
 	dbg_assert(m_end  == (char*)m_start + (1 << h->level) * block_size);
 	dbg_assert(m_last == (char*)m_start + ((1 << h->level) - 1)* block_size);
 
@@ -75,6 +76,10 @@ void* heap_spool_alloc_c(struct heap_spool* h, int size) {
 	dbg_assert(size == h->target_size);
 
 	if (h->next == NULL) {
+		if (h->target_size == -1) {
+			/* first allocation, got the size */
+			h->target_size = size >= sizeof(void*) ? size : sizeof(void*); 
+		}
 		heap_spool_expand_memory(h);
 	}
 	dbg_assert(h->next != NULL);
@@ -88,6 +93,8 @@ void* heap_spool_alloc_c(struct heap_spool* h, int size) {
 }
 
 bool heap_spool_dealloc_c(struct heap_spool* h, void* buff) {
+	dbg_assert(h->target_size != -1);
+
 	*((intptr_t*)buff) = (intptr_t)h->next;
 	h->next = buff;
 	
@@ -125,6 +132,10 @@ void* heap_spool_alloc_v(struct heap_spool* h, int size, const char* file, int l
 	dbg_assert(size == h->target_size);
 
 	if (h->next == NULL) {
+		if (h->target_size == -1) {
+			/* first allocation, got the size */
+			h->target_size = size >= sizeof(void*) ? size : sizeof(void*); 
+		}
 		heap_spool_expand_memory(h);
 	}
 	dbg_assert(h->next != NULL);
@@ -144,6 +155,8 @@ void* heap_spool_alloc_v(struct heap_spool* h, int size, const char* file, int l
 bool heap_spool_dealloc_v(struct heap_spool* h, void* buff, const char* file, int line) {
 	struct pool_block_header* header = (struct pool_block_header*)buff;
 	void* mem = (void*)(header - 1);
+
+	dbg_assert(h->target_size != -1);
 
 #ifdef _HEAP_POOL_DEBUG_CHECK_
 	{
@@ -224,7 +237,7 @@ void* heap_mpool_alloc_c(struct heap_mpool* h, int __size) {
 		/* use a new single pool */
 		h->spools[i] = alloc(h->__alloc, h->__parent, sizeof(struct heap_spool));
 		dbg_assert(h->spools[i] != NULL);
-		heap_spool_init(h->spools[i], h->__parent, h->__alloc, h->__dealloc, size);
+		heap_spool_init(h->spools[i], h->__parent, h->__alloc, h->__dealloc);
 		h->used_pools ++;
 
 		mem = heap_spool_alloc_c(h->spools[i], size);
@@ -256,7 +269,7 @@ void* heap_mpool_alloc_c(struct heap_mpool* h, int __size) {
 
 bool heap_mpool_dealloc_c(struct heap_mpool* h, void* buff) {
 	void* mem = (void*)((int*)buff - 1);
-	int size = (int)mem;
+	int size = (int)(intptr_t)mem;
 	int i, res;
 
 	for (i = 0; i < h->used_pools; i ++) {
@@ -309,7 +322,7 @@ void* heap_mpool_alloc_v(struct heap_mpool* h, int __size, const char* file, int
 		/* use a new single pool */
 		h->spools[i] = (struct heap_spool*)alloc(h->__alloc, h->__parent, sizeof(struct heap_spool));
 		dbg_assert(h->spools[i] != NULL);
-		heap_spool_init(h->spools[i], h->__parent, h->__alloc, h->__dealloc, size);
+		heap_spool_init(h->spools[i], h->__parent, h->__alloc, h->__dealloc);
 		h->used_pools ++;
 
 		mem = heap_spool_alloc_v(h->spools[i], size, file, line);
@@ -341,7 +354,7 @@ void* heap_mpool_alloc_v(struct heap_mpool* h, int __size, const char* file, int
 
 bool heap_mpool_dealloc_v(struct heap_mpool* h, void* buff, const char* file, int line) {
 	void* mem = (void*)((int*)buff - 1);
-	int size = (int)mem;
+	int size = (int)(intptr_t)mem;
 	int i, res;
 
 	for (i = 0; i < h->used_pools; i ++) {

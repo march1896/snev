@@ -135,8 +135,8 @@ extern inline const char* block_c_debug_get_fileline(struct block_c_debug* pbc, 
 
 #else
 extern inline const char* block_c_clean_get_fileline(struct block_c_clean* pbc, int* line);
-inline void block_c_clean_donothing(void* x) {}
-inline void block_c_clean_donothingv(void* x, void* y, void* z) {}
+extern inline void block_c_clean_donothing(void* x);
+extern inline void block_c_clean_donothingv(void* x, void* y, void* z);
 
 /* by using these macros, control the efficiency explicitly. */
 #define block_c block_c_clean

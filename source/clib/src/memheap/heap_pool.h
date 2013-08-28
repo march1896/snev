@@ -68,7 +68,7 @@ bool  heap_mpool_dealloc_c(struct heap_mpool* h, void* buff);
 #define heap_mpool_dealloc heap_mpool_dealloc_c
 #endif
 
-void  heap_spool_init    (struct heap_spool* h, void* __parent, pf_alloc __alloc, pf_dealloc __dealloc, int target_size);
+void  heap_spool_init    (struct heap_spool* h, void* __parent, pf_alloc __alloc, pf_dealloc __dealloc);
 void  heap_spool_deinit  (struct heap_spool* h);
 
 void  heap_mpool_init    (struct heap_mpool* h, void* __parent, pf_alloc __alloc, pf_dealloc __dealloc, int max_diff_type);

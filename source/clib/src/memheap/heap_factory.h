@@ -21,4 +21,7 @@ struct heap_sysd*  heap_sysd_spawn   (void* parent, pf_alloc alloc, pf_dealloc d
 struct heap_sysd*  heap_sysd_spawn_v (void* parent, pf_alloc alloc, pf_dealloc dealloc, int split_threshold, int expand_size);
 void               heap_sysd_join    (struct heap_sysd* pheap);
 */
+
+struct heap_spool* heap_spool_spawn  (void* __parent, pf_alloc __alloc, pf_dealloc __dealloc);
+struct heap_mpool* heap_mpool_spawn  (void* __parent, pf_alloc __alloc, pf_dealloc __dealloc, int max_diff_type);
 #endif /* _HEAP_FACTORY_H_ */
