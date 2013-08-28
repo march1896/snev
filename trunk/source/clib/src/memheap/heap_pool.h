@@ -70,8 +70,10 @@ bool  heap_mpool_dealloc_c(struct heap_mpool* h, void* buff);
 
 void  heap_spool_init    (struct heap_spool* h, void* __parent, pf_alloc __alloc, pf_dealloc __dealloc);
 void  heap_spool_deinit  (struct heap_spool* h);
+void  heap_spool_walk    (struct heap_spool* pheap, pf_process_block per_block_cb, void* param);
 
 void  heap_mpool_init    (struct heap_mpool* h, void* __parent, pf_alloc __alloc, pf_dealloc __dealloc, int max_diff_type);
 void  heap_mpool_deinit  (struct heap_mpool* h);
+void  heap_mpool_walk    (struct heap_mpool* pheap, pf_process_block per_block_cb, void* param);
 
 #endif /* _HEAP_POOLED_SYSTEM_H_*/

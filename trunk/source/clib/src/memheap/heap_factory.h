@@ -23,5 +23,7 @@ void               heap_sysd_join    (struct heap_sysd* pheap);
 */
 
 struct heap_spool* heap_spool_spawn  (void* __parent, pf_alloc __alloc, pf_dealloc __dealloc);
+void               heap_spool_join   (struct heap_spool* pheap);
 struct heap_mpool* heap_mpool_spawn  (void* __parent, pf_alloc __alloc, pf_dealloc __dealloc, int max_diff_type);
+void               heap_mpool_join   (struct heap_mpool* pheap);
 #endif /* _HEAP_FACTORY_H_ */
