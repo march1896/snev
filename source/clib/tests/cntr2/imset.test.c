@@ -247,6 +247,34 @@ static void mset_test_basic_operation(iobject* mset) {
 	}
 }
 
+static void mset_test_random_operation(iobject* mset, int max_diff_types, int dataset_size) {
+	int i;
+
+	imset_clear(mset);
+	dbg_assert(imset_empty(mset));
+
+	for (i = 0; i < dataset_size; i ++) {
+		intptr_t x = rand() % max_diff_types;
+		bool found = imset_contains(mset, (void*)x);
+		
+		if (!found) {
+			imset_insert(mset, (void*)x);
+		}
+		else {
+			int addit = rand() % 2;
+			if (addit == 1) {
+				imset_insert(mset, (void*)x);
+			}
+			else {
+				bool res = imset_remove(mset, (void*)x);
+				dbg_assert(res == true);
+			}
+		}
+	}
+
+	imset_clear(mset);
+}
+
 void mset_test_datamset(iobject* mset, int datamset_size) {
 	intptr_t x = 0;
 	bool res = false;
@@ -288,17 +316,14 @@ void mset_test_datamset(iobject* mset, int datamset_size) {
 }
 
 void mset_test_basic(iobject* mset) {
-
 	mset_test_basic_operation(mset);
-
 	mset_test_basic_itr_operation(mset);
-
-	mset_test_datamset(mset, 1000000); 
 }
 
 void mset_test_memory(iobject* mset) {
 }
 
-void mset_test_bench(iobject* mset, int datamset_size) {
-	/* the test bench should contain special data query pattern */
+void mset_test_bench(iobject* mset, int max_diff_type, int datamset_size) {
+	mset_test_datamset(mset, max_diff_type); 
+	mset_test_random_operation(mset, max_diff_type, datamset_size);
 }

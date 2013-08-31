@@ -76,7 +76,7 @@ static void cntr_fbt_init(cntr_fbt* pb, pf_preremove_cb rm, pf_compare_object co
 }
 
 cntr cntr_create_as_fbt() {
-	cntr_fbt* pb = (cntr_fbt*)halloc(sizeof(cntr_fbt));
+	cntr_fbt* pb = (cntr_fbt*)malloc(sizeof(cntr_fbt));
 
 	cntr_fbt_init(pb, NULL, NULL);
 
@@ -84,7 +84,7 @@ cntr cntr_create_as_fbt() {
 }
 
 cntr cntr_create_as_fbt_r(pf_preremove_cb prerm) {
-	cntr_fbt* pb = (cntr_fbt*)halloc(sizeof(cntr_fbt));
+	cntr_fbt* pb = (cntr_fbt*)malloc(sizeof(cntr_fbt));
 
 	cntr_fbt_init(pb, prerm, NULL);
 
@@ -92,7 +92,7 @@ cntr cntr_create_as_fbt_r(pf_preremove_cb prerm) {
 }
 
 cntr cntr_create_as_fbt_v(pf_compare_object comp) {
-	cntr_fbt* pb = (cntr_fbt*)halloc(sizeof(cntr_fbt));
+	cntr_fbt* pb = (cntr_fbt*)malloc(sizeof(cntr_fbt));
 
 	cntr_fbt_init(pb, NULL, comp);
 
@@ -100,7 +100,7 @@ cntr cntr_create_as_fbt_v(pf_compare_object comp) {
 }
 
 cntr cntr_create_as_fbt_rv(pf_preremove_cb prerm, pf_compare_object comp) {
-	cntr_fbt* pb = (cntr_fbt*)halloc(sizeof(cntr_fbt));
+	cntr_fbt* pb = (cntr_fbt*)malloc(sizeof(cntr_fbt));
 
 	cntr_fbt_init(pb, prerm, comp);
 
@@ -114,7 +114,7 @@ static cattr cntr_fbt_attribute(cntr c) {
 static void  cntr_fbt_destroy(cntr c) {
 	cntr_fbt_clear(c);
 
-	hfree(c);
+	free(c);
 }
 
 static void fbt_clear_traverse(fbt_node* pn, pf_preremove_cb __delete) {
@@ -133,7 +133,7 @@ static void fbt_clear_traverse(fbt_node* pn, pf_preremove_cb __delete) {
 		}
 	}
 
-	hfree(pn);
+	free(pn);
 }
 
 static void  cntr_fbt_clear(cntr c) {

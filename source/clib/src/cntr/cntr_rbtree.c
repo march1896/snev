@@ -91,7 +91,7 @@ static inline int __compare(const cntr_rbt* pb, const void *lhs, const void *rhs
 }
 
 cntr cntr_create_as_rbt() {
-	cntr_rbt* pb = (cntr_rbt*)halloc(sizeof(cntr_rbt));
+	cntr_rbt* pb = (cntr_rbt*)malloc(sizeof(cntr_rbt));
 
 	cntr_rbt_init(pb, NULL, NULL);
 
@@ -99,7 +99,7 @@ cntr cntr_create_as_rbt() {
 }
 
 cntr cntr_create_as_rbt_r(pf_preremove_cb prerm) {
-	cntr_rbt* pb = (cntr_rbt*)halloc(sizeof(cntr_rbt));
+	cntr_rbt* pb = (cntr_rbt*)malloc(sizeof(cntr_rbt));
 
 	cntr_rbt_init(pb, prerm, NULL);
 
@@ -107,7 +107,7 @@ cntr cntr_create_as_rbt_r(pf_preremove_cb prerm) {
 }
 
 cntr cntr_create_as_rbt_v(pf_compare_object comp) {
-	cntr_rbt* pb = (cntr_rbt*)halloc(sizeof(cntr_rbt));
+	cntr_rbt* pb = (cntr_rbt*)malloc(sizeof(cntr_rbt));
 
 	cntr_rbt_init(pb, NULL, comp);
 
@@ -115,7 +115,7 @@ cntr cntr_create_as_rbt_v(pf_compare_object comp) {
 }
 
 cntr cntr_create_as_rbt_rv(pf_preremove_cb prerm, pf_compare_object comp) {
-	cntr_rbt* pb = (cntr_rbt*)halloc(sizeof(cntr_rbt));
+	cntr_rbt* pb = (cntr_rbt*)malloc(sizeof(cntr_rbt));
 
 	cntr_rbt_init(pb, prerm, comp);
 
@@ -129,7 +129,7 @@ static cattr cntr_rbt_attribute(cntr c) {
 static void  cntr_rbt_destroy(cntr c) {
 	cntr_rbt_clear(c);
 
-	hfree(c);
+	free(c);
 }
 
 static void rbt_clear_traverse(rbt_node* pn, pf_preremove_cb __remove) {
@@ -140,7 +140,7 @@ static void rbt_clear_traverse(rbt_node* pn, pf_preremove_cb __remove) {
 
 	if (__remove)
 		__remove(pn->object);
-	hfree(pn);
+	free(pn);
 }
 
 static void  cntr_rbt_clear(cntr c) {
@@ -308,7 +308,7 @@ static void rbt_add_adjust(rbt_node* n) {
 
 static void cntr_rbt_add(cntr c, void* obj) {
 	cntr_rbt* pb = (cntr_rbt*)c;
-	rbt_node* n_node = (rbt_node*)halloc(sizeof(rbt_node));
+	rbt_node* n_node = (rbt_node*)malloc(sizeof(rbt_node));
 	bool redup = false;
 
 	n_node->parent = NULL;
@@ -371,7 +371,7 @@ static void cntr_rbt_add(cntr c, void* obj) {
 				if (pb->prerm) pb->prerm(obj);
 			}
 
-			hfree(n_node);
+			free(n_node);
 		}
 	}
 
@@ -524,7 +524,7 @@ static void rbt_remove_one_child(rbt_node* n) {
 
 	if (child == SENT)
 		child->parent = NULL;
-	hfree(n);
+	free(n);
 	return;
 }
 

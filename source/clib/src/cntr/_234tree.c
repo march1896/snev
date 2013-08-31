@@ -71,7 +71,7 @@ static struct _234_node* __add_adjust(struct _234_node *n) {
 	if (n->dim < 3) return n;
 
 	{
-		struct _234_node *s = (struct _234_node*)halloc(sizeof(struct _234_node));
+		struct _234_node *s = (struct _234_node*)malloc(sizeof(struct _234_node));
 		struct _234_node *p = n->parent;
 		void *popup = n->second;
 
@@ -79,7 +79,7 @@ static struct _234_node* __add_adjust(struct _234_node *n) {
 
 		if (p == NULL) {
 			/* n is root node, make a new root node */
-			p = (struct _234_node*)halloc(sizeof(struct _234_node));
+			p = (struct _234_node*)malloc(sizeof(struct _234_node));
 			__node_init(p, n->second);
 
 			p->left = n;
@@ -138,7 +138,7 @@ struct _234_node* _234_node_add(struct _234_node *n, void *key) {
 	int i = 0;
 
 	if (n == NULL) {
-		n = (struct _234_node*)halloc(sizeof(struct _234_node));
+		n = (struct _234_node*)malloc(sizeof(struct _234_node));
 		__node_init(n, key);
 		return n;
 	}
@@ -244,7 +244,7 @@ struct _234_node* _234_node_delete(struct _234_node *n, int idx) {
 
 				n->dim --;
 				if (n->dim == 0) {
-					hfree(n);
+					free(n);
 					return NULL;
 				}
 				else 
@@ -365,7 +365,7 @@ static struct _234_node* __node_steal_sibling(struct _234_node *n) {
 
 			s->dim = 3;
 
-			hfree(n);
+			free(n);
 
 			return s;
 		}
@@ -391,7 +391,7 @@ static struct _234_node* __node_steal_sibling(struct _234_node *n) {
 
 			n->dim = 3;
 
-			hfree(s);
+			free(s);
 
 			return n;
 		}
@@ -423,8 +423,8 @@ static struct _234_node* __node_steal_sibling(struct _234_node *n) {
 				if (r->left) r->left->parent = p;
 				if (r->midleft) r->midleft->parent = p;
 
-				hfree(l);
-				hfree(r);
+				free(l);
+				free(r);
 			}
 
 			p->dim = 3;

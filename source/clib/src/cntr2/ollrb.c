@@ -284,7 +284,8 @@ static int ollrb_compare_v(const struct llrb_link* a, const struct llrb_link* b,
 }
 
 static object* ollrb_create(pf_compare ref_compare) {
-	return ollrb_create_v(ref_compare, global_sysd_allocator, NULL);
+	//return ollrb_create_v(ref_compare, default_allocator, NULL);
+	return ollrb_create_v(ref_compare, NULL, NULL);
 }
 
 static void ollrb_itr_com_init(struct ollrb_itr* itr, struct ollrb* list);
@@ -293,7 +294,7 @@ static object* ollrb_create_v(pf_compare ref_compare, allocator alc, pf_dispose 
 	bool managed_allocator = false;
 
 	if (alc == NULL) {
-		alc = allocator_mpool_spawn(global_sysd_allocator, 10);
+		alc = allocator_mpool_spawn(default_allocator, 10);
 		managed_allocator = true;
 	}
 

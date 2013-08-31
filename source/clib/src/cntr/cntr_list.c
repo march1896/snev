@@ -92,7 +92,7 @@ static void cntr_list_init(cntr_list* pcl) {
 }
 
 cntr cntr_create_as_list() {
-	cntr_list* pcl = (cntr_list*)halloc(sizeof(cntr_list));
+	cntr_list* pcl = (cntr_list*)malloc(sizeof(cntr_list));
 
 	cntr_list_init(pcl);
 
@@ -100,7 +100,7 @@ cntr cntr_create_as_list() {
 }
 
 cntr cntr_create_as_list_r(pf_preremove_cb pre_rm) {
-	cntr_list* pcl = (cntr_list*)halloc(sizeof(cntr_list));
+	cntr_list* pcl = (cntr_list*)malloc(sizeof(cntr_list));
 
 	cntr_list_init(pcl);
 
@@ -122,7 +122,7 @@ static void cntr_list_destroy(cntr cl) {
 
 	cntr_list_clear(cl);
 
-	hfree(pcl);
+	free(pcl);
 }
 
 static void cntr_list_clear(cntr cl) {
@@ -143,7 +143,7 @@ static void cntr_list_clear(cntr cl) {
 		if (pcl->prerm) 
 			pcl->prerm(obj_link->object);
 		/* second delete the link itself */
-		hfree(obj_link);
+		free(obj_link);
 	}
 	
 	/* init the sentinel again, since we do not unlink the deleted nodes */
@@ -190,7 +190,7 @@ static void* cntr_list_back (cntr cl) {
 
 static void  cntr_list_add_front(cntr cl, void* object) {
 	cntr_list* pcl = (cntr_list*)cl;
-	object_link* obj_link = (object_link*)halloc(sizeof(object_link));
+	object_link* obj_link = (object_link*)malloc(sizeof(object_link));
 
 	obj_link->object = object;
 	list_insert_front(&pcl->sent, &obj_link->link);
@@ -200,7 +200,7 @@ static void  cntr_list_add_front(cntr cl, void* object) {
 
 static void  cntr_list_add_back (cntr cl, void* object) {
 	cntr_list* pcl = (cntr_list*)cl;
-	object_link* obj_link = (object_link*)halloc(sizeof(object_link));
+	object_link* obj_link = (object_link*)malloc(sizeof(object_link));
 
 	obj_link->object = object;
 	list_insert_back(&pcl->sent, &obj_link->link);
@@ -223,7 +223,7 @@ static void* cntr_list_remove_front(cntr cl) {
 
 		list_unlink(node);
 		object = obj_link->object;
-		hfree(obj_link);
+		free(obj_link);
 
 		pcl->size --;
 
@@ -250,7 +250,7 @@ static void*  cntr_list_remove_back (cntr cl) {
 
 		list_unlink(node);
 		object = obj_link->object;
-		hfree(obj_link);
+		free(obj_link);
 
 		pcl->size --;
 
@@ -380,7 +380,7 @@ static void  cntr_list_remove(cntr cl, citer begin, citer end) {
 
 		if (pcl->prerm != NULL) 
 			pcl->prerm(obj_link->object);
-		hfree(obj_link);
+		free(obj_link);
 
 		count ++;
 	};
@@ -389,7 +389,7 @@ static void  cntr_list_remove(cntr cl, citer begin, citer end) {
 	obj_link = container_of(lb, object_link, link);
 	if (pcl->prerm != NULL) 
 		pcl->prerm(obj_link->object);
-	hfree(obj_link);
+	free(obj_link);
 	count ++;
 	
 	pcl->size -= count;

@@ -287,7 +287,7 @@ static unknown o_dlist_itr_cast(unknown x, unique_id inf_id) {
 }
 
 static object* o_dlist_create() {
-	return o_dlist_create_v(global_llrb_allocator, NULL);
+	return o_dlist_create_v(default_allocator, NULL);
 }
 
 static void o_dlist_itr_com_init(struct o_dlist_itr* itr, struct o_dlist* list);

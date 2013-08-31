@@ -6,8 +6,8 @@
 #include <cominc.h>
 #include <memheap/heap_global.h>
 
-#define t_alloc halloc
-#define t_free hfree
+#define t_alloc malloc
+#define t_free free
 
 #define EPSILON 256
 typedef struct __s_edge {
