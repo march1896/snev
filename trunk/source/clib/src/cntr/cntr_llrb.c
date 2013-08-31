@@ -80,7 +80,7 @@ static void cntr_llrb_init(cntr_llrb* pb, pf_preremove_cb rm, pf_compare_object 
  * that they are compare by the llrb_link's address, which is supported by the llrb_link, at 
  * least we should give comment on this TODO */
 cntr cntr_create_as_llrb() {
-	cntr_llrb* pb = (cntr_llrb*)halloc(sizeof(cntr_llrb));
+	cntr_llrb* pb = (cntr_llrb*)malloc(sizeof(cntr_llrb));
 
 	cntr_llrb_init(pb, NULL, NULL);
 
@@ -88,7 +88,7 @@ cntr cntr_create_as_llrb() {
 }
 
 cntr cntr_create_as_llrb_r(pf_preremove_cb prerm) {
-	cntr_llrb* pb = (cntr_llrb*)halloc(sizeof(cntr_llrb));
+	cntr_llrb* pb = (cntr_llrb*)malloc(sizeof(cntr_llrb));
 
 	cntr_llrb_init(pb, prerm, NULL);
 
@@ -96,7 +96,7 @@ cntr cntr_create_as_llrb_r(pf_preremove_cb prerm) {
 }
 
 cntr cntr_create_as_llrb_v(pf_compare_object comp) {
-	cntr_llrb* pb = (cntr_llrb*)halloc(sizeof(cntr_llrb));
+	cntr_llrb* pb = (cntr_llrb*)malloc(sizeof(cntr_llrb));
 
 	cntr_llrb_init(pb, NULL, comp);
 
@@ -104,7 +104,7 @@ cntr cntr_create_as_llrb_v(pf_compare_object comp) {
 }
 
 cntr cntr_create_as_llrb_rv(pf_preremove_cb prerm, pf_compare_object comp) {
-	cntr_llrb* pb = (cntr_llrb*)halloc(sizeof(cntr_llrb));
+	cntr_llrb* pb = (cntr_llrb*)malloc(sizeof(cntr_llrb));
 
 	cntr_llrb_init(pb, prerm, comp);
 
@@ -118,7 +118,7 @@ static cattr cntr_llrb_attribute(cntr c) {
 static void  cntr_llrb_destroy(cntr c) {
 	cntr_llrb_clear(c);
 
-	hfree(c);
+	free(c);
 }
 
 static void llrb_clear_traverse(struct llrb_link* link, pf_preremove_cb __remove) {
@@ -134,7 +134,7 @@ static void llrb_clear_traverse(struct llrb_link* link, pf_preremove_cb __remove
 	if (__remove)
 		__remove(obj_link->object);
 	/* second delete the node itself */
-	hfree(obj_link);
+	free(obj_link);
 }
 
 static void  cntr_llrb_clear(cntr c) {
@@ -164,7 +164,7 @@ static int llrb_compare_cb(const struct llrb_link* l, const struct llrb_link* r)
 
 static void cntr_llrb_add(cntr c, void* obj) {
 	cntr_llrb* pb = (cntr_llrb*)c;
-	struct object_link* obj_link = (struct object_link*)halloc(sizeof(struct object_link));
+	struct object_link* obj_link = (struct object_link*)malloc(sizeof(struct object_link));
 
 	obj_link->object = obj;
 
@@ -207,7 +207,7 @@ void cntr_llrb_remove_proc(citer itr, void* param) {
 	static_comp_func = NULL;
 
 	/* second delete the target link */
-	hfree(obj_link);
+	free(obj_link);
 
 	pb->size --;
 }

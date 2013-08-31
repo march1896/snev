@@ -5,4 +5,6 @@
 
 void set_test_basic(iobject* set);
 
+void set_test_bench(iobject* set, int max_diff_type, int dataset_size);
+
 #endif /* _CNTR2_ISET_TEST_H_ */

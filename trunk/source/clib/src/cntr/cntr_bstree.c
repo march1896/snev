@@ -77,7 +77,7 @@ static inline int __compare(const cntr_bst* pb, const void *lhs, const void *rhs
 }
 
 cntr cntr_create_as_bst() {
-	cntr_bst* pb = (cntr_bst*)halloc(sizeof(cntr_bst));
+	cntr_bst* pb = (cntr_bst*)malloc(sizeof(cntr_bst));
 
 	cntr_bst_init(pb, NULL, NULL);
 
@@ -85,7 +85,7 @@ cntr cntr_create_as_bst() {
 }
 
 cntr cntr_create_as_bst_r(pf_preremove_cb prerm) {
-	cntr_bst* pb = (cntr_bst*)halloc(sizeof(cntr_bst));
+	cntr_bst* pb = (cntr_bst*)malloc(sizeof(cntr_bst));
 
 	cntr_bst_init(pb, prerm, NULL);
 
@@ -93,7 +93,7 @@ cntr cntr_create_as_bst_r(pf_preremove_cb prerm) {
 }
 
 cntr cntr_create_as_bst_v(pf_compare_object comp) {
-	cntr_bst* pb = (cntr_bst*)halloc(sizeof(cntr_bst));
+	cntr_bst* pb = (cntr_bst*)malloc(sizeof(cntr_bst));
 
 	cntr_bst_init(pb, NULL, comp);
 
@@ -101,7 +101,7 @@ cntr cntr_create_as_bst_v(pf_compare_object comp) {
 }
 
 cntr cntr_create_as_bst_rv(pf_preremove_cb prerm, pf_compare_object comp) {
-	cntr_bst* pb = (cntr_bst*)halloc(sizeof(cntr_bst));
+	cntr_bst* pb = (cntr_bst*)malloc(sizeof(cntr_bst));
 
 	cntr_bst_init(pb, prerm, comp);
 
@@ -115,7 +115,7 @@ static cattr cntr_bst_attribute(cntr c) {
 static void  cntr_bst_destroy(cntr c) {
 	cntr_bst_clear(c);
 
-	hfree(c);
+	free(c);
 }
 
 static void bst_clear_traverse(bst_node* pn, pf_preremove_cb __remove) {
@@ -126,7 +126,7 @@ static void bst_clear_traverse(bst_node* pn, pf_preremove_cb __remove) {
 
 	if (__remove)
 		__remove(pn->object);
-	hfree(pn);
+	free(pn);
 }
 
 static void  cntr_bst_clear(cntr c) {
@@ -146,7 +146,7 @@ static int   cntr_bst_size(cntr c) {
 
 static void cntr_bst_add(cntr c, void* obj) {
 	cntr_bst* pb = (cntr_bst*)c;
-	bst_node* n_node = (bst_node*)halloc(sizeof(bst_node));
+	bst_node* n_node = (bst_node*)malloc(sizeof(bst_node));
 	bool redup = false;
 
 	n_node->parent = NULL;
@@ -206,7 +206,7 @@ static void cntr_bst_add(cntr c, void* obj) {
 				if (pb->prerm) pb->prerm(obj);
 			}
 
-			hfree(n_node);
+			free(n_node);
 		}
 	}
 }
@@ -268,7 +268,7 @@ static void* bst_remove(cntr_bst* pb, bst_node* pn) {
 			if (par->left == pn) par->left = NULL;
 			else par->right = NULL;
 		}
-		hfree(pn);
+		free(pn);
 		pb->size --;
 	}
 	else if (pn->left == NULL) {
@@ -285,7 +285,7 @@ static void* bst_remove(cntr_bst* pb, bst_node* pn) {
 			pn->right->parent = par;
 		}
 		
-		hfree(pn);
+		free(pn);
 		pb->size --;
 	}
 	else if (pn->right == NULL) {
@@ -302,7 +302,7 @@ static void* bst_remove(cntr_bst* pb, bst_node* pn) {
 			pn->left->parent = par;
 		}
 		
-		hfree(pn);
+		free(pn);
 		pb->size --;
 	}
 	else {

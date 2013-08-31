@@ -97,11 +97,11 @@ static void cntr_array_init(cntr_array* pca, int init_capacity, int expand_size,
 	pca->expand_size = expand_size;
 	pca->flags = 0;
 	pca->prerm = prm;
-	pca->data = (void**)halloc(init_capacity * sizeof(void*));
+	pca->data = (void**)malloc(init_capacity * sizeof(void*));
 }
 
 cntr cntr_create_as_array_v(int init_capacity, int expand_size) {
-	cntr_array* pca = (cntr_array*)halloc(sizeof(cntr_array));
+	cntr_array* pca = (cntr_array*)malloc(sizeof(cntr_array));
 
 	cntr_array_init(pca, init_capacity, expand_size, NULL);
 
@@ -109,7 +109,7 @@ cntr cntr_create_as_array_v(int init_capacity, int expand_size) {
 }
 
 cntr cntr_create_as_array_r(pf_preremove_cb pre_rm) {
-	cntr_array* pca = (cntr_array*)halloc(sizeof(cntr_array));
+	cntr_array* pca = (cntr_array*)malloc(sizeof(cntr_array));
 
 	cntr_array_init(pca, default_init_capacity, default_expand_size, pre_rm);
 
@@ -117,7 +117,7 @@ cntr cntr_create_as_array_r(pf_preremove_cb pre_rm) {
 }
 
 cntr cntr_create_as_array_rv(pf_preremove_cb pre_rm, int init_capacity, int expand_size) {
-	cntr_array* pca = (cntr_array*)halloc(sizeof(cntr_array));
+	cntr_array* pca = (cntr_array*)malloc(sizeof(cntr_array));
 
 	cntr_array_init(pca, init_capacity, expand_size, pre_rm);
 
@@ -131,9 +131,9 @@ static cattr cntr_array_attribute(cntr ca) {
 static void  cntr_array_destroy    (cntr ca) {
 	cntr_array* pca = (cntr_array*)ca;
 
-	hfree(pca->data);
+	free(pca->data);
 
-	hfree(pca);
+	free(pca);
 }
 
 static void  cntr_array_clear      (cntr ca) {
@@ -190,10 +190,10 @@ static void __expand_capacity(cntr_array* pca) {
 	void** n_data = NULL;
 
 	pca->capacity += pca->expand_size;
-	n_data = (void**)halloc(sizeof(void*) * pca->capacity);
+	n_data = (void**)malloc(sizeof(void*) * pca->capacity);
 
 	memory_move((char*)n_data, (char*)pca->data, pca->size * sizeof(void*) / sizeof(char));
-	hfree((void*)pca->data);
+	free((void*)pca->data);
 	pca->data = n_data;
 }
 
@@ -362,9 +362,9 @@ static void cntr_array_assign_capacity(cntr ca, int n_size) {
 	dbg_assert(n_size >= pca->size);
 
 	pca->capacity = n_size;
-	n_data = (void**)halloc(sizeof(void*) * pca->capacity);
+	n_data = (void**)malloc(sizeof(void*) * pca->capacity);
 
 	memory_move((char*)n_data, (char*)pca->data, pca->size * sizeof(void*) / sizeof(char));
-	hfree((void*)pca->data);
+	free((void*)pca->data);
 	pca->data = n_data;
 }

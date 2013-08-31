@@ -88,9 +88,9 @@ static void heap_mpool_single_test(const int num_diff_type, const int max_single
 		num_diff_type
 		);
 
-	pointer = (void***)salloc(sizeof(void**) * num_diff_type);
+	pointer = (void***)malloc(sizeof(void**) * num_diff_type);
 	for (i = 0; i < num_diff_type; i ++) {
-		pointer[i] = (void**)salloc(sizeof(void*) * max_single_allocation);
+		pointer[i] = (void**)malloc(sizeof(void*) * max_single_allocation);
 		memset(pointer[i], 0, sizeof(void*) * max_single_allocation);
 	}
 
@@ -110,10 +110,10 @@ static void heap_mpool_single_test(const int num_diff_type, const int max_single
 	heap_mpool_join(testheap);
 
 	for (i = 0; i < num_diff_type; i ++) {
-		sfree(pointer[i]);
+		free(pointer[i]);
 	}
 
-	sfree(pointer);
+	free(pointer);
 }
 
 static void heap_mpool_correct_test() {

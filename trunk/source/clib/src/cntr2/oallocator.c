@@ -411,10 +411,11 @@ static struct allocator_buddy __allocator_buddy = {
 		&__allocator_buddy_vtable
 	},                           /* __iftable[e_heap_count]; */
 	(allocator)&__allocator_sysd,/* __parent */
-	&__global_static_heap_buddy   /* __driver */
+	&__global_static_heap_buddy  /* __driver */
 };
 
 allocator global_buddy_allocator = (allocator)&__allocator_buddy;
+allocator default_allocator = (allocator)&__allocator_buddy;
 
 /*****************************************************************************************
  * allocator buddy end 

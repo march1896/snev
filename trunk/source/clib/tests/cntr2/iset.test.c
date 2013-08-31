@@ -300,18 +300,37 @@ void set_test_dataset(iobject* set, int dataset_size) {
 	dbg_assert(iset_size(set) == 0);
 }
 
+void set_test_random_operation(iobject* mset, int max_diff_types, int dataset_size) {
+	int i;
+
+	iset_clear(mset);
+	dbg_assert(iset_empty(mset));
+
+	for (i = 0; i < dataset_size; i ++) {
+		intptr_t x = rand() % max_diff_types;
+		bool found = iset_contains(mset, (void*)x);
+
+		if (!found) {
+			iset_insert(mset, (void*)x);
+		}
+		else {
+			bool res = iset_remove(mset, (void*)x);
+			dbg_assert(res == true);
+		}
+	}
+
+	iset_clear(mset);
+}
+
 void set_test_basic(iobject* set) {
-
 	set_test_basic_operation(set);
-
 	set_test_basic_itr_operation(set);
-
-	set_test_dataset(set, 1000000); 
 }
 
 void set_test_memory(iobject* set) {
 }
 
-void set_test_bench(iobject* set, int dataset_size) {
-	/* the test bench should contain special data query pattern */
+void set_test_bench(iobject* set, int max_diff_type, int dataset_size) {
+	set_test_dataset(set, max_diff_type); 
+	set_test_random_operation(set, max_diff_type, dataset_size);
 }
