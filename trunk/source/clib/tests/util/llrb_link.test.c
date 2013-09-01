@@ -1,98 +1,38 @@
 #include <llrb_link.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <time.h>
+#include "test_util.h"
 
-#include <test_util.h>
+typedef struct llrb_link tree_link;
+#define tree_insert llrb_insert
+#define tree_insert_s llrb_insert_s
+#define tree_insert_v llrb_insert_v
+#define tree_insert_sv llrb_insert_sv
+#define tree_remove llrb_remove
+#define tree_remove_v llrb_remove_v
+#define tree_search llrb_search
+#define pf_tree_compare pf_llrb_compare
+#define tree_min llrb_min
+#define tree_max llrb_max
+#define tree_check llrb_debug_check
+#define tree_check_v llrb_debug_check_v
 
-struct data {
-	int key;
-	int value;
-
-	struct llrb_link link;
-};
-
-#define N 500000
-struct data *pdata[N];
-
-static void _init_data(int n) {
-	int i;
-	unsigned int iseed = (unsigned int)time(NULL);
-
-	srand (iseed);
-
-	for (i = 0; i < n; i ++) {
-		pdata[i] = (struct data*)malloc(sizeof(struct data));
-
-		pdata[i]->key = rand() % N;
-		pdata[i]->value = 0;
-	}
-}
-
-static void _destroy_data(int n) {
-	int i;
-
-	for (i = 0; i < n; i ++) {
-		free(pdata[i]);
-	}
-}
-
-static struct llrb_link *root = NULL;
-
-int comp(const struct llrb_link *l, const struct llrb_link *r) {
-	struct data *pl, *pr;
-	pl = container_of(l, struct data, link);
-	pr = container_of(r, struct data, link);
-
-	if (pl->key < pr->key) return -1;
-	else if (pl->key == pr->key) return 0;
-	else return 1;
-}
-
-void insert_data(int n, bool check) {
-	int i;
-
-	for (i = 0; i < n; i ++) {
-		root = llrb_insert(root, &(pdata[i]->link), comp);
-		if (check)
-			llrb_debug_check(root, comp);
-	}
-}
-
-void remove_data(int n, bool check) {
-	int i;
-
-	for (i = 0; i < n; i ++) {
-		root = llrb_remove(root, &(pdata[i]->link), comp);
-		if (check)
-			llrb_debug_check(root, comp);
-	}
-}
-
-void llrb_link_correctness_test() {
-	int length = 1000;
-	_init_data(length);
-	insert_data(length, true);
-	remove_data(length, true);
-	_destroy_data(length);
-}
-
-void llrb_link_performance_test() {
-	clock_t start_c, end_c;
-	int length = N;
-
-	_init_data(length);
-
-	start_c = clock();	
-	insert_data(length, false);
-	remove_data(length, false);
-	end_c = clock();
-	log_printline("insert/remove %d elements used %f", length, (float)(end_c - start_c)/CLOCKS_PER_SEC);
-
-	_destroy_data(length);
-}
+#include "tree_link.util.h"
 
 void llrb_link_test() {
-	test_run_single("llrb link correctness test", llrb_link_correctness_test);
-	test_run_single("llrb link performance test", llrb_link_performance_test);
+	test_run_single("llrb link correctness test", tree_link_correctness_test);
+	test_run_single("llrb link performance test", tree_link_performance_test);
 }
+
+#undef tree_insert
+#undef tree_insert_s
+#undef tree_insert_v
+#undef tree_insert_sv
+#undef tree_remove
+#undef tree_remove_v
+#undef tree_search
+#undef pf_tree_compare
+#undef tree_min
+#undef tree_max
+#undef tree_check
+#undef tree_check_v

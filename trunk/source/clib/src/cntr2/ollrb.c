@@ -470,7 +470,6 @@ struct direct_s {
 	const struct llrb_link* candidate; /* only useful for multiple instances */
 };
 
-/* TODO: totally wrong, using directly compare instead of the comparison callback */
 static int ollrb_direct(const struct llrb_link* link, void* param) {
 	struct ollrb_node* node = container_of(link, struct ollrb_node, link);
 	struct direct_s* dir    = (struct direct_s*)param;
