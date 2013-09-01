@@ -17,41 +17,41 @@ static int int_compare(const void* a, const void* b) {
 }
 
 static void __as_set_basic_test() {
-	iset set = as_set(cntr_create_osplay(int_compare));
+	iset set = as_set(cntr_create_ollrb(int_compare));
 	set_test_basic(set);
 	iset_destroy(set);
 }
 
 static void __as_mset_basic_test() {
-	imset mset = as_mset(cntr_create_osplay(int_compare));
+	imset mset = as_mset(cntr_create_ollrb(int_compare));
 	mset_test_basic(mset);
 	imset_destroy(mset);
 }
 
 static void __as_set_bench_test() {
-	iset set = as_set(cntr_create_osplay(int_compare));
+	iset set = as_set(cntr_create_ollrb(int_compare));
 	set_test_bench(set, 1000, 1000 * 10000);
 	iset_destroy(set);
 }
 
 static void __as_mset_bench_test() {
-	imset mset = as_mset(cntr_create_osplay(int_compare));
+	imset mset = as_mset(cntr_create_ollrb(int_compare));
 	mset_test_bench(mset, 1000, 1000 * 10000);
 	imset_destroy(mset);
 }
 
 static void __correctness_test() {
-	test_run_single("osplay as set basic test", __as_set_basic_test);
-	test_run_single("osplay as mset basic test", __as_mset_basic_test);
+	test_run_single("ollrb as set basic test", __as_set_basic_test);
+	test_run_single("ollrb as mset basic test", __as_mset_basic_test);
 }
 
 static void __performance_test() {
-	test_run_single("osplay as set bench test", __as_set_bench_test);
-	test_run_single("osplay as mset bench test", __as_mset_bench_test);
+	test_run_single("ollrb as set bench test", __as_set_bench_test);
+	test_run_single("ollrb as mset bench test", __as_mset_bench_test);
 }
 
-void cntr2_osplay_test() {
-	test_run_single("cntr_splay correctness", __correctness_test);
+void cntr2_ollrb_test() {
+	test_run_single("cntr_llrb correctness", __correctness_test);
 
-	test_run_bench("cntr_splay performance", __performance_test);
+	test_run_bench("cntr_llrb performance", __performance_test);
 }

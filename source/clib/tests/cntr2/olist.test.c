@@ -39,5 +39,5 @@ static void __performance_test() {
 void cntr2_odlist_test() {
 	test_run_single("cntr cntr_base correctness", __correctness_test);
 
-	test_run_single("cntr cntr_base performance", __performance_test);
+	test_run_bench("cntr cntr_base performance", __performance_test);
 }

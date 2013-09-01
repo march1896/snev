@@ -6,16 +6,17 @@
 
 #include "test_util.h"
 
-static bool        g_use_file = false;
-static const char* g_log_file = NULL;
-static bool        g_log_header = true;
-static bool        g_log_footer = true;
-static bool        g_log_time = true;
+bool        g_use_file = false;
+const char* g_log_file = "test_log.txt";
+bool        g_log_header = true;
+bool        g_log_footer = true;
+bool        g_log_time = true;
 
-static const char  g_table_char = ' ';
-static char        g_table_buff[101];
-static int         g_table_step = 2;
-static int         g_table_length = 0;
+const char  g_table_char = ' ';
+int         g_table_step = 2;
+int         g_table_length = 0;
+
+static char g_table_buff[101];
 
 void log_inc_tab(bool inc) {
 	int i;
@@ -102,6 +103,23 @@ void test_run_single(const char* test_name, pf_test_case test_func) {
 	}
 
 	log_inc_tab(false);
+}
+
+void test_run_bench(const char* test_name, pf_test_case test_func) {
+#ifdef _DEBUG
+	return;
+#endif
+#ifdef DEBUG
+	return;
+#endif
+	bool old_log_time = g_log_time;
+	g_log_time = true;
+	test_run_single(test_name, test_func);
+	g_log_time = old_log_time;
+}
+
+void test_run_feature(const char* test_name, pf_test_case test_func) {
+	test_run_single(test_name, test_func);
 }
 
 void test_log_use_file(const char* file_name) {

@@ -21,7 +21,7 @@ typedef struct llrb_link tree_link;
 
 void llrb_link_test() {
 	test_run_single("llrb link correctness test", tree_link_correctness_test);
-	test_run_single("llrb link performance test", tree_link_performance_test);
+	test_run_bench("llrb link performance test", tree_link_performance_test);
 }
 
 #undef tree_insert

@@ -22,7 +22,7 @@ typedef struct splay_link tree_link;
 
 void splay_link_test() {
 	test_run_single("splay link correctness test", tree_link_correctness_test);
-	test_run_single("splay link performance test", tree_link_performance_test);
+	test_run_bench("splay link performance test", tree_link_performance_test);
 }
 
 #undef tree_insert

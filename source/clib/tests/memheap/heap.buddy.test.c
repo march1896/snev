@@ -54,7 +54,5 @@ void heap_buddy_performance_test() {
 void heap_buddy_test() {
 	test_run_single("heap_buddy correctness test", heap_buddy_correct_test);
 
-	if (enable_heap_bench) {
-		test_run_single("heap_buddy performance test", heap_buddy_performance_test);
-	}
+	test_run_bench("heap_buddy performance test", heap_buddy_performance_test);
 }

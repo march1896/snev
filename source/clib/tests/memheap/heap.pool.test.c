@@ -72,9 +72,7 @@ static void heap_spool_performance_test() {
 void heap_spool_test() {
 	test_run_single("heap_spool correctness test", heap_spool_correct_test);
 
-	if (enable_heap_bench) {
-		test_run_single("heap_spool performance test", heap_spool_performance_test);
-	}
+	test_run_bench("heap_spool performance test", heap_spool_performance_test);
 }
 
 #include <string.h>
@@ -128,7 +126,5 @@ static void heap_mpool_performance_test() {
 void heap_mpool_test() {
 	test_run_single("heap_mpool correctness test", heap_mpool_correct_test);
 
-	if (enable_heap_bench) {
-		test_run_single("heap_mpool performance test", heap_mpool_performance_test);
-	}
+	test_run_bench("heap_mpool performance test", heap_mpool_performance_test);
 }

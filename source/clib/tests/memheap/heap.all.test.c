@@ -8,8 +8,6 @@ extern void heap_sysd_test();
 extern void heap_spool_test();
 extern void heap_mpool_test();
 
-bool enable_heap_bench = true;
-
 void heap_all_test() {
 	/* NOTE, this test is not very accurate, since I have run a lot of the this 
 	 * test on my machine, with the same build environment. 
@@ -17,11 +15,11 @@ void heap_all_test() {
 	 * allocation speed is not stable, it will very from time to time, I don't 
 	 * know why. */
 
-// 	test_run_single("heap_llrb test", heap_llrb_test);
-// 
-// 	test_run_single("heap_buddy test", heap_buddy_test);
-// 
-// 	test_run_single("heap_sysd test", heap_sysd_test);
+ 	test_run_single("heap_llrb test", heap_llrb_test);
+ 
+	test_run_single("heap_buddy test", heap_buddy_test);
+
+	test_run_single("heap_sysd test", heap_sysd_test);
 
 	test_run_single("heap_spool test", heap_spool_test);
 
