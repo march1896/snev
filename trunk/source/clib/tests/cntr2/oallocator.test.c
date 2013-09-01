@@ -39,6 +39,7 @@ static void allocator_trace_test() {
 		}
 
 		allocator_walk(allrb, allocator_heap_walk_print, NULL);
+		log_printline("two leak pointer expected");
 
 		allocator_join(allrb);
 	}
@@ -114,5 +115,6 @@ void cntr2_allocator_recursive_spawn_test() {
 void cntr2_oallocator_test() {
 	test_run_single("allocator simple trace test", allocator_trace_test);
 
-	test_run_single("allocator recursive spawn test", cntr2_allocator_recursive_spawn_test);
+	// TODO: remove the printf
+	//test_run_single("allocator recursive spawn test", cntr2_allocator_recursive_spawn_test);
 }

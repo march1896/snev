@@ -30,7 +30,5 @@ void heap_sysd_performance_test() {
 void heap_sysd_test() {
 	test_run_single("heap_sysd correctness test", heap_sysd_correct_test);
 
-	if (enable_heap_bench) {
-		test_run_single("heap_sysd performance test", heap_sysd_performance_test);
-	}
+	test_run_bench("heap_sysd performance test", heap_sysd_performance_test);
 }

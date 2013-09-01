@@ -54,7 +54,5 @@ void heap_llrb_performance_test() {
 void heap_llrb_test() {
 	test_run_single("heap_llrb correctness test", heap_llrb_correct_test);
 
-	if (enable_heap_bench) {
-		test_run_single("heap_llrb performance test", heap_llrb_performance_test);
-	}
+	test_run_bench("heap_llrb performance test", heap_llrb_performance_test);
 }

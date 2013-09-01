@@ -675,9 +675,9 @@ static void tree_link_correctness_test() {
 	tree_link_basic_test();
 	//tree_link_robust_test();
 
-	num_operation = 1000 * 100;
+	num_operation = 100 * 1000;
 
-	data_max_diff_type = 100;
+	data_max_diff_type = 1000;
 	data_max_dup = 10;
 	__create_data();
 	tree_clear();
@@ -704,8 +704,8 @@ static void tree_link_correctness_test() {
 }
 
 static void tree_link_performance_test() {
-	num_operation = 1000 * 1000;
-	data_max_diff_type = 100;
+	num_operation = 100 * 10000;
+	data_max_diff_type = 10000;
 	data_max_dup = 10;
 
 	__create_data();
@@ -724,6 +724,7 @@ static void tree_link_performance_test() {
 	tree_clear();
 	test_run_single("insert_sv/remove performance", tree_link_insert_remove_sv);
 
+#ifndef tree_dynamic_search 
 	__reset_data();
 	tree_clear();
 	test_run_single("search           performance", tree_link_search);
@@ -732,7 +733,7 @@ static void tree_link_performance_test() {
 	tree_clear();
 	test_run_single("patterned search performance", tree_link_patterned_search);
 
-#ifdef tree_dynamic_search
+#else /* tree_dynamic_search */
 	__reset_data();
 	tree_clear();
 	test_run_single("dynamic search   performance", tree_link_dynamic_search);

@@ -282,6 +282,7 @@
     <ClCompile Include="..\..\tests\cntr2\oallocator.test.c" />
     <ClCompile Include="..\..\tests\cntr2\olist.test.c" />
     <ClCompile Include="..\..\tests\cntr2\ollrb.test.c" />
+    <ClCompile Include="..\..\tests\cntr2\osplay.test.c" />
     <ClCompile Include="..\..\tests\cntr\cntr_algorithm.test.c" />
     <ClCompile Include="..\..\tests\cntr\cntr_all.test.c" />
     <ClCompile Include="..\..\tests\cntr\cntr_base.test.c" />
