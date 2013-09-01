@@ -3,7 +3,7 @@
 #define BLACK 1
 #define RED   0
 
-static struct llrb_link *_rotate_left(struct llrb_link* n) {
+static inline struct llrb_link *__rotate_left(struct llrb_link* n) {
 	struct llrb_link* r = n->right;
 	struct llrb_link* p = n->parent;
 
@@ -30,7 +30,7 @@ static struct llrb_link *_rotate_left(struct llrb_link* n) {
 	return r;
 }
 
-static struct llrb_link *_rotate_right(struct llrb_link *n) {
+static inline struct llrb_link *__rotate_right(struct llrb_link *n) {
 	struct llrb_link *l = n->left;
 	struct llrb_link *p = n->parent;
 
@@ -57,7 +57,7 @@ static struct llrb_link *_rotate_right(struct llrb_link *n) {
 	return l;
 }
 
-static void llrb_init(struct llrb_link *n) {
+static inline void llrb_init(struct llrb_link *n) {
 	dbg_assert(n != NULL);
 
 	n->left = NULL;
@@ -66,7 +66,7 @@ static void llrb_init(struct llrb_link *n) {
 	n->color = RED;
 }
 
-void llrb_swap_link(struct llrb_link **pa, struct llrb_link **pb) {
+static inline void llrb_swap_link(struct llrb_link **pa, struct llrb_link **pb) {
 	struct llrb_link *a = *pa;
 	struct llrb_link *b = *pb;
 	if (a->parent == b) {
@@ -144,7 +144,7 @@ void llrb_swap_link(struct llrb_link **pa, struct llrb_link **pb) {
  * For llrb 23tree, the successor must be a leaf, that is, it can not have a right child,
  * this is determined by the left-leaning property
  */
-static struct llrb_link *_swap_link(struct llrb_link *anc, struct llrb_link *des) {
+static inline struct llrb_link *_swap_link(struct llrb_link *anc, struct llrb_link *des) {
 	if (des->parent != anc) {
 		/* swap c and its successor */
 		struct llrb_link swp;
@@ -210,7 +210,7 @@ static struct llrb_link *_swap_link(struct llrb_link *anc, struct llrb_link *des
 /*
  * use a <key, address> pair as the real key stored in the tree.
  */
-static int __compare_wrap(const struct llrb_link* a, const struct llrb_link* b, pf_llrb_compare raw_comp) {
+static inline int __compare_wrap(const struct llrb_link* a, const struct llrb_link* b, pf_llrb_compare raw_comp) {
 	int raw_result = raw_comp(a, b);
 
 	if (raw_result != 0) return raw_result;
@@ -235,12 +235,12 @@ static inline void _color_flip(struct llrb_link *n) {
 	n->color = !n->color;
 }
 
-struct llrb_link *_fix_up(struct llrb_link *c) {
+static inline struct llrb_link *_fix_up(struct llrb_link *c) {
 	if (_is_red(c->right) && !_is_red(c->left))
-		c = _rotate_left(c);
+		c = __rotate_left(c);
 
 	if (_is_red(c->left) && _is_red(c->left->left))
-		c = _rotate_right(c);
+		c = __rotate_right(c);
 
 	if (_is_red(c->left) && _is_red(c->right))
 		_color_flip(c);
@@ -297,8 +297,8 @@ static struct llrb_link *_move_red_left(struct llrb_link *c) {
 	_color_flip(c);
 
 	if (_is_red(c->right->left)) {
-		c->right = _rotate_right(c->right);
-		c = _rotate_left(c);
+		c->right = __rotate_right(c->right);
+		c = __rotate_left(c);
 		_color_flip(c);
 	}
 
@@ -309,7 +309,7 @@ static struct llrb_link *_move_red_right(struct llrb_link *c) {
 	_color_flip(c);
 
 	if (_is_red(c->left->left)) {
-		c = _rotate_right(c);
+		c = __rotate_right(c);
 		_color_flip(c);
 	}
 
@@ -344,7 +344,7 @@ struct llrb_link *__llrb_delete(struct llrb_link *c, struct llrb_link *n, pf_llr
 	}
 	else {
 		if (_is_red(c->left))
-			c = _rotate_right(c);
+			c = __rotate_right(c);
 		compr = __compare_wrap(n, c, comp);
 		if (compr == 0 && c->right == NULL)
 			return NULL;
@@ -403,7 +403,7 @@ struct llrb_link *llrb_remove(struct llrb_link *root, struct llrb_link *n, pf_ll
 	return root;
 }
 
-static int __compare_wrap_v(const struct llrb_link* a, const struct llrb_link* b, pf_llrb_compare_v raw_comp, void* param) {
+static inline int __compare_wrap_v(const struct llrb_link* a, const struct llrb_link* b, pf_llrb_compare_v raw_comp, void* param) {
 	int raw_result = raw_comp(a, b, param);
 
 	if (raw_result != 0) return raw_result;
@@ -492,7 +492,7 @@ struct llrb_link *__llrb_delete_v(struct llrb_link *c, struct llrb_link *n, pf_l
 	}
 	else {
 		if (_is_red(c->left))
-			c = _rotate_right(c);
+			c = __rotate_right(c);
 		compr = __compare_wrap_v(n, c, comp, param);
 		if (compr == 0 && c->right == NULL)
 			return NULL;
@@ -593,6 +593,47 @@ static void __llrb_check(struct llrb_link *c, int depth, pf_llrb_compare comp) {
 void llrb_debug_check(struct llrb_link *root, pf_llrb_compare comp) {
 	black_depth = -1;
 	__llrb_check(root, 0, comp);
+}
+
+static void __llrb_check_v(struct llrb_link *c, int depth, pf_llrb_compare_v comp_v, void* param) {
+	if (c == NULL) {
+		if (black_depth == -1) black_depth = depth;
+		else dbg_assert(depth == black_depth);
+	}
+	else {
+		struct llrb_link *lc = c->left;
+		struct llrb_link *rc = c->right;
+		struct llrb_link *par = c->parent;
+		int cmpr = 0;
+
+		if (lc) {
+			dbg_assert(lc->parent == c);
+
+			cmpr = __compare_wrap_v(lc, c, comp_v, param);
+			dbg_assert(cmpr == -1);
+		}
+		if (rc) {
+			dbg_assert(rc->parent == c);
+
+			cmpr = __compare_wrap_v(rc, c, comp_v, param);
+			dbg_assert(cmpr == 1);
+		}
+
+		if (par) dbg_assert(par->left == c || par->right == c);
+
+		dbg_assert(!_is_red(rc));
+		if (_is_red(par)) dbg_assert(!_is_red(c));
+
+		if (!_is_red(c)) depth ++;
+
+		__llrb_check_v(c->left, depth, comp_v, param);
+		__llrb_check_v(c->right, depth, comp_v, param);
+	}
+}
+
+void llrb_debug_check_v(struct llrb_link* root, pf_llrb_compare_v comp_v, void* param) {
+	black_depth = -1;
+	__llrb_check_v(root, 0, comp_v, param);
 }
 
 struct llrb_link* llrb_min(struct llrb_link* root) {

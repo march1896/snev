@@ -296,6 +296,7 @@
     <ClCompile Include="..\..\tests\test_main.c" />
     <ClCompile Include="..\..\tests\test_util.c" />
     <ClCompile Include="..\..\tests\util\llrb_link.test.c" />
+    <ClCompile Include="..\..\tests\util\splay_link.test.c" />
     <ClCompile Include="..\..\tests\util\util.all.test.c" />
   </ItemGroup>
   <ItemGroup>
@@ -312,6 +313,7 @@
     <ClInclude Include="..\..\tests\cntr\cntr_test_util.h" />
     <ClInclude Include="..\..\tests\memheap\heap_util.test.h" />
     <ClInclude Include="..\..\tests\test_util.h" />
+    <ClInclude Include="..\..\tests\util\tree_link.util.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

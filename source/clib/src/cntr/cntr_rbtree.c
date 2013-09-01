@@ -185,7 +185,7 @@ static rbt_node* _sibling(rbt_node* n) {
 		return n->parent->left;
 }
 
-static void _rotate_left(rbt_node* n) {
+static void __rotate_left(rbt_node* n) {
 	rbt_node* r = n->right;
 	rbt_node* p = n->parent;
 	dbg_assert(r != SENT);
@@ -205,7 +205,7 @@ static void _rotate_left(rbt_node* n) {
 	}
 }
 
-static void _rotate_right(rbt_node* n) {
+static void __rotate_right(rbt_node* n) {
 	rbt_node *l = n->left;
 	rbt_node *p = n->parent;
 	dbg_assert(l != SENT);
@@ -284,11 +284,11 @@ static void rbt_add_adjust(rbt_node* n) {
 		}
 
 		if (n == n->parent->right && n->parent == g->left) {
-			_rotate_left(n->parent);
+			__rotate_left(n->parent);
 			n = n->left;
 		}
 		else if (n == n->parent->left && n->parent == g->right) {
-			_rotate_right(n->parent);
+			__rotate_right(n->parent);
 			n = n->right;
 		}
 
@@ -297,11 +297,11 @@ static void rbt_add_adjust(rbt_node* n) {
 		g->color = RED;
 		if (n == n->parent->left) {
 			dbg_assert(n->parent == g->left);
-			_rotate_right(g);
+			__rotate_right(g);
 		}
 		else {
 			dbg_assert(n->parent == g->right);
-			_rotate_left(g);
+			__rotate_left(g);
 		}
 	}
 }
@@ -444,9 +444,9 @@ static void rbt_remove_adjust(rbt_node* n) {
 			n->parent->color = RED;
 			s->color = BLACK;
 			if (n == n->parent->left) 
-				_rotate_left(n->parent);
+				__rotate_left(n->parent);
 			else 
-				_rotate_right(n->parent);
+				__rotate_right(n->parent);
 		}
 
 		/* case 3 and 4 */
@@ -474,13 +474,13 @@ static void rbt_remove_adjust(rbt_node* n) {
 			dbg_assert(s->left->color == RED);
 			s->color = RED;
 			s->left->color = BLACK;
-			_rotate_right(s);
+			__rotate_right(s);
 		}
 		if (s->left->color == BLACK && n == n->parent->right) {
 			dbg_assert(s->right->color == RED);
 			s->color = RED;
 			s->right->color = BLACK;
-			_rotate_left(s);
+			__rotate_left(s);
 		}
 
 		s = _sibling(n);
@@ -488,11 +488,11 @@ static void rbt_remove_adjust(rbt_node* n) {
 		n->parent->color = BLACK;
 		if (n == n->parent->left) {
 			s->right->color = BLACK;
-			_rotate_left(n->parent);
+			__rotate_left(n->parent);
 		}
 		else {
 			s->left->color = BLACK;
-			_rotate_right(n->parent);
+			__rotate_right(n->parent);
 		}
 	}
 }
