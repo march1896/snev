@@ -106,13 +106,15 @@ void test_run_single(const char* test_name, pf_test_case test_func) {
 }
 
 void test_run_bench(const char* test_name, pf_test_case test_func) {
+	bool old_log_time = g_log_time;
+
 #ifdef _DEBUG
 	return;
 #endif
 #ifdef DEBUG
 	return;
 #endif
-	bool old_log_time = g_log_time;
+
 	g_log_time = true;
 	test_run_single(test_name, test_func);
 	g_log_time = old_log_time;

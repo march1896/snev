@@ -48,28 +48,6 @@ static inline struct splay_link *__splay_rotate_right(struct splay_link *n) {
 	return l;
 }
 
-/*
-void splay( node *x ) {
-	while( x->parent ) {
-		if( !x->parent->parent ) {
-			if( x->parent->left == x ) right_rotate( x->parent );
-			else left_rotate( x->parent );
-		} else if( x->parent->left == x && x->parent->parent->left == x->parent ) {
-			right_rotate( x->parent->parent );
-			right_rotate( x->parent );
-		} else if( x->parent->right == x && x->parent->parent->right == x->parent ) {
-			left_rotate( x->parent->parent );
-			left_rotate( x->parent );
-		} else if( x->parent->left == x && x->parent->parent->right == x->parent ) {
-			right_rotate( x->parent );
-			left_rotate( x->parent );
-		} else {
-			left_rotate( x->parent );
-			right_rotate( x->parent );
-		}
-	}
-}
-*/
 static inline void __splay(struct splay_link* n) {
 	while (n->parent) {
 		if (!n->parent->parent) {
