@@ -42,9 +42,13 @@ struct skip_link* skip_link_create_fixed(pf_alloc alc, void* heap, int level) {
 	return link;
 }
 
+struct skip_link* skip_link_destroy(struct skip_link* link, pf_dealloc dlc, void* heap) {
+	dealloc(dlc, heap, link);
+}
+
 #define SKIP_LINK_FROM_LIST(list, level) ((struct skip_link*)((int*)((struct list_link*)list - level) - 1))
 
-void skiplist_insert(struct skip_link* header, struct skip_link* target, pf_skip_compare comp) {
+void skip_link_insert(struct skip_link* header, struct skip_link* target, pf_skip_compare comp) {
 	int i;
 	struct list_link* list = &header->levels[header->num_level-1];
 
@@ -64,7 +68,7 @@ void skiplist_insert(struct skip_link* header, struct skip_link* target, pf_skip
 }
 
 /* NOTE: remember to delete the skip_link when failed */
-bool skiplist_insert_s(struct skip_link* header, struct skip_link* target, pf_skip_compare comp) {
+bool skip_link_insert_s(struct skip_link* header, struct skip_link* target, pf_skip_compare comp) {
 	int i;
 	struct list_link* list = &header->levels[header->num_level-1];
 
@@ -93,7 +97,7 @@ bool skiplist_insert_s(struct skip_link* header, struct skip_link* target, pf_sk
 	return true;
 }
 
-void skiplist_remove(struct skip_link* header, struct skip_link* target, pf_skip_compare comp) {
+void skip_link_remove(struct skip_link* header, struct skip_link* target, pf_skip_compare comp) {
 	int i;
 
 	unused(header);
@@ -104,7 +108,7 @@ void skiplist_remove(struct skip_link* header, struct skip_link* target, pf_skip
 	}
 }
 
-struct skip_link* skiplist_search(struct skip_link* header, pf_skip_direct direct, void* param) {
+struct skip_link* skip_link_search(struct skip_link* header, pf_skip_direct direct, void* param) {
 	int i;
 	struct list_link* list = &header->levels[header->num_level-1];
 	
