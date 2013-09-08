@@ -157,7 +157,7 @@ static struct allocator_sysd __allocator_sysd = {
 	NULL                         /* __driver, should we use __global_heap_sysd instead? */
 };
 
-allocator global_sysd_allocator = (allocator)&__allocator_sysd;
+allocator __global_sysd_allocator = (allocator)&__allocator_sysd;
 
 /*****************************************************************************************
  * allocator system default end 
@@ -286,7 +286,7 @@ static struct allocator_llrb __allocator_llrb = {
 	&__global_static_heap_llrb   /* __driver */
 };
 
-allocator global_llrb_allocator = (allocator)&__allocator_llrb;
+allocator __global_llrb_allocator = (allocator)&__allocator_llrb;
 
 /*****************************************************************************************
  * allocator llrb end 
@@ -414,8 +414,8 @@ static struct allocator_buddy __allocator_buddy = {
 	&__global_static_heap_buddy  /* __driver */
 };
 
-allocator global_buddy_allocator = (allocator)&__allocator_buddy;
-allocator default_allocator = (allocator)&__allocator_buddy;
+allocator __global_buddy_allocator = (allocator)&__allocator_buddy;
+allocator __global_default_allocator = (allocator)&__allocator_buddy;
 
 /*****************************************************************************************
  * allocator buddy end 

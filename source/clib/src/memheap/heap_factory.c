@@ -17,7 +17,7 @@ struct heap_wrap* heap_wrap_spawn(void* __parent, pf_alloc __alloc, pf_dealloc _
 
 void heap_wrap_join(struct heap_wrap* pheap) {
 	void* __parent       = pheap->__parent;
-	pf_dealloc __dealloc = pheap->__dealloc;
+	pf_dealloc __dealloc = pheap->__parent_dealloc;
 
 	heap_wrap_deinit(pheap);
 
@@ -44,7 +44,7 @@ struct heap_llrb* heap_llrb_spawn_v(void* __parent, pf_alloc __alloc, pf_dealloc
 
 void heap_llrb_join(struct heap_llrb* pheap) {
 	void* __parent       = pheap->__parent;
-	pf_dealloc __dealloc = pheap->__dealloc;
+	pf_dealloc __dealloc = pheap->__parent_dealloc;
 
 	heap_llrb_deinit(pheap);
 
@@ -71,7 +71,7 @@ struct heap_buddy* heap_buddy_spawn_v(void* __parent, pf_alloc __alloc, pf_deall
 
 void heap_buddy_join(struct heap_buddy* pheap) {
 	void* __parent       = pheap->__parent;
-	pf_dealloc __dealloc = pheap->__dealloc;
+	pf_dealloc __dealloc = pheap->__parent_dealloc;
 
 	heap_buddy_deinit(pheap);
 

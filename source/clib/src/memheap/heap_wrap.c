@@ -2,8 +2,8 @@
 
 void  heap_wrap_init(struct heap_wrap* h, void* __parent, pf_alloc __alloc, pf_dealloc __dealloc) {
 	h->__parent  = __parent;
-	h->__alloc   = __alloc;
-	h->__dealloc = __dealloc;
+	h->__parent_alloc   = __alloc;
+	h->__parent_dealloc = __dealloc;
 
 	list_init(&h->allocated);
 }
@@ -17,7 +17,7 @@ void heap_wrap_deinit(struct heap_wrap* h) {
 #ifndef _VERBOSE_ALLOC_DEALLOC_
 void* heap_wrap_alloc_c(struct heap_wrap* h, int size) {
 	int __size = size + sizeof(struct list_link);
-	void* buff = alloc(h->__alloc, h->__parent, size);
+	void* buff = alloc(h->__parent_alloc, h->__parent, size);
 
 	dbg_assert(buff != NULL);
 	/* link the allocated block in to list */
@@ -39,7 +39,7 @@ bool  heap_wrap_dealloc_c(struct heap_wrap* h, void* buff) {
 	list_remove(&h->allocated, link);
 
 	/* return the memory to the 'real' heap */
-	return h->__dealloc(h->__parent, real_addr);
+	return h->__parent_dealloc(h->__parent, real_addr);
 	/* using the raw __dealloc to keep the client file & line */
 	/*dealloc(h->__dealloc, h->__parent);*/
 }
@@ -49,7 +49,7 @@ bool  heap_wrap_dealloc_c(struct heap_wrap* h, void* buff) {
 void* heap_wrap_alloc_v(struct heap_wrap* h, int size, const char* file ,int line) {
 	int __size = size + sizeof(struct list_link);
 	//void* buff = alloc(h->__alloc, h->__parent, __size);
-	void* buff = h->__alloc(h->__parent, __size, file, line);
+	void* buff = h->__parent_alloc(h->__parent, __size, file, line);
 
 	dbg_assert(buff != NULL);
 	/* link the allocated block in to list */
@@ -74,7 +74,7 @@ bool  heap_wrap_dealloc_v(struct heap_wrap* h, void* buff, const char* file, int
 
 	/* using the raw __dealloc to keep the client file & line */
 	/*dealloc(h->__dealloc, h->__parent, real_addr, file, line);*/
-	return h->__dealloc(h->__parent, real_addr, file, line);
+	return h->__parent_dealloc(h->__parent, real_addr, file, line);
 }
 
 #endif

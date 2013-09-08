@@ -9,7 +9,7 @@
 
 void heap_buddy_correct_test() {
 	struct heap_buddy* testheap = heap_buddy_spawn(
-				__global_heap_sysd, 
+				__global_sysd_heap, 
 				heap_sysd_alloc,
 				heap_sysd_dealloc
 			);
@@ -35,7 +35,7 @@ void heap_buddy_correct_test() {
 
 void heap_buddy_performance_test() {
 	struct heap_buddy* testheap = heap_buddy_spawn(
-				__global_heap_sysd, 
+				__global_sysd_heap, 
 				heap_sysd_alloc,
 				heap_sysd_dealloc
 			);

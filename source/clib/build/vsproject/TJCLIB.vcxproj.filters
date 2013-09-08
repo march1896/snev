@@ -145,7 +145,7 @@
     <ClCompile Include="..\..\src\cntr2\osplay.c">
       <Filter>Source Files\cntr2</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\util\skiplist_link.c">
+    <ClCompile Include="..\..\src\util\skiplist.c">
       <Filter>Source Files\util</Filter>
     </ClCompile>
   </ItemGroup>
@@ -335,7 +335,7 @@
     <ClInclude Include="..\..\src\util\splay_link.h">
       <Filter>Source Files\util</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\util\skiplist_link.h">
+    <ClInclude Include="..\..\src\util\skiplist.h">
       <Filter>Source Files\util</Filter>
     </ClInclude>
   </ItemGroup>

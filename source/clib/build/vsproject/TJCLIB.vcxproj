@@ -250,7 +250,7 @@
     <ClCompile Include="..\..\src\regex\node.c" />
     <ClCompile Include="..\..\src\regex\prog.c" />
     <ClCompile Include="..\..\src\regex\regc.c" />
-    <ClCompile Include="..\..\src\util\skiplist_link.c" />
+    <ClCompile Include="..\..\src\util\skiplist.c" />
     <ClCompile Include="..\..\src\util\splay_link.c" />
   </ItemGroup>
   <ItemGroup>
@@ -308,7 +308,7 @@
     <ClInclude Include="..\..\src\util\list_link.h" />
     <ClInclude Include="..\..\src\util\llrb_link.h" />
     <ClInclude Include="..\..\src\util\math.h" />
-    <ClInclude Include="..\..\src\util\skiplist_link.h" />
+    <ClInclude Include="..\..\src\util\skiplist.h" />
     <ClInclude Include="..\..\src\util\splay_link.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

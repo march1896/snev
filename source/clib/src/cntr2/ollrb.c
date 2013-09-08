@@ -294,7 +294,7 @@ static object* ollrb_create_v(pf_compare ref_compare, allocator alc, pf_dispose 
 	bool managed_allocator = false;
 
 	if (alc == NULL) {
-		alc = allocator_mpool_spawn(default_allocator, 10);
+		alc = allocator_mpool_spawn(__global_default_allocator, 10);
 		managed_allocator = true;
 	}
 
