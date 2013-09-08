@@ -79,6 +79,9 @@
     <ClCompile Include="..\..\tests\cntr2\osplay.test.c">
       <Filter>Source Files\cntr2</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\tests\util\skiplist.test.c">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">

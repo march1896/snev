@@ -49,11 +49,11 @@ extern inline void      allocator_walk      (allocator o, pf_process_block per_b
 #endif
 
 /* system default allocator, which can not be spawned or joined */
-extern allocator global_sysd_allocator;
-extern allocator global_llrb_allocator;
-extern allocator global_buddy_allocator;
+extern allocator __global_sysd_allocator;
+extern allocator __global_llrb_allocator;
+extern allocator __global_buddy_allocator;
 
-extern allocator default_allocator;
+extern allocator __global_default_allocator;
 
 /* the factory methods */
 allocator allocator_llrb_spawn (allocator parent);

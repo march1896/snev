@@ -17,5 +17,5 @@ void cntr2_all_test() {
 	test_run_single("osplay object test", cntr2_osplay_test);
 
 	/* check the container/iterator memory leak */
-	allocator_walk(default_allocator, allocator_heap_walk_print, NULL);
+	allocator_walk(__global_default_allocator, allocator_heap_walk_print, NULL);
 }

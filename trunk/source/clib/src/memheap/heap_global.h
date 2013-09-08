@@ -2,24 +2,45 @@
 #define _HEAP_GLOBAL_H_
 
 #include <memheap/heap_def.h>
-
 #include <memheap/heap_sys.h>
 #include <memheap/heap_llrb.h>
 #include <memheap/heap_buddy.h>
 
-extern void*              __global_heap_sysd;
-extern struct heap_llrb*  __global_heap_llrb;
-extern struct heap_buddy* __global_heap_buddy;
+extern void*      __global_sysd_heap;
+extern pf_alloc   __global_sysd_alloc;
+extern pf_dealloc __global_sysd_dealloc;
 
-#define malloc(size) alloc(heap_buddy_alloc, __global_heap_buddy, size)
-#define free(buff)   dealloc(heap_buddy_dealloc, __global_heap_buddy, buff)
+extern void*      __global_llrb_heap;
+extern pf_alloc   __global_llrb_alloc;
+extern pf_dealloc __global_llrb_dealloc;
+
+extern void*      __global_buddy_heap;
+extern pf_alloc   __global_buddy_alloc;
+extern pf_dealloc __global_buddy_dealloc;
+
+extern void*      __global_default_heap;
+extern pf_alloc   __global_default_alloc;
+extern pf_dealloc __global_default_dealloc;
+
+/* please don't include system headers after this file */
+#ifdef malloc
+#define sys_malloc malloc
+#undef malloc
+#endif 
+#ifdef free
+#define sys_free free
+#undef free
+#endif
+
+#define malloc(size) alloc(__global_default_alloc, __global_default_heap, size)
+#define free(buff)   dealloc(__global_default_dealloc, __global_default_heap, buff)
 
 /*
 #define malloc(size) alloc(heap_sysd_alloc, __global_heap_sysd, size)
 #define free(buff)   dealloc(heap_sysd_dealloc, __global_heap_sysd, buff)
 
-#define malloc(size) alloc(heap_llrb_alloc, __global_heap_llrb, size)
-#define free(buff)   dealloc(heap_llrb_dealloc, __global_heap_llrb, buff)
+#define malloc(size) alloc(heap_llrb_alloc, (struct heap_llrb*)__global_heap_llrb, size)
+#define free(buff)   dealloc(heap_llrb_dealloc, (struct heap_llrb*)__global_heap_llrb, buff)
 */
 
 #endif /* _HEAP_GLOBAL_H_ */

@@ -7,7 +7,7 @@
 
 void heap_sysd_correct_test() {
 	heaptest_begin();
-	heaptest_set_heap(__global_heap_sysd, heap_sysd_alloc, heap_sysd_dealloc);
+	heaptest_set_heap(__global_sysd_heap, heap_sysd_alloc, heap_sysd_dealloc);
 	heaptest_set_filldata(true);
 
 	heaptest_run_single(100, ht_op_reverseorder, ht_data_small, ht_pattern_unique);
@@ -18,7 +18,7 @@ void heap_sysd_correct_test() {
 
 void heap_sysd_performance_test() {
 	heaptest_begin();
-	heaptest_set_heap(__global_heap_sysd, heap_sysd_alloc, heap_sysd_dealloc);
+	heaptest_set_heap(__global_sysd_heap, heap_sysd_alloc, heap_sysd_dealloc);
 	heaptest_set_filldata(false);
 	heaptest_set_logtime(true, 0, "heap_sysd_performance.txt");
 

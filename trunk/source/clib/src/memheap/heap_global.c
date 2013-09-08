@@ -7,7 +7,9 @@
 
 #include <memheap/heap_factory.h>
 
-void*              __global_heap_sysd  = NULL;
+void*      __global_sysd_heap  = NULL;
+pf_alloc   __global_sysd_alloc = (pf_alloc)heap_sysd_alloc;
+pf_dealloc __global_sysd_dealloc = (pf_dealloc)heap_sysd_dealloc;
 
 static int __system_global_heap_magic;
 
@@ -24,7 +26,9 @@ struct heap_llrb __global_static_heap_llrb = {
 	HEAP_MINIMUM_EXPAND_SIZE         /* expand_size */
 };
 
-struct heap_llrb*  __global_heap_llrb  = &__global_static_heap_llrb;
+void*      __global_llrb_heap    = (void*)&__global_static_heap_llrb;
+pf_alloc   __global_llrb_alloc   = (pf_alloc)heap_llrb_alloc;
+pf_dealloc __global_llrb_dealloc = (pf_dealloc)heap_llrb_dealloc;
 
 #define list_static_init(var) {&var, &var}
 
@@ -75,4 +79,10 @@ struct heap_buddy __global_static_heap_buddy = {
 	HEAP_MINIMUM_EXPAND_SIZE         /* expand_size */
 };
 
-struct heap_buddy* __global_heap_buddy = &__global_static_heap_buddy;
+void*      __global_buddy_heap    = (void*)&__global_static_heap_buddy;
+pf_alloc   __global_buddy_alloc   = (pf_alloc)heap_buddy_alloc;
+pf_dealloc __global_buddy_dealloc = (pf_dealloc)heap_buddy_dealloc;
+
+void*      __global_default_heap    = (void*)&__global_static_heap_buddy;;
+pf_alloc   __global_default_alloc   = (pf_alloc)heap_buddy_alloc;
+pf_dealloc __global_default_dealloc = (pf_dealloc)heap_buddy_dealloc;

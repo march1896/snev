@@ -13,10 +13,10 @@ int block_data_size_from_blick(struct list_link *link) {
 
 static void heap_buddy_expand_memory(struct heap_buddy* pheap, int expand_size) {
 	struct block_c_pool* n_blk_pool = (struct block_c_pool*)
-		alloc(pheap->__alloc, pheap->__parent, sizeof(struct block_c_pool));
+		alloc(pheap->__parent_alloc, pheap->__parent, sizeof(struct block_c_pool));
 
 	void* n_mem_begin = 
-		alloc(pheap->__alloc, pheap->__parent, expand_size);
+		alloc(pheap->__parent_alloc, pheap->__parent, expand_size);
 
 	dbg_assert(n_mem_begin != NULL);
 	{
@@ -60,8 +60,8 @@ void heap_buddy_init_v(struct heap_buddy* pheap, void* __parent, pf_alloc __allo
 	int i;
 
 	pheap->__parent  = __parent;
-	pheap->__alloc   = __alloc;
-	pheap->__dealloc = __dealloc;
+	pheap->__parent_alloc   = __alloc;
+	pheap->__parent_dealloc = __dealloc;
 
 	for (i = 0; i < BUDDY_COUNT; i ++) 
 		list_init(&pheap->buddy[i]);
@@ -80,10 +80,10 @@ static void block_c_pool_dispose(struct list_link* link, void* param) {
 	struct heap_buddy* pheap = (struct heap_buddy*)param;
 
 	/* first delete the memory hold by this node */
-	dealloc(pheap->__dealloc, pheap->__parent, blk_pool->memory);
+	dealloc(pheap->__parent_dealloc, pheap->__parent, blk_pool->memory);
 
 	/* second delete the memory node itself */
-	dealloc(pheap->__dealloc, pheap->__parent, blk_pool);
+	dealloc(pheap->__parent_dealloc, pheap->__parent, blk_pool);
 }
 
 void heap_buddy_deinit(struct heap_buddy* pheap) {

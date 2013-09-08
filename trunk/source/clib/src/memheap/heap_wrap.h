@@ -28,8 +28,8 @@ struct heap_wrap_node {
 
 struct heap_wrap {
 	void*            __parent;
-	pf_alloc         __alloc;
-	pf_dealloc       __dealloc;
+	pf_alloc         __parent_alloc;
+	pf_dealloc       __parent_dealloc;
 
 	struct list_link allocated;
 };

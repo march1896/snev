@@ -18,8 +18,8 @@ struct heap_buddy_block {
 struct heap_buddy {
 	void*              __parent;
 	/* the inner alloc/dealloc callback to manage the inner usage of this heap */
-	pf_alloc           __alloc;
-	pf_dealloc         __dealloc;
+	pf_alloc           __parent_alloc;
+	pf_dealloc         __parent_dealloc;
 
 	/* point to the single free list */
 	struct list_link   buddy[BUDDY_COUNT]; 

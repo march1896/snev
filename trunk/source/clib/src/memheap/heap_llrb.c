@@ -45,10 +45,10 @@ static struct llrb_link *llrb_link_findbysize(struct llrb_link *c, int size) {
 
 static void heap_llrb_expand_memory(struct heap_llrb* pheap, int expand_size) {
 	struct block_c_pool* n_block_pool = (struct block_c_pool*)
-		alloc(pheap->__alloc, pheap->__parent, sizeof(struct block_c_pool));
+		alloc(pheap->__parent_alloc, pheap->__parent, sizeof(struct block_c_pool));
 
 	void* n_mem_begin = 
-		alloc(pheap->__alloc, pheap->__parent, expand_size);
+		alloc(pheap->__parent_alloc, pheap->__parent, expand_size);
 
 	dbg_assert(n_mem_begin != NULL);
 	{
@@ -90,8 +90,8 @@ void heap_llrb_init(struct heap_llrb* pheap, void* parent, pf_alloc __alloc, pf_
 
 void heap_llrb_init_v(struct heap_llrb* pheap, void* __parent, pf_alloc __alloc, pf_dealloc __dealloc, int __split_threshold, int __expand_size) {
 	pheap->__parent  = __parent;
-	pheap->__alloc   = __alloc;
-	pheap->__dealloc = __dealloc;
+	pheap->__parent_alloc   = __alloc;
+	pheap->__parent_dealloc = __dealloc;
 
 	pheap->llrb_root = NULL;
 	list_init(&pheap->memlist);
@@ -108,10 +108,10 @@ static void block_c_pool_dispose(struct list_link* link, void* param) {
 	struct heap_llrb* pheap = (struct heap_llrb*)param;
 
 	/* first delete the memory hold by this node */
-	dealloc(pheap->__dealloc, pheap->__parent, blk_pool->memory);
+	dealloc(pheap->__parent_dealloc, pheap->__parent, blk_pool->memory);
 
 	/* second delete the memory node itself */
-	dealloc(pheap->__dealloc, pheap->__parent, blk_pool);
+	dealloc(pheap->__parent_dealloc, pheap->__parent, blk_pool);
 }
 
 void heap_llrb_deinit(struct heap_llrb* pheap) {

@@ -13,17 +13,17 @@ static void allocator_trace_test() {
 
 	for (i = 0; i < 10; i ++) {
 		size[i] = (i + 1) * 10;
-		addr[i] = (void*)allocator_alloc(global_sysd_allocator, size[i]);
+		addr[i] = (void*)allocator_alloc(__global_sysd_allocator, size[i]);
 		memset(addr[i], size[i], 0);
 	}
 
 	for (i = 0; i < 10; i ++) {
-		allocator_dealloc(global_sysd_allocator, addr[i]);
+		allocator_dealloc(__global_sysd_allocator, addr[i]);
 	}
 
 	{
 		allocator allrb;
-		allrb = allocator_llrb_spawn(global_sysd_allocator);
+		allrb = allocator_llrb_spawn(__global_sysd_allocator);
 		for (i = 0; i < 10; i ++) {
 			size[i] = (i + 1) * 10;
 			addr[i] = (void*)allocator_alloc(allrb, size[i]);
@@ -50,7 +50,7 @@ static void allocator_trace_test() {
 typedef allocator (*pf_spawn_cb)(allocator parent);
 
 void cntr2_allocator_recursive_spawn_test() {
-	allocator grand_father = allocator_llrb_spawn(global_sysd_allocator);
+	allocator grand_father = allocator_llrb_spawn(__global_sysd_allocator);
 	allocator father       = allocator_llrb_spawn(grand_father);
 	allocator uncle        = allocator_llrb_spawn(grand_father);
 	allocator brother      = allocator_llrb_spawn(father);

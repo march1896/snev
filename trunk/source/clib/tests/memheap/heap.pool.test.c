@@ -9,7 +9,7 @@
 
 static void heap_spool_correct_test() {
 	struct heap_spool* testheap = heap_spool_spawn(
-				__global_heap_sysd, 
+				__global_sysd_heap, 
 				heap_sysd_alloc,
 				heap_sysd_dealloc
 			);
@@ -40,7 +40,7 @@ static void heap_spool_correct_test() {
 
 static void heap_spool_performance_test() {
 	struct heap_spool* testheap = heap_spool_spawn(
-				__global_heap_sysd, 
+				__global_sysd_heap, 
 				heap_sysd_alloc,
 				heap_sysd_dealloc
 			);
@@ -80,7 +80,7 @@ static void heap_mpool_single_test(const int num_diff_type, const int max_single
 	void*** pointer = NULL;
 	int i;
 	struct heap_mpool* testheap = heap_mpool_spawn(
-		__global_heap_sysd, 
+		__global_sysd_heap, 
 		heap_sysd_alloc,
 		heap_sysd_dealloc,
 		num_diff_type
