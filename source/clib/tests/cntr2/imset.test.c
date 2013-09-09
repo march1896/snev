@@ -345,7 +345,7 @@ void mset_test_basic(iobject* mset) {
 void mset_test_memory(iobject* mset) {
 }
 
-void mset_test_bench(iobject* mset, int max_diff_type, int num_operation) {
+void mset_test_bench(iobject* mset) {
 	__mset = mset;
 	__data_diff_type = 100;
 	__data_max_count = 10;
