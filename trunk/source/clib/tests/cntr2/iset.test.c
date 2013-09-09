@@ -267,60 +267,82 @@ static void set_test_basic_operation(iobject* set) {
 	}
 }
 
-void set_test_dataset(iobject* set, int dataset_size) {
-	intptr_t x = 0;
-	bool res = false;
+static int __num_modify; /* number of insert and remove */
+static int __num_search;
 
-	iset_clear(set);
-	dbg_assert(iset_empty(set));
+static int __data_diff_type; /* number of different values to store in the set */
+static int __data_max_count; /* max count of a single value */
 
-	for (x = 0; x < (intptr_t)dataset_size; x ++) {
-		res = iset_insert(set, (void*)x);
-		dbg_assert(res == true);
+static iobject* __set = NULL; /* to be tested */
+static intptr_t* data_count = NULL;
+
+static void __reset_data() {
+	int i = 0;
+
+	for (i = 0; i < __data_diff_type; i ++) {
+		data_count[i] = 0;
 	}
-	dbg_assert(iset_size(set) == dataset_size);
-
-	/* insert the data set again */
-	for (x = 0; x < (intptr_t)dataset_size; x ++) {
-		res = iset_insert(set, (void*)x);
-		dbg_assert(res == false);
-	}
-	dbg_assert(iset_size(set) == dataset_size);
-
-	for (x = 0; x < (intptr_t)dataset_size; x ++) {
-		res = iset_contains(set, (void*)x);
-		dbg_assert(res == true);
-	}
-	dbg_assert(iset_contains(set, (void*)(x + 1)) == false);
-
-	for (x = 0; x < (intptr_t)dataset_size; x ++) {
-		res = iset_remove(set, (void*)x);
-		dbg_assert(res == true);
-	}
-	dbg_assert(iset_size(set) == 0);
 }
 
-void set_test_random_operation(iobject* mset, int max_diff_types, int dataset_size) {
+static void __create_data() {
+	if (data_count != NULL) 
+		free(data_count);
+
+	data_count = (intptr_t*)malloc(sizeof(intptr_t)*__data_diff_type);
+
+	__reset_data();
+}
+
+static void __destroy_data() {
+	free(data_count);
+	data_count = NULL;
+}
+
+static void set_bench_modify_randomly() {
 	int i;
 
-	iset_clear(mset);
-	dbg_assert(iset_empty(mset));
+	log_printline("[number of modify: %d]", __num_modify);
+	dbg_assert(iset_empty(__set));
 
-	for (i = 0; i < dataset_size; i ++) {
-		intptr_t x = rand() % max_diff_types;
-		bool found = iset_contains(mset, (void*)x);
-
-		if (!found) {
-			iset_insert(mset, (void*)x);
-		}
-		else {
-			bool res = iset_remove(mset, (void*)x);
-			dbg_assert(res == true);
+	for (i = 0; i < __num_modify; i ++) {
+		intptr_t x = rand() % __data_diff_type;
+		bool found = iset_contains(__set, (void*)x);
+		
+		if (found == false) {
+			iset_insert(__set, (void*)x);
+			data_count[x] ++;
+		} else {
+			iset_remove(__set, (void*)x);
+			data_count[x] --;
 		}
 	}
 
-	iset_clear(mset);
+	iset_clear(__set);
 }
+
+static void set_bench_search_randomly() {
+	int i;
+	dbg_assert(iset_empty(__set));
+
+	log_printline("[number of search: %d]", __num_search);
+
+	for (i = 0; i < __data_diff_type; i ++) {
+		/* insert all data one by one */
+		iset_insert(__set, (void*)(intptr_t)i);
+	}
+	/* now the set contains __data_diff_type * 2 of data, each elememt int [0, __data_diff_type)
+	 * appears at least once */
+
+	for (i = 0; i < __num_search; i ++) {
+		intptr_t x = rand() % __data_diff_type;
+
+		bool res = iset_contains(__set, (void*)x);
+		dbg_assert(res == true);
+	}
+
+	iset_clear(__set);
+}
+
 
 void set_test_basic(iobject* set) {
 	set_test_basic_operation(set);
@@ -331,6 +353,64 @@ void set_test_memory(iobject* set) {
 }
 
 void set_test_bench(iobject* set, int max_diff_type, int dataset_size) {
-	set_test_dataset(set, max_diff_type); 
-	set_test_random_operation(set, max_diff_type, dataset_size);
+	__set = set;
+	__data_diff_type = 100;
+	__data_max_count = 1;
+	__num_modify     = 100;
+	__num_search     = 100;
+	iset_clear(__set);
+	log_printline("[data type: %d, single data max dup: %d]", __data_diff_type, __data_max_count);
+	
+	__create_data();
+	test_run_single("randomly modify test", set_bench_modify_randomly);
+	__destroy_data();
+	test_run_single("randomly search test", set_bench_search_randomly);
+
+	__num_modify     = 100000;
+	__num_search     = 100;
+	__create_data();
+	test_run_single("randomly modify test", set_bench_modify_randomly);
+	__destroy_data();
+
+	__num_modify     = 100;
+	__num_search     = 100000;
+	test_run_single("randomly search test", set_bench_search_randomly);
+
+	__data_diff_type = 5000;
+	log_printline("[data type: %d, single data max dup: %d]", __data_diff_type, __data_max_count);
+	__num_modify     = 100000;
+	__num_search     = 100;
+	__create_data();
+	test_run_single("randomly modify test", set_bench_modify_randomly);
+	__destroy_data();
+
+	__num_modify     = 100;
+	__num_search     = 100000;
+	test_run_single("randomly search test", set_bench_search_randomly);
+
+	__data_diff_type = 100000;
+	log_printline("[data type: %d, single data max dup: %d]", __data_diff_type, __data_max_count);
+	__num_modify     = 100000;
+	__num_search     = 100;
+
+	__create_data();
+	test_run_single("randomly modify test", set_bench_modify_randomly);
+	__destroy_data();
+
+	__num_modify     = 100;
+	__num_search     = 100000;
+	test_run_single("randomly search test", set_bench_search_randomly);
+
+	__data_diff_type = 100000;
+	log_printline("[data type: %d, single data max dup: %d]", __data_diff_type, __data_max_count);
+	__num_modify     = 1000000;
+	__num_search     = 100;
+
+	__create_data();
+	test_run_single("randomly modify test", set_bench_modify_randomly);
+	__destroy_data();
+
+	__num_modify     = 100;
+	__num_search     = 1000000;
+	test_run_single("randomly search test", set_bench_search_randomly);
 }

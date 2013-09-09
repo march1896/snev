@@ -1,3 +1,5 @@
+#include <time.h>
+
 #include "test_util.h"
 
 extern void util_all_test();
@@ -6,10 +8,10 @@ extern void cntr2_all_test();
 extern void cntr_all_test();
 
 int main() {
-#ifndef _DEBUG 
-	g_use_file = true;
-#endif
-#ifndef DEBUG
+	unsigned int iseed = (unsigned int)time(NULL);
+	srand (iseed);
+
+#if defined(_DEBUG) || defined(DEBUG) 
 	g_use_file = true;
 #endif
 
