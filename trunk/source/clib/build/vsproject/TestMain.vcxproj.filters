@@ -82,6 +82,9 @@
     <ClCompile Include="..\..\tests\util\skiplist.test.c">
       <Filter>Source Files\util</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\tests\cntr2\oskiplist.test.c">
+      <Filter>Source Files\cntr2</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">

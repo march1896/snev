@@ -13,14 +13,22 @@ static int ref_compare(const void* a, const void* b) {
 }
 
 static void skiplist_basic_test() {
-	struct skiplist* list = skiplist_create(ref_compare, __global_default_alloc, __global_default_dealloc, __global_default_heap);
+	struct skiplist* list = skiplist_create(ref_compare);
 
 	{
+		dbg_assert(skiplist_empty(list) == true);
 		skiplist_insert(list, (void*)(intptr_t)2);
+		/* now is { 2 } */
+		dbg_assert(skiplist_empty(list) == false);
+		dbg_assert(skiplist_first(list) == skiplist_last(list));
+		dbg_assert(skip_link_getref(skiplist_first(list)) == (void*)(intptr_t)2);
+
 		skiplist_insert(list, (void*)(intptr_t)0);
 		skiplist_insert(list, (void*)(intptr_t)1);
 		skiplist_insert(list, (void*)(intptr_t)3);
 		/* now the list contains { 0, 1, 2, 3 } */
+		dbg_assert(skip_link_getref(skiplist_first(list)) == (void*)(intptr_t)0);
+		dbg_assert(skip_link_getref(skiplist_last(list)) == (void*)(intptr_t)3);
 
 		dbg_assert(skiplist_contains(list, (void*)(intptr_t)0) == true);
 		dbg_assert(skiplist_contains(list, (void*)(intptr_t)1) == true);
@@ -73,6 +81,7 @@ static void skiplist_basic_test() {
 		dbg_assert(skiplist_remove(list, (void*)(intptr_t)2) == false);
 
 		skiplist_clear(list);
+		dbg_assert(skiplist_empty(list) == true);
 	}
 	/* test insert_s */
 	{
@@ -131,7 +140,7 @@ static int num_operation;
 
 static void skiplist_insert_remove() {
 	int i = 0;
-	struct skiplist* list = skiplist_create(ref_compare, __global_default_alloc, __global_default_dealloc, __global_default_heap);
+	struct skiplist* list = skiplist_create(ref_compare);
 
 	for (i = 0; i < num_operation; i ++) {
 		int idx = rand() % data_max_diff_type;
@@ -165,7 +174,7 @@ static void skiplist_insert_remove() {
 
 static void skiplist_insert_remove_s() {
 	int i = 0;
-	struct skiplist* list = skiplist_create(ref_compare, __global_default_alloc, __global_default_dealloc, __global_default_heap);
+	struct skiplist* list = skiplist_create(ref_compare);
 
 	for (i = 0; i < num_operation; i ++) {
 		int idx = rand() % data_max_diff_type;

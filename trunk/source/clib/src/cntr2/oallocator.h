@@ -41,11 +41,11 @@ extern inline allocator allocator_get_parent(allocator o);
 extern inline void      allocator_walk      (allocator o, pf_process_block per_block_cb, void* param);
 
 #ifdef _VERBOSE_ALLOC_DEALLOC_
-#define allocator_alloc(i, size) allocator_acquire_v(i, size, __FILE__, __LINE__)
-#define allocator_dealloc(i, buff) allocator_release_v(i, buff, __FILE__, __LINE__)
+#define allocator_alloc(o, size) allocator_acquire_v(o, size, __FILE__, __LINE__)
+#define allocator_dealloc(o, buff) allocator_release_v(o, buff, __FILE__, __LINE__)
 #else 
-#define allocator_alloc(i, size) allocator_acquire_c(i, size)
-#define allocator_dealloc(i, buff) allocator_release_c(i, buff)
+#define allocator_alloc(o, size) allocator_acquire_c(o, size)
+#define allocator_dealloc(o, buff) allocator_release_c(o, buff)
 #endif
 
 /* system default allocator, which can not be spawned or joined */
