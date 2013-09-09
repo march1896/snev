@@ -26,4 +26,7 @@ object* cntr_create_ollrb_v(pf_compare comp, allocator alc, pf_dispose dispose);
 object* cntr_create_osplay(pf_compare comp);
 object* cntr_create_osplay_v(pf_compare comp, allocator alc, pf_dispose dispose);
 
+object* cntr_create_oskiplist(pf_compare comp);
+object* cntr_create_oskiplist_v(pf_compare comp, allocator alc, pf_dispose dispose);
+
 #endif /* _INTERFACE_FACTORY_H_ */
