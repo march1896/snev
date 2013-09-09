@@ -30,13 +30,13 @@ static void __as_mset_basic_test() {
 
 static void __as_set_bench_test() {
 	iset set = as_set(cntr_create_osplay(int_compare));
-	set_test_bench(set, 1000, 1000 * 10000);
+	set_test_bench(set);
 	iset_destroy(set);
 }
 
 static void __as_mset_bench_test() {
 	imset mset = as_mset(cntr_create_osplay(int_compare));
-	mset_test_bench(mset, 1000, 1000 * 10000);
+	mset_test_bench(mset);
 	imset_destroy(mset);
 }
 

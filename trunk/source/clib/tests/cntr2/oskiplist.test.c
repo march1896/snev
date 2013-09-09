@@ -31,13 +31,13 @@ static void __as_mset_basic_test() {
 
 static void __as_set_bench_test() {
 	iset set = as_set(cntr_create_oskiplist_v(int_compare, __global_default_allocator, NULL));
-	set_test_bench(set, 1000, 1000 * 10000);
+	set_test_bench(set);
 	iset_destroy(set);
 }
 
 static void __as_mset_bench_test() {
 	imset mset = as_mset(cntr_create_oskiplist_v(int_compare, __global_default_allocator, NULL));
-	mset_test_bench(mset, 1000, 1000 * 10000);
+	mset_test_bench(mset);
 	imset_destroy(mset);
 }
 
