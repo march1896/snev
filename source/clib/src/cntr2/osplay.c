@@ -35,7 +35,7 @@ struct osplay_itr {
 	 * alloc the memory, but we should know how to delete this memory */
 	allocator                     __allocator;
 
-	struct splay_link*             __current;
+	struct splay_link*            __current;
 };
 
 /* binary search tree */
@@ -46,9 +46,9 @@ struct osplay {
 	iobject                       __iftable[e_l_count];
 
 	/* just a sentinel to represent the end of the tree, the maximum element of the tree */
-	struct splay_link              __sentinel;
+	struct splay_link             __sentinel;
 	/* __root == __sentinel.left */
-	struct splay_link*             __root;
+	struct splay_link*            __root;
 
 	int                           __size;
 	pf_compare                    __ref_comp;
@@ -60,11 +60,12 @@ struct osplay {
 	/* methods to manage the object's lifetime which is stored in the container */
 	pf_dispose                    __dispose;         
 
-	struct osplay_itr              __itr_begin;
-	struct osplay_itr              __itr_end;
+	struct osplay_itr             __itr_begin;
+	struct osplay_itr             __itr_end;
 };
 
 static object*  osplay_create          (pf_compare ref_comp);
+/* if alc is NULL, create_v will create an osplay with multi-pool allocator to gain best efficiency */
 static object*  osplay_create_v        (pf_compare ref_comp, allocator alc, pf_dispose dispose);
 static void     osplay_destroy         (object* o);
 static void     osplay_clear           (object* o);
@@ -284,8 +285,7 @@ static int osplay_compare_v(const struct splay_link* a, const struct splay_link*
 }
 
 static object* osplay_create(pf_compare ref_compare) {
-	//return osplay_create_v(ref_compare, default_allocator, NULL);
-	return osplay_create_v(ref_compare, NULL, NULL);
+	return osplay_create_v(ref_compare, __global_default_allocator, NULL);
 }
 
 static void osplay_itr_com_init(struct osplay_itr* itr, struct osplay* list);

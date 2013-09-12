@@ -64,27 +64,6 @@
     <ClCompile Include="..\..\src\cntr\oos_model.c">
       <Filter>Source Files\cntr</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\regex\dfa.c">
-      <Filter>Source Files\regex</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\regex\fatable.c">
-      <Filter>Source Files\regex</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\regex\nfa.c">
-      <Filter>Source Files\regex</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\regex\nfastack.c">
-      <Filter>Source Files\regex</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\regex\node.c">
-      <Filter>Source Files\regex</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\regex\prog.c">
-      <Filter>Source Files\regex</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\regex\regc.c">
-      <Filter>Source Files\regex</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cntr2\iqueue.c">
       <Filter>Source Files\cntr2</Filter>
     </ClCompile>
@@ -151,6 +130,9 @@
     <ClCompile Include="..\..\src\cntr2\oskiplist.c">
       <Filter>Source Files\cntr2</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\lexer\automaton.c">
+      <Filter>Source Files\lexer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
@@ -162,14 +144,14 @@
     <Filter Include="Source Files\cntr">
       <UniqueIdentifier>{c470f9be-73ef-435c-a63d-2d83c36b3583}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\regex">
-      <UniqueIdentifier>{01bb233f-0b11-4b81-99bc-d94a7f06e4c6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\cntr2">
       <UniqueIdentifier>{9595d002-0e2d-4fcb-ab1c-bd9400b4b157}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\memheap">
       <UniqueIdentifier>{ad1e1824-3f67-4597-9455-85f3927d0274}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\lexer">
+      <UniqueIdentifier>{a64cd8cb-5f4a-46cf-991d-66f7c8036f7a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -244,21 +226,6 @@
     </ClInclude>
     <ClInclude Include="..\..\src\memheap\mem_common.h">
       <Filter>Source Files\memheap</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\regex\fa.h">
-      <Filter>Source Files\regex</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\regex\fatable.h">
-      <Filter>Source Files\regex</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\regex\nfastack.h">
-      <Filter>Source Files\regex</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\regex\prog.h">
-      <Filter>Source Files\regex</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\regex\regc.h">
-      <Filter>Source Files\regex</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\util\bit_math.h">
       <Filter>Source Files\util</Filter>
@@ -340,6 +307,12 @@
     </ClInclude>
     <ClInclude Include="..\..\src\util\skiplist.h">
       <Filter>Source Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cntr2\olist.h">
+      <Filter>Source Files\cntr2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\lexer\automaton.h">
+      <Filter>Source Files\lexer</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

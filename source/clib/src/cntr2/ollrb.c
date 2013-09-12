@@ -65,6 +65,7 @@ struct ollrb {
 };
 
 static object*  ollrb_create          (pf_compare ref_comp);
+/* if alc is NULL, create_v will create an osplay with multi-pool allocator to gain best efficiency */
 static object*  ollrb_create_v        (pf_compare ref_comp, allocator alc, pf_dispose dispose);
 static void     ollrb_destroy         (object* o);
 static void     ollrb_clear           (object* o);
@@ -284,8 +285,7 @@ static int ollrb_compare_v(const struct llrb_link* a, const struct llrb_link* b,
 }
 
 static object* ollrb_create(pf_compare ref_compare) {
-	//return ollrb_create_v(ref_compare, default_allocator, NULL);
-	return ollrb_create_v(ref_compare, NULL, NULL);
+	return ollrb_create_v(ref_compare, __global_default_allocator, NULL);
 }
 
 static void ollrb_itr_com_init(struct ollrb_itr* itr, struct ollrb* list);

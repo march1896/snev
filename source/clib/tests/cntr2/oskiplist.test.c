@@ -18,25 +18,25 @@ static int int_compare(const void* a, const void* b) {
 }
 
 static void __as_set_basic_test() {
-	iset set = as_set(cntr_create_oskiplist_v(int_compare, __global_default_allocator, NULL));
+	iset set = as_set(cntr_create_oskiplist(int_compare));
 	set_test_basic(set);
 	iset_destroy(set);
 }
 
 static void __as_mset_basic_test() {
-	imset mset = as_mset(cntr_create_oskiplist_v(int_compare, __global_default_allocator, NULL));
+	imset mset = as_mset(cntr_create_oskiplist(int_compare));
 	mset_test_basic(mset);
 	imset_destroy(mset);
 }
 
 static void __as_set_bench_test() {
-	iset set = as_set(cntr_create_oskiplist_v(int_compare, __global_default_allocator, NULL));
+	iset set = as_set(cntr_create_oskiplist_v(int_compare, NULL, NULL));
 	set_test_bench(set);
 	iset_destroy(set);
 }
 
 static void __as_mset_bench_test() {
-	imset mset = as_mset(cntr_create_oskiplist_v(int_compare, __global_default_allocator, NULL));
+	imset mset = as_mset(cntr_create_oskiplist_v(int_compare, NULL, NULL));
 	mset_test_bench(mset);
 	imset_destroy(mset);
 }

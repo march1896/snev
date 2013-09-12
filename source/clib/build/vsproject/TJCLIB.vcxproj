@@ -217,6 +217,7 @@
     <ClCompile Include="..\..\src\cntr2\oo_model.c" />
     <ClCompile Include="..\..\src\cntr2\oskiplist.c" />
     <ClCompile Include="..\..\src\cntr2\osplay.c" />
+    <ClCompile Include="..\..\src\lexer\automaton.c" />
     <ClCompile Include="..\..\src\memheap\block_common.c" />
     <ClCompile Include="..\..\src\memheap\block_link.c" />
     <ClCompile Include="..\..\src\memheap\heap_buddy.c" />
@@ -244,13 +245,6 @@
     <ClCompile Include="..\..\src\cntr\cntr_rbtree.c" />
     <ClCompile Include="..\..\src\cntr\oos_model.c" />
     <ClCompile Include="..\..\src\cntr\_234tree.c" />
-    <ClCompile Include="..\..\src\regex\dfa.c" />
-    <ClCompile Include="..\..\src\regex\fatable.c" />
-    <ClCompile Include="..\..\src\regex\nfa.c" />
-    <ClCompile Include="..\..\src\regex\nfastack.c" />
-    <ClCompile Include="..\..\src\regex\node.c" />
-    <ClCompile Include="..\..\src\regex\prog.c" />
-    <ClCompile Include="..\..\src\regex\regc.c" />
     <ClCompile Include="..\..\src\util\skiplist.c" />
     <ClCompile Include="..\..\src\util\splay_link.c" />
   </ItemGroup>
@@ -266,6 +260,7 @@
     <ClInclude Include="..\..\src\cntr2\iset.h" />
     <ClInclude Include="..\..\src\cntr2\istack.h" />
     <ClInclude Include="..\..\src\cntr2\oallocator.h" />
+    <ClInclude Include="..\..\src\cntr2\olist.h" />
     <ClInclude Include="..\..\src\cntr2\oo_model.h" />
     <ClInclude Include="..\..\src\cntr\cattr.h" />
     <ClInclude Include="..\..\src\cntr\citer_base.h" />
@@ -285,6 +280,7 @@
     <ClInclude Include="..\..\src\cntr\oo_model.doc.h" />
     <ClInclude Include="..\..\src\cntr\oo_model.h" />
     <ClInclude Include="..\..\src\cntr\_234tree.h" />
+    <ClInclude Include="..\..\src\lexer\automaton.h" />
     <ClInclude Include="..\..\src\memheap\block_common.h" />
     <ClInclude Include="..\..\src\memheap\block_link.h" />
     <ClInclude Include="..\..\src\memheap\heap_buddy.h" />
@@ -297,11 +293,6 @@
     <ClInclude Include="..\..\src\memheap\heap_walk.h" />
     <ClInclude Include="..\..\src\memheap\heap_wrap.h" />
     <ClInclude Include="..\..\src\memheap\mem_common.h" />
-    <ClInclude Include="..\..\src\regex\fa.h" />
-    <ClInclude Include="..\..\src\regex\fatable.h" />
-    <ClInclude Include="..\..\src\regex\nfastack.h" />
-    <ClInclude Include="..\..\src\regex\prog.h" />
-    <ClInclude Include="..\..\src\regex\regc.h" />
     <ClInclude Include="..\..\src\util\bit_math.h" />
     <ClInclude Include="..\..\src\util\bst_link.h" />
     <ClInclude Include="..\..\src\util\cominc.h" />
