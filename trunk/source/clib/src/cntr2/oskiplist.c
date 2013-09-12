@@ -55,6 +55,7 @@ struct oskiplist {
 };
 
 static object*  oskiplist_create          (pf_compare ref_comp);
+/* if alc is NULL, create_v will create an osplay with multi-pool allocator to gain best efficiency */
 static object*  oskiplist_create_v        (pf_compare ref_comp, allocator alc, pf_dispose dispose);
 static void     oskiplist_destroy         (object* o);
 static void     oskiplist_clear           (object* o);
@@ -253,8 +254,7 @@ static unknown oskiplist_itr_cast(unknown x, unique_id inf_id) {
 }
 
 static object* oskiplist_create(pf_compare ref_compare) {
-	//return oskiplist_create_v(ref_compare, default_allocator, NULL);
-	return oskiplist_create_v(ref_compare, NULL, NULL);
+	return oskiplist_create_v(ref_compare, __global_default_allocator, NULL);
 }
 
 static void* skiplist_alloc_adapter(int size, void* context) {
