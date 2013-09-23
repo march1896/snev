@@ -60,17 +60,17 @@ static void     oskiplist_destroy         (object* o);
 static void     oskiplist_clear           (object* o);
 static int      oskiplist_size            (const object* o);
 static bool     oskiplist_empty           (const object* o);
-static bool     oskiplist_insert_s        (object* o, void* __ref);
-static void     oskiplist_insert_m        (object* o, void* __ref);
-static bool     oskiplist_contains        (const object* o, void* __ref);
-static int      oskiplist_count           (const object* o, void* __ref);
+static bool     oskiplist_insert_s        (object* o, const void* __ref);
+static void     oskiplist_insert_m        (object* o, const void* __ref);
+static bool     oskiplist_contains        (const object* o, const void* __ref);
+static int      oskiplist_count           (const object* o, const void* __ref);
 static bool     oskiplist_remove          (object* o, void* __ref);
 
 static iterator oskiplist_itr_create      (const object* o, itr_pos pos);
 static void     oskiplist_itr_assign      (const object* o, iterator itr, itr_pos pos);
-static void     oskiplist_itr_find        (const object* o, iterator itr, void* __ref);
-static void     oskiplist_itr_find_lower  (const object* o, iterator itr, void* __ref);
-static void     oskiplist_itr_find_upper  (const object* o, iterator itr, void* __ref);
+static void     oskiplist_itr_find        (const object* o, iterator itr, const void* __ref);
+static void     oskiplist_itr_find_lower  (const object* o, iterator itr, const void* __ref);
+static void     oskiplist_itr_find_upper  (const object* o, iterator itr, const void* __ref);
 
 static void*    oskiplist_itr_remove      (object* o, iterator itr);
 
@@ -415,7 +415,7 @@ static void oskiplist_itr_assign(const object* o, iterator itr, itr_pos pos) {
 		n_itr->__current = skiplist_sent(olist->__skiplist);
 	}
 }
-static void oskiplist_itr_find(const object* o, iterator itr, void* __ref) {
+static void oskiplist_itr_find(const object* o, iterator itr, const void* __ref) {
 	struct oskiplist* olist      = (struct oskiplist*)o;
 	struct oskiplist_itr* oitr   = (struct oskiplist_itr*)itr;
 	const struct skip_link* link = NULL;
@@ -429,7 +429,7 @@ static void oskiplist_itr_find(const object* o, iterator itr, void* __ref) {
 	oitr->__current = link;
 }
 
-static void oskiplist_itr_find_lower(const object* o, iterator itr, void* __ref) {
+static void oskiplist_itr_find_lower(const object* o, iterator itr, const void* __ref) {
 	struct oskiplist* oskiplist = (struct oskiplist*)o;
 	struct oskiplist_itr* oitr  = (struct oskiplist_itr*)itr;
 	const struct skip_link* link = NULL;
@@ -443,7 +443,7 @@ static void oskiplist_itr_find_lower(const object* o, iterator itr, void* __ref)
 	oitr->__current = link;
 }
 
-static void oskiplist_itr_find_upper(const object* o, iterator itr, void* __ref) {
+static void oskiplist_itr_find_upper(const object* o, iterator itr, const void* __ref) {
 	struct oskiplist* oskiplist = (struct oskiplist*)o;
 	struct oskiplist_itr* oitr  = (struct oskiplist_itr*)itr;
 	const struct skip_link* link = NULL;
@@ -457,7 +457,7 @@ static void oskiplist_itr_find_upper(const object* o, iterator itr, void* __ref)
 	oitr->__current = link;
 }
 
-static bool oskiplist_insert_s(object* o, void* __ref) {
+static bool oskiplist_insert_s(object* o, const void* __ref) {
 	struct oskiplist* oskiplist     = (struct oskiplist*)o;
 	bool res = skiplist_insert_s(oskiplist->__skiplist, __ref);
 
@@ -467,7 +467,7 @@ static bool oskiplist_insert_s(object* o, void* __ref) {
 	return res;
 }
 
-static void oskiplist_insert_m(object* o, void* __ref) {
+static void oskiplist_insert_m(object* o, const void* __ref) {
 	struct oskiplist* oskiplist     = (struct oskiplist*)o;
 
 	skiplist_insert(oskiplist->__skiplist, __ref);
@@ -476,13 +476,13 @@ static void oskiplist_insert_m(object* o, void* __ref) {
 	return;
 }
 
-static bool oskiplist_contains(const object* o, void* __ref) {
+static bool oskiplist_contains(const object* o, const void* __ref) {
 	struct oskiplist* oskiplist   = (struct oskiplist*)o;
 
 	return skiplist_contains(oskiplist->__skiplist, __ref);
 }
 
-static int oskiplist_count(const object* o, void* __ref) {
+static int oskiplist_count(const object* o, const void* __ref) {
 	struct oskiplist* oskiplist = (struct oskiplist*)o;
 	const struct skip_link* lb = skiplist_search_v(oskiplist->__skiplist, __ref, skiplist_min_greaterorequal);
 	const struct skip_link* ub = skiplist_search_v(oskiplist->__skiplist, __ref, skiplist_min_greater);

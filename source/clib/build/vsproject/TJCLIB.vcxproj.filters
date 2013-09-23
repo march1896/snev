@@ -133,6 +133,9 @@
     <ClCompile Include="..\..\src\lexer\nfa.c">
       <Filter>Source Files\lexer</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\cntr2\imap.c">
+      <Filter>Source Files\cntr2</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
@@ -313,6 +316,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\lexer\nfa.h">
       <Filter>Source Files\lexer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cntr2\imap.h">
+      <Filter>Source Files\cntr2</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

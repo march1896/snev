@@ -19,10 +19,10 @@ struct skiplist* skiplist_create_v(pf_skiplist_compare comp,
 		pf_skiplink_alloc alc, pf_skiplink_dealloc dlc, void* alloc_context);
 void   skiplist_destroy(struct skiplist* list);
 
-void skiplist_insert  (struct skiplist* list, void* data);
-bool skiplist_insert_s(struct skiplist* list, void* data);
-bool skiplist_contains(const struct skiplist* list, void* data);
-bool skiplist_remove  (struct skiplist* list, void* data);
+void skiplist_insert  (struct skiplist* list, const void* data);
+bool skiplist_insert_s(struct skiplist* list, const void* data);
+bool skiplist_contains(const struct skiplist* list, const void* data);
+bool skiplist_remove  (struct skiplist* list, const void* data);
 void skiplist_remove_link(struct skiplist* list, struct skip_link* link);
 void skiplist_clear   (struct skiplist* list);
 bool skiplist_empty   (const struct skiplist* list);
@@ -30,7 +30,7 @@ bool skiplist_empty   (const struct skiplist* list);
 extern inline const struct skip_link* skiplist_first(const struct skiplist* list);
 extern inline const struct skip_link* skiplist_last (const struct skiplist* list);
 extern inline const struct skip_link* skiplist_sent (const struct skiplist* list);
-const struct skip_link* skiplist_search(const struct skiplist* list, void* data);
+const struct skip_link* skiplist_search(const struct skiplist* list, const void* data);
 enum skiplist_search_option {
 	skiplist_equal,
 	skiplist_min_greater,
@@ -40,7 +40,7 @@ enum skiplist_search_option {
 	skiplist_search_count
 };
 /* the result may contains sentinel link */
-const struct skip_link* skiplist_search_v(const struct skiplist* slist, void* data, enum skiplist_search_option option);
+const struct skip_link* skiplist_search_v(const struct skiplist* slist, const void* data, enum skiplist_search_option option);
 
 /* note, if you change the inner value of ref, it may destroy the skiplist order */
 typedef void (*pf_ref_process)(const void* __ref, void* context);

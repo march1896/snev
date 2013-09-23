@@ -10,15 +10,15 @@ extern inline void     iset_clear            (iobject* ic);
 extern inline int      iset_size             (const iobject* ic);
 extern inline bool     iset_empty            (const iobject* ic);
 /* return false if __ref is already in the set */
-extern inline bool     iset_insert           (iobject* ic, void* __ref);
-extern inline bool     iset_contains         (const iobject* ic, void* __ref);
+extern inline bool     iset_insert           (iobject* ic, const void* __ref);
+extern inline bool     iset_contains         (const iobject* ic, const void* __ref);
 /* return false if __ref is not in the set */
 extern inline bool     iset_remove           (iobject* ic, void* __ref);
 
 extern inline iterator iset_itr_create       (const iobject* ic, itr_pos pos);
 extern inline void     iset_itr_assign       (const iobject* ic, /* out */iterator itr, itr_pos pos);
 /* points to end if __ref is not in the set */
-extern inline void     iset_itr_find         (const iobject* ic, /* out */iterator itr, void* __ref);
+extern inline void     iset_itr_find         (const iobject* ic, /* out */iterator itr, const void* __ref);
 extern inline void*    iset_itr_remove       (iobject* ic, iterator itr);
 /* return a iterator, maybe forward/bidirectional/random accessed. */
 extern inline const_iterator iset_itr_begin  (const iobject* ic);
@@ -30,13 +30,13 @@ typedef       void     (*pf_iset_destroy)    (object* c);
 typedef       void     (*pf_iset_clear)      (object* c);
 typedef       int      (*pf_iset_size)       (const object* c);
 typedef       bool     (*pf_iset_empty)      (const object* c);
-typedef       bool     (*pf_iset_insert)     (object* c, void* __ref);
-typedef       bool     (*pf_iset_contains)   (const object* c, void* __ref);
+typedef       bool     (*pf_iset_insert)     (object* c, const void* __ref);
+typedef       bool     (*pf_iset_contains)   (const object* c, const void* __ref);
 typedef       bool     (*pf_iset_remove)     (object* c, void* __ref);
 
 typedef       iterator (*pf_iset_itr_create) (const object* c, itr_pos pos);
 typedef       void     (*pf_iset_itr_assign) (const object* c, iterator itr, itr_pos pos);
-typedef       void     (*pf_iset_itr_find)   (const object* c, iterator itr, void* __ref);
+typedef       void     (*pf_iset_itr_find)   (const object* c, iterator itr, const void* __ref);
 typedef       void*    (*pf_iset_itr_remove) (object* c, iterator itr);
 typedef const_iterator (*pf_iset_itr_begin)  (const object* c);
 typedef const_iterator (*pf_iset_itr_end)    (const object* c);
@@ -66,19 +66,19 @@ extern inline       void     imset_destroy    (iobject* i);
 extern inline       void     imset_clear      (iobject* i);
 extern inline       int      imset_size       (const iobject* i);
 extern inline       bool     imset_empty      (const iobject* i);
-extern inline       void     imset_insert     (iobject* i, void* __ref);
-extern inline       bool     imset_contains   (const iobject* i, void* __ref);
+extern inline       void     imset_insert     (iobject* i, const void* __ref);
+extern inline       bool     imset_contains   (const iobject* i, const void* __ref);
 /* return number of reference of __ref */
-extern inline       int      imset_count      (const iobject* i, void* __ref);
+extern inline       int      imset_count      (const iobject* i, const void* __ref);
 /* return false if __ref is not in the set */
 extern inline       bool     imset_remove     (iobject* i, void* __ref);
 
 extern inline       iterator imset_itr_create (const iobject* i, itr_pos pos);
 extern inline       void     imset_itr_assign (const iobject* i, /* out */iterator itr, itr_pos pos);
 /* find the minimum element which is greater or equal to __ref */
-extern inline       void     imset_itr_find_lower(const iobject* i, /* out */iterator itr, void* __ref);
+extern inline       void     imset_itr_find_lower(const iobject* i, /* out */iterator itr, const void* __ref);
 /* find the minimum element which is greater than __ref */
-extern inline       void     imset_itr_find_upper(const iobject* i, /* out */iterator itr, void* __ref);
+extern inline       void     imset_itr_find_upper(const iobject* i, /* out */iterator itr, const void* __ref);
 extern inline       void*    imset_itr_remove (iobject* i, iterator itr);
 /* return a iterator, maybe forward/bidirectional/random accessed. */
 extern inline const_iterator imset_itr_begin  (const iobject* i);
@@ -90,15 +90,15 @@ typedef       void     (*pf_imset_destroy)    (object* o);
 typedef       void     (*pf_imset_clear)      (object* o);
 typedef       int      (*pf_imset_size)       (const object* o);
 typedef       bool     (*pf_imset_empty)      (const object* o);
-typedef       void     (*pf_imset_insert)     (object* o, void* __ref);
-typedef       bool     (*pf_imset_contains)   (const object* o, void* __ref);
-typedef       int      (*pf_imset_count)      (const object* o, void* __ref);
+typedef       void     (*pf_imset_insert)     (object* o, const void* __ref);
+typedef       bool     (*pf_imset_contains)   (const object* o, const void* __ref);
+typedef       int      (*pf_imset_count)      (const object* o, const void* __ref);
 typedef       bool     (*pf_imset_remove)     (object* o, void* __ref);
 
 typedef       iterator (*pf_imset_itr_create) (const object* o, itr_pos pos);
 typedef       void     (*pf_imset_itr_assign) (const object* o, iterator itr, itr_pos pos);
-typedef       void     (*pf_imset_itr_find_lower)(const object* o, iterator itr, void* __ref);
-typedef       void     (*pf_imset_itr_find_upper)(const object* o, iterator itr, void* __ref);
+typedef       void     (*pf_imset_itr_find_lower)(const object* o, iterator itr, const void* __ref);
+typedef       void     (*pf_imset_itr_find_upper)(const object* o, iterator itr, const void* __ref);
 typedef       void*    (*pf_imset_itr_remove) (object* o, iterator itr);
 typedef const_iterator (*pf_imset_itr_begin)  (const object* o);
 typedef const_iterator (*pf_imset_itr_end)    (const object* o);

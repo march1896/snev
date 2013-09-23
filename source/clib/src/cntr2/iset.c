@@ -32,14 +32,14 @@ inline bool iset_empty(const iobject* i) {
 	return ((struct iset_vtable*)(i->__vtable))->__empty(o);
 }
 
-inline bool iset_insert(iobject* i, void* ref) {
+inline bool iset_insert(iobject* i, const void* __ref) {
 	object* o = __object_from_interface(i);
 	dbg_assert(__cast(o, ISET_ID) == i);
 
-	return ((struct iset_vtable*)(i->__vtable))->__insert(o, ref);
+	return ((struct iset_vtable*)(i->__vtable))->__insert(o, __ref);
 }
 
-inline bool iset_contains(const iobject* i, void* __ref) {
+inline bool iset_contains(const iobject* i, const void* __ref) {
 	object* o = __object_from_interface(i);
 	dbg_assert(__cast(o, ISET_ID) == i);
 
@@ -64,11 +64,11 @@ inline void iset_itr_assign(const iobject* i, iterator itr, itr_pos pos) {
 
 	((struct iset_vtable*)i->__vtable)->__itr_assign(o, itr, pos);
 }
-inline void iset_itr_find(const iobject* i, iterator itr, void* ref) {
+inline void iset_itr_find(const iobject* i, iterator itr, const void* __ref) {
 	object* o = __object_from_interface(i);
 	dbg_assert(__cast(o, ISET_ID) == i);
 
-	((struct iset_vtable*)(i->__vtable))->__itr_find(o, itr, ref);
+	((struct iset_vtable*)(i->__vtable))->__itr_find(o, itr, __ref);
 }
 inline void* iset_itr_remove(iobject* i, iterator itr) {
 	object* o = __object_from_interface(i);
@@ -121,21 +121,21 @@ inline bool imset_empty(const iobject* i) {
 	return ((struct imset_vtable*)(i->__vtable))->__empty(o);
 }
 
-inline void imset_insert(iobject* i, void* ref) {
+inline void imset_insert(iobject* i, const void* __ref) {
 	object* o = __object_from_interface(i);
 	dbg_assert(__cast(o, IMSET_ID) == i);
 
-	((struct imset_vtable*)(i->__vtable))->__insert(o, ref);
+	((struct imset_vtable*)(i->__vtable))->__insert(o, __ref);
 }
 
-inline bool imset_contains(const iobject* i, void* __ref) {
+inline bool imset_contains(const iobject* i, const void* __ref) {
 	object* o = __object_from_interface(i);
 	dbg_assert(__cast(o, IMSET_ID) == i);
 
 	return ((struct imset_vtable*)(i->__vtable))->__contains(o, __ref);
 }
 
-inline int imset_count(const iobject* i, void* __ref) {
+inline int imset_count(const iobject* i, const void* __ref) {
 	object* o = __object_from_interface(i);
 	dbg_assert(__cast(o, IMSET_ID) == i);
 
@@ -160,13 +160,13 @@ inline void imset_itr_assign(const iobject* i, iterator itr, itr_pos pos) {
 
 	((struct imset_vtable*)i->__vtable)->__itr_assign(o, itr, pos);
 }
-inline void imset_itr_find_lower(const iobject* i, iterator itr, void* ref) {
+inline void imset_itr_find_lower(const iobject* i, iterator itr, const void* ref) {
 	object* o = __object_from_interface(i);
 	dbg_assert(__cast(o, IMSET_ID) == i);
 
 	((struct imset_vtable*)(i->__vtable))->__itr_find_lower(o, itr, ref);
 }
-inline void imset_itr_find_upper(const iobject* i, iterator itr, void* ref) {
+inline void imset_itr_find_upper(const iobject* i, iterator itr, const void* ref) {
 	object* o = __object_from_interface(i);
 	dbg_assert(__cast(o, IMSET_ID) == i);
 
