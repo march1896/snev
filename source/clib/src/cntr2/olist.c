@@ -375,7 +375,7 @@ const void* o_dlist_back(const object* o) {
 	return n_node->reference;
 }
 
-void o_dlist_add_front(object* o, void* ref) {
+void o_dlist_add_front(object* o, const void* ref) {
 	struct o_dlist* olist = (struct o_dlist*)o;
 
 	struct o_dlist_node* n_node = (struct o_dlist_node*)
@@ -387,7 +387,7 @@ void o_dlist_add_front(object* o, void* ref) {
 	olist->__size ++;
 }
 
-void o_dlist_add_back(object* o, void* ref) {
+void o_dlist_add_back(object* o, const void* ref) {
 	struct o_dlist* olist = (struct o_dlist*)o;
 
 	struct o_dlist_node* n_node = (struct o_dlist_node*)
@@ -448,7 +448,7 @@ void* o_dlist_remove_back(object* o) {
 	return NULL;
 }
 
-bool o_dlist_contains(const object* o, void* __ref) {
+bool o_dlist_contains(const object* o, const void* __ref) {
 	const struct o_dlist* olist     = (const struct o_dlist*)o;
 	const struct list_link* link    = olist->__sentinel.next;
 

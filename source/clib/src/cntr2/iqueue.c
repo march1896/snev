@@ -42,11 +42,11 @@ inline const void* iqueue_back(const iobject* iq) {
 	return ((struct iqueue_vtable*)(iq->__vtable))->__back(o);
 }
 
-inline void iqueue_push(iobject* iq, void* ref) {
+inline void iqueue_push(iobject* iq, const void* __ref) {
 	object* o = __object_from_interface(iq);
 	dbg_assert(__cast(o, IQUEUE_ID) == iq);
 
-	((struct iqueue_vtable*)(iq->__vtable))->__push(o, ref);
+	((struct iqueue_vtable*)(iq->__vtable))->__push(o, __ref);
 }
 
 inline void* iqueue_pop(iobject* iq) {
