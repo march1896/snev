@@ -207,7 +207,6 @@
     <ClCompile Include="..\..\src\cntr2\iallocator.c" />
     <ClCompile Include="..\..\src\cntr2\iitr.c" />
     <ClCompile Include="..\..\src\cntr2\ilist.c" />
-    <ClCompile Include="..\..\src\cntr2\imset.c" />
     <ClCompile Include="..\..\src\cntr2\iqueue.c" />
     <ClCompile Include="..\..\src\cntr2\iset.c" />
     <ClCompile Include="..\..\src\cntr2\istack.c" />
@@ -218,6 +217,7 @@
     <ClCompile Include="..\..\src\cntr2\oskiplist.c" />
     <ClCompile Include="..\..\src\cntr2\osplay.c" />
     <ClCompile Include="..\..\src\lexer\automaton.c" />
+    <ClCompile Include="..\..\src\lexer\nfa.c" />
     <ClCompile Include="..\..\src\memheap\block_common.c" />
     <ClCompile Include="..\..\src\memheap\block_link.c" />
     <ClCompile Include="..\..\src\memheap\heap_buddy.c" />
@@ -255,7 +255,6 @@
     <ClInclude Include="..\..\src\cntr2\ifactory.h" />
     <ClInclude Include="..\..\src\cntr2\iitr.h" />
     <ClInclude Include="..\..\src\cntr2\ilist.h" />
-    <ClInclude Include="..\..\src\cntr2\imset.h" />
     <ClInclude Include="..\..\src\cntr2\iqueue.h" />
     <ClInclude Include="..\..\src\cntr2\iset.h" />
     <ClInclude Include="..\..\src\cntr2\istack.h" />
@@ -281,6 +280,7 @@
     <ClInclude Include="..\..\src\cntr\oo_model.h" />
     <ClInclude Include="..\..\src\cntr\_234tree.h" />
     <ClInclude Include="..\..\src\lexer\automaton.h" />
+    <ClInclude Include="..\..\src\lexer\nfa.h" />
     <ClInclude Include="..\..\src\memheap\block_common.h" />
     <ClInclude Include="..\..\src\memheap\block_link.h" />
     <ClInclude Include="..\..\src\memheap\heap_buddy.h" />

@@ -1,6 +1,6 @@
-#include "cntr2/imset.h"
-#include "cntr2/iitr.h"
-#include "cntr2/ialgo.h"
+#include <cntr2/iset.h>
+#include <cntr2/iitr.h>
+#include <cntr2/ialgo.h>
 
 #include "imset.test.h"
 #include "test_util.h"

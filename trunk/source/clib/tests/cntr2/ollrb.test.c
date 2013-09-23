@@ -1,7 +1,6 @@
-#include "cntr2/iset.h"
-#include "cntr2/imset.h"
-#include "cntr2/ifactory.h"
-#include "cntr2/oallocator.h"
+#include <cntr2/iset.h>
+#include <cntr2/ifactory.h>
+#include <cntr2/oallocator.h>
 
 #include "test_util.h"
 #include "cntr2/iset.test.h"

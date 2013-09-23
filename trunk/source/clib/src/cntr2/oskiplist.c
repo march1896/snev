@@ -1,13 +1,12 @@
 #include <string.h>
 
-#include "cntr2/iset.h"
-#include "cntr2/imset.h"
-#include "cntr2/iitr.h"
+#include <cntr2/iset.h>
+#include <cntr2/iitr.h>
 
-#include "cntr2/ifactory.h"
-#include "cntr2/oallocator.h"
+#include <cntr2/ifactory.h>
+#include <cntr2/oallocator.h>
 
-#include "util/skiplist.h"
+#include <util/skiplist.h>
 
 /* this module defines a left-lean red black tree container, which implements iset interface. */
 

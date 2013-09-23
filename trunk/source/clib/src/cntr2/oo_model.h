@@ -49,7 +49,7 @@ typedef struct base_object {
 	};
  */
 typedef void (*pf_oo_destroy)(object* obj);
-typedef void (*pf_oo_copy)   (const object* obj, object* to);
+typedef void (*pf_oo_copy)   (const object* from, object* to);
 
 /* An object should know how to clone itself, but the clone method has transitivity.
  * that is, if an object has a clone method, all objects that it inherit or hold should 

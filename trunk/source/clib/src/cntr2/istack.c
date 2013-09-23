@@ -35,11 +35,11 @@ inline const void* istack_top(const iobject* iq) {
 	return ((struct istack_vtable*)(iq->__vtable))->__top(o);
 }
 
-inline void istack_push(iobject* iq, void* ref) {
+inline void istack_push(iobject* iq, const void* __ref) {
 	object* o = __object_from_interface(iq);
 	dbg_assert(__cast(o, ISTACK_ID) == iq);
 
-	((struct istack_vtable*)(iq->__vtable))->__push(o, ref);
+	((struct istack_vtable*)(iq->__vtable))->__push(o, __ref);
 }
 
 inline void* istack_pop(iobject* iq) {

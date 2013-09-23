@@ -36,13 +36,13 @@ inline const void* ilist_back(const iobject* ilist) {
 
 	return ((struct ilist_vtable*)(ilist->__vtable))->__back(o);
 }
-inline void ilist_add_front(iobject* ilist, void* __ref) {
+inline void ilist_add_front(iobject* ilist, const void* __ref) {
 	object* o = __object_from_interface(ilist);
 	dbg_assert(__cast(o, ILIST_ID) == ilist);
 
 	((struct ilist_vtable*)ilist->__vtable)->__add_front(o, __ref);
 }
-inline void ilist_add_back(iobject* ilist, void* __ref) {
+inline void ilist_add_back(iobject* ilist, const void* __ref) {
 	object* o = __object_from_interface(ilist);
 	dbg_assert(__cast(o, ILIST_ID) == ilist);
 
@@ -60,7 +60,7 @@ inline void* ilist_remove_back(iobject* ilist) {
 
 	return ((struct ilist_vtable*)ilist->__vtable)->__remove_back(o);
 }
-inline bool ilist_contains(const iobject* ilist, void* __ref) {
+inline bool ilist_contains(const iobject* ilist, const void* __ref) {
 	object* o = __object_from_interface(ilist);
 	dbg_assert(__cast(o, ILIST_ID) == ilist);
 
