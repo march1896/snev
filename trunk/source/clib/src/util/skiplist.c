@@ -254,13 +254,13 @@ void skiplist_destroy(struct skiplist* slist) {
 	slist->__dealloc(slist, slist->__alloc_context);
 }
 
-void skiplist_insert(struct skiplist* slist, void* data) {
+void skiplist_insert(struct skiplist* slist, const void* data) {
 	struct skip_link* skiplink = skip_link_create(data, slist->__alloc, slist->__alloc_context);
 
 	skip_link_insert(slist->sentinel, skiplink, slist->__comp);
 }
 
-bool skiplist_insert_s(struct skiplist* slist, void* data) {
+bool skiplist_insert_s(struct skiplist* slist, const void* data) {
 	struct skip_link* skiplink = skip_link_create(data, slist->__alloc, slist->__alloc_context);
 
 	bool res = skip_link_insert_s(slist->sentinel, skiplink, slist->__comp);
@@ -271,11 +271,11 @@ bool skiplist_insert_s(struct skiplist* slist, void* data) {
 	return res;
 }
 
-bool skiplist_contains(const struct skiplist* slist, void* data) {
+bool skiplist_contains(const struct skiplist* slist, const void* data) {
 	return skiplist_search(slist, data) != slist->sentinel;
 }
 
-const struct skip_link* skiplist_search(const struct skiplist* slist, void* data) {
+const struct skip_link* skiplist_search(const struct skiplist* slist, const void* data) {
 	int i;
 	struct skip_link* header = slist->sentinel;
 	struct list_link* list = header->levels[header->num_level-1].next;
@@ -302,7 +302,7 @@ const struct skip_link* skiplist_search(const struct skiplist* slist, void* data
 /* max_smaller is previous to min_greaterorequal,
  * max_smallerorequal is previous to min_greater. 
  * so the algorithm only cares about min_greater and min_greaterorequal. */
-const struct skip_link* skiplist_search_v(const struct skiplist* slist, void* data, enum skiplist_search_option option) {
+const struct skip_link* skiplist_search_v(const struct skiplist* slist, const void* data, enum skiplist_search_option option) {
 	int i;
 	struct skip_link* header = slist->sentinel;
 	struct list_link* list = header->levels[header->num_level-1].next;
@@ -362,7 +362,7 @@ inline const struct skip_link* skiplist_sent(const struct skiplist* slist) {
 	return slist->sentinel;
 }
 
-bool skiplist_remove(struct skiplist* slist, void* data) {
+bool skiplist_remove(struct skiplist* slist, const void* data) {
 	struct skip_link* skiplink = (struct skip_link*)skiplist_search(slist, data);
 
 	if (skiplink == slist->sentinel) 

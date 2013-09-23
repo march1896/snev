@@ -70,17 +70,17 @@ static void     ollrb_destroy         (object* o);
 static void     ollrb_clear           (object* o);
 static int      ollrb_size            (const object* o);
 static bool     ollrb_empty           (const object* o);
-static bool     ollrb_insert_s        (object* o, void* __ref);
-static void     ollrb_insert_m        (object* o, void* __ref);
-static bool     ollrb_contains        (const object* o, void* __ref);
-static int      ollrb_count           (const object* o, void* __ref);
+static bool     ollrb_insert_s        (object* o, const void* __ref);
+static void     ollrb_insert_m        (object* o, const void* __ref);
+static bool     ollrb_contains        (const object* o, const void* __ref);
+static int      ollrb_count           (const object* o, const void* __ref);
 static bool     ollrb_remove          (object* o, void* __ref);
 
 static iterator ollrb_itr_create      (const object* o, itr_pos pos);
 static void     ollrb_itr_assign      (const object* o, iterator itr, itr_pos pos);
-static void     ollrb_itr_find        (const object* o, iterator itr, void* __ref);
-static void     ollrb_itr_find_lower  (const object* o, iterator itr, void* __ref);
-static void     ollrb_itr_find_upper  (const object* o, iterator itr, void* __ref);
+static void     ollrb_itr_find        (const object* o, iterator itr, const void* __ref);
+static void     ollrb_itr_find_lower  (const object* o, iterator itr, const void* __ref);
+static void     ollrb_itr_find_upper  (const object* o, iterator itr, const void* __ref);
 
 static void*    ollrb_itr_remove      (object* o, iterator itr);
 
@@ -521,7 +521,7 @@ static int ollrb_direct_upper(const struct llrb_link* link, void* param) {
 	return 0;
 }
 
-static void ollrb_itr_find(const object* o, iterator itr, void* __ref) {
+static void ollrb_itr_find(const object* o, iterator itr, const void* __ref) {
 	struct ollrb* ollrb     = (struct ollrb*)o;
 	struct ollrb_itr* oitr  = (struct ollrb_itr*)itr;
 	struct direct_s   dir   = { ollrb->__ref_comp, __ref, NULL };
@@ -541,7 +541,7 @@ static void ollrb_itr_find(const object* o, iterator itr, void* __ref) {
 	}
 }
 
-static void ollrb_itr_find_lower(const object* o, iterator itr, void* __ref) {
+static void ollrb_itr_find_lower(const object* o, iterator itr, const void* __ref) {
 	struct ollrb* ollrb     = (struct ollrb*)o;
 	struct ollrb_itr* oitr  = (struct ollrb_itr*)itr;
 	struct direct_s   dir   = { ollrb->__ref_comp, __ref, NULL };
@@ -563,7 +563,7 @@ static void ollrb_itr_find_lower(const object* o, iterator itr, void* __ref) {
 	}
 }
 
-static void ollrb_itr_find_upper(const object* o, iterator itr, void* __ref) {
+static void ollrb_itr_find_upper(const object* o, iterator itr, const void* __ref) {
 	struct ollrb* ollrb     = (struct ollrb*)o;
 	struct ollrb_itr* oitr  = (struct ollrb_itr*)itr;
 	struct direct_s   dir   = { ollrb->__ref_comp, __ref, NULL };
@@ -584,7 +584,7 @@ static void ollrb_itr_find_upper(const object* o, iterator itr, void* __ref) {
 	}
 }
 
-static bool ollrb_insert_s(object* o, void* __ref) {
+static bool ollrb_insert_s(object* o, const void* __ref) {
 	struct ollrb* ollrb     = (struct ollrb*)o;
 	struct ollrb_node* node = (struct ollrb_node*)
 		allocator_alloc(ollrb->__allocator, sizeof(struct ollrb_node));
@@ -604,7 +604,7 @@ static bool ollrb_insert_s(object* o, void* __ref) {
 	return true;
 }
 
-static void ollrb_insert_m(object* o, void* __ref) {
+static void ollrb_insert_m(object* o, const void* __ref) {
 	struct ollrb* ollrb     = (struct ollrb*)o;
 	struct ollrb_node* node = (struct ollrb_node*)
 		allocator_alloc(ollrb->__allocator, sizeof(struct ollrb_node));
@@ -617,7 +617,7 @@ static void ollrb_insert_m(object* o, void* __ref) {
 	return;
 }
 
-static bool ollrb_contains(const object* o, void* __ref) {
+static bool ollrb_contains(const object* o, const void* __ref) {
 	struct ollrb* ollrb    = (struct ollrb*)o;
 	struct direct_s   dir  = { ollrb->__ref_comp, __ref, NULL };
 	struct llrb_link* link = llrb_search(ollrb->__sentinel.left, ollrb_direct, &dir);
@@ -629,7 +629,7 @@ static bool ollrb_contains(const object* o, void* __ref) {
 	return false;
 }
 
-static int ollrb_count(const object* o, void* __ref) {
+static int ollrb_count(const object* o, const void* __ref) {
 	struct ollrb*     ollrb    = (struct ollrb*)o;
 	struct direct_s   dir      = { ollrb->__ref_comp, __ref, NULL };
 	const struct llrb_link* lb = llrb_search(ollrb->__sentinel.left, ollrb_direct_lower, &dir);

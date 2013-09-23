@@ -70,17 +70,17 @@ static void     osplay_destroy         (object* o);
 static void     osplay_clear           (object* o);
 static int      osplay_size            (const object* o);
 static bool     osplay_empty           (const object* o);
-static bool     osplay_insert_s        (object* o, void* __ref);
-static void     osplay_insert_m        (object* o, void* __ref);
-static bool     osplay_contains        (const object* o, void* __ref);
-static int      osplay_count           (const object* o, void* __ref);
+static bool     osplay_insert_s        (object* o, const void* __ref);
+static void     osplay_insert_m        (object* o, const void* __ref);
+static bool     osplay_contains        (const object* o, const void* __ref);
+static int      osplay_count           (const object* o, const void* __ref);
 static bool     osplay_remove          (object* o, void* __ref);
 
 static iterator osplay_itr_create      (const object* o, itr_pos pos);
 static void     osplay_itr_assign      (const object* o, iterator itr, itr_pos pos);
-static void     osplay_itr_find        (const object* o, iterator itr, void* __ref);
-static void     osplay_itr_find_lower  (const object* o, iterator itr, void* __ref);
-static void     osplay_itr_find_upper  (const object* o, iterator itr, void* __ref);
+static void     osplay_itr_find        (const object* o, iterator itr, const void* __ref);
+static void     osplay_itr_find_lower  (const object* o, iterator itr, const void* __ref);
+static void     osplay_itr_find_upper  (const object* o, iterator itr, const void* __ref);
 
 static void*    osplay_itr_remove      (object* o, iterator itr);
 
@@ -525,7 +525,7 @@ static int osplay_direct_upper(const struct splay_link* link, void* param) {
 	return 0;
 }
 
-static void osplay_itr_find(const object* o, iterator itr, void* __ref) {
+static void osplay_itr_find(const object* o, iterator itr, const void* __ref) {
 	struct osplay* osplay    = (struct osplay*)o;
 	struct osplay_itr* oitr  = (struct osplay_itr*)itr;
 	struct direct_s   dir    = { osplay->__ref_comp, __ref, NULL };
@@ -549,7 +549,7 @@ static void osplay_itr_find(const object* o, iterator itr, void* __ref) {
 	}
 }
 
-static void osplay_itr_find_lower(const object* o, iterator itr, void* __ref) {
+static void osplay_itr_find_lower(const object* o, iterator itr, const void* __ref) {
 	struct osplay* osplay    = (struct osplay*)o;
 	struct osplay_itr* oitr  = (struct osplay_itr*)itr;
 	struct direct_s   dir    = { osplay->__ref_comp, __ref, NULL };
@@ -575,7 +575,7 @@ static void osplay_itr_find_lower(const object* o, iterator itr, void* __ref) {
 	}
 }
 
-static void osplay_itr_find_upper(const object* o, iterator itr, void* __ref) {
+static void osplay_itr_find_upper(const object* o, iterator itr, const void* __ref) {
 	struct osplay* osplay    = (struct osplay*)o;
 	struct osplay_itr* oitr  = (struct osplay_itr*)itr;
 	struct direct_s   dir    = { osplay->__ref_comp, __ref, NULL };
@@ -600,7 +600,7 @@ static void osplay_itr_find_upper(const object* o, iterator itr, void* __ref) {
 	}
 }
 
-static bool osplay_insert_s(object* o, void* __ref) {
+static bool osplay_insert_s(object* o, const void* __ref) {
 	struct osplay* osplay     = (struct osplay*)o;
 	struct osplay_node* node = (struct osplay_node*)
 		allocator_alloc(osplay->__allocator, sizeof(struct osplay_node));
@@ -621,7 +621,7 @@ static bool osplay_insert_s(object* o, void* __ref) {
 	return true;
 }
 
-static void osplay_insert_m(object* o, void* __ref) {
+static void osplay_insert_m(object* o, const void* __ref) {
 	struct osplay* osplay     = (struct osplay*)o;
 	struct osplay_node* node = (struct osplay_node*)
 		allocator_alloc(osplay->__allocator, sizeof(struct osplay_node));
@@ -635,7 +635,7 @@ static void osplay_insert_m(object* o, void* __ref) {
 	return;
 }
 
-static bool osplay_contains(const object* o, void* __ref) {
+static bool osplay_contains(const object* o, const void* __ref) {
 	struct osplay* osplay   = (struct osplay*)o;
 	struct direct_s   dir   = { osplay->__ref_comp, __ref, NULL };
 	struct splay_link* link = NULL;
@@ -651,7 +651,7 @@ static bool osplay_contains(const object* o, void* __ref) {
 	return false;
 }
 
-static int osplay_count(const object* o, void* __ref) {
+static int osplay_count(const object* o, const void* __ref) {
 	struct osplay*     osplay   = (struct osplay*)o;
 	struct direct_s   dir       = { osplay->__ref_comp, __ref, NULL };
 	const struct splay_link* lb = NULL;

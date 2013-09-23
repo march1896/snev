@@ -21,6 +21,8 @@
 #define ILIST_ID  0X0A0B0C03
 #define ISET_ID   0X0A0B0C04
 #define IMSET_ID  0X0A0B0C05
+#define IMAP_ID   0X0A0B0C06
+#define IMMAP_ID  0X0A0B0C07
 
 #include <oo_model.h>
 
