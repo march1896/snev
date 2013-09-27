@@ -303,16 +303,16 @@ static void tree_link_basic_test() {
 	}
 	/* test insert_s */
 	{
-		bool dup = false;
+		tree_link* dup = NULL;
 		dbg_assert(root == NULL);
 		root = tree_insert_s(root, dlink(2, 0), comp, &dup);
-		dbg_assert(dup == false);
+		dbg_assert(dup == NULL);
 		root = tree_insert_s(root, dlink(0, 0), comp, &dup);
-		dbg_assert(dup == false);
+		dbg_assert(dup == NULL);
 		root = tree_insert_s(root, dlink(1, 0), comp, &dup);
-		dbg_assert(dup == false);
+		dbg_assert(dup == NULL);
 		root = tree_insert_s(root, dlink(3, 0), comp, &dup);
-		dbg_assert(dup == false);
+		dbg_assert(dup == NULL);
 		/* now the tree contains { 0, 1, 2, 3 } */
 		tree_check(root, comp);
 
@@ -335,9 +335,9 @@ static void tree_link_basic_test() {
 		root = tree_remove(root, dlink(0, 0), comp);
 		root = tree_remove(root, dlink(2, 0), comp);
 		root = tree_insert_s(root, dlink(5, 0), comp, &dup);
-		dbg_assert(dup == false);
+		dbg_assert(dup == NULL);
 		root = tree_insert_s(root, dlink(7, 0), comp, &dup);
-		dbg_assert(dup == false);
+		dbg_assert(dup == NULL);
 		/* now the tree contains { 1, 3, 5, 7 } */
 		tree_check(root, comp);
 
@@ -360,7 +360,8 @@ static void tree_link_basic_test() {
 		dbg_assert(temp == dlink(7, 0));
 
 		root = tree_insert_s(root, dlink(3, 1), comp, &dup);
-		dbg_assert(dup == true);
+		dbg_assert(dup != NULL);
+		dbg_assert(comp(dlink(3, 1), dup) == 0);
 		/* now the tree is still { 1, 3, 5, 7 } */
 		tree_check(root, comp);
 
@@ -388,7 +389,7 @@ static void tree_link_basic_test() {
 	}
 	/* test insert_v/remove_v */
 	{
-		bool dup = false;
+		tree_link* dup = NULL;
 		dbg_assert(root == NULL);
 		root = tree_insert_v(root, dlink(2, 0),    comp_v, &bound);
 		root = tree_insert_v(root, &max_data.link, comp_v, &bound);
@@ -444,7 +445,8 @@ static void tree_link_basic_test() {
 		dbg_assert(temp == dlink(7, 0));
 
 		root = tree_insert_sv(root, dlink(3, 1), comp_v, &bound, &dup);
-		dbg_assert(dup == true);
+		dbg_assert(dup != NULL);
+		dbg_assert(comp_v(dlink(3,1), dup, &bound) == 0);
 		/* now the tree is still { min, 1, 3, 5, 7, max } */
 		tree_check_v(root, comp_v, &bound);
 		temp = tree_search(root, direct_v, dlink(3, 0));
@@ -542,9 +544,9 @@ static void tree_link_insert_remove_s() {
 		int idx = rand() % data_max_diff_type;
 
 		if (dup_count[idx] == 0) {
-			bool dup = false;
+			tree_link* dup = NULL;
 			root = tree_insert_s(root, dlink(idx, 0), comp, &dup);
-			dbg_assert(dup == false);
+			dbg_assert(dup == NULL);
 			dup_count[idx] ++;
 		}
 		else {
@@ -593,9 +595,9 @@ static void tree_link_insert_remove_sv() {
 		int idx = rand() % data_max_diff_type;
 
 		if (dup_count[idx] == 0) {
-			bool dup = false;
+			tree_link* dup = NULL;
 			root = tree_insert_sv(root, dlink(idx, 0), comp_v, &bound, &dup);
-			dbg_assert(dup == false);
+			dbg_assert(dup == NULL);
 			dup_count[idx] ++;
 		}
 		else {

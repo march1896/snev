@@ -399,11 +399,11 @@ struct splay_link* splay_insert_v(struct splay_link* root, struct splay_link* nl
 	return nlink;
 }
 
-struct splay_link* splay_insert_s(struct splay_link* root, struct splay_link* nlink, pf_splay_compare comp, bool* dup) {
+struct splay_link* splay_insert_s(struct splay_link* root, struct splay_link* nlink, pf_splay_compare comp, struct splay_link** dup) {
 	struct splay_link* fwd = root;
 	struct splay_link* par = NULL;
 	int compr = 0;
-	*dup = false;
+	*dup = NULL;
 
 	splay_init(nlink);
 	if (root == NULL) {
@@ -415,7 +415,7 @@ struct splay_link* splay_insert_s(struct splay_link* root, struct splay_link* nl
 
 		par = fwd;
 		if (compr == 0) {
-			*dup = true;
+			*dup = fwd;
 			return root;
 		}
 		if (compr < 0) 
@@ -437,11 +437,11 @@ struct splay_link* splay_insert_s(struct splay_link* root, struct splay_link* nl
 	return nlink;
 }
 
-struct splay_link* splay_insert_sv(struct splay_link* root, struct splay_link* nlink, pf_splay_compare_v comp, void* param, bool* dup) {
+struct splay_link* splay_insert_sv(struct splay_link* root, struct splay_link* nlink, pf_splay_compare_v comp, void* param, struct splay_link** dup) {
 	struct splay_link* fwd = root;
 	struct splay_link* par = NULL;
 	int compr = 0;
-	*dup = false;
+	*dup = NULL;
 
 	splay_init(nlink);
 	if (root == NULL) {
@@ -453,7 +453,7 @@ struct splay_link* splay_insert_sv(struct splay_link* root, struct splay_link* n
 
 		par = fwd;
 		if (compr == 0) {
-			*dup = true;
+			*dup = fwd;
 			return root;
 		}
 		if (compr < 0) 

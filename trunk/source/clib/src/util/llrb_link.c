@@ -269,7 +269,7 @@ static struct llrb_link *__llrb_insert(struct llrb_link *c, struct llrb_link *n,
 }
 
 /* insert single instance of the link by using the raw comparison function */
-static struct llrb_link *__llrb_insert_s(struct llrb_link *c, struct llrb_link *n, pf_llrb_compare comp, bool* dup) {
+static struct llrb_link *__llrb_insert_s(struct llrb_link *c, struct llrb_link *n, pf_llrb_compare comp, struct llrb_link** dup) {
 	if (c == NULL) return n;
 
 	{
@@ -278,7 +278,7 @@ static struct llrb_link *__llrb_insert_s(struct llrb_link *c, struct llrb_link *
 		if (compr == 0) {
 			/* we don't have to do anything here */
 			/* the __fix_up function will do nothing */
-			*dup = true;
+			*dup = c;
 		}
 		else if (compr < 0) {
 			c->left = __llrb_insert_s(c->left, n, comp, dup);
@@ -384,9 +384,9 @@ struct llrb_link *llrb_insert(struct llrb_link *root, struct llrb_link *nlink, p
 	return root;
 }
 
-struct llrb_link* llrb_insert_s (struct llrb_link* root, struct llrb_link* nlink, pf_llrb_compare comp, bool* dup) {
+struct llrb_link* llrb_insert_s (struct llrb_link* root, struct llrb_link* nlink, pf_llrb_compare comp, struct llrb_link** dup) {
 	llrb_init(nlink);
-	*dup = false;
+	*dup = NULL;
 
 	root = __llrb_insert_s(root, nlink, comp, dup);
 	root->color = BLACK;
@@ -444,7 +444,7 @@ struct llrb_link* llrb_insert_v (struct llrb_link* root, struct llrb_link* nlink
 	return root;
 }
 
-struct llrb_link *__llrb_insert_sv(struct llrb_link *c, struct llrb_link *n, pf_llrb_compare_v comp, void* param, bool* dup) {
+static struct llrb_link *__llrb_insert_sv(struct llrb_link *c, struct llrb_link *n, pf_llrb_compare_v comp, void* param, struct llrb_link** dup) {
 	if (c == NULL) return n;
 
 	{
@@ -452,7 +452,7 @@ struct llrb_link *__llrb_insert_sv(struct llrb_link *c, struct llrb_link *n, pf_
 
 		if (compr == 0) {
 			/* we need to do nothing */
-			*dup = true;
+			*dup = c;
 		}
 		else if (compr < 0) {
 			c->left = __llrb_insert_sv(c->left, n, comp, param, dup);
@@ -467,9 +467,9 @@ struct llrb_link *__llrb_insert_sv(struct llrb_link *c, struct llrb_link *n, pf_
 	return _fix_up(c);
 }
 
-struct llrb_link* llrb_insert_sv(struct llrb_link* root, struct llrb_link* nlink, pf_llrb_compare_v comp, void* param, bool* dup) {
+struct llrb_link* llrb_insert_sv(struct llrb_link* root, struct llrb_link* nlink, pf_llrb_compare_v comp, void* param, struct llrb_link** dup) {
 	llrb_init(nlink);
-	*dup = false;
+	*dup = NULL;
 
 	root = __llrb_insert_sv(root, nlink, comp, param, dup);
 

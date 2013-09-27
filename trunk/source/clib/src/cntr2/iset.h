@@ -7,13 +7,18 @@
 
 extern inline void     iset_destroy          (iobject* ic);
 extern inline void     iset_clear            (iobject* ic);
+extern inline void     iset_clear_v          (iobject* ic, pf_ref_dispose_v dispose, void* context);
 extern inline int      iset_size             (const iobject* ic);
 extern inline bool     iset_empty            (const iobject* ic);
-/* return false if __ref is already in the set */
-extern inline bool     iset_insert           (iobject* ic, const void* __ref);
+/* if some comp(__dup, __ref) == 0 is in the set, insert __ref, remove __dup and return __dup.
+ * otherwise, if no comp(__any, __ref) == 0, just return NULL.
+ * NOTE: if __ref(the address) is exactly in the set, __ref will be returned, so if you
+ * dealloc(iset_insert(i, __ref)) without comparing the res to __ref, the inserted one maybe deleted. */
+extern inline void*    iset_insert           (iobject* ic, const void* __ref);
 extern inline bool     iset_contains         (const iobject* ic, const void* __ref);
 /* return false if __ref is not in the set */
 extern inline bool     iset_remove           (iobject* ic, void* __ref);
+extern inline void     iset_foreach          (iobject* ic, pf_ref_visit_v process, void* context);
 
 extern inline iterator iset_itr_create       (const iobject* ic, itr_pos pos);
 extern inline void     iset_itr_assign       (const iobject* ic, /* out */iterator itr, itr_pos pos);
@@ -28,9 +33,10 @@ extern inline const_iterator iset_itr_end    (const iobject* ic);
 /* the virtual functions that each container should implement */
 typedef       void     (*pf_iset_destroy)    (object* c);
 typedef       void     (*pf_iset_clear)      (object* c);
+typedef       void     (*pf_iset_clear_v)    (object* c, pf_ref_dispose_v dispose, void* context);
 typedef       int      (*pf_iset_size)       (const object* c);
 typedef       bool     (*pf_iset_empty)      (const object* c);
-typedef       bool     (*pf_iset_insert)     (object* c, const void* __ref);
+typedef       void*    (*pf_iset_insert)     (object* c, const void* __ref);
 typedef       bool     (*pf_iset_contains)   (const object* c, const void* __ref);
 typedef       bool     (*pf_iset_remove)     (object* c, void* __ref);
 
@@ -45,6 +51,7 @@ struct iset_vtable {
 	/* public */
 	pf_iset_destroy     __destroy;
 	pf_iset_clear       __clear;
+	pf_iset_clear_v     __clear_v;
 	pf_iset_size        __size;
 	pf_iset_empty       __empty;
 	pf_iset_insert      __insert;
@@ -64,6 +71,7 @@ struct iset_vtable {
  ******************************************************************************/
 extern inline       void     imset_destroy    (iobject* i);
 extern inline       void     imset_clear      (iobject* i);
+extern inline       void     imset_clear_v    (iobject* i, pf_ref_dispose_v dispose, void* context);
 extern inline       int      imset_size       (const iobject* i);
 extern inline       bool     imset_empty      (const iobject* i);
 extern inline       void     imset_insert     (iobject* i, const void* __ref);
@@ -88,6 +96,7 @@ extern inline const_iterator imset_itr_end    (const iobject* i);
 /* the virtual functions that each container should implement */
 typedef       void     (*pf_imset_destroy)    (object* o);
 typedef       void     (*pf_imset_clear)      (object* o);
+typedef       void     (*pf_imset_clear_v)    (object* o, pf_ref_dispose_v dispose, void* context);
 typedef       int      (*pf_imset_size)       (const object* o);
 typedef       bool     (*pf_imset_empty)      (const object* o);
 typedef       void     (*pf_imset_insert)     (object* o, const void* __ref);
@@ -107,6 +116,7 @@ struct imset_vtable {
 	/* public */
 	pf_imset_destroy        __destroy;
 	pf_imset_clear          __clear;
+	pf_imset_clear_v        __clear_v;
 	pf_imset_size           __size;
 	pf_imset_empty          __empty;
 	pf_imset_insert         __insert;

@@ -262,7 +262,11 @@
     <ClInclude Include="..\..\src\cntr2\istack.h" />
     <ClInclude Include="..\..\src\cntr2\oallocator.h" />
     <ClInclude Include="..\..\src\cntr2\olist.h" />
+    <ClInclude Include="..\..\src\cntr2\ollrb.h" />
     <ClInclude Include="..\..\src\cntr2\oo_model.h" />
+    <ClInclude Include="..\..\src\cntr2\oo_ref.h" />
+    <ClInclude Include="..\..\src\cntr2\oskiplist.h" />
+    <ClInclude Include="..\..\src\cntr2\osplay.h" />
     <ClInclude Include="..\..\src\cntr\cattr.h" />
     <ClInclude Include="..\..\src\cntr\citer_base.h" />
     <ClInclude Include="..\..\src\cntr\citer_base.local.h" />

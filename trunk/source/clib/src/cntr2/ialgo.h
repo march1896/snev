@@ -22,14 +22,10 @@
  * It assumes that the algorithm will traverse from begin, and finally walks to end.
  */
 
-typedef void (*pf_ref_process)  (const void* __ref);
-typedef void (*pf_ref_process_v)(const void* __ref, void* param);
-typedef int (*pf_ref_compare)  (const void* ref_a, const void* ref_b);
-
 /* iterator should be at least forward able */
-void foreach     (const_iterator begin, const_iterator end, pf_ref_process cb);
+void foreach     (const_iterator begin, const_iterator end, pf_ref_visit cb);
 /* iterator should be at least forward able */
-void foreach_v   (const_iterator begin, const_iterator end, pf_ref_process_v cb, void* param);
+void foreach_v   (const_iterator begin, const_iterator end, pf_ref_visit_v cb, void* param);
 
 /* bidirectional iterator sort */
 void sort_b      (const_iterator begin, const_iterator end, pf_ref_compare comp);

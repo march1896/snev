@@ -22,14 +22,14 @@ object* cntr_create_olist_v(allocator alc, pf_dispose dispose);
 
 object* cntr_create_ollrb(pf_compare comp);
 /* if alc is NULL, create_v will create with multi-pool allocator to gain best efficiency */
-object* cntr_create_ollrb_v(pf_compare comp, allocator alc, pf_dispose dispose);
+object* cntr_create_ollrb_v(pf_compare comp, allocator alc);
 
 object* cntr_create_osplay(pf_compare comp);
 /* if alc is NULL, create_v will create with multi-pool allocator to gain best efficiency */
-object* cntr_create_osplay_v(pf_compare comp, allocator alc, pf_dispose dispose);
+object* cntr_create_osplay_v(pf_compare comp, allocator alc);
 
 object* cntr_create_oskiplist(pf_compare comp);
 /* if alc is NULL, create_v will create with multi-pool allocator to gain best efficiency */
-object* cntr_create_oskiplist_v(pf_compare comp, allocator alc, pf_dispose dispose);
+object* cntr_create_oskiplist_v(pf_compare comp, allocator alc);
 
 #endif /* _INTERFACE_FACTORY_H_ */

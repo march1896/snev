@@ -18,6 +18,13 @@ inline void iset_clear(iobject* i) {
 	((struct iset_vtable*)(i->__vtable))->__clear(o);
 }
 
+inline void iset_clear_v(iobject* i, pf_ref_dispose_v dispose, void* context) {
+	object* o = __object_from_interface(i);
+	dbg_assert(__cast(o, ISET_ID) == i);
+
+	((struct iset_vtable*)(i->__vtable))->__clear_v(o, dispose, context);
+}
+
 inline int iset_size(const iobject* i) {
 	object* o = __object_from_interface(i);
 	dbg_assert(__cast(o, ISET_ID) == i);
@@ -32,7 +39,7 @@ inline bool iset_empty(const iobject* i) {
 	return ((struct iset_vtable*)(i->__vtable))->__empty(o);
 }
 
-inline bool iset_insert(iobject* i, const void* __ref) {
+inline void* iset_insert(iobject* i, const void* __ref) {
 	object* o = __object_from_interface(i);
 	dbg_assert(__cast(o, ISET_ID) == i);
 
@@ -105,6 +112,13 @@ inline void imset_clear(iobject* i) {
 	dbg_assert(__cast(o, IMSET_ID) == i);
 
 	((struct imset_vtable*)(i->__vtable))->__clear(o);
+}
+
+inline void imset_clear_v(iobject* i, pf_ref_dispose_v dispose, void* context) {
+	object* o = __object_from_interface(i);
+	dbg_assert(__cast(o, IMSET_ID) == i);
+
+	((struct imset_vtable*)(i->__vtable))->__clear_v(o, dispose, context);
 }
 
 inline int imset_size(const iobject* i) {

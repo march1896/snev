@@ -5,7 +5,7 @@
 #include "test_util.h"
 
 static void set_test_basic_itr_operation(iobject* set) {
-	iset_clear(set);
+	iset_clear_v(set, NULL, NULL);
 	dbg_assert(iset_empty(set));
 
 	iset_insert(set, (void*)(intptr_t)4);
@@ -91,27 +91,27 @@ static void set_test_basic_itr_operation(iobject* set) {
 }
 
 static void set_test_basic_operation(iobject* set) {
-	iset_clear(set);
+	iset_clear_v(set, NULL, NULL);
 	dbg_assert(iset_empty(set));
 
 	{
-		bool res;
+		void* res = NULL;
 		res = iset_insert(set, (void*)(intptr_t)4);
-		dbg_assert(res == true);
+		dbg_assert(res == NULL);
 		res = iset_insert(set, (void*)(intptr_t)5);
-		dbg_assert(res == true);
+		dbg_assert(res == NULL);
 		res = iset_insert(set, (void*)(intptr_t)3);
-		dbg_assert(res == true);
+		dbg_assert(res == NULL);
 		res = iset_insert(set, (void*)(intptr_t)6);
-		dbg_assert(res == true);
+		dbg_assert(res == NULL);
 		res = iset_insert(set, (void*)(intptr_t)2);
-		dbg_assert(res == true);
+		dbg_assert(res == NULL);
 		res = iset_insert(set, (void*)(intptr_t)7);
-		dbg_assert(res == true);
+		dbg_assert(res == NULL);
 		res = iset_insert(set, (void*)(intptr_t)1);
-		dbg_assert(res == true);
+		dbg_assert(res == NULL);
 		res = iset_insert(set, (void*)(intptr_t)8);
-		dbg_assert(res == true);
+		dbg_assert(res == NULL);
 	}
 	/* now the set contains { 1, 2, 3, 4, 5, 6, 7, 8 } */
 	dbg_assert(iset_size(set) == 8);
@@ -149,98 +149,99 @@ static void set_test_basic_operation(iobject* set) {
 
 	dbg_assert(iset_size(set) == 4);
 	{
-		bool res;
+		bool bool_res = false;
+		void* old_ref = 0;
 
 		/* remove elements one by one */
-		res = (intptr_t)iset_remove(set, (void*)(intptr_t)3);
+		bool_res = (intptr_t)iset_remove(set, (void*)(intptr_t)3);
 		/* now the set is { 1,  5, 7 } */
-		dbg_assert(res == true);
+		dbg_assert(bool_res == true);
 		dbg_assert(iset_size(set) == 3);
 		dbg_assert(iset_empty(set) == false);
 		dbg_assert(iset_contains(set, (void*)(intptr_t)3) == false);
 
 		/* try to remove another 3, should failed */
-		res = (intptr_t)iset_remove(set, (void*)(intptr_t)3);
+		bool_res = (intptr_t)iset_remove(set, (void*)(intptr_t)3);
 		/* now the set is { 1,  5, 7 } */
-		dbg_assert(res == false);
+		dbg_assert(bool_res == false);
 		dbg_assert(iset_size(set) == 3);
 		dbg_assert(iset_empty(set) == false);
 		dbg_assert(iset_contains(set, (void*)(intptr_t)3) == false);
 
-		res = (intptr_t)iset_remove(set, (void*)(intptr_t)5);
+		bool_res = (intptr_t)iset_remove(set, (void*)(intptr_t)5);
 		/* now the set is { 1,   7 } */
-		dbg_assert(res == true);
+		dbg_assert(bool_res == true);
 		dbg_assert(iset_size(set) == 2);
 		dbg_assert(iset_empty(set) == false);
 		dbg_assert(iset_contains(set, (void*)(intptr_t)5) == false);
 		
-		res = (intptr_t)iset_remove(set, (void*)(intptr_t)1);
+		bool_res = (intptr_t)iset_remove(set, (void*)(intptr_t)1);
 		/* now the set is { 7 } */
-		dbg_assert(res == true);
+		dbg_assert(bool_res == true);
 		dbg_assert(iset_size(set) == 1);
 		dbg_assert(iset_empty(set) == false);
 		dbg_assert(iset_contains(set, (void*)(intptr_t)1) == false);
 
-		res = (intptr_t)iset_remove(set, (void*)(intptr_t)7);
+		bool_res = (intptr_t)iset_remove(set, (void*)(intptr_t)7);
 		/* now the set is { } */
-		dbg_assert(res == true);
+		dbg_assert(bool_res == true);
 		dbg_assert(iset_size(set) == 0);
 		dbg_assert(iset_empty(set) == true);
 		dbg_assert(iset_contains(set, (void*)(intptr_t)7) == false);
 
 		/* try to remove element from empty set */
-		res = (intptr_t)iset_remove(set, (void*)(intptr_t)7);
+		bool_res = (intptr_t)iset_remove(set, (void*)(intptr_t)7);
 		/* now the set is { } */
-		dbg_assert(res == false);
+		dbg_assert(bool_res == false);
 		dbg_assert(iset_size(set) == 0);
 		dbg_assert(iset_empty(set) == true);
 		dbg_assert(iset_contains(set, (void*)(intptr_t)7) == false);
 
 		/* trying to add element into the set after removing from empty set */
-		res = iset_insert(set, (void*)(intptr_t)2);
+		old_ref = iset_insert(set, (void*)(intptr_t)2);
 		/* now the set is { 2 } */
-		dbg_assert(res == true);
+		dbg_assert(old_ref == NULL);
 		dbg_assert(iset_size(set) == 1);
 		dbg_assert(iset_empty(set) == false);
 		dbg_assert(iset_contains(set, (void*)(intptr_t)2) == true);
 		dbg_assert(iset_contains(set, (void*)(intptr_t)0) == false);
 
-		res = iset_insert(set, (void*)(intptr_t)3);
+		old_ref = iset_insert(set, (void*)(intptr_t)3);
 		/* now the set is { 2, 3 } */
-		dbg_assert(res == true);
+		dbg_assert(old_ref == NULL);
 		dbg_assert(iset_size(set) == 2);
 		dbg_assert(iset_empty(set) == false);
 		dbg_assert(iset_contains(set, (void*)(intptr_t)2) == true);
 		dbg_assert(iset_contains(set, (void*)(intptr_t)3) == true);
 
-		iset_clear(set);
+		iset_clear_v(set, NULL, NULL);
 	}
 
 	dbg_assert(iset_empty(set) == true);
 	{
-		bool res;
+		void* old_ref = NULL;
 		/* try to add same element to the set */
-		res = iset_insert(set, (void*)(intptr_t)1);
+		old_ref = iset_insert(set, (void*)(intptr_t)1);
 		/* now the set is { 1 } */
-		dbg_assert(res == true);
+		dbg_assert(old_ref == NULL);
 		dbg_assert(iset_size(set) == 1);
 		dbg_assert(iset_empty(set) == false);
 		dbg_assert(iset_contains(set, (void*)(intptr_t)1) == true);
 		dbg_assert(iset_contains(set, (void*)(intptr_t)0) == false);
 
 		/* insert 1 again */
-		res = iset_insert(set, (void*)(intptr_t)1);
+		old_ref = iset_insert(set, (void*)(intptr_t)1);
 		/* now the set is { 1 } */
-		dbg_assert(res == false);
+		dbg_assert(old_ref != NULL);
 		dbg_assert(iset_size(set) == 1);
 		dbg_assert(iset_empty(set) == false);
 		dbg_assert(iset_contains(set, (void*)(intptr_t)1) == true);
 		dbg_assert(iset_contains(set, (void*)(intptr_t)0) == false);
 
 		/* insert 1 again and again */
-		res = iset_insert(set, (void*)(intptr_t)1);
+		old_ref = iset_insert(set, (void*)(intptr_t)1);
 		/* now the set is { 1 } */
-		dbg_assert(res == false);
+		dbg_assert(old_ref != NULL);
 		dbg_assert(iset_size(set) == 1);
 		dbg_assert(iset_empty(set) == false);
 		dbg_assert(iset_contains(set, (void*)(intptr_t)1) == true);
@@ -249,20 +250,20 @@ static void set_test_basic_operation(iobject* set) {
 
 	/* test clear */
 	{
-		iset_clear(set);
+		iset_clear_v(set, NULL, NULL);
 		/* now the set is empty */
 		dbg_assert(iset_empty(set));
 		
 		/* clear an empty set */
-		iset_clear(set);
+		iset_clear_v(set, NULL, NULL);
 		dbg_assert(iset_empty(set));
 
 		iset_insert(set, (void*)(intptr_t)1);
 		iset_insert(set, (void*)(intptr_t)1);
 		iset_insert(set, (void*)(intptr_t)1);
 
-		/* now the set is { 1, 1, 1 } */
-		iset_clear(set);
+		/* now the set is { 1 } */
+		iset_clear_v(set, NULL, NULL);
 		dbg_assert(iset_empty(set));
 	}
 }
@@ -317,7 +318,7 @@ static void set_bench_modify_randomly() {
 		}
 	}
 
-	iset_clear(__set);
+	iset_clear_v(__set, NULL, NULL);
 }
 
 static void set_bench_search_randomly() {
@@ -340,7 +341,7 @@ static void set_bench_search_randomly() {
 		dbg_assert(res == true);
 	}
 
-	iset_clear(__set);
+	iset_clear_v(__set, NULL, NULL);
 }
 
 
@@ -358,7 +359,7 @@ void set_test_bench(iobject* set) {
 	__data_max_count = 1;
 	__num_modify     = 100;
 	__num_search     = 100;
-	iset_clear(__set);
+	iset_clear_v(__set, NULL, NULL);
 	log_printline("[data type: %d, single data max dup: %d]", __data_diff_type, __data_max_count);
 	
 	__create_data();

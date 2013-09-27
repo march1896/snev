@@ -1,8 +1,7 @@
 #ifndef _OBJECT_DOUBLE_LINK_LIST_H_
 #define _OBJECT_DOUBLE_LINK_LIST_H_
 
-#include <oo_model.h>
-#include <ifactory.h>
+#include <cntr2/ifactory.h>
 
 /* this interface inherit ilist, so it implements all method from ilist */
 
