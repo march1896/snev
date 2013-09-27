@@ -91,4 +91,9 @@ extern inline unknown __cast(const_unknown x, unique_id id);
  */
 extern inline iobject* __fast_cast(const object* x, int ifoffset);
 
+/*
+ * include the raw-pointer-object common processing functions.
+ */
+#include <oo_ref.h>
+
 #endif /* _OO_MODEL_H_ */

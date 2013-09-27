@@ -2,7 +2,7 @@
 #include <iitr.h>
 #include <ifactory.h>
 
-void foreach(const_iterator begin, const_iterator end, pf_ref_process cb) {
+void foreach(const_iterator begin, const_iterator end, pf_ref_visit cb) {
 	iterator itr = itr_clone(begin);
 
 	dbg_assert(is_itrfwd(begin));
@@ -18,7 +18,7 @@ void foreach(const_iterator begin, const_iterator end, pf_ref_process cb) {
 	return;
 }
 
-void foreach_v(const_iterator begin, const_iterator end, pf_ref_process_v cb, void* param) {
+void foreach_v(const_iterator begin, const_iterator end, pf_ref_visit_v cb, void* param) {
 	iterator itr = itr_clone(begin);
 
 	dbg_assert(is_itrfwd(begin));

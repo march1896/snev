@@ -13,8 +13,8 @@ typedef int (*pf_splay_compare)  (const struct splay_link* l, const struct splay
 typedef int (*pf_splay_compare_v)(const struct splay_link* l, const struct splay_link* r, void* param);
 /**
  * @brief insert target into a tree.
- * 		if root == target, this function will change nothing, just return the original tree root.
- * 		if comp(root, target) == 0, it will directly compare the address of current line and target to insert.
+ * 		if comp(tree_node, target) == 0, it will directly compare the address of tree_node and target to insert.
+ * 		if tree_node == target, this function will change nothing, just return the original tree root.
  *
  * @param root the original root.
  * @param target the new link to insert.
@@ -26,8 +26,8 @@ struct splay_link* splay_insert(struct splay_link* root, struct splay_link* targ
 
 /**
  * @brief insert a single instance into the tree.
- * 		if comp(root, target) == 0, the tree will not changed, *dup will be set to true.
- * 		if comp(root, target) != 0, target will be insert into the tree, *dup will be false.
+ * 		if comp(tree_node, target) == 0, the tree will not changed, *dup will be set to tree_node.
+ * 		if comp(tree_node, target) != 0, target will be insert into the tree, *dup will be NULL.
  *
  * @param root the original tree root.
  * @param target the new link to insert.
@@ -36,7 +36,7 @@ struct splay_link* splay_insert(struct splay_link* root, struct splay_link* targ
  *
  * @return the new tree root after insertion.
  */
-struct splay_link* splay_insert_s(struct splay_link* root, struct splay_link* target, pf_splay_compare comp, bool* dup);
+struct splay_link* splay_insert_s(struct splay_link* root, struct splay_link* target, pf_splay_compare comp, struct splay_link** dup);
 
 /**
  * @brief remove a link from a tree.
@@ -53,17 +53,17 @@ struct splay_link* splay_remove(struct splay_link* root, struct splay_link* targ
 
 /* the verbose version of insert/remove */
 struct splay_link* splay_insert_v(struct splay_link* root, struct splay_link* target, pf_splay_compare_v comp, void* param);
-struct splay_link* splay_insert_sv(struct splay_link* root, struct splay_link* target, pf_splay_compare_v comp, void* param, bool* dup);
+struct splay_link* splay_insert_sv(struct splay_link* root, struct splay_link* target, pf_splay_compare_v comp, void* param, struct splay_link** dup);
 struct splay_link* splay_remove_v(struct splay_link* root, struct splay_link* target, pf_splay_compare_v comp, void* param);
 
 /**
- * @brief splay_search callback, given the current link, this fucntion will deside which child will be searched next.
+ * @brief splay_search callback, given the current link, this function will decide which child will be searched next.
  * 		if return value < 0, the left child tree will be searched.
  * 		if return value == 0, the current link will be returned.
  * 		if return value > 0, the right child tree will be searched.
  *
  * @param the current tree link.
- * @param param custom parameter which is used for desiding which side to search next.
+ * @param param custom parameter which is used for deciding which side to search next.
  *
  * @return see @brief
  */

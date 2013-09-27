@@ -38,7 +38,7 @@ struct skip_link* skip_link_create_fixed(const void* owner, int level, pf_skipli
 void skip_link_destroy(struct skip_link* link, pf_skiplink_dealloc dlc, void* dealloc_param);
 
 void skip_link_insert(struct skip_link* header, struct skip_link* target, pf_skiplist_compare comp);
-bool skip_link_insert_s(struct skip_link* header, struct skip_link* target, pf_skiplist_compare comp);
+struct skip_link* skip_link_insert_s(struct skip_link* header, struct skip_link* target, pf_skiplist_compare comp);
 void skip_link_remove(struct skip_link* header, struct skip_link* target, pf_skiplist_compare comp);
 
 void skip_link_debug_check(struct skip_link* root, pf_skiplist_compare comp);
@@ -129,8 +129,10 @@ void skip_link_insert(struct skip_link* header, struct skip_link* target, pf_ski
 	}
 }
 
-/* NOTE: remember to delete the skip_link when failed */
-bool skip_link_insert_s(struct skip_link* header, struct skip_link* target, pf_skiplist_compare comp) {
+/* NOTE: remember to delete the skip_link when failed 
+ * if there is not data equal to target's reference, insert the target and return target.
+ * if there is some data equal to target's reference, don't insert target and return the link */
+struct skip_link* skip_link_insert_s(struct skip_link* header, struct skip_link* target, pf_skiplist_compare comp) {
 	int i;
 	struct list_link* list = header->levels[header->num_level-1].next;
 
@@ -149,7 +151,7 @@ bool skip_link_insert_s(struct skip_link* header, struct skip_link* target, pf_s
 				while (++i < target->num_level) {
 					list_unlink(&target->levels[i]);
 				}
-				return false;
+				return skiplink;
 			}
 			list = list->next;
 		}
@@ -159,7 +161,7 @@ bool skip_link_insert_s(struct skip_link* header, struct skip_link* target, pf_s
 		list --;
 		list = list->next;
 	}
-	return true;
+	return target;
 }
 
 void skip_link_remove(struct skip_link* header, struct skip_link* target, pf_skiplist_compare comp) {
@@ -228,7 +230,7 @@ bool skiplist_empty(const struct skiplist* slist) {
 	return slist->sentinel == skip_link_next(slist->sentinel);
 }
 
-void skiplist_foreach(struct skiplist* slist, pf_ref_process process, void* context) {
+void skiplist_foreach(struct skiplist* slist, pf_ref_visit_v process, void* context) {
 	/* traverse the first level */
 	struct list_link* listlink = NULL;
 	struct list_link* listsent = NULL;
@@ -260,15 +262,20 @@ void skiplist_insert(struct skiplist* slist, const void* data) {
 	skip_link_insert(slist->sentinel, skiplink, slist->__comp);
 }
 
-bool skiplist_insert_s(struct skiplist* slist, const void* data) {
-	struct skip_link* skiplink = skip_link_create(data, slist->__alloc, slist->__alloc_context);
+void* skiplist_insert_s(struct skiplist* slist, const void* data) {
+	struct skip_link* toinsert = skip_link_create(data, slist->__alloc, slist->__alloc_context);
+	struct skip_link* inlist = skip_link_insert_s(slist->sentinel, toinsert, slist->__comp);
 
-	bool res = skip_link_insert_s(slist->sentinel, skiplink, slist->__comp);
+	if (inlist != toinsert) {
+		/* there is duplicate data in the skiplist, replace it and destroy the link we created before*/
+		const void* old_reference = inlist->reference; 
+		inlist->reference = data;
 
-	if (res == false) {
-		skip_link_destroy(skiplink, slist->__dealloc, slist->__alloc_context);
+		skip_link_destroy(toinsert, slist->__dealloc, slist->__alloc_context);
+
+		return (void*)old_reference;
 	}
-	return res;
+	return NULL;
 }
 
 bool skiplist_contains(const struct skiplist* slist, const void* data) {

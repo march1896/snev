@@ -320,5 +320,17 @@
     <ClInclude Include="..\..\src\cntr2\imap.h">
       <Filter>Source Files\cntr2</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\cntr2\osplay.h">
+      <Filter>Source Files\cntr2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cntr2\ollrb.h">
+      <Filter>Source Files\cntr2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cntr2\oskiplist.h">
+      <Filter>Source Files\cntr2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cntr2\oo_ref.h">
+      <Filter>Source Files\cntr2</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -19,8 +19,8 @@ typedef int (*pf_llrb_compare)  (const struct llrb_link* l, const struct llrb_li
 typedef int (*pf_llrb_compare_v)(const struct llrb_link* l, const struct llrb_link* r, void* param);
 /**
  * @brief insert target into a tree.
- * 		if root == target, this function will change nothing, just return the original tree root.
- * 		if comp(root, target) == 0, it will directly compare the address of current line and target to insert.
+ * 		if comp(tree_node, target) == 0, it will directly compare the address of tree_node and target to insert.
+ * 		if tree_node == target, this function will change nothing, just return the original tree root.
  *
  * @param root the original root.
  * @param target the new link to insert.
@@ -32,8 +32,8 @@ struct llrb_link* llrb_insert(struct llrb_link* root, struct llrb_link* target, 
 
 /**
  * @brief insert a single instance into the tree.
- * 		if comp(root, target) == 0, the tree will not changed, *dup will be set to true.
- * 		if comp(root, target) != 0, target will be insert into the tree, *dup will be false.
+ * 		if comp(tree_node, target) == 0, the tree will not changed, *dup will be set to tree_node.
+ * 		if comp(tree_node, target) != 0, target will be insert into the tree, *dup will be NULL.
  *
  * @param root the original tree root.
  * @param target the new link to insert.
@@ -42,7 +42,7 @@ struct llrb_link* llrb_insert(struct llrb_link* root, struct llrb_link* target, 
  *
  * @return the new tree root after insertion.
  */
-struct llrb_link* llrb_insert_s(struct llrb_link* root, struct llrb_link* target, pf_llrb_compare comp, bool* dup);
+struct llrb_link* llrb_insert_s(struct llrb_link* root, struct llrb_link* target, pf_llrb_compare comp, struct llrb_link** dup);
 
 /**
  * @brief remove a link from a tree.
@@ -59,17 +59,17 @@ struct llrb_link* llrb_remove(struct llrb_link* root, struct llrb_link* target, 
 
 /* the verbose version of insert/remove */
 struct llrb_link* llrb_insert_v(struct llrb_link* root, struct llrb_link* target, pf_llrb_compare_v comp, void* param);
-struct llrb_link* llrb_insert_sv(struct llrb_link* root, struct llrb_link* target, pf_llrb_compare_v comp, void* param, bool* dup);
+struct llrb_link* llrb_insert_sv(struct llrb_link* root, struct llrb_link* target, pf_llrb_compare_v comp, void* param, struct llrb_link** dup);
 struct llrb_link* llrb_remove_v(struct llrb_link* root, struct llrb_link* target, pf_llrb_compare_v comp, void* param);
 
 /**
- * @brief llrb_search callback, given the current link, this fucntion will deside which child will be searched next.
+ * @brief llrb_search callback, given the current link, this function will decide which child will be searched next.
  * 		if return value < 0, the left child tree will be searched.
  * 		if return value == 0, the current link will be returned.
  * 		if return value > 0, the right child tree will be searched.
  *
  * @param the current tree link.
- * @param param custom parameter which is used for desiding which side to search next.
+ * @param param custom parameter which is used for deciding which side to search next.
  *
  * @return see @brief
  */

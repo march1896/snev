@@ -92,7 +92,7 @@ void atm_destroy(atm* a) {
 		/* accept_states are just pointers */
 		ilist_clear(a->accept_states);
 	} else if (a->lifestate == atm_active) {
-		foreach(ilist_itr_begin(a->states), ilist_itr_end(a->states), (pf_ref_process)atm_state_destroy);
+		foreach(ilist_itr_begin(a->states), ilist_itr_end(a->states), (pf_ref_visit)atm_state_destroy);
 		ilist_clear(a->states);
 
 		/* accept_states are just pointers */
@@ -172,7 +172,7 @@ atm_state* atm_state_create(atm* a) {
 }
 
 void atm_state_destroy(atm_state* state) {
-	foreach(ilist_itr_begin(state->transforms), ilist_itr_end(state->transforms), (pf_ref_process)atm_transform_destroy);
+	foreach(ilist_itr_begin(state->transforms), ilist_itr_end(state->transforms), (pf_ref_visit)atm_transform_destroy);
 
 	ilist_clear(state->transforms);
 
