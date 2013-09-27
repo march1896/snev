@@ -32,9 +32,9 @@ struct ollrb_itr {
 
 	/* the iterator will never alloc memory, when acquire an iterator, the container will 
 	 * alloc the memory, but we should know how to delete this memory */
-	allocator                     __allocator;
+	allocator                     allocator;
 
-	struct llrb_link*             __current;
+	struct llrb_link*             current;
 };
 
 /* binary search tree */
@@ -45,19 +45,19 @@ struct ollrb {
 	iobject                       __iftable[e_l_count];
 
 	/* just a sentinel to represent the end of the tree, the maximum element of the tree */
-	struct llrb_link              __sentinel;
+	struct llrb_link              sentinel;
 	/* __root == __sentinel.left */
-	struct llrb_link*             __root;
+	struct llrb_link*             root;
 
-	int                           __size;
-	pf_compare                    __ref_comp;
+	int                           size;
+	pf_ref_compare                ref_comp;
 
 	/* methods to manage the inner memory use by the container */
-	allocator                     __allocator;
-	bool                          __allocator_join_ondispose;      
+	allocator                     allocator;
+	bool                          allocator_join_ondispose;      
 
-	struct ollrb_itr              __itr_begin;
-	struct ollrb_itr              __itr_end;
+	struct ollrb_itr              itr_begin;
+	struct ollrb_itr              itr_end;
 };
 
 static struct iset_vtable __iset_vtable = {
@@ -127,7 +127,7 @@ static void ollrb_itr_destroy(object* citr) {
 	dbg_assert(itr->__cast == ollrb_itr_cast);
 
 	/* destroy itself */
-	allocator_dealloc(itr->__allocator, itr);
+	allocator_dealloc(itr->allocator, itr);
 }
 
 static iterator ollrb_itr_clone(const_iterator citr) {
@@ -138,7 +138,7 @@ static iterator ollrb_itr_clone(const_iterator citr) {
 	dbg_assert(itr->__cast == ollrb_itr_cast);
 
 	/* destroy itself */
-	n_itr = (struct ollrb_itr*)allocator_alloc(itr->__allocator, sizeof(struct ollrb_itr));
+	n_itr = (struct ollrb_itr*)allocator_alloc(itr->allocator, sizeof(struct ollrb_itr));
 
 	memcpy (n_itr, itr, sizeof(struct ollrb_itr));
 	/* TODO: this is error prone */
@@ -156,7 +156,7 @@ static bool ollrb_itr_equals(const_iterator a, const_iterator b) {
 	dbg_assert(itr_a->__cast == ollrb_itr_cast);
 	dbg_assert(itr_b->__cast == ollrb_itr_cast);
 
-	return itr_a->__current == itr_b->__current;
+	return itr_a->current == itr_b->current;
 }
 
 static const void* ollrb_itr_get_ref(const_iterator citr) {
@@ -164,9 +164,9 @@ static const void* ollrb_itr_get_ref(const_iterator citr) {
 	const struct ollrb_node* node = NULL;
 
 	dbg_assert(itr->__cast == ollrb_itr_cast);
-	dbg_assert(itr->__current != NULL);
+	dbg_assert(itr->current != NULL);
 
-	node = container_of(itr->__current, struct ollrb_node, link);
+	node = container_of(itr->current, struct ollrb_node, link);
 	return node->reference;
 }
 
@@ -195,18 +195,18 @@ static void ollrb_itr_to_next(object* citr) {
 	struct ollrb_itr* itr = (struct ollrb_itr*)citr;
 
 	dbg_assert(itr->__cast == ollrb_itr_cast);
-	dbg_assert(itr->__current != NULL);
+	dbg_assert(itr->current != NULL);
 
-	itr->__current = llrb_successor(itr->__current, false);
+	itr->current = llrb_successor(itr->current, false);
 }
 
 static void ollrb_itr_to_prev(object* citr) {
 	struct ollrb_itr* itr = (struct ollrb_itr*)citr;
 
 	dbg_assert(itr->__cast == ollrb_itr_cast);
-	dbg_assert(itr->__current != NULL);
+	dbg_assert(itr->current != NULL);
 
-	itr->__current = llrb_predesessor(itr->__current, false);
+	itr->current = llrb_predesessor(itr->current, false);
 }
 
 static unknown ollrb_cast(unknown x, unique_id intf_id) {
@@ -250,7 +250,7 @@ static unknown ollrb_itr_cast(unknown x, unique_id inf_id) {
 }
 
 static int ollrb_compare_v(const struct llrb_link* a, const struct llrb_link* b, void* param) {
-	pf_compare ref_comp = (pf_compare)param;
+	pf_ref_compare ref_comp = (pf_ref_compare)param;
 
 	struct ollrb_node* node_a = container_of(a, struct ollrb_node, link);
 	struct ollrb_node* node_b = container_of(b, struct ollrb_node, link);
@@ -258,12 +258,12 @@ static int ollrb_compare_v(const struct llrb_link* a, const struct llrb_link* b,
 	return ref_comp(node_a->reference, node_b->reference);
 }
 
-object* ollrb_create(pf_compare ref_compare) {
+object* ollrb_create(pf_ref_compare ref_compare) {
 	return ollrb_create_v(ref_compare, __global_default_allocator);
 }
 
 static void ollrb_itr_com_init(struct ollrb_itr* itr, struct ollrb* list);
-object* ollrb_create_v(pf_compare ref_compare, allocator alc) {
+object* ollrb_create_v(pf_ref_compare ref_compare, allocator alc) {
 	struct ollrb* ollrb = NULL;
 	bool managed_allocator = false;
 
@@ -282,37 +282,37 @@ object* ollrb_create_v(pf_compare ref_compare, allocator alc) {
 	ollrb->__iftable[e_mset].__offset = (address)e_mset;
 	ollrb->__iftable[e_mset].__vtable = &__imset_vtable;
 
-	ollrb->__size      = 0;
-	ollrb->__ref_comp  = ref_compare;
-	ollrb->__root      = NULL;
-	ollrb->__sentinel.left   = NULL;
-	ollrb->__sentinel.right  = NULL;
-	ollrb->__sentinel.parent = NULL;
-	ollrb->__sentinel.color  = 55; /* TODO: how to handle this color? */
+	ollrb->size      = 0;
+	ollrb->ref_comp  = ref_compare;
+	ollrb->root      = NULL;
+	ollrb->sentinel.left   = NULL;
+	ollrb->sentinel.right  = NULL;
+	ollrb->sentinel.parent = NULL;
+	ollrb->sentinel.color  = 55; /* TODO: how to handle this color? */
 
 
-	ollrb->__allocator = alc;
-	ollrb->__allocator_join_ondispose = managed_allocator;
+	ollrb->allocator = alc;
+	ollrb->allocator_join_ondispose = managed_allocator;
 
 	/* initialize begin/end iterators, the position is reassigned when each query */
-	ollrb_itr_com_init(&ollrb->__itr_begin, ollrb);
-	ollrb_itr_com_init(&ollrb->__itr_end, ollrb);
+	ollrb_itr_com_init(&ollrb->itr_begin, ollrb);
+	ollrb_itr_com_init(&ollrb->itr_end, ollrb);
 
 	return (object*)ollrb;
 }
 
 /* from ifactory.h  */
-object* cntr_create_ollrb(pf_compare comp) {
+object* cntr_create_ollrb(pf_ref_compare comp) {
 	return ollrb_create(comp);
 }
-object* cntr_create_ollrb_v(pf_compare comp, allocator alc) {
+object* cntr_create_ollrb_v(pf_ref_compare comp, allocator alc) {
 	return ollrb_create_v(comp, alc);
 }
 
 void ollrb_destroy(object* o) {
 	struct ollrb* ollrb = (struct ollrb*)o;
-	allocator alc = ollrb->__allocator;
-	bool join_alc = ollrb->__allocator_join_ondispose;
+	allocator alc = ollrb->allocator;
+	bool join_alc = ollrb->allocator_join_ondispose;
 
 	ollrb_clear(o);
 
@@ -334,10 +334,10 @@ static void llrb_traverse(struct llrb_link* cur, pf_per_link_operation cb, void*
 
 /* we have to re-associate the sentinel and the root node after we change the tree */
 static inline void ollrb_reassociate(struct ollrb* ollrb) {
-	ollrb->__sentinel.left = ollrb->__root;
+	ollrb->sentinel.left = ollrb->root;
 
-	if (ollrb->__root != NULL)
-		ollrb->__root->parent = &ollrb->__sentinel;
+	if (ollrb->root != NULL)
+		ollrb->root->parent = &ollrb->sentinel;
 }
 
 static void ollrblink_dispose(struct llrb_link* link, void* param) {
@@ -345,17 +345,17 @@ static void ollrblink_dispose(struct llrb_link* link, void* param) {
 	struct ollrb* ollrb     = (struct ollrb*)param;
 
 	/* delete the node it self */
-	allocator_dealloc(ollrb->__allocator, node);
+	allocator_dealloc(ollrb->allocator, node);
 }
 
 void ollrb_clear(object* o) {
 	struct ollrb* ollrb = (struct ollrb*)o;
 
-	llrb_traverse(ollrb->__root, ollrblink_dispose, (void*)ollrb);
+	llrb_traverse(ollrb->root, ollrblink_dispose, (void*)ollrb);
 
-	ollrb->__root = NULL;
+	ollrb->root = NULL;
 	ollrb_reassociate(ollrb);
-	ollrb->__size = 0;
+	ollrb->size = 0;
 }
 
 struct clear_v_params {
@@ -373,8 +373,8 @@ static void ollrblink_dispose_v(struct llrb_link* link, void* param) {
 	}
 
 	/* delete the node it self */
-	dbg_assert(dp && dp->container && dp->container->__allocator);
-	allocator_dealloc(dp->container->__allocator, node);
+	dbg_assert(dp && dp->container && dp->container->allocator);
+	allocator_dealloc(dp->container->allocator, node);
 }
 
 void ollrb_clear_v(object* o, pf_ref_dispose_v dispose, void* context) {
@@ -383,22 +383,22 @@ void ollrb_clear_v(object* o, pf_ref_dispose_v dispose, void* context) {
 		dispose, context, ollrb
 	};
 
-	llrb_traverse(ollrb->__root, ollrblink_dispose_v, (void*)&clear_params);
+	llrb_traverse(ollrb->root, ollrblink_dispose_v, (void*)&clear_params);
 
-	ollrb->__root = NULL;
+	ollrb->root = NULL;
 	ollrb_reassociate(ollrb);
-	ollrb->__size = 0;
+	ollrb->size = 0;
 }
 
 int ollrb_size(const object* o) {
 	struct ollrb* ollrb = (struct ollrb*)o;
 
-	return ollrb->__size;
+	return ollrb->size;
 }
 
 bool ollrb_empty(const object* o) {
 	struct ollrb* ollrb = (struct ollrb*)o;
-	return ollrb->__size == 0;
+	return ollrb->size == 0;
 }
 
 /* initialize all part of an iterator except the __current position */
@@ -409,39 +409,43 @@ static void ollrb_itr_com_init(struct ollrb_itr* itr, struct ollrb* list) {
 	itr->__iftable[0].__offset = (address)0;
 	itr->__iftable[0].__vtable = (unknown)&__itr_vtable;
 
-	itr->__allocator = list->__allocator;
+	itr->allocator = list->allocator;
 	/* itr->__current = NULL; */
 }
 
 const_iterator ollrb_itr_begin(const object* o) {
 	struct ollrb* ollrb = (struct ollrb*)o;
 
-	ollrb->__itr_begin.__current = llrb_min(ollrb->__root);
+	ollrb->itr_begin.current = llrb_min(ollrb->root);
 
-	return (iterator)&ollrb->__itr_begin;
+	return (iterator)&ollrb->itr_begin;
 }
 
 const_iterator ollrb_itr_end(const object* o) {
 	struct ollrb* ollrb = (struct ollrb*)o;
 
-	ollrb->__itr_end.__current = &ollrb->__sentinel;
+	ollrb->itr_end.current = &ollrb->sentinel;
 
-	return (iterator)&ollrb->__itr_end;
+	return (iterator)&ollrb->itr_end;
 }
 
 iterator ollrb_itr_create(const object* o, itr_pos pos) {
 	struct ollrb* ollrb = (struct ollrb*)o;
 	struct ollrb_itr* n_itr = (struct ollrb_itr*)
-		allocator_alloc(ollrb->__allocator, sizeof(struct ollrb_itr));
+		allocator_alloc(ollrb->allocator, sizeof(struct ollrb_itr));
 
 	ollrb_itr_com_init(n_itr, ollrb);
 
 	if (pos == itr_begin) {
-		n_itr->__current = llrb_min(ollrb->__root);
+		if (ollrb->root == NULL) {
+			n_itr->current = &ollrb->sentinel;
+		} else {
+			n_itr->current = llrb_min(ollrb->root);
+		}
 	}
 	else {
-		/* __sentinel will be the maximum element in the tree */
-		n_itr->__current = &ollrb->__sentinel;
+		/* sentinel will be the maximum element in the tree */
+		n_itr->current = &ollrb->sentinel;
 	}
 	
 	return (object*)n_itr;
@@ -454,16 +458,20 @@ void ollrb_itr_assign(const object* o, iterator itr, itr_pos pos) {
 	ollrb_itr_com_init(n_itr, ollrb);
 
 	if (pos == itr_begin) {
-		n_itr->__current = llrb_min(ollrb->__root);
+		if (ollrb->root == NULL) {
+			n_itr->current = &ollrb->sentinel;
+		} else {
+			n_itr->current = llrb_min(ollrb->root);
+		}
 	}
 	else {
 		/* __sentinel will be the maximum element in the tree */
-		n_itr->__current = &ollrb->__sentinel;
+		n_itr->current = &ollrb->sentinel;
 	}
 }
 
 struct direct_s {
-	pf_compare  comp;
+	pf_ref_compare  comp;
 	const void* target;
 	const struct llrb_link* candidate; /* only useful for multiple instances */
 };
@@ -523,8 +531,8 @@ static int ollrb_direct_upper(const struct llrb_link* link, void* param) {
 void ollrb_itr_find(const object* o, iterator itr, const void* __ref) {
 	struct ollrb* ollrb     = (struct ollrb*)o;
 	struct ollrb_itr* oitr  = (struct ollrb_itr*)itr;
-	struct direct_s   dir   = { ollrb->__ref_comp, __ref, NULL };
-	struct llrb_link* link  = llrb_search(ollrb->__sentinel.left, ollrb_direct, &dir);
+	struct direct_s   dir   = { ollrb->ref_comp, __ref, NULL };
+	struct llrb_link* link  = llrb_search(ollrb->sentinel.left, ollrb_direct, &dir);
 
 	dbg_assert(dir.candidate == NULL);
 
@@ -533,18 +541,18 @@ void ollrb_itr_find(const object* o, iterator itr, const void* __ref) {
 	dbg_assert(itr->__iftable[0].__vtable == (unknown)&__itr_vtable);
 
 	if (link != NULL) {
-		oitr->__current = link;
+		oitr->current = link;
 	}
 	else {
-		oitr->__current = &ollrb->__sentinel;
+		oitr->current = &ollrb->sentinel;
 	}
 }
 
 void ollrb_itr_find_lower(const object* o, iterator itr, const void* __ref) {
 	struct ollrb* ollrb     = (struct ollrb*)o;
 	struct ollrb_itr* oitr  = (struct ollrb_itr*)itr;
-	struct direct_s   dir   = { ollrb->__ref_comp, __ref, NULL };
-	struct llrb_link* link  = llrb_search(ollrb->__sentinel.left, ollrb_direct_lower, &dir);
+	struct direct_s   dir   = { ollrb->ref_comp, __ref, NULL };
+	struct llrb_link* link  = llrb_search(ollrb->sentinel.left, ollrb_direct_lower, &dir);
 
 	dbg_assert(link == NULL); /* we will always direct down */
 	/* TODO: remove const cast */
@@ -555,18 +563,18 @@ void ollrb_itr_find_lower(const object* o, iterator itr, const void* __ref) {
 	dbg_assert(itr->__iftable[0].__vtable == (unknown)&__itr_vtable);
 
 	if (link != NULL) {
-		oitr->__current = link;
+		oitr->current = link;
 	}
 	else {
-		oitr->__current = &ollrb->__sentinel;
+		oitr->current = &ollrb->sentinel;
 	}
 }
 
 void ollrb_itr_find_upper(const object* o, iterator itr, const void* __ref) {
 	struct ollrb* ollrb     = (struct ollrb*)o;
 	struct ollrb_itr* oitr  = (struct ollrb_itr*)itr;
-	struct direct_s   dir   = { ollrb->__ref_comp, __ref, NULL };
-	struct llrb_link* link  = llrb_search(ollrb->__sentinel.left, ollrb_direct_upper, &dir);
+	struct direct_s   dir   = { ollrb->ref_comp, __ref, NULL };
+	struct llrb_link* link  = llrb_search(ollrb->sentinel.left, ollrb_direct_upper, &dir);
 
 	dbg_assert(link == NULL); /* we will always direct down */
 	link = (struct llrb_link*)dir.candidate;
@@ -576,36 +584,36 @@ void ollrb_itr_find_upper(const object* o, iterator itr, const void* __ref) {
 	dbg_assert(itr->__iftable[0].__vtable == (unknown)&__itr_vtable);
 
 	if (link != NULL) { 
-		oitr->__current = link;
+		oitr->current = link;
 	}
 	else {
-		oitr->__current = &ollrb->__sentinel;
+		oitr->current = &ollrb->sentinel;
 	}
 }
 
 void* ollrb_insert_s(object* o, const void* __ref) {
 	struct ollrb* ollrb     = (struct ollrb*)o;
 	struct ollrb_node* node = (struct ollrb_node*)
-		allocator_alloc(ollrb->__allocator, sizeof(struct ollrb_node));
+		allocator_alloc(ollrb->allocator, sizeof(struct ollrb_node));
 	struct llrb_link* duplicated = NULL;
 
 	node->reference = __ref;
-	ollrb->__root = llrb_insert_sv(ollrb->__root, &node->link, ollrb_compare_v, ollrb->__ref_comp, &duplicated);
+	ollrb->root = llrb_insert_sv(ollrb->root, &node->link, ollrb_compare_v, ollrb->ref_comp, &duplicated);
 	ollrb_reassociate(ollrb);
 
 	if (duplicated != NULL) {
 		struct ollrb_node* dup_node = container_of(duplicated, struct ollrb_node, link);
 		const void* old_ref = dup_node->reference;
-		dbg_assert(ollrb_compare_v(&node->link, duplicated, ollrb->__ref_comp) == 0);
+		dbg_assert(ollrb_compare_v(&node->link, duplicated, ollrb->ref_comp) == 0);
 
-		allocator_dealloc(ollrb->__allocator, node);
+		allocator_dealloc(ollrb->allocator, node);
 
 		/* update the reference */
 		dup_node->reference = __ref;
 		return (void*)old_ref;
 	}
 	
-	ollrb->__size ++;
+	ollrb->size ++;
 
 	return NULL;
 }
@@ -613,20 +621,20 @@ void* ollrb_insert_s(object* o, const void* __ref) {
 void ollrb_insert_m(object* o, const void* __ref) {
 	struct ollrb* ollrb     = (struct ollrb*)o;
 	struct ollrb_node* node = (struct ollrb_node*)
-		allocator_alloc(ollrb->__allocator, sizeof(struct ollrb_node));
+		allocator_alloc(ollrb->allocator, sizeof(struct ollrb_node));
 
 	node->reference = __ref;
-	ollrb->__root = llrb_insert_v(ollrb->__root, &node->link, ollrb_compare_v, ollrb->__ref_comp);
+	ollrb->root = llrb_insert_v(ollrb->root, &node->link, ollrb_compare_v, ollrb->ref_comp);
 	ollrb_reassociate(ollrb);
 
-	ollrb->__size ++;
+	ollrb->size ++;
 	return;
 }
 
 bool ollrb_contains(const object* o, const void* __ref) {
 	struct ollrb* ollrb    = (struct ollrb*)o;
-	struct direct_s   dir  = { ollrb->__ref_comp, __ref, NULL };
-	struct llrb_link* link = llrb_search(ollrb->__sentinel.left, ollrb_direct, &dir);
+	struct direct_s   dir  = { ollrb->ref_comp, __ref, NULL };
+	struct llrb_link* link = llrb_search(ollrb->sentinel.left, ollrb_direct, &dir);
 
 	if (link != NULL) {
 		return true;
@@ -637,21 +645,21 @@ bool ollrb_contains(const object* o, const void* __ref) {
 
 int ollrb_count(const object* o, const void* __ref) {
 	struct ollrb*     ollrb    = (struct ollrb*)o;
-	struct direct_s   dir      = { ollrb->__ref_comp, __ref, NULL };
-	const struct llrb_link* lb = llrb_search(ollrb->__sentinel.left, ollrb_direct_lower, &dir);
+	struct direct_s   dir      = { ollrb->ref_comp, __ref, NULL };
+	const struct llrb_link* lb = llrb_search(ollrb->sentinel.left, ollrb_direct_lower, &dir);
 	dbg_assert(lb == NULL);
 	lb = (dir.candidate);
 
 	dir.candidate = NULL;
 	if (lb != NULL) {
-		const struct llrb_link* ub = llrb_search(ollrb->__sentinel.left, ollrb_direct_upper, &dir);
+		const struct llrb_link* ub = llrb_search(ollrb->sentinel.left, ollrb_direct_upper, &dir);
 		int count = 0;
 
 		dbg_assert(ub == NULL);
 		ub = (dir.candidate);
 		
 		if (ub == NULL) 
-			ub = &ollrb->__sentinel;
+			ub = &ollrb->sentinel;
 
 		while (lb != ub) {
 			count ++;
@@ -666,18 +674,18 @@ int ollrb_count(const object* o, const void* __ref) {
 
 bool ollrb_remove(object* o, void* __ref) {
 	struct ollrb* ollrb     = (struct ollrb*)o;
-	struct direct_s   dir   = { ollrb->__ref_comp, __ref, NULL };
-	struct llrb_link* link   = llrb_search(ollrb->__sentinel.left, ollrb_direct, &dir);
+	struct direct_s   dir   = { ollrb->ref_comp, __ref, NULL };
+	struct llrb_link* link   = llrb_search(ollrb->sentinel.left, ollrb_direct, &dir);
 
 	if (link != NULL) {
 		struct ollrb_node* node = container_of(link, struct ollrb_node, link);
 
-		ollrb->__root = llrb_remove_v(ollrb->__root, link, ollrb_compare_v, ollrb->__ref_comp);
+		ollrb->root = llrb_remove_v(ollrb->root, link, ollrb_compare_v, ollrb->ref_comp);
 		ollrb_reassociate(ollrb);
 
-		allocator_dealloc(ollrb->__allocator, node);
+		allocator_dealloc(ollrb->allocator, node);
 
-		ollrb->__size --;
+		ollrb->size --;
 
 		return true;
 	}
@@ -688,19 +696,19 @@ bool ollrb_remove(object* o, void* __ref) {
 void* ollrb_itr_remove(object* o, iterator itr) {
 	struct ollrb* ollrb     = (struct ollrb*)o;
 	struct ollrb_itr* oitr  = (struct ollrb_itr*)itr;
-	struct ollrb_node* node = container_of(oitr->__current, struct ollrb_node, link);
+	struct ollrb_node* node = container_of(oitr->current, struct ollrb_node, link);
 	const void* obj_ref      = node->reference;
 
 	dbg_assert(oitr->__cast == ollrb_itr_cast);
-	dbg_assert(oitr->__current != NULL);
+	dbg_assert(oitr->current != NULL);
 
-	ollrb->__root = llrb_remove_v(ollrb->__root, &node->link, ollrb_compare_v, ollrb->__ref_comp);
+	ollrb->root = llrb_remove_v(ollrb->root, &node->link, ollrb_compare_v, ollrb->ref_comp);
 	ollrb_reassociate(ollrb);
 
 	/* we only free the node pointer, not the reference, the reference is returned to the client */
-	allocator_dealloc(ollrb->__allocator, node);
+	allocator_dealloc(ollrb->allocator, node);
 
-	ollrb->__size --;
+	ollrb->size --;
 
 	return (void*)obj_ref;
 }
