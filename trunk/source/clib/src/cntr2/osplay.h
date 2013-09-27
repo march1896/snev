@@ -1,11 +1,12 @@
 #ifndef _OBJECT_SPLAYTREE_H_
 #define _OBJECT_SPLAYTREE_H_
 
-#include <cntr2/ifactory.h>
+#include <cntr2/oo_model.h>
+#include <cntr2/oallocator.h>
 
 /* if alc is NULL, create_v will create an osplay with multi-pool allocator to gain best efficiency */
-object*         splayset_create_v        (pf_compare ref_comp, allocator alc);
-object*         splayset_create          (pf_compare ref_comp);
+object*         splayset_create_v        (pf_ref_compare ref_comp, allocator alc);
+object*         splayset_create          (pf_ref_compare ref_comp);
 void            splayset_destroy         (object* o);
 void            splayset_clear           (object* o);
 void            splayset_clear_v         (object* o, pf_ref_dispose_v dispose, void* context);
@@ -28,8 +29,8 @@ const_iterator  splayset_itr_begin       (const object* o);
 const_iterator  splayset_itr_end         (const object* o);
 
 /* if alc is NULL, create_v will create an osplay with multi-pool allocator to gain best efficiency */
-object*  splaymap_create_v        (pf_compare ref_comp, allocator alc, pf_dispose dispose);
-object*  splaymap_create          (pf_compare ref_comp);
+object*  splaymap_create_v        (pf_ref_compare ref_comp, allocator alc);
+object*  splaymap_create          (pf_ref_compare ref_comp);
 void     splaymap_destroy         (object* o);
 void     splaymap_clear           (object* o);
 int      splaymap_size            (const object* o);

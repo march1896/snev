@@ -1,11 +1,12 @@
 #ifndef _OBJECT_SKIPLIST_H_
 #define _OBJECT_SKIPLIST_H_
 
-#include <cntr2/ifactory.h>
+#include <cntr2/oo_model.h>
+#include <cntr2/oallocator.h>
 
-object*  oskiplist_create          (pf_compare ref_comp);
+object*  oskiplist_create          (pf_ref_compare ref_comp);
 /* if alc is NULL, create_v will create an osplay with multi-pool allocator to gain best efficiency */
-object*  oskiplist_create_v        (pf_compare ref_comp, allocator alc);
+object*  oskiplist_create_v        (pf_ref_compare ref_comp, allocator alc);
 void     oskiplist_destroy         (object* o);
 void     oskiplist_clear           (object* o);
 void     oskiplist_clear_v         (object* o, pf_ref_dispose_v dispose, void* context);

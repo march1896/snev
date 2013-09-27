@@ -44,7 +44,7 @@ const struct skip_link* skiplist_search_v(const struct skiplist* slist, const vo
 
 #include <oo_ref.h>
 /* note, if you change the inner value of ref, it may destroy the skiplist order */
-void skiplist_foreach(struct skiplist* list, pf_ref_visit process, void* context);
+void skiplist_foreach(struct skiplist* list, pf_ref_visit_v process, void* context);
 
 #endif /* _SKIP_LINK_H_ */
 

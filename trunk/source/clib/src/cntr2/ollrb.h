@@ -1,11 +1,12 @@
 #ifndef _OBJECT_LEFTLEAN_REDBLACK_TREE_H_
 #define _OBJECT_LEFTLEAN_REDBLACK_TREE_H_
 
-#include <cntr2/ifactory.h>
+#include <cntr2/oo_model.h>
+#include <cntr2/oallocator.h>
 
-object*  ollrb_create          (pf_compare ref_comp);
+object*  ollrb_create          (pf_ref_compare ref_comp);
 /* if alc is NULL, create_v will create an osplay with multi-pool allocator to gain best efficiency */
-object*  ollrb_create_v        (pf_compare ref_comp, allocator alc);
+object*  ollrb_create_v        (pf_ref_compare ref_comp, allocator alc);
 void     ollrb_destroy         (object* o);
 void     ollrb_clear           (object* o);
 void     ollrb_clear_v         (object* o, pf_ref_dispose_v dispose, void* context);

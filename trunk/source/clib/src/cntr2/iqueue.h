@@ -7,6 +7,7 @@
 
 extern inline       void     iqueue_destroy     (iobject* iq);
 extern inline       void     iqueue_clear       (iobject* iq);
+extern inline       void     iqueue_clear_v     (iobject* iq, pf_ref_dispose_v dispose, void* context);
 extern inline       int      iqueue_size        (const iobject* iq);
 extern inline       bool     iqueue_empty       (const iobject* iq);
 extern inline const void*    iqueue_front       (const iobject* iq);
@@ -22,6 +23,7 @@ extern inline const_iterator iqueue_itr_end     (const iobject* iq);
 /* the virtual functions that each container should implement */
 typedef       void     (*pf_iqueue_destroy)     (object* c);
 typedef       void     (*pf_iqueue_clear)       (object* c);
+typedef       void     (*pf_iqueue_clear_v)     (object* c, pf_ref_dispose_v dispose, void* context);
 typedef       int      (*pf_iqueue_size)        (const object* c);
 typedef       bool     (*pf_iqueue_empty)       (const object* c);
 typedef const void*    (*pf_iqueue_front)       (const object* c);
@@ -37,6 +39,7 @@ struct iqueue_vtable {
 	/* public */
 	pf_iqueue_destroy     __destroy;
 	pf_iqueue_clear       __clear;
+	pf_iqueue_clear_v     __clear_v;
 	pf_iqueue_size        __size;
 	pf_iqueue_empty       __empty;
 	pf_iqueue_front       __front;

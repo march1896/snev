@@ -1,15 +1,17 @@
 #ifndef _OBJECT_DOUBLE_LINK_LIST_H_
 #define _OBJECT_DOUBLE_LINK_LIST_H_
 
-#include <cntr2/ifactory.h>
+#include <cntr2/oo_model.h>
+#include <cntr2/oallocator.h>
 
 /* this interface inherit ilist, so it implements all method from ilist */
 
 object*        o_dlist_create          ();
-object*        o_dlist_create_v        (allocator alc, pf_dispose dispose);
+object*        o_dlist_create_v        (allocator alc);
 
 void           o_dlist_destroy         (      object* o);
 void           o_dlist_clear           (      object* o);
+void           o_dlist_clear_v         (      object* o, pf_ref_dispose_v dispose, void* context);
 int            o_dlist_size            (const object* o);
 bool           o_dlist_empty           (const object* o);
 const void*    o_dlist_front           (const object* o);
