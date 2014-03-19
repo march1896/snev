@@ -1,0 +1,28 @@
+#include "../test_util.h"
+
+#include "heap_util.test.h"
+
+extern void heap_llrb_test();
+extern void heap_buddy_test();
+extern void heap_sysd_test();
+extern void heap_spool_test();
+extern void heap_mpool_test();
+
+void heap_all_test() {
+	/* NOTE, this test is not very accurate, since I have run a lot of the this
+	 * test on my machine, with the same build environment.
+	 * But the result is quite different, currently, I guess the system heap's
+	 * allocation speed is not stable, it will very from time to time, I don't
+	 * know why. */
+
+	test_run_single("heap_llrb test", heap_llrb_test);
+
+	test_run_single("heap_buddy test", heap_buddy_test);
+
+	test_run_single("heap_sysd test", heap_sysd_test);
+
+	test_run_single("heap_spool test", heap_spool_test);
+
+	test_run_single("heap_mpool test", heap_mpool_test);
+}
+

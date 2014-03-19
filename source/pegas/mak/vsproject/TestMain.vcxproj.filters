@@ -1,0 +1,135 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\..\tests\memheap\heap_util.test.c">
+      <Filter>Source Files\memheap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tests\util\llrb_link.test.c">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tests\test_util.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tests\memheap\heap.all.test.c">
+      <Filter>Source Files\memheap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tests\util\util.all.test.c">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tests\test_main.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tests\memheap\heap.sysd.test.c">
+      <Filter>Source Files\memheap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tests\memheap\heap.llrb.test.c">
+      <Filter>Source Files\memheap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tests\memheap\heap.buddy.test.c">
+      <Filter>Source Files\memheap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tests\cntr2\all.test.c">
+      <Filter>Source Files\cntr2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tests\cntr2\ilist.test.c">
+      <Filter>Source Files\cntr2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tests\cntr2\oallocator.test.c">
+      <Filter>Source Files\cntr2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tests\cntr2\iqueue.test.c">
+      <Filter>Source Files\cntr2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tests\cntr2\istack.test.c">
+      <Filter>Source Files\cntr2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tests\cntr2\iset.test.c">
+      <Filter>Source Files\cntr2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tests\cntr2\olist.test.c">
+      <Filter>Source Files\cntr2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tests\cntr2\ollrb.test.c">
+      <Filter>Source Files\cntr2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tests\cntr2\imset.test.c">
+      <Filter>Source Files\cntr2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tests\memheap\heap.pool.test.c">
+      <Filter>Source Files\memheap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tests\util\splay_link.test.c">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tests\cntr2\osplay.test.c">
+      <Filter>Source Files\cntr2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tests\util\skiplist.test.c">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tests\cntr2\oskiplist.test.c">
+      <Filter>Source Files\cntr2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tests\cntr2\oarray.test.c">
+      <Filter>Source Files\cntr2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tests\cntr2\iarray.test.c">
+      <Filter>Source Files\cntr2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tests\cntr2\ele.data.c">
+      <Filter>Source Files\cntr2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tests\oop\cls_builtintype.c">
+      <Filter>Source Files\oop</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4A183075-02A6-4578-988C-434CB6F73E28}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\cntr2">
+      <UniqueIdentifier>{8dcae3fd-8d00-403f-bf02-de4756f48a20}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\memheap">
+      <UniqueIdentifier>{4996b439-aed9-4287-8d6b-39c97349fd23}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\util">
+      <UniqueIdentifier>{f4952aa1-f354-413f-b064-b69b2251a659}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\oop">
+      <UniqueIdentifier>{5762ae24-62ef-4c70-b3f3-2b609844d32d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\tests\memheap\heap_util.test.h">
+      <Filter>Source Files\memheap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\tests\test_util.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\tests\cntr2\ilist.test.h">
+      <Filter>Source Files\cntr2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\tests\cntr2\iqueue.test.h">
+      <Filter>Source Files\cntr2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\tests\cntr2\istack.test.h">
+      <Filter>Source Files\cntr2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\tests\cntr2\iset.test.h">
+      <Filter>Source Files\cntr2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\tests\cntr2\imset.test.h">
+      <Filter>Source Files\cntr2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\tests\util\tree_link.util.h">
+      <Filter>Source Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\tests\cntr2\iarray.test.h">
+      <Filter>Source Files\cntr2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\tests\cntr2\ele.data.h">
+      <Filter>Source Files\cntr2</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

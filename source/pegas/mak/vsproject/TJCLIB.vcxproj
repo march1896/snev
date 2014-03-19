@@ -1,0 +1,295 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|Win32">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|Win32">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGUID>{F064679C-4F52-49EA-A070-0ED4F2C0CF83}</ProjectGUID>
+    <Keyword>Win32Proj</Keyword>
+    <Platform>Win32</Platform>
+    <ProjectName>TJCLIB</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">TJCLIB.dir\Debug\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">TJCLIB</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TJCLIB.dir\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TJCLIB</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">.\MinSizeRel\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">TJCLIB.dir\MinSizeRel\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">TJCLIB</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">.\RelWithDebInfo\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">TJCLIB.dir\RelWithDebInfo\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">TJCLIB</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">.lib</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <AdditionalOptions> /Zm1000 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>../../src/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <CompileAs>CompileAsC</CompileAs>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;CMAKE_INTDIR="Debug";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AssemblerListingLocation>Debug</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>./Debug/TJCLIB.pdb</ProgramDataBaseFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;CMAKE_INTDIR=\"Debug\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../../src/.;../../src/memheap;../../src/util;../..src/cntr;../../src/regex;../../src/../tests;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>../../src/.;../../src/memheap;../../src/util;../../src/cntr;../../src/regex;../../src/../tests;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalOptions> /Zm1000 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>../../src/.;../../src/memheap;../../src/util;../../src/cntr;../../src/cntr2;../../src/regex;../../src/../tests;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <CompileAs>CompileAsC</CompileAs>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="Release";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AssemblerListingLocation>Release</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>./Release/TJCLIB.pdb</ProgramDataBaseFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"Release\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../../src/.;../../src/memheap;../../src/util;../../src/cntr;../../src/regex;../../src/../tests;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>../../src/.;../../src/memheap;../../src/util;../../src/cntr;../../src/regex;../../src/../tests;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">
+    <ClCompile>
+      <AdditionalOptions> /Zm1000 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>../../src/.;../../src/memheap;../../src/util;../../src/cntr;../../src/regex;../../src/../tests;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <CompileAs>CompileAsC</CompileAs>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <Optimization>MinSpace</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="MinSizeRel";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AssemblerListingLocation>MinSizeRel</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>./MinSizeRel/TJCLIB.pdb</ProgramDataBaseFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"MinSizeRel\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../../src/.;../../src/memheap;../../src/util;../../src/cntr;../../src/regex;../../src/../tests;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>../../src/.;../../src/memheap;../../src/util;../../src/cntr;../../src/regex;../../src/../tests;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">
+    <ClCompile>
+      <AdditionalOptions> /Zm1000 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>../../src/.;../../src/memheap;../../src/util;../../src/cntr;../../src/cntr2;../../src/regex;../../src/../tests;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <CompileAs>CompileAsC</CompileAs>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="RelWithDebInfo";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AssemblerListingLocation>RelWithDebInfo</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>./RelWithDebInfo/TJCLIB.pdb</ProgramDataBaseFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"RelWithDebInfo\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../../src/.;../../src/memheap;../../src/util;../../src/cntr;../../src/regex;../../src/../tests;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>../../src/.;../../src/memheap;../../src/util;../../src/cntr;../../src/regex;../../src/../tests;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\cntr2\ialgo.c" />
+    <ClCompile Include="..\..\src\cntr2\iarray.c" />
+    <ClCompile Include="..\..\src\cntr2\iitr.c" />
+    <ClCompile Include="..\..\src\cntr2\ilist.c" />
+    <ClCompile Include="..\..\src\cntr2\imap.c" />
+    <ClCompile Include="..\..\src\cntr2\iobject.c" />
+    <ClCompile Include="..\..\src\cntr2\iqueue.c" />
+    <ClCompile Include="..\..\src\cntr2\iset.c" />
+    <ClCompile Include="..\..\src\cntr2\istack.c" />
+    <ClCompile Include="..\..\src\cntr2\oallocator.c" />
+    <ClCompile Include="..\..\src\cntr2\oarray.c" />
+    <ClCompile Include="..\..\src\cntr2\olist.c" />
+    <ClCompile Include="..\..\src\cntr2\ollrb.c" />
+    <ClCompile Include="..\..\src\cntr2\oo_model.c" />
+    <ClCompile Include="..\..\src\cntr2\oo_bridge.c" />
+    <ClCompile Include="..\..\src\cntr2\oskiplist.c" />
+    <ClCompile Include="..\..\src\cntr2\osplay.c" />
+    <ClCompile Include="..\..\src\memheap\block_common.c" />
+    <ClCompile Include="..\..\src\memheap\block_link.c" />
+    <ClCompile Include="..\..\src\memheap\heap_buddy.c" />
+    <ClCompile Include="..\..\src\memheap\heap_factory.c" />
+    <ClCompile Include="..\..\src\memheap\heap_global.c" />
+    <ClCompile Include="..\..\src\memheap\heap_llrb.c" />
+    <ClCompile Include="..\..\src\memheap\heap_pool.c" />
+    <ClCompile Include="..\..\src\memheap\heap_sys.c" />
+    <ClCompile Include="..\..\src\memheap\heap_walk.c" />
+    <ClCompile Include="..\..\src\memheap\heap_wrap.c" />
+    <ClCompile Include="..\..\src\oop\cls_builtintype.c" />
+    <ClCompile Include="..\..\src\oop\oo_model2.c" />
+    <ClCompile Include="..\..\src\oop\ptc_basic.c" />
+    <ClCompile Include="..\..\src\oop\ptc_iterator.c" />
+    <ClCompile Include="..\..\src\util\bit_math.c" />
+    <ClCompile Include="..\..\src\util\bst_link.c" />
+    <ClCompile Include="..\..\src\util\cominc.c" />
+    <ClCompile Include="..\..\src\util\list_link.c" />
+    <ClCompile Include="..\..\src\util\llrb_link.c" />
+    <ClCompile Include="..\..\src\util\skiplist.c" />
+    <ClCompile Include="..\..\src\util\splay_link.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\cntr2\ialgo.h" />
+    <ClInclude Include="..\..\src\cntr2\iarray.h" />
+    <ClInclude Include="..\..\src\cntr2\idef.h" />
+    <ClInclude Include="..\..\src\cntr2\ifactory.h" />
+    <ClInclude Include="..\..\src\cntr2\iitr.h" />
+    <ClInclude Include="..\..\src\cntr2\ilist.h" />
+    <ClInclude Include="..\..\src\cntr2\imap.h" />
+    <ClInclude Include="..\..\src\cntr2\iobject.h" />
+    <ClInclude Include="..\..\src\cntr2\iqueue.h" />
+    <ClInclude Include="..\..\src\cntr2\iset.h" />
+    <ClInclude Include="..\..\src\cntr2\istack.h" />
+    <ClInclude Include="..\..\src\cntr2\oallocator.h" />
+    <ClInclude Include="..\..\src\cntr2\oarray.h" />
+    <ClInclude Include="..\..\src\cntr2\olist.h" />
+    <ClInclude Include="..\..\src\cntr2\ollrb.h" />
+    <ClInclude Include="..\..\src\cntr2\oo_model.h" />
+    <ClInclude Include="..\..\src\cntr2\oo_bridge.h" />
+    <ClInclude Include="..\..\src\cntr2\oskiplist.h" />
+    <ClInclude Include="..\..\src\cntr2\osplay.h" />
+    <ClInclude Include="..\..\src\lexer\automaton.h" />
+    <ClInclude Include="..\..\src\lexer\nfa.h" />
+    <ClInclude Include="..\..\src\memheap\block_common.h" />
+    <ClInclude Include="..\..\src\memheap\block_link.h" />
+    <ClInclude Include="..\..\src\memheap\heap_buddy.h" />
+    <ClInclude Include="..\..\src\memheap\heap_def.h" />
+    <ClInclude Include="..\..\src\memheap\heap_factory.h" />
+    <ClInclude Include="..\..\src\memheap\heap_global.h" />
+    <ClInclude Include="..\..\src\memheap\heap_llrb.h" />
+    <ClInclude Include="..\..\src\memheap\heap_pool.h" />
+    <ClInclude Include="..\..\src\memheap\heap_sys.h" />
+    <ClInclude Include="..\..\src\memheap\heap_walk.h" />
+    <ClInclude Include="..\..\src\memheap\heap_wrap.h" />
+    <ClInclude Include="..\..\src\oop\cls_builtintype.h" />
+    <ClInclude Include="..\..\src\oop\oo_model2.h" />
+    <ClInclude Include="..\..\src\oop\ptc_basic.h" />
+    <ClInclude Include="..\..\src\oop\ptc_iterator.h" />
+    <ClInclude Include="..\..\src\util\bit_math.h" />
+    <ClInclude Include="..\..\src\util\bst_link.h" />
+    <ClInclude Include="..\..\src\util\cominc.h" />
+    <ClInclude Include="..\..\src\util\link.doc.h" />
+    <ClInclude Include="..\..\src\util\list_link.h" />
+    <ClInclude Include="..\..\src\util\llrb_link.h" />
+    <ClInclude Include="..\..\src\util\math.h" />
+    <ClInclude Include="..\..\src\util\skiplist.h" />
+    <ClInclude Include="..\..\src\util\splay_link.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
