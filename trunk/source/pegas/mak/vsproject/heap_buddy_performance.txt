@@ -1,0 +1,120 @@
+0.035000    /* 40000 	operations, mode: op_inorder     , data_small     , pattern_unique                */
+0.028000    /* 40000 	operations, mode: op_inorder     , data_small     , pattern_increasing            */
+0.024000    /* 40000 	operations, mode: op_inorder     , data_small     , pattern_decreasing            */
+0.023000    /* 40000 	operations, mode: op_inorder     , data_small     , pattern_jag                   */
+0.021000    /* 40000 	operations, mode: op_inorder     , data_small     , pattern_random_restricted     */
+0.018000    /* 40000 	operations, mode: op_inorder     , data_small     , pattern_random                */
+0.103000    /* 40000 	operations, mode: op_inorder     , data_middle    , pattern_unique                */
+0.024000    /* 40000 	operations, mode: op_inorder     , data_middle    , pattern_increasing            */
+0.021000    /* 40000 	operations, mode: op_inorder     , data_middle    , pattern_decreasing            */
+0.017000    /* 40000 	operations, mode: op_inorder     , data_middle    , pattern_jag                   */
+0.018000    /* 40000 	operations, mode: op_inorder     , data_middle    , pattern_random_restricted     */
+0.015000    /* 40000 	operations, mode: op_inorder     , data_middle    , pattern_random                */
+0.021000    /* 40000 	operations, mode: op_inorder     , data_large     , pattern_unique                */
+0.040000    /* 40000 	operations, mode: op_inorder     , data_large     , pattern_increasing            */
+0.028000    /* 40000 	operations, mode: op_inorder     , data_large     , pattern_decreasing            */
+0.023000    /* 40000 	operations, mode: op_inorder     , data_large     , pattern_jag                   */
+0.019000    /* 40000 	operations, mode: op_inorder     , data_large     , pattern_random_restricted     */
+0.018000    /* 40000 	operations, mode: op_inorder     , data_large     , pattern_random                */
+0.020000    /* 40000 	operations, mode: op_inorder     , data_huge      , pattern_unique                */
+0.017000    /* 40000 	operations, mode: op_inorder     , data_huge      , pattern_increasing            */
+0.017000    /* 40000 	operations, mode: op_inorder     , data_huge      , pattern_decreasing            */
+0.015000    /* 40000 	operations, mode: op_inorder     , data_huge      , pattern_jag                   */
+0.015000    /* 40000 	operations, mode: op_inorder     , data_huge      , pattern_random_restricted     */
+0.014000    /* 40000 	operations, mode: op_inorder     , data_huge      , pattern_random                */
+0.014000    /* 40000 	operations, mode: op_inorder     , data_random    , pattern_unique                */
+0.015000    /* 40000 	operations, mode: op_inorder     , data_random    , pattern_increasing            */
+0.015000    /* 40000 	operations, mode: op_inorder     , data_random    , pattern_decreasing            */
+0.013000    /* 40000 	operations, mode: op_inorder     , data_random    , pattern_jag                   */
+0.012000    /* 40000 	operations, mode: op_inorder     , data_random    , pattern_random_restricted     */
+0.012000    /* 40000 	operations, mode: op_inorder     , data_random    , pattern_random                */
+0.031000    /* 40000 	operations, mode: op_reverseorder, data_small     , pattern_unique                */
+0.013000    /* 40000 	operations, mode: op_reverseorder, data_small     , pattern_increasing            */
+0.013000    /* 40000 	operations, mode: op_reverseorder, data_small     , pattern_decreasing            */
+0.013000    /* 40000 	operations, mode: op_reverseorder, data_small     , pattern_jag                   */
+0.012000    /* 40000 	operations, mode: op_reverseorder, data_small     , pattern_random_restricted     */
+0.012000    /* 40000 	operations, mode: op_reverseorder, data_small     , pattern_random                */
+0.013000    /* 40000 	operations, mode: op_reverseorder, data_middle    , pattern_unique                */
+0.014000    /* 40000 	operations, mode: op_reverseorder, data_middle    , pattern_increasing            */
+0.018000    /* 40000 	operations, mode: op_reverseorder, data_middle    , pattern_decreasing            */
+0.012000    /* 40000 	operations, mode: op_reverseorder, data_middle    , pattern_jag                   */
+0.012000    /* 40000 	operations, mode: op_reverseorder, data_middle    , pattern_random_restricted     */
+0.014000    /* 40000 	operations, mode: op_reverseorder, data_middle    , pattern_random                */
+0.010000    /* 40000 	operations, mode: op_reverseorder, data_large     , pattern_unique                */
+0.013000    /* 40000 	operations, mode: op_reverseorder, data_large     , pattern_increasing            */
+0.015000    /* 40000 	operations, mode: op_reverseorder, data_large     , pattern_decreasing            */
+0.013000    /* 40000 	operations, mode: op_reverseorder, data_large     , pattern_jag                   */
+0.013000    /* 40000 	operations, mode: op_reverseorder, data_large     , pattern_random_restricted     */
+0.012000    /* 40000 	operations, mode: op_reverseorder, data_large     , pattern_random                */
+0.010000    /* 40000 	operations, mode: op_reverseorder, data_huge      , pattern_unique                */
+0.014000    /* 40000 	operations, mode: op_reverseorder, data_huge      , pattern_increasing            */
+0.015000    /* 40000 	operations, mode: op_reverseorder, data_huge      , pattern_decreasing            */
+0.013000    /* 40000 	operations, mode: op_reverseorder, data_huge      , pattern_jag                   */
+0.012000    /* 40000 	operations, mode: op_reverseorder, data_huge      , pattern_random_restricted     */
+0.014000    /* 40000 	operations, mode: op_reverseorder, data_huge      , pattern_random                */
+0.113000    /* 40000 	operations, mode: op_reverseorder, data_random    , pattern_unique                */
+0.014000    /* 40000 	operations, mode: op_reverseorder, data_random    , pattern_increasing            */
+0.013000    /* 40000 	operations, mode: op_reverseorder, data_random    , pattern_decreasing            */
+0.012000    /* 40000 	operations, mode: op_reverseorder, data_random    , pattern_jag                   */
+0.013000    /* 40000 	operations, mode: op_reverseorder, data_random    , pattern_random_restricted     */
+0.011000    /* 40000 	operations, mode: op_reverseorder, data_random    , pattern_random                */
+0.002000    /* 40000 	operations, mode: op_alternately , data_small     , pattern_unique                */
+0.003000    /* 40000 	operations, mode: op_alternately , data_small     , pattern_increasing            */
+0.003000    /* 40000 	operations, mode: op_alternately , data_small     , pattern_decreasing            */
+0.003000    /* 40000 	operations, mode: op_alternately , data_small     , pattern_jag                   */
+0.004000    /* 40000 	operations, mode: op_alternately , data_small     , pattern_random_restricted     */
+0.004000    /* 40000 	operations, mode: op_alternately , data_small     , pattern_random                */
+0.003000    /* 40000 	operations, mode: op_alternately , data_middle    , pattern_unique                */
+0.003000    /* 40000 	operations, mode: op_alternately , data_middle    , pattern_increasing            */
+0.003000    /* 40000 	operations, mode: op_alternately , data_middle    , pattern_decreasing            */
+0.003000    /* 40000 	operations, mode: op_alternately , data_middle    , pattern_jag                   */
+0.004000    /* 40000 	operations, mode: op_alternately , data_middle    , pattern_random_restricted     */
+0.003000    /* 40000 	operations, mode: op_alternately , data_middle    , pattern_random                */
+0.003000    /* 40000 	operations, mode: op_alternately , data_large     , pattern_unique                */
+0.003000    /* 40000 	operations, mode: op_alternately , data_large     , pattern_increasing            */
+0.003000    /* 40000 	operations, mode: op_alternately , data_large     , pattern_decreasing            */
+0.003000    /* 40000 	operations, mode: op_alternately , data_large     , pattern_jag                   */
+0.003000    /* 40000 	operations, mode: op_alternately , data_large     , pattern_random_restricted     */
+0.003000    /* 40000 	operations, mode: op_alternately , data_large     , pattern_random                */
+0.002000    /* 40000 	operations, mode: op_alternately , data_huge      , pattern_unique                */
+0.003000    /* 40000 	operations, mode: op_alternately , data_huge      , pattern_increasing            */
+0.003000    /* 40000 	operations, mode: op_alternately , data_huge      , pattern_decreasing            */
+0.004000    /* 40000 	operations, mode: op_alternately , data_huge      , pattern_jag                   */
+0.004000    /* 40000 	operations, mode: op_alternately , data_huge      , pattern_random_restricted     */
+0.003000    /* 40000 	operations, mode: op_alternately , data_huge      , pattern_random                */
+0.003000    /* 40000 	operations, mode: op_alternately , data_random    , pattern_unique                */
+0.003000    /* 40000 	operations, mode: op_alternately , data_random    , pattern_increasing            */
+0.003000    /* 40000 	operations, mode: op_alternately , data_random    , pattern_decreasing            */
+0.003000    /* 40000 	operations, mode: op_alternately , data_random    , pattern_jag                   */
+0.004000    /* 40000 	operations, mode: op_alternately , data_random    , pattern_random_restricted     */
+0.004000    /* 40000 	operations, mode: op_alternately , data_random    , pattern_random                */
+0.003000    /* 40000 	operations, mode: op_random      , data_small     , pattern_unique                */
+0.004000    /* 40000 	operations, mode: op_random      , data_small     , pattern_increasing            */
+0.003000    /* 40000 	operations, mode: op_random      , data_small     , pattern_decreasing            */
+0.004000    /* 40000 	operations, mode: op_random      , data_small     , pattern_jag                   */
+0.004000    /* 40000 	operations, mode: op_random      , data_small     , pattern_random_restricted     */
+0.004000    /* 40000 	operations, mode: op_random      , data_small     , pattern_random                */
+0.003000    /* 40000 	operations, mode: op_random      , data_middle    , pattern_unique                */
+0.003000    /* 40000 	operations, mode: op_random      , data_middle    , pattern_increasing            */
+0.003000    /* 40000 	operations, mode: op_random      , data_middle    , pattern_decreasing            */
+0.004000    /* 40000 	operations, mode: op_random      , data_middle    , pattern_jag                   */
+0.003000    /* 40000 	operations, mode: op_random      , data_middle    , pattern_random_restricted     */
+0.004000    /* 40000 	operations, mode: op_random      , data_middle    , pattern_random                */
+0.003000    /* 40000 	operations, mode: op_random      , data_large     , pattern_unique                */
+0.003000    /* 40000 	operations, mode: op_random      , data_large     , pattern_increasing            */
+0.003000    /* 40000 	operations, mode: op_random      , data_large     , pattern_decreasing            */
+0.004000    /* 40000 	operations, mode: op_random      , data_large     , pattern_jag                   */
+0.004000    /* 40000 	operations, mode: op_random      , data_large     , pattern_random_restricted     */
+0.004000    /* 40000 	operations, mode: op_random      , data_large     , pattern_random                */
+0.003000    /* 40000 	operations, mode: op_random      , data_huge      , pattern_unique                */
+0.003000    /* 40000 	operations, mode: op_random      , data_huge      , pattern_increasing            */
+0.003000    /* 40000 	operations, mode: op_random      , data_huge      , pattern_decreasing            */
+0.004000    /* 40000 	operations, mode: op_random      , data_huge      , pattern_jag                   */
+0.004000    /* 40000 	operations, mode: op_random      , data_huge      , pattern_random_restricted     */
+0.004000    /* 40000 	operations, mode: op_random      , data_huge      , pattern_random                */
+0.003000    /* 40000 	operations, mode: op_random      , data_random    , pattern_unique                */
+0.003000    /* 40000 	operations, mode: op_random      , data_random    , pattern_increasing            */
+0.003000    /* 40000 	operations, mode: op_random      , data_random    , pattern_decreasing            */
+0.004000    /* 40000 	operations, mode: op_random      , data_random    , pattern_jag                   */
+0.005000    /* 40000 	operations, mode: op_random      , data_random    , pattern_random_restricted     */
+0.004000    /* 40000 	operations, mode: op_random      , data_random    , pattern_random                */
